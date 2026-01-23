@@ -3,65 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Catalogue Anime</title>
+    <title>Mon Catalogue</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #121212; color: white; margin: 0; padding: 20px; }
-        h1 { text-align: center; color: #ff4757; text-transform: uppercase; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px; }
-        .card { background: #1e1e1e; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid #333; text-align: center; }
-        .card img { width: 100%; height: 300px; object-fit: cover; background: #222; }
-        .content { padding: 15px; }
-        .title { font-weight: bold; font-size: 1em; color: #fff; margin-bottom: 8px; min-height: 2.4em; display: flex; align-items: center; justify-content: center; }
-        .score { color: #ffa502; font-weight: bold; font-size: 0.9em; }
-        .meta { color: #888; font-size: 0.8em; margin-top: 5px; }
+        :root { --primary: #ff4757; --bg: #121212; --card-bg: #1e1e1e; --text: #eee; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        
+        /* Barre de contrôle */
+        .controls { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; background: rgba(18,18,18,0.9); padding: 10px; border-radius: 10px; }
+        input, select { padding: 10px; border-radius: 5px; border: 1px solid #333; background: #252525; color: white; outline: none; }
+        input:focus { border-color: var(--primary); }
+
+        /* Grille */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.3s; border: 1px solid #333; position: relative; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card img { width: 100%; height: 280px; object-fit: cover; }
+        .card-info { padding: 12px; text-align: center; }
+        .card-title { font-weight: bold; font-size: 0.9em; height: 2.5em; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .card-score { color: #ffa502; font-size: 0.8em; margin-top: 5px; }
+
+        /* Fenêtre Modale (Popup) */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); overflow-y: auto; }
+        .modal-content { background: #222; margin: 5% auto; padding: 20px; width: 90%; max-width: 800px; border-radius: 15px; position: relative; display: flex; flex-wrap: wrap; gap: 20px; }
+        .close { position: absolute; right: 20px; top: 10px; font-size: 30px; cursor: pointer; color: var(--primary); }
+        .modal-left { flex: 1; min-width: 250px; }
+        .modal-left img { width: 100%; border-radius: 10px; }
+        .modal-right { flex: 2; min-width: 300px; }
+        .modal-right h2 { color: var(--primary); margin-top: 0; }
+        .tag { display: inline-block; background: #333; padding: 4px 10px; border-radius: 15px; font-size: 0.8em; margin: 5px 5px 5px 0; }
+        .desc { line-height: 1.6; color: #ccc; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px; }
     </style>
 </head>
 <body>
 
-    <h1>Ma Collection d'Animes</h1>
+    <div class="controls">
+        <input type="text" id="search" placeholder="Rechercher un titre...">
+        <select id="sort">
+            <option value="none">Trier par...</option>
+            <option value="score">Meilleur score</option>
+            <option value="popularite">Popularité</option>
+            <option value="nom">Nom (A-Z)</option>
+        </select>
+    </div>
+
     <div class="grid" id="anime-container"></div>
 
+    <div id="animeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div class="modal-left" id="modal-img"></div>
+            <div class="modal-right">
+                <h2 id="modal-title"></h2>
+                <div id="modal-tags"></div>
+                <div class="desc" id="modal-desc"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        async function loadAnimes() {
+        let allAnimes = [];
+
+        async function init() {
             try {
                 const response = await fetch('animes.csv');
                 const data = await response.text();
+                const lines = data.split(/\r?\n/).filter(l => l.trim() !== "");
                 
-                // On sépare les lignes
-                const lines = data.split(/\r?\n/).filter(line => line.trim() !== "");
-                const container = document.getElementById('anime-container');
+                // Analyse du CSV avec séparateur ";"
+                allAnimes = lines.slice(1).map(line => {
+                    const c = line.split(';');
+                    return {
+                        nom: c[0] || "",
+                        popularite: c[1] || "",
+                        score: parseFloat((c[2] || "0").replace(',', '.')),
+                        sortie: c[3] || "",
+                        episodes: c[4] || "",
+                        censure: c[5] || "",
+                        etat: c[6] || "",
+                        desc: c[7] || "Aucune description.",
+                        img: (c[8] || "").trim()
+                    };
+                }).filter(a => a.nom !== "");
 
-                // On saute la ligne de titre (i=1)
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i];
-                    
-                    // ON COUPE PAR POINT-VIRGULE (puisque c'est ton format)
-                    const cols = line.split(';');
-
-                    if (cols.length >= 9) {
-                        const title = cols[0];
-                        const score = cols[2];
-                        const episodes = cols[4];
-                        const imageFileName = cols[8].trim(); // On récupère le nom de l'image
-
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        card.innerHTML = `
-                            <img src="img/${imageFileName}" alt="${title}" onerror="this.src='https://via.placeholder.com/220x300?text=Image+Introuvable'">
-                            <div class="content">
-                                <div class="title">${title}</div>
-                                <div class="score">⭐ ${score}/10</div>
-                                <div class="meta">${episodes} épisodes</div>
-                            </div>
-                        `;
-                        container.appendChild(card);
-                    }
-                }
-            } catch (e) {
-                console.error("Erreur fatale :", e);
-            }
+                displayAnimes(allAnimes);
+            } catch (err) { console.error("Erreur:", err); }
         }
-        loadAnimes();
+
+        function displayAnimes(list) {
+            const container = document.getElementById('anime-container');
+            container.innerHTML = "";
+            list.forEach(anime => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => openModal(anime);
+                card.innerHTML = `
+                    <img src="img/${anime.img}" onerror="this.src='https://via.placeholder.com/200x280?text=Image+Missing'">
+                    <div class="card-info">
+                        <div class="card-title">${anime.nom}</div>
+                        <div class="card-score">⭐ ${anime.score}/10</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openModal(a) {
+            document.getElementById('modal-title').innerText = a.nom;
+            document.getElementById('modal-img').innerHTML = `<img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/400x600?text=Image'">`;
+            document.getElementById('modal-desc').innerText = a.desc;
+            document.getElementById('modal-tags').innerHTML = `
+                <span class="tag">🏆 ${a.popularite}</span>
+                <span class="tag">📅 ${a.sortie}</span>
+                <span class="tag">📺 ${a.episodes} épisodes</span>
+                <span class="tag">🔞 Censure: ${a.censure}</span>
+                <span class="tag">📌 État: ${a.etat}</span>
+            `;
+            document.getElementById('animeModal').style.display = "block";
+        }
+
+        function closeModal() { document.getElementById('animeModal').style.display = "none"; }
+
+        // Barre de recherche
+        document.getElementById('search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = allAnimes.filter(a => a.nom.toLowerCase().includes(val));
+            displayAnimes(filtered);
+        });
+
+        // Triage
+        document.getElementById('sort').addEventListener('change', (e) => {
+            let sorted = [...allAnimes];
+            if(e.target.value === "score") sorted.sort((a,b) => b.score - a.score);
+            if(e.target.value === "popularite") sorted.sort((a,b) => parseInt(a.popularite.replace('#','')) - parseInt(b.popularite.replace('#','')));
+            if(e.target.value === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
+            displayAnimes(sorted);
+        });
+
+        window.onclick = (e) => { if(e.target == document.getElementById('animeModal')) closeModal(); }
+        
+        init();
     </script>
 </body>
 </html>
