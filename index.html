@@ -5,20 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mon Catalogue Anime</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
-        .card img { max-width: 100%; height: auto; border-radius: 4px; border: 1px solid #ddd; }
-        h1 { text-align: center; color: #333; }
-        .anime-title { font-weight: bold; margin: 10px 0 5px 0; font-size: 1.1em; }
-        .anime-info { color: #666; font-size: 0.9em; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a1a; color: white; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
+        .card { background: #2a2a2a; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; transition: transform 0.2s; }
+        .card:hover { transform: scale(1.05); }
+        .card img { width: 100%; height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
+        h1 { text-align: center; color: #ff4757; margin-bottom: 30px; }
+        .anime-title { font-weight: bold; font-size: 1.1em; margin-bottom: 8px; height: 2.4em; overflow: hidden; }
+        .anime-score { color: #ffa502; font-weight: bold; }
+        .anime-meta { font-size: 0.8em; color: #aaa; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <h1>Ma Collection d'Animes</h1>
-    <div class="grid" id="anime-container">
-        </div>
+    <div class="grid" id="anime-container"></div>
 
     <script>
         async function loadAnimes() {
@@ -26,34 +27,36 @@
                 const response = await fetch('animes.csv');
                 const data = await response.text();
                 
-                // On sépare les lignes du CSV
-                const rows = data.split('\n').slice(1); // On ignore la première ligne (titres)
+                const rows = data.split('\n').slice(1); 
                 const container = document.getElementById('anime-container');
 
                 rows.forEach(row => {
-                    const columns = row.split(','); // On sépare par les virgules
-                    if (columns.length > 1) {
-                        const title = columns[0];
-                        const imageUrl = columns[1].trim(); // Récupère "anime (x).jpg"
+                    // Utilisation d'une regex pour gérer les virgules dans les descriptions
+                    const columns = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
+                    
+                    if (columns.length >= 9) {
+                        const title = columns[0].replace(/"/g, ""); // Colonne 1 : anime
+                        const score = columns[2];                  // Colonne 3 : score
+                        const episodes = columns[4];               // Colonne 5 : episodes
+                        const imageUrl = columns[8].trim().replace(/"/g, ""); // Colonne 9 : image_url
                         
-                        // CRÉATION DE LA CARTE
                         const card = document.createElement('div');
                         card.className = 'card';
 
-                        // MISE À JOUR DU CHEMIN : On ajoute "img/" devant le nom du fichier
                         card.innerHTML = `
-                            <img src="img/${imageUrl}" alt="${title}" onerror="this.src='https://via.placeholder.com/200x300?text=Image+Introuvable'">
+                            <img src="img/${imageUrl}" alt="${title}" onerror="this.src='https://via.placeholder.com/220x300?text=Pas+d+image'">
                             <div class="anime-title">${title}</div>
+                            <div class="anime-score">⭐ ${score}/10</div>
+                            <div class="anime-meta">${episodes} épisodes</div>
                         `;
                         
                         container.appendChild(card);
                     }
                 });
             } catch (error) {
-                console.error("Erreur lors du chargement du CSV :", error);
+                console.error("Erreur :", error);
             }
         }
-
         loadAnimes();
     </script>
 </body>
