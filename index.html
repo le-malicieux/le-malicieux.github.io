@@ -6,117 +6,135 @@
     <title>Ma Collection d'Animes</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        :root { --main-red: #e50914; --bg-dark: #0f0f0f; --card-bg: #1e1e1e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); color: white; margin: 0; padding: 20px; }
+        :root { --accent: #e50914; --bg: #0b0b0b; --card: #161616; --text: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         
-        header { text-align: center; margin-bottom: 40px; }
-        h1 { color: var(--main-red); font-size: 2.5em; margin-bottom: 20px; }
+        header { text-align: center; margin-bottom: 30px; }
+        #barreRecherche { padding: 12px 20px; width: 100%; max-width: 450px; border-radius: 25px; border: 1px solid #333; background: #1a1a1a; color: white; outline: none; }
+        #barreRecherche:focus { border-color: var(--accent); }
 
-        /* Style de la barre de recherche */
-        .search-container { margin-bottom: 30px; }
-        #barreRecherche { 
-            padding: 12px 20px; width: 100%; max-width: 400px; 
-            border-radius: 25px; border: 1px solid #333; 
-            background: #252525; color: white; outline: none;
-        }
-
-        /* Grille des cartes */
-        .grille { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-            gap: 25px; max-width: 1200px; margin: 0 auto;
-        }
-
-        /* Style d'une carte d'anime */
-        .carte { 
-            background: var(--card-bg); border-radius: 12px; 
-            overflow: hidden; transition: 0.3s; border: 1px solid #333;
-            display: flex; flex-direction: column;
-        }
-        .carte:hover { transform: translateY(-8px); border-color: var(--main-red); }
+        .grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
         
-        .img-container { width: 100%; height: 320px; background: #252525; }
-        .carte img { width: 100%; height: 100%; object-fit: cover; }
+        .carte { background: var(--card); border-radius: 12px; cursor: pointer; transition: 0.3s; border: 1px solid #222; overflow: hidden; position: relative; }
+        .carte:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .carte img { width: 100%; height: 280px; object-fit: cover; }
         
-        .infos { padding: 15px; flex-grow: 1; }
-        .infos h3 { margin: 0; font-size: 1.1em; height: 2.4em; overflow: hidden; }
-        .meta { margin-top: 10px; font-size: 0.9em; display: flex; justify-content: space-between; color: #aaa; }
-        .note { color: #ffcc00; font-weight: bold; }
-        .desc { font-size: 0.8em; color: #888; margin-top: 10px; line-height: 1.4; }
+        .infos-mini { padding: 12px; text-align: center; font-weight: bold; font-size: 0.9em; }
+        .score-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.85); color: #ffcc00; padding: 4px 8px; border-radius: 8px; font-weight: bold; }
+
+        /* Fenêtre Détails (Modale) */
+        #modale { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); }
+        .modale-contenu { background: #181818; margin: 5% auto; padding: 30px; border-radius: 20px; max-width: 750px; position: relative; display: flex; gap: 25px; border: 1px solid #333; }
+        .close { position: absolute; right: 20px; top: 15px; font-size: 30px; cursor: pointer; color: #666; }
+        
+        .badge { background: #333; padding: 5px 12px; border-radius: 6px; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.5px; }
+        .censure-tag { color: #ff4444; border: 1px solid #ff4444; }
+        .etat-tag { color: #44ff44; border: 1px solid #44ff44; }
+
+        @media (max-width: 600px) { .modale-contenu { flex-direction: column; margin: 0; height: 100%; overflow-y: auto; } }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>My Anime List</h1>
-        <div class="search-container">
-            <input type="text" id="barreRecherche" placeholder="Rechercher un titre..." onkeyup="filtrerAnimes()">
+<header>
+    <h1>ARCHIVE ANIMES</h1>
+    <div style="margin-bottom: 20px;">
+        <input type="text" id="barreRecherche" onkeyup="filtrer()" placeholder="Rechercher dans mes 330 animes...">
+    </div>
+</header>
+
+<div id="conteneur" class="grille">Initialisation de la base de données...</div>
+
+<div id="modale">
+    <div class="modale-contenu">
+        <span class="close" onclick="fermer()">&times;</span>
+        <img id="modale-img" style="width: 240px; border-radius: 12px; object-fit: cover;">
+        <div>
+            <h2 id="modale-titre" style="margin-top:0; color: var(--accent);"></h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+                <span id="modale-sortie" class="badge"></span>
+                <span id="modale-ep" class="badge"></span>
+                <span id="modale-etat" class="badge etat-tag"></span>
+                <span id="modale-censure" class="badge"></span>
+            </div>
+            <p id="modale-desc" style="line-height: 1.6; color: #ddd; font-size: 0.95em;"></p>
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #333;">
+                <p><b>Note :</b> <span id="modale-score" style="color:#ffcc00;"></span> / 10</p>
+                <p style="font-size: 0.85em; color: #777;">Popularité : #<span id="modale-pop"></span></p>
+            </div>
         </div>
-    </header>
+    </div>
+</div>
 
-    <div id="conteneur" class="grille">Chargement des 330 animes...</div>
+<script>
+    let listAnimes = [];
 
-    <script>
-        // FONCTION 1 : Trouver l'image sur le Web (Kitsu API)
-        async function getPoster(nom) {
-            try {
-                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(nom)}&page[limit]=1`);
-                const data = await res.json();
-                return data.data[0].attributes.posterImage.large;
-            } catch (e) { return 'https://via.placeholder.com/225x320?text=Pas+d+image'; }
-        }
+    // Récupération auto de l'affiche via Kitsu API
+    async function searchPoster(title) {
+        try {
+            const r = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=1`);
+            const d = await r.json();
+            return d.data[0].attributes.posterImage.large;
+        } catch(e) { return 'https://via.placeholder.com/225x320?text=Pas+d+image'; }
+    }
 
-        // FONCTION 2 : Lire ton Excel et créer les cartes
-        Papa.parse("animes.csv", {
-            download: true,
-            header: true,
-            complete: async function(results) {
-                const conteneur = document.getElementById("conteneur");
-                conteneur.innerHTML = ""; 
+    // Lecture du CSV
+    Papa.parse("animes.csv", {
+        download: true, header: true, skipEmptyLines: true,
+        complete: async function(res) {
+            listAnimes = res.data;
+            const target = document.getElementById("conteneur");
+            target.innerHTML = "";
 
-                for (let anime of results.data) {
-                    if (anime.nom) {
-                        const card = document.createElement("div");
-                        card.className = "carte";
-                        const cardId = "img-" + Math.random().toString(36).substr(2, 9);
-                        
-                        card.innerHTML = `
-                            <div class="img-container">
-                                <img src="https://via.placeholder.com/225x320?text=Chargement..." id="${cardId}">
-                            </div>
-                            <div class="infos">
-                                <h3>${anime.nom}</h3>
-                                <div class="meta">
-                                    <span class="note">★ ${anime.note}</span>
-                                    <span>${anime.annee}</span>
-                                </div>
-                                <div class="meta"><span>${anime.episodes} épisodes</span></div>
-                                <p class="desc">${anime.description ? anime.description.substring(0, 80) + '...' : ''}</p>
-                            </div>
-                        `;
-                        conteneur.appendChild(card);
-
-                        // On charge l'image après
-                        getPoster(anime.nom).then(url => {
-                            document.getElementById(cardId).src = url;
-                        });
-                        
-                        // Petite pause pour ne pas bloquer le navigateur
-                        await new Promise(r => setTimeout(r, 150));
-                    }
-                }
+            for (let a of listAnimes) {
+                if (!a.nom) continue;
+                let card = document.createElement("div");
+                card.className = "carte";
+                let tempId = "img-" + Math.random().toString(36).substr(2, 7);
+                
+                card.innerHTML = `
+                    <div class="score-badge">★ ${a.score || '?'}</div>
+                    <img src="https://via.placeholder.com/225x320?text=Chargement..." id="${tempId}">
+                    <div class="infos-mini">${a.nom}</div>
+                `;
+                card.onclick = () => showDetails(a, document.getElementById(tempId).src);
+                target.appendChild(card);
+                
+                // Charger l'image en décalé
+                searchPoster(a.nom).then(url => {
+                    const img = document.getElementById(tempId);
+                    if(img) img.src = url;
+                });
+                await new Promise(wait => setTimeout(wait, 200)); // Fluidité
             }
+        }
+    });
+
+    function showDetails(a, img) {
+        document.getElementById("modale").style.display = "block";
+        document.getElementById("modale-titre").innerText = a.nom;
+        document.getElementById("modale-img").src = img;
+        document.getElementById("modale-desc").innerText = a.description || "Pas de description renseignée.";
+        document.getElementById("modale-sortie").innerText = a.sortie || "Date ?";
+        document.getElementById("modale-ep").innerText = (a["nombre episodes"] || "?") + " EPS";
+        document.getElementById("modale-etat").innerText = a.etat || "Statut ?";
+        document.getElementById("modale-score").innerText = a.score || "?";
+        document.getElementById("modale-pop").innerText = a.popularite || "N/A";
+        
+        const cns = document.getElementById("modale-censure");
+        cns.innerText = "Censure : " + (a.censure || "Non");
+        cns.className = (a.censure && a.censure.toLowerCase().includes("oui")) ? "badge censure-tag" : "badge";
+    }
+
+    function fermer() { document.getElementById("modale").style.display = "none"; }
+    window.onclick = (e) => { if(e.target == document.getElementById("modale")) fermer(); }
+
+    function filtrer() {
+        let val = document.getElementById("barreRecherche").value.toLowerCase();
+        document.querySelectorAll(".carte").forEach(c => {
+            c.style.display = c.innerText.toLowerCase().includes(val) ? "" : "none";
         });
-
-        // FONCTION 3 : La barre de recherche
-        function filtrerAnimes() {
-            let input = document.getElementById('barreRecherche').value.toLowerCase();
-            let cartes = document.getElementsByClassName('carte');
-            for (let i = 0; i < cartes.length; i++) {
-                let titre = cartes[i].getElementsByTagName('h3')[0].innerText.toLowerCase();
-                cartes[i].style.display = titre.includes(input) ? "" : "none";
-            }
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
