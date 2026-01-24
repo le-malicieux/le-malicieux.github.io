@@ -64,27 +64,46 @@
     <script>
         let allAnimes = [];
 
-        // Fonction pour nettoyer les textes du CSV
         const clean = (str) => (str || "").replace(/^"|"$/g, "").trim();
+
+        function splitCSVLine(line) {
+            const result = [];
+            let current = "";
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                let char = line[i];
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ';' && !inQuotes) {
+                    result.push(current);
+                    current = "";
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result;
+        }
 
         async function init() {
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
-                
-                // Découpage par ligne robuste (gère les sauts de ligne dans les descriptions)
                 const rows = rawData.split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/).filter(l => l.trim() !== "");
                 
                 allAnimes = rows.slice(1).map(line => {
-                    const c = line.split(';');
-                    const numEps = parseInt(clean(c[4]));
+                    const c = splitCSVLine(line);
+                    
+                    // NOUVELLE LOGIQUE D'EXTRACTION DU NOMBRE D'EPISODES
+                    let rawEp = clean(c[4]);
+                    let numEps = parseInt(rawEp.replace(/[^0-9]/g, '')); // On garde que les chiffres
                     
                     return {
                         nom: clean(c[0]),
                         popularite: clean(c[1]),
                         score: clean(c[2]).replace(',', '.'),
                         sortie: clean(c[3]),
-                        episodes: isNaN(numEps) ? "Inconnu" : numEps,
+                        // Si on a trouvé un chiffre on l'affiche, sinon on garde le texte original
+                        episodes: isNaN(numEps) ? rawEp : numEps,
                         censure: clean(c[5]),
                         etat: clean(c[6]),
                         desc: clean(c[7]) || "Aucune description disponible.",
@@ -101,15 +120,11 @@
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
             container.innerHTML = "";
-            
             list.forEach(anime => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.onclick = () => openModal(anime);
-                
-                // On encode l'URL pour gérer les espaces et parenthèses
                 const imgPath = encodeURI(anime.img);
-
                 card.innerHTML = `
                     <img src="img/${imgPath}" loading="lazy" onerror="this.onerror=null; this.src='https://via.placeholder.com/200x260?text=Image+Introuvable'">
                     <div class="card-info">
@@ -137,9 +152,7 @@
             document.getElementById('animeModal').style.display = "block";
         }
 
-        function closeModal() { 
-            document.getElementById('animeModal').style.display = "none"; 
-        }
+        function closeModal() { document.getElementById('animeModal').style.display = "none"; }
 
         function randomAnime() {
             if(allAnimes.length > 0) {
@@ -147,8 +160,6 @@
                 openModal(random);
             }
         }
-
-        // --- EVENEMENTS (RECHERCHE ET TRI) ---
 
         document.getElementById('search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
@@ -159,8 +170,7 @@
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const mode = e.target.value;
-            
-            if(mode === "score") sorted.sort((a,b) => parseFloat(b.score) - parseFloat(a.score));
+            if(mode === "score") sorted.sort((a,b) => (parseFloat(b.score) || 0) - (parseFloat(a.score) || 0));
             if(mode === "popularite") sorted.sort((a,b) => {
                 const valA = parseInt(a.popularite.replace('#','')) || 9999;
                 const valB = parseInt(b.popularite.replace('#','')) || 9999;
@@ -169,15 +179,10 @@
             if(mode === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
             if(mode === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
             if(mode === "episodes") sorted.sort((a,b) => (parseInt(b.episodes) || 0) - (parseInt(a.episodes) || 0));
-            
             displayAnimes(sorted);
         });
 
-        window.onclick = (e) => { 
-            if(e.target == document.getElementById('animeModal')) closeModal(); 
-        }
-
-        // Lancement
+        window.onclick = (e) => { if(e.target == document.getElementById('animeModal')) closeModal(); }
         init();
     </script>
 </body>
