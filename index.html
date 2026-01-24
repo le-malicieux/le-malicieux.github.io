@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
-        /* Styles de base préservés */
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; --header-bg: rgba(15,15,15,0.95); }
         body.light-mode { --bg: #EAEAEA; --card-bg: #FFFFFF; --text: #2d3436; --header-bg: rgba(234, 234, 234, 0.95); }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; }
         
-        /* AJOUT : Style du Logo et Slogan */
+        /* Header avec logo */
         .header-main { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto 20px auto; width: 100%; }
         .site-logo { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 2px solid var(--primary); }
         .header-text h1 { margin: 0; color: var(--primary); font-size: 2em; }
@@ -43,7 +42,6 @@
 
     <div class="controls">
         <input type="text" id="search" placeholder="Rechercher...">
-        
         <select id="sort">
             <option value="">Trier par...</option>
             <option value="nom">Nom (A-Z)</option>
@@ -51,10 +49,7 @@
             <option value="score">Score</option>
             <option value="sortie">Année</option>
             <option value="episodes">Épisodes</option>
-            <option value="censure">Censure</option>
-            <option value="etat">État</option>
         </select>
-        
         <button onclick="toggleTheme()" id="theme-btn">🌓 Mode Clair</button>
         <button onclick="randomAnime()">🎲 Aléatoire</button>
     </div>
@@ -70,16 +65,15 @@
             document.getElementById('theme-btn').innerText = isLight ? "🌓 Mode Sombre" : "🌓 Mode Clair";
         }
 
-        // --- CETTE PARTIE EST TON SCRIPT QUI MARCHE (LÉGÈREMENT ADAPTÉ POUR L'IMAGE) ---
         async function init() {
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
-                const rows = rawData.split('\n').filter(r => r.trim() !== "");
+                // On garde ton split mais on filtre les lignes qui ne contiennent pas de texte
+                const rows = rawData.split('\n').filter(r => r.trim().length > 10);
                 
                 allAnimes = rows.slice(1).map(line => {
                     const c = line.split(';');
-                    // On vérifie que la ligne a assez de colonnes
                     if (c.length < 8) return null;
                     
                     return {
@@ -90,8 +84,7 @@
                         episodes: c[4].trim().replace(/"/g, ''),
                         censure: c[5].trim().replace(/"/g, ''),
                         etat: c[6].trim().replace(/"/g, ''),
-                        // L'image est en colonne 9 (index 8)
-                        img: c[8] ? c[8].trim().replace(/"/g, '') : "" 
+                        img: c[8] ? c[8].trim().replace(/"/g, '').replace(/\r/g, '') : "" 
                     };
                 }).filter(a => a !== null);
                 displayAnimes(allAnimes);
@@ -106,7 +99,7 @@
                 card.className = 'card';
                 card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
                 
-                // On nettoie le nom de l'image pour être sûr qu'elle s'affiche
+                // On s'assure que l'URL de l'image est propre
                 const imgSrc = "img/" + a.img;
 
                 card.innerHTML = `
@@ -125,20 +118,14 @@
             });
         }
 
-        // --- AJOUT DU SYSTÈME DE TRI ---
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const mode = e.target.value;
-            if(!mode) return;
-
             if(mode === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            else if(mode === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.'))).reverse();
-            else if(mode === "popularite") sorted.sort((a,b) => (parseInt(a.popularite.replace('#','')) || 9999) - (parseInt(b.popularite.replace('#','')) || 9999));
-            else if(mode === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
-            else if(mode === "episodes") sorted.sort((a,b) => (parseInt(b.episodes) || 0) - (parseInt(a.episodes) || 0)).reverse();
-            else if(mode === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
-            else if(mode === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
-
+            if(mode === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.'))).reverse();
+            if(mode === "popularite") sorted.sort((a,b) => (parseInt(a.popularite.replace('#','')) || 999) - (parseInt(b.popularite.replace('#','')) || 999));
+            if(mode === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
+            if(mode === "episodes") sorted.sort((a,b) => (parseInt(b.episodes) || 0) - (parseInt(a.episodes) || 0)).reverse();
             displayAnimes(sorted);
         });
 
