@@ -8,13 +8,15 @@
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; background: rgba(15,15,15,0.95); padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        input, select, button { padding: 10px 15px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; cursor: pointer; }
+        input, select, button { padding: 10px 15px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; cursor: pointer; transition: 0.2s; }
+        input:focus { border-color: var(--primary); }
         button { background: var(--primary); border: none; font-weight: bold; }
+        button:hover { transform: scale(1.05); }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
         .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; display: block; }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
         .card img { width: 100%; height: 260px; object-fit: cover; background: #222; }
-        .card-info { padding: 10px; text-align: center; }
+        .card-info { padding: 12px; text-align: center; }
         .card-title { font-weight: bold; font-size: 0.9em; height: 2.4em; overflow: hidden; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
         .card-score { color: #ffa502; font-size: 0.85em; margin-top: 5px; font-weight: bold; }
     </style>
@@ -26,7 +28,6 @@
             <option value="">Trier par...</option>
             <option value="nom">Nom (A-Z)</option>
             <option value="score">Meilleur score</option>
-            <option value="sortie">Année de sortie</option>
         </select>
         <button onclick="randomAnime()">🎲 Aléatoire</button>
     </div>
@@ -54,18 +55,16 @@
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
                 const rows = rawData.split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/).filter(l => l.trim() !== "");
-                
                 allAnimes = rows.slice(1).map(line => {
                     const c = splitCSVLine(line);
                     return {
                         nom: clean(c[0]),
                         score: clean(c[2]).replace(',', '.'),
-                        sortie: clean(c[3]),
                         img: clean(c[8])
                     };
                 }).filter(a => a.nom.length > 1);
                 displayAnimes(allAnimes);
-            } catch (err) { console.error("Erreur init:", err); }
+            } catch (err) { console.error("Erreur chargement catalogue:", err); }
         }
 
         function displayAnimes(list) {
@@ -86,19 +85,15 @@
             });
         }
 
-        // --- RECHERCHE ET TRI ---
         document.getElementById('search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
-            const filtered = allAnimes.filter(a => a.nom.toLowerCase().includes(val));
-            displayAnimes(filtered);
+            displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
         });
 
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
-            const mode = e.target.value;
-            if(mode === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            if(mode === "score") sorted.sort((a,b) => parseFloat(b.score) - parseFloat(a.score));
-            if(mode === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
+            if(e.target.value === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
+            if(e.target.value === "score") sorted.sort((a,b) => parseFloat(b.score) - parseFloat(a.score));
             displayAnimes(sorted);
         });
 
@@ -108,7 +103,6 @@
                 window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
             }
         }
-
         init();
     </script>
 </body>
