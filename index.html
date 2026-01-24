@@ -4,14 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="uysQ4sE5b19o93JOBGzo3ooKtm2KiSzBlKEkGlq2T-0" />
-    <title>Le Malicieux - Catalogue d'Animes</title>
-    <meta name="description" content="Découvrez le catalogue d'animes du Malicieux. Popularité, score, épisodes et streaming.">
+    
+    <title>Le Malicieux - Catalogue d'Animes & Streaming Gratuit</title>
+    <meta name="description" content="Bienvenue sur Le Malicieux ! Explorez notre catalogue d'animes complet avec scores, popularité et épisodes. Trouvez votre prochain coup de cœur en streaming ici.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://le-malicieux.github.io/">
+    <meta property="og:title" content="Le Malicieux - Catalogue d'Animes & Streaming">
+    <meta property="og:description" content="Découvrez le meilleur catalogue d'animes. Classements, filtres personnalisés et streaming rapide sur Le Malicieux.">
+    <meta property="og:image" content="https://le-malicieux.github.io/img/logo.jpg">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Le Malicieux - Catalogue d'Animes">
+    <meta property="twitter:description" content="Le catalogue d'animes ultime avec tri par popularité et score.">
+    <meta property="twitter:image" content="https://le-malicieux.github.io/img/logo.jpg">
     
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; --header-bg: rgba(15,15,15,0.95); }
         body.light-mode { --bg: #EAEAEA; --card-bg: #FFFFFF; --text: #2d3436; --header-bg: rgba(234, 234, 234, 0.95); }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; display: flex; flex-direction: column; min-height: 100vh; }
         
+        /* Style pour ton logo en haut de page */
+        .site-logo { display: block; margin: 0 auto 15px auto; height: 60px; width: auto; border-radius: 8px; }
+
         .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; background: var(--header-bg); padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         input, select, button { padding: 10px 15px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; cursor: pointer; }
         body.light-mode input, body.light-mode select { background: #fff; color: #333; border: 1px solid #ccc; }
@@ -33,6 +48,8 @@
     </style>
 </head>
 <body>
+
+    <img src="img/logo.jpg" alt="Logo Le Malicieux" class="site-logo">
 
     <div class="controls">
         <input type="text" id="search" placeholder="Rechercher...">
@@ -56,6 +73,7 @@
     </footer>
 
     <script>
+        // Le script JS reste identique au tien, car il fonctionnait très bien !
         let allAnimes = [];
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
