@@ -19,38 +19,24 @@
         
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* HEADER AVEC LOGO À GAUCHE */
         .header-main { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto 20px auto; width: 100%; }
-        
-        .site-logo { 
-            width: 120px; 
-            height: 120px; 
-            object-fit: cover; 
-            border-radius: 15px; 
-            border: 2px solid var(--primary);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
+        .site-logo { width: 120px; height: 120px; object-fit: cover; border-radius: 15px; border: 2px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .header-text h1 { margin: 0; color: var(--primary); font-size: 2.2em; }
         .header-text p { margin: 5px 0 0 0; opacity: 0.8; font-style: italic; }
 
         .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; background: var(--header-bg); padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); width: 100%; box-sizing: border-box; }
-        
-        input, select, button { padding: 10px 15px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; cursor: pointer; font-size: 0.9em; }
+        input, select, button { padding: 10px 15px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; cursor: pointer; }
         body.light-mode input, body.light-mode select { background: #fff; color: #333; border: 1px solid #ccc; }
         button { background: var(--primary); border: none; font-weight: bold; }
-        button:hover { opacity: 0.9; transform: scale(1.02); }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; flex-grow: 1; }
         .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
         .card img { width: 100%; height: 280px; object-fit: cover; }
-        
         .card-info { padding: 15px; font-size: 0.85em; flex-grow: 1; }
-        .card-title { font-weight: bold; font-size: 1.1em; margin-bottom: 10px; color: var(--primary); height: 2.4em; overflow: hidden; line-height: 1.2; display: flex; align-items: center; }
-        .info-line { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px; }
-        body.light-mode .info-line { border-bottom-color: rgba(0,0,0,0.1); }
-        .label { color: #888; font-weight: 500; }
+        .card-title { font-weight: bold; font-size: 1.1em; margin-bottom: 10px; color: var(--primary); height: 2.4em; overflow: hidden; }
+        .info-line { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .label { color: #888; }
 
         footer { margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #333; color: #888; }
         footer a { color: #7289da; text-decoration: none; font-weight: bold; }
@@ -59,7 +45,7 @@
 <body>
 
     <div class="header-main">
-        <img src="img/logo.jpg" alt="Logo Le Malicieux" class="site-logo" onerror="this.src='https://via.placeholder.com/120?text=Logo'">
+        <img src="img/logo.jpg" alt="Logo" class="site-logo">
         <div class="header-text">
             <h1>Le Malicieux</h1>
             <p>Catalogue d'animes malicieux</p>
@@ -67,8 +53,7 @@
     </div>
 
     <div class="controls">
-        <input type="text" id="search" placeholder="Rechercher un anime...">
-        
+        <input type="text" id="search" placeholder="Rechercher...">
         <select id="sort">
             <option value="">Trier par...</option>
             <option value="nom">Nom (A-Z)</option>
@@ -79,7 +64,6 @@
             <option value="censure">Censure</option>
             <option value="etat">État</option>
         </select>
-
         <button onclick="toggleTheme()" id="theme-btn">🌓 Mode Clair</button>
         <button onclick="randomAnime()">🎲 Aléatoire</button>
     </div>
@@ -100,7 +84,6 @@
             document.getElementById('theme-btn').innerText = isLight ? "🌓 Mode Sombre" : "🌓 Mode Clair";
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
         }
-
         if(localStorage.getItem('theme') === 'light') toggleTheme();
         document.getElementById('year').innerText = new Date().getFullYear();
 
@@ -123,21 +106,18 @@
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
-                const rows = rawData.split(/\r?\n(?=(?:(?:[^\" ]*\"){2})*[^\" ]*$)/).filter(l => l.trim() !== "");
+                // DECOUPAGE SIMPLE POUR EVITER LES BUGS
+                const rows = rawData.split(/\r?\n/).filter(l => l.trim() !== "");
                 
                 allAnimes = rows.slice(1).map(line => {
                     const c = splitCSVLine(line);
+                    if (c.length < 9) return null;
                     return {
-                        nom: clean(c[0]),
-                        popularite: clean(c[1]),
-                        score: clean(c[2]),
-                        sortie: clean(c[3]),
-                        episodes: clean(c[4]),
-                        censure: clean(c[5]),
-                        etat: clean(c[6]),
-                        img: clean(c[8])
+                        nom: clean(c[0]), popularite: clean(c[1]), score: clean(c[2]),
+                        sortie: clean(c[3]), episodes: clean(c[4]), censure: clean(c[5]),
+                        etat: clean(c[6]), img: clean(c[8])
                     };
-                }).filter(a => a.nom.length > 1);
+                }).filter(a => a !== null);
                 displayAnimes(allAnimes);
             } catch (err) { console.error(err); }
         }
@@ -153,10 +133,10 @@
                     <img src="img/${encodeURI(a.img)}" onerror="this.src='https://via.placeholder.com/220x280?text=Pas+d+image'">
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
-                        <div class="info-line"><span class="label">Popularité :</span> <span>${a.popularite}</span></div>
+                        <div class="info-line"><span class="label">Pop :</span> <span>${a.popularite}</span></div>
                         <div class="info-line"><span class="label">Score :</span> <span>⭐ ${a.score}/10</span></div>
-                        <div class="info-line"><span class="label">Sortie :</span> <span>${a.sortie}</span></div>
-                        <div class="info-line"><span class="label">Épisodes :</span> <span>${a.episodes}</span></div>
+                        <div class="info-line"><span class="label">Année :</span> <span>${a.sortie}</span></div>
+                        <div class="info-line"><span class="label">Eps :</span> <span>${a.episodes}</span></div>
                         <div class="info-line"><span class="label">Censure :</span> <span>${a.censure}</span></div>
                         <div class="info-line"><span class="label">État :</span> <span>${a.etat}</span></div>
                     </div>
@@ -168,23 +148,13 @@
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const mode = e.target.value;
-            
-            if(mode === "nom") {
-                sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            } else if(mode === "score") {
-                sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.')));
-            } else if(mode === "popularite") {
-                sorted.sort((a,b) => (parseInt(a.popularite.replace('#','')) || 9999) - (parseInt(b.popularite.replace('#','')) || 9999));
-            } else if(mode === "sortie") {
-                sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
-            } else if(mode === "episodes") {
-                sorted.sort((a,b) => (parseInt(b.episodes) || 0) - (parseInt(a.episodes) || 0));
-            } else if(mode === "censure") {
-                sorted.sort((a,b) => a.censure.localeCompare(b.censure));
-            } else if(mode === "etat") {
-                sorted.sort((a,b) => a.etat.localeCompare(b.etat));
-            }
-            
+            if(mode === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
+            if(mode === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.')));
+            if(mode === "popularite") sorted.sort((a,b) => (parseInt(a.popularite.replace('#','')) || 999) - (parseInt(b.popularite.replace('#','')) || 999));
+            if(mode === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
+            if(mode === "episodes") sorted.sort((a,b) => (parseInt(b.episodes) || 0) - (parseInt(a.episodes) || 0));
+            if(mode === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
+            if(mode === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
             displayAnimes(sorted);
         });
 
