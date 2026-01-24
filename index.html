@@ -35,16 +35,14 @@
 <body>
 
     <div class="controls">
-        <input type="text" id="search" placeholder="Rechercher...">
+        <input type="text" id="search" placeholder="Rechercher un anime...">
         <select id="sort">
             <option value="">Trier par...</option>
-            <option value="nom">Anime (A-Z)</option>
+            <option value="nom">Nom (A-Z)</option>
             <option value="popularite">Popularité</option>
             <option value="score">Meilleur score</option>
             <option value="sortie">Année de sortie</option>
             <option value="episodes">Nombre d'épisodes</option>
-            <option value="censure">Censure</option>
-            <option value="etat">État</option>
         </select>
         <button onclick="randomAnime()">🎲 Aléatoire</button>
     </div>
@@ -66,48 +64,57 @@
     <script>
         let allAnimes = [];
 
+        // Fonction pour nettoyer les textes du CSV
+        const clean = (str) => (str || "").replace(/^"|"$/g, "").trim();
+
         async function init() {
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
-                // Regex améliorée pour séparer les lignes CSV
+                
+                // Découpage par ligne robuste (gère les sauts de ligne dans les descriptions)
                 const rows = rawData.split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/).filter(l => l.trim() !== "");
                 
                 allAnimes = rows.slice(1).map(line => {
                     const c = line.split(';');
-                    const clean = (str) => (str || "").replace(/^"|"$/g, "").trim();
+                    const numEps = parseInt(clean(c[4]));
+                    
                     return {
                         nom: clean(c[0]),
                         popularite: clean(c[1]),
-                        score: parseFloat(clean(c[2]).replace(',', '.')) || 0,
+                        score: clean(c[2]).replace(',', '.'),
                         sortie: clean(c[3]),
-                        episodes: parseInt(clean(c[4])) || 0,
+                        episodes: isNaN(numEps) ? "Inconnu" : numEps,
                         censure: clean(c[5]),
                         etat: clean(c[6]),
                         desc: clean(c[7]) || "Aucune description disponible.",
                         img: clean(c[8])
                     };
-                }).filter(a => a.nom.length > 2);
+                }).filter(a => a.nom.length > 1);
+
                 displayAnimes(allAnimes);
-            } catch (err) { console.error("Erreur de chargement CSV:", err); }
+            } catch (err) { 
+                console.error("Erreur de chargement CSV:", err); 
+            }
         }
 
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
             container.innerHTML = "";
+            
             list.forEach(anime => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.onclick = () => openModal(anime);
                 
-                // On utilise encodeURI pour gérer proprement les espaces et parenthèses
-                const imgUrl = encodeURI(anime.img);
+                // On encode l'URL pour gérer les espaces et parenthèses
+                const imgPath = encodeURI(anime.img);
 
                 card.innerHTML = `
-                    <img src="img/${imgUrl}" loading="lazy" onerror="this.onerror=null; this.src='https://via.placeholder.com/200x260?text=Image+Introuvable'">
+                    <img src="img/${imgPath}" loading="lazy" onerror="this.onerror=null; this.src='https://via.placeholder.com/200x260?text=Image+Introuvable'">
                     <div class="card-info">
                         <div class="card-title">${anime.nom}</div>
-                        <div class="card-score">⭐ ${anime.score > 0 ? anime.score + '/10' : 'N/A'}</div>
+                        <div class="card-score">⭐ ${anime.score !== "" ? anime.score + '/10' : 'N/A'}</div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -116,8 +123,8 @@
 
         function openModal(a) {
             document.getElementById('modal-title').innerText = a.nom;
-            const imgUrl = encodeURI(a.img);
-            document.getElementById('modal-img').innerHTML = `<img src="img/${imgUrl}" onerror="this.src='https://via.placeholder.com/400x600?text=Pas+d+image'">`;
+            const imgPath = encodeURI(a.img);
+            document.getElementById('modal-img').innerHTML = `<img src="img/${imgPath}" onerror="this.src='https://via.placeholder.com/400x600?text=Pas+d+image'">`;
             document.getElementById('modal-desc').innerText = a.desc;
             document.getElementById('modal-tags').innerHTML = `
                 <span class="tag">🏆 Pop: ${a.popularite}</span>
@@ -125,12 +132,14 @@
                 <span class="tag">📺 ${a.episodes} épisodes</span>
                 <span class="tag">🔞 Censure: ${a.censure}</span>
                 <span class="tag">📌 État: ${a.etat}</span>
-                <span class="tag">⭐ Score: ${a.score}/10</span>
+                <span class="tag">⭐ Score: ${a.score !== "" ? a.score + '/10' : 'N/A'}</span>
             `;
             document.getElementById('animeModal').style.display = "block";
         }
 
-        function closeModal() { document.getElementById('animeModal').style.display = "none"; }
+        function closeModal() { 
+            document.getElementById('animeModal').style.display = "none"; 
+        }
 
         function randomAnime() {
             if(allAnimes.length > 0) {
@@ -138,6 +147,8 @@
                 openModal(random);
             }
         }
+
+        // --- EVENEMENTS (RECHERCHE ET TRI) ---
 
         document.getElementById('search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
@@ -148,7 +159,8 @@
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const mode = e.target.value;
-            if(mode === "score") sorted.sort((a,b) => b.score - a.score);
+            
+            if(mode === "score") sorted.sort((a,b) => parseFloat(b.score) - parseFloat(a.score));
             if(mode === "popularite") sorted.sort((a,b) => {
                 const valA = parseInt(a.popularite.replace('#','')) || 9999;
                 const valB = parseInt(b.popularite.replace('#','')) || 9999;
@@ -156,13 +168,16 @@
             });
             if(mode === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
             if(mode === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
-            if(mode === "episodes") sorted.sort((a,b) => b.episodes - a.episodes);
-            if(mode === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
-            if(mode === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
+            if(mode === "episodes") sorted.sort((a,b) => (parseInt(b.episodes) || 0) - (parseInt(a.episodes) || 0));
+            
             displayAnimes(sorted);
         });
 
-        window.onclick = (e) => { if(e.target == document.getElementById('animeModal')) closeModal(); }
+        window.onclick = (e) => { 
+            if(e.target == document.getElementById('animeModal')) closeModal(); 
+        }
+
+        // Lancement
         init();
     </script>
 </body>
