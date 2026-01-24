@@ -17,9 +17,9 @@
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; --header-bg: rgba(15,15,15,0.95); }
         body.light-mode { --bg: #EAEAEA; --card-bg: #FFFFFF; --text: #2d3436; --header-bg: rgba(234, 234, 234, 0.95); }
-        
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; display: flex; flex-direction: column; min-height: 100vh; }
         
+        /* HEADER LOGO GAUCHE */
         .header-main { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto 20px auto; width: 100%; }
         .site-logo { width: 120px; height: 120px; object-fit: cover; border-radius: 15px; border: 2px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .header-text h1 { margin: 0; color: var(--primary); font-size: 2.2em; }
@@ -34,9 +34,8 @@
         .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-5px); border-color: var(--primary); }
         .card img { width: 100%; height: 280px; object-fit: cover; }
-        
         .card-info { padding: 15px; font-size: 0.85em; flex-grow: 1; }
-        .card-title { font-weight: bold; font-size: 1.1em; margin-bottom: 10px; color: var(--primary); height: 2.4em; overflow: hidden; display: flex; align-items: center; }
+        .card-title { font-weight: bold; font-size: 1.1em; margin-bottom: 10px; color: var(--primary); height: 2.4em; overflow: hidden; }
         .info-line { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .label { color: #888; }
 
@@ -95,30 +94,21 @@
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
-                // Découpage par ligne sans règle complexe pour éviter les erreurs
-                const rows = rawData.split(/\r?\n/).filter(line => line.trim().length > 10);
+                const rows = rawData.split(/\r?\n/).filter(l => l.trim().length > 5);
                 
                 allAnimes = rows.slice(1).map(line => {
-                    // Séparation par point-virgule
                     const c = line.split(';');
-                    if (c.length < 7) return null;
+                    // SECURITÉ : Si la colonne Nom est vide, on ignore la ligne
+                    if (!c[0] || c[0].trim() === "" || c.length < 7) return null;
 
                     return {
-                        nom: clean(c[0]),
-                        popularite: clean(c[1]),
-                        score: clean(c[2]),
-                        sortie: clean(c[3]),
-                        episodes: clean(c[4]),
-                        censure: clean(c[5]),
-                        etat: clean(c[6]),
-                        img: clean(c[8])
+                        nom: clean(c[0]), popularite: clean(c[1]), score: clean(c[2]),
+                        sortie: clean(c[3]), episodes: clean(c[4]), censure: clean(c[5]),
+                        etat: clean(c[6]), img: clean(c[8])
                     };
-                }).filter(a => a !== null && a.nom !== "");
-
+                }).filter(a => a !== null);
                 displayAnimes(allAnimes);
-            } catch (err) {
-                console.error("Erreur de chargement :", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         function displayAnimes(list) {
