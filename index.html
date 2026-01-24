@@ -9,7 +9,6 @@
         body.light-mode { --bg: #EAEAEA; --card-bg: #FFFFFF; --text: #2d3436; --header-bg: rgba(234, 234, 234, 0.95); }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; }
         
-        /* Header avec logo */
         .header-main { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto 20px auto; width: 100%; }
         .site-logo { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 2px solid var(--primary); }
         .header-text h1 { margin: 0; color: var(--primary); font-size: 2em; }
@@ -28,6 +27,9 @@
         .card-title { font-weight: bold; font-size: 1.1em; margin-bottom: 10px; color: var(--primary); height: 2.4em; overflow: hidden; }
         .info-line { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .label { color: #888; }
+
+        footer { margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #333; color: #888; }
+        footer a { color: #7289da; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -49,6 +51,8 @@
             <option value="score">Score</option>
             <option value="sortie">Année</option>
             <option value="episodes">Épisodes</option>
+            <option value="censure">Censure</option>
+            <option value="etat">État</option>
         </select>
         <button onclick="toggleTheme()" id="theme-btn">🌓 Mode Clair</button>
         <button onclick="randomAnime()">🎲 Aléatoire</button>
@@ -56,8 +60,14 @@
 
     <div id="anime-container" class="grid"></div>
 
+    <footer>
+        <p>&copy; <span id="year"></span> Le Malicieux - Tous droits réservés</p>
+        <p>Rejoins-nous sur <a href="https://discord.gg/4DY3Zq4vW4" target="_blank">Discord</a></p>
+    </footer>
+
     <script>
         let allAnimes = [];
+        document.getElementById('year').innerText = new Date().getFullYear();
 
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
@@ -69,24 +79,30 @@
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
-                // On garde ton split mais on filtre les lignes qui ne contiennent pas de texte
-                const rows = rawData.split('\n').filter(r => r.trim().length > 10);
+                
+                // Cette regex magique permet de séparer les lignes TOUT EN ignorant les retours à la ligne entre guillemets
+                const rows = rawData.match(/(".*?"|[^"\r\n]+)(?=\r?\n|$)/g) || [];
                 
                 allAnimes = rows.slice(1).map(line => {
-                    const c = line.split(';');
+                    // On sépare par ; mais on protège ce qui est entre guillemets
+                    const c = line.match(/(".*?"|[^;]+)(?=;|$)/g) || [];
                     if (c.length < 8) return null;
                     
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '').replace(/\r?\n|\r/g, " ") : "";
+
                     return {
-                        nom: c[0].trim().replace(/"/g, ''),
-                        popularite: c[1].trim().replace(/"/g, ''),
-                        score: c[2].trim().replace(/"/g, ''),
-                        sortie: c[3].trim().replace(/"/g, ''),
-                        episodes: c[4].trim().replace(/"/g, ''),
-                        censure: c[5].trim().replace(/"/g, ''),
-                        etat: c[6].trim().replace(/"/g, ''),
-                        img: c[8] ? c[8].trim().replace(/"/g, '').replace(/\r/g, '') : "" 
+                        nom: clean(c[0]),
+                        popularite: clean(c[1]),
+                        score: clean(c[2]),
+                        sortie: clean(c[3]),
+                        episodes: clean(c[4]),
+                        censure: clean(c[5]),
+                        etat: clean(c[6]),
+                        // On force la récupération de la DERNIÈRE colonne pour l'image
+                        img: clean(c[c.length - 1])
                     };
-                }).filter(a => a !== null);
+                }).filter(a => a !== null && a.nom !== "");
+
                 displayAnimes(allAnimes);
             } catch (err) { console.error(err); }
         }
@@ -99,8 +115,8 @@
                 card.className = 'card';
                 card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
                 
-                // On s'assure que l'URL de l'image est propre
-                const imgSrc = "img/" + a.img;
+                // On s'assure que le nom de l'image ne contient pas de restes de code CSV
+                const imgSrc = "img/" + a.img.split(';')[0].trim();
 
                 card.innerHTML = `
                     <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/220x280?text=Image+Introuvable'">
@@ -121,11 +137,16 @@
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const mode = e.target.value;
+            if(!mode) return;
+
             if(mode === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            if(mode === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.'))).reverse();
-            if(mode === "popularite") sorted.sort((a,b) => (parseInt(a.popularite.replace('#','')) || 999) - (parseInt(b.popularite.replace('#','')) || 999));
-            if(mode === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
-            if(mode === "episodes") sorted.sort((a,b) => (parseInt(b.episodes) || 0) - (parseInt(a.episodes) || 0)).reverse();
+            else if(mode === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.'))).reverse();
+            else if(mode === "popularite") sorted.sort((a,b) => (parseInt(a.popularite.replace('#','')) || 9999) - (parseInt(b.popularite.replace('#','')) || 9999));
+            else if(mode === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
+            else if(mode === "episodes") sorted.sort((a,b) => (parseInt(a.episodes) || 0) - (parseInt(a.episodes) || 0)).reverse();
+            else if(mode === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
+            else if(mode === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
+
             displayAnimes(sorted);
         });
 
