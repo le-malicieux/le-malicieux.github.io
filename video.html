@@ -11,41 +11,46 @@
         .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .back-btn { padding: 10px 20px; background: #333; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
         .back-btn:hover { background: var(--primary); }
-        
-        /* Menu déroulant épisodes */
-        .episode-selector { padding: 10px; border-radius: 5px; background: #222; color: white; border: 1px solid var(--primary); cursor: pointer; font-size: 16px; }
-
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 0 30px rgba(255, 71, 87, 0.2); }
+        .episode-selector { padding: 10px; border-radius: 5px; background: #222; color: white; border: 1px solid var(--primary); font-size: 16px; }
+        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 20px; border: 1px solid #333; }
         iframe { width: 100%; height: 100%; border: none; }
-        
-        .details { display: flex; gap: 20px; flex-wrap: wrap; background: #1a1a1a; padding: 25px; border-radius: 15px; border: 1px solid #333; }
-        .details img { width: 220px; border-radius: 10px; object-fit: cover; }
+        .details { display: flex; gap: 20px; flex-wrap: wrap; background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #333; }
+        .details img { width: 200px; border-radius: 10px; object-fit: cover; }
         .info { flex: 1; min-width: 300px; }
-        h1 { color: var(--primary); margin: 0 0 15px 0; }
-        .tag { background: #333; padding: 5px 12px; border-radius: 20px; font-size: 0.85em; margin-right: 8px; border: 1px solid #444; }
-        p.desc { line-height: 1.6; color: #bbb; margin-top: 20px; white-space: pre-wrap; }
+        h1 { color: var(--primary); margin: 0 0 10px 0; }
+        .tag { background: #333; padding: 5px 10px; border-radius: 15px; font-size: 0.85em; margin-right: 5px; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <div class="header-nav">
             <a href="index.html" class="back-btn">← Retour</a>
-            <div id="selector-container"></div> </div>
-        
-        <div id="video-wrapper" class="video-container">
-            </div>
-
-        <div id="details-content">
-            <p>Chargement...</p>
+            <div id="selector-container"></div>
         </div>
+        <div id="video-wrapper" class="video-container">
+            <p style="text-align:center; padding-top:20%;">Recherche de la vidéo...</p>
+        </div>
+        <div id="details-content"></div>
     </div>
 
     <script>
         const clean = (str) => (str || "").replace(/^"|"$/g, "").trim();
 
+        function splitCSVLine(line) {
+            const result = [];
+            let current = "", inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                let char = line[i];
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ';' && !inQuotes) { result.push(current); current = ""; }
+                else current += char;
+            }
+            result.push(current);
+            return result;
+        }
+
         function formatStreamtape(url) {
-            if(!url) return "";
+            if(!url || url.length < 5) return "";
             return url.trim().replace('/v/', '/e/');
         }
 
@@ -53,63 +58,59 @@
             const params = new URLSearchParams(window.location.search);
             const animeName = params.get('name');
 
-            const response = await fetch('animes.csv');
-            const data = await response.text();
-            // On utilise la même logique de split que sur l'index
-            const rows = data.split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/).filter(l => l.trim() !== "");
-            
-            let found = null;
-            for(let row of rows) {
-                let c = row.split(';'); // Attention: si splitCSVLine est nécessaire, utilise-la
-                if (clean(c[0]) === animeName) {
-                    found = {
-                        nom: clean(c[0]),
-                        score: clean(c[2]),
-                        episodes_count: clean(c[4]),
-                        desc: clean(c[7]),
-                        img: clean(c[8]),
-                        video_urls: clean(c[9]).split(',') // On coupe par la virgule
-                    };
-                    break;
-                }
-            }
-
-            if (found) {
-                // 1. Créer le lecteur avec le premier épisode
-                const videoWrapper = document.getElementById('video-wrapper');
-                videoWrapper.innerHTML = `<iframe id="main-player" src="${formatStreamtape(found.video_urls[0])}" allowfullscreen></iframe>`;
-
-                // 2. Créer le menu déroulant si plus d'un épisode
-                if (found.video_urls.length > 1) {
-                    let htmlSelect = `<select class="episode-selector" onchange="changeEpisode(this.value)">`;
-                    found.video_urls.forEach((url, index) => {
-                        htmlSelect += `<option value="${formatStreamtape(url)}">Épisode ${index + 1}</option>`;
-                    });
-                    htmlSelect += `</select>`;
-                    document.getElementById('selector-container').innerHTML = htmlSelect;
+            try {
+                const response = await fetch('animes.csv');
+                const data = await response.text();
+                const rows = data.split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/).filter(l => l.trim() !== "");
+                
+                let found = null;
+                for(let i=1; i<rows.length; i++) {
+                    let c = splitCSVLine(rows[i]);
+                    if (clean(c[0]) === animeName) {
+                        found = {
+                            nom: clean(c[0]),
+                            score: clean(c[2]),
+                            eps: clean(c[4]),
+                            desc: clean(c[7]),
+                            img: clean(c[8]),
+                            urls: clean(c[9]).split(',').filter(u => u.trim() !== "")
+                        };
+                        break;
+                    }
                 }
 
-                // 3. Afficher les détails
-                document.getElementById('details-content').innerHTML = `
-                    <div class="details">
-                        <img src="img/${found.img}" onerror="this.src='https://via.placeholder.com/200x300'">
-                        <div class="info">
-                            <h1>${found.nom}</h1>
-                            <p>
-                                <span class="tag">⭐ Score: ${found.score}/10</span>
-                                <span class="tag">📺 ${found.episodes_count} épisodes</span>
-                            </p>
-                            <p class="desc">${found.desc}</p>
+                if (found) {
+                    // Charger la vidéo
+                    if(found.urls.length > 0) {
+                        document.getElementById('video-wrapper').innerHTML = `<iframe id="main-player" src="${formatStreamtape(found.urls[0])}" allowfullscreen></iframe>`;
+                        
+                        // Menu épisodes
+                        if (found.urls.length > 1) {
+                            let select = `<select class="episode-selector" onchange="document.getElementById('main-player').src=this.value">`;
+                            found.urls.forEach((url, i) => {
+                                select += `<option value="${formatStreamtape(url)}">Épisode ${i + 1}</option>`;
+                            });
+                            select += `</select>`;
+                            document.getElementById('selector-container').innerHTML = select;
+                        }
+                    } else {
+                        document.getElementById('video-wrapper').innerHTML = `<p style="text-align:center; padding-top:20%;">Aucune vidéo disponible pour cet anime.</p>`;
+                    }
+
+                    // Détails
+                    document.getElementById('details-content').innerHTML = `
+                        <div class="details">
+                            <img src="img/${found.img}" onerror="this.src='https://via.placeholder.com/200x300'">
+                            <div class="info">
+                                <h1>${found.nom}</h1>
+                                <p><span class="tag">⭐ ${found.score}/10</span> <span class="tag">📺 ${found.eps} épisodes</span></p>
+                                <p>${found.desc}</p>
+                            </div>
                         </div>
-                    </div>
-                `;
-            }
+                    `;
+                }
+            } catch(e) { console.error(e); }
         }
-
-        function changeEpisode(url) {
-            document.getElementById('main-player').src = url;
-        }
-
         initVideo();
     </script>
 </body>
