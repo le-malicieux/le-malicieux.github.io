@@ -11,20 +11,19 @@
         body.light-mode { --bg: #EAEAEA; --card-bg: #FFFFFF; --text: #2d3436; --header-bg: rgba(234, 234, 234, 0.95); }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* Header avec logo à gauche */
         .header-main { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto 20px auto; width: 100%; }
         .site-logo { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 2px solid var(--primary); }
         .header-text h1 { margin: 0; color: var(--primary); font-size: 2em; }
         .header-text p { margin: 5px 0 0 0; opacity: 0.8; font-style: italic; }
 
-        .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; background: var(--header-bg); padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; background: var(--header-bg); padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); width: 100%; box-sizing: border-box; }
         input, select, button { padding: 10px 15px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; cursor: pointer; }
         body.light-mode input, body.light-mode select { background: #fff; color: #333; border: 1px solid #ccc; }
         button { background: var(--primary); border: none; font-weight: bold; }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; flex-grow: 1; }
         .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
         .card img { width: 100%; height: 280px; object-fit: cover; background: #000; }
         
         .card-info { padding: 15px; font-size: 0.85em; flex-grow: 1; }
@@ -81,48 +80,53 @@
 
         const clean = (str) => (str || "").trim().replace(/^"|"$/g, "").trim();
 
-        function parseCSVLine(line) {
-            const cells = [];
-            let cell = "";
-            let inQuotes = false;
-            for (let char of line) {
-                if (char === '"') inQuotes = !inQuotes;
-                else if (char === ';' && !inQuotes) {
-                    cells.push(cell);
-                    cell = "";
-                } else {
-                    cell += char;
+        // Fonction ultra-robuste pour lire le CSV même avec des ";" dans les textes
+        function parseCSV(text) {
+            const lines = text.split(/\r?\n/).filter(l => l.includes(';'));
+            const result = [];
+            const headers = lines[0].split(';');
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (line.replace(/;/g, '').trim().length < 5) continue;
+
+                let cells = [];
+                let current = "";
+                let inQuotes = false;
+
+                for (let char of line) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ';' && !inQuotes) {
+                        cells.push(current);
+                        current = "";
+                    } else current += char;
+                }
+                cells.push(current);
+
+                // On vérifie que la ligne a bien le nom de l'anime (colonne 0)
+                if (cells[0] && cells[0].trim() !== "") {
+                    result.push({
+                        nom: clean(cells[0]),
+                        popularite: clean(cells[1]),
+                        score: clean(cells[2]),
+                        sortie: clean(cells[3]),
+                        episodes: clean(cells[4]),
+                        censure: clean(cells[5]),
+                        etat: clean(cells[6]),
+                        img: clean(cells[8]) // On prend la colonne image_url
+                    });
                 }
             }
-            cells.push(cell);
-            return cells;
+            return result;
         }
 
         async function init() {
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
-                // Nettoyage des lignes vides (;;;;) pour éviter les cartes glitchées
-                const rows = rawData.split(/\r?\n/).filter(l => l.replace(/;/g, '').trim().length > 5);
-                
-                allAnimes = rows.slice(1).map(line => {
-                    const c = parseCSVLine(line);
-                    if (!c[0] || clean(c[0]) === "") return null;
-                    
-                    return {
-                        nom: clean(c[0]),
-                        popularite: clean(c[1]),
-                        score: clean(c[2]),
-                        sortie: clean(c[3]),
-                        episodes: clean(c[4]),
-                        censure: clean(c[5]),
-                        etat: clean(c[6]),
-                        img: clean(c[8]) // Colonne image_url
-                    };
-                }).filter(a => a !== null);
-                
+                allAnimes = parseCSV(rawData);
                 displayAnimes(allAnimes);
-            } catch (err) { console.error("Erreur CSV:", err); }
+            } catch (err) { console.error("Erreur:", err); }
         }
 
         function displayAnimes(list) {
@@ -133,4 +137,49 @@
                 card.className = 'card';
                 card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
                 
-                // CORRECTION CRUCIALE : Encodage des espaces et parenthèses
+                // On s'assure que le lien de l'image est propre pour le navigateur
+                const imgSrc = "img/" + a.img;
+
+                card.innerHTML = `
+                    <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/220x280?text=Image+Introuvable'">
+                    <div class="card-info">
+                        <div class="card-title">${a.nom}</div>
+                        <div class="info-line"><span class="label">Pop :</span> <span>${a.popularite}</span></div>
+                        <div class="info-line"><span class="label">Score :</span> <span>⭐ ${a.score}/10</span></div>
+                        <div class="info-line"><span class="label">Année :</span> <span>${a.sortie}</span></div>
+                        <div class="info-line"><span class="label">Eps :</span> <span>${a.episodes}</span></div>
+                        <div class="info-line"><span class="label">Censure :</span> <span>${a.censure}</span></div>
+                        <div class="info-line"><span class="label">État :</span> <span>${a.etat}</span></div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        document.getElementById('sort').addEventListener('change', (e) => {
+            let sorted = [...allAnimes];
+            const mode = e.target.value;
+            if(!mode) return;
+            if(mode === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
+            if(mode === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.'))).reverse();
+            if(mode === "popularite") sorted.sort((a,b) => (parseInt(a.popularite.replace('#','')) || 9999) - (parseInt(b.popularite.replace('#','')) || 9999));
+            if(mode === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
+            if(mode === "episodes") sorted.sort((a,b) => (parseInt(a.episodes) || 0) - (parseInt(b.episodes) || 0)).reverse();
+            displayAnimes(sorted);
+        });
+
+        document.getElementById('search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
+        });
+
+        function randomAnime() {
+            if(allAnimes.length > 0) {
+                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
+                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+            }
+        }
+        init();
+    </script>
+</body>
+</html>
