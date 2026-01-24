@@ -68,7 +68,7 @@
         <button onclick="randomAnime()">🎲 Aléatoire</button>
     </div>
 
-    <div class="grid" id="anime-container"></div>
+    <div id="anime-container" class="grid"></div>
 
     <footer>
         <p>&copy; <span id="year"></span> Le Malicieux - Tous droits réservés</p>
@@ -89,16 +89,31 @@
 
         const clean = (str) => (str || "").trim().replace(/^"|"$/g, "");
 
+        // Fonction robuste pour découper les colonnes même avec des guillemets
+        function splitCSVLine(line) {
+            const result = [];
+            let current = "", inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                let char = line[i];
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ';' && !inQuotes) { result.push(current); current = ""; }
+                else current += char;
+            }
+            result.push(current);
+            return result;
+        }
+
         async function init() {
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
-                // On filtre les lignes trop courtes pour éviter les "glitchs" de cartes vides
-                const rows = rawData.split(/\r?\n/).filter(l => l.trim().length > 5);
+                // Découpage par ligne
+                const rows = rawData.split(/\r?\n/).filter(l => l.trim().length > 10);
                 
                 allAnimes = rows.slice(1).map(line => {
-                    const c = line.split(';');
-                    if (!c[0] || c[0].trim() === "" || c.length < 7) return null;
+                    const c = splitCSVLine(line);
+                    // On vérifie qu'on a bien des données sur cette ligne
+                    if (!c[0] || clean(c[0]) === "") return null;
 
                     return {
                         nom: clean(c[0]), popularite: clean(c[1]), score: clean(c[2]),
@@ -106,8 +121,9 @@
                         etat: clean(c[6]), img: clean(c[8])
                     };
                 }).filter(a => a !== null);
+                
                 displayAnimes(allAnimes);
-            } catch (err) { console.error(err); }
+            } catch (err) { console.error("Erreur de chargement CSV:", err); }
         }
 
         function displayAnimes(list) {
@@ -116,4 +132,56 @@
             list.forEach(a => {
                 const card = document.createElement('a');
                 card.className = 'card';
-                card.href = `video.html?name=${encodeURIComponent(a
+                card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+                
+                // On prépare le lien de l'image
+                const imgName = a.img ? a.img.trim() : "";
+                const imgSrc = imgName.startsWith('http') ? imgName : `img/${encodeURI(imgName)}`;
+
+                card.innerHTML = `
+                    <img src="${imgSrc}" onerror="this.onerror=null; this.src='https://via.placeholder.com/220x280?text=Image+Introuvable'">
+                    <div class="card-info">
+                        <div class="card-title">${a.nom}</div>
+                        <div class="info-line"><span class="label">Pop :</span> <span>${a.popularite}</span></div>
+                        <div class="info-line"><span class="label">Score :</span> <span>⭐ ${a.score}/10</span></div>
+                        <div class="info-line"><span class="label">Année :</span> <span>${a.sortie}</span></div>
+                        <div class="info-line"><span class="label">Eps :</span> <span>${a.episodes}</span></div>
+                        <div class="info-line"><span class="label">Censure :</span> <span>${a.censure}</span></div>
+                        <div class="info-line"><span class="label">État :</span> <span>${a.etat}</span></div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        document.getElementById('sort').addEventListener('change', (e) => {
+            let sorted = [...allAnimes];
+            const mode = e.target.value;
+            if(!mode) return;
+
+            if(mode === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
+            else if(mode === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.')));
+            else if(mode === "popularite") sorted.sort((a,b) => (parseInt(a.popularite.replace('#','')) || 9999) - (parseInt(b.popularite.replace('#','')) || 9999));
+            else if(mode === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
+            else if(mode === "episodes") sorted.sort((a,b) => (parseInt(b.episodes) || 0) - (parseInt(a.episodes) || 0));
+            else if(mode === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
+            else if(mode === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
+
+            displayAnimes(sorted);
+        });
+
+        document.getElementById('search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
+        });
+
+        function randomAnime() {
+            if(allAnimes.length > 0) {
+                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
+                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+            }
+        }
+        init();
+    </script>
+</body>
+</html>
