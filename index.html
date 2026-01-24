@@ -23,7 +23,6 @@
         .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-5px); border-color: var(--primary); }
         .card img { width: 100%; height: 280px; object-fit: cover; background: #000; }
-        
         .card-info { padding: 15px; font-size: 0.85em; flex-grow: 1; }
         .card-title { font-weight: bold; font-size: 1.1em; margin-bottom: 10px; color: var(--primary); height: 2.4em; overflow: hidden; }
         .info-line { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -76,47 +75,34 @@
             document.getElementById('theme-btn').innerText = isLight ? "🌓 Mode Sombre" : "🌓 Mode Clair";
         }
 
-        // --- LA FONCTION ANTI-DECALAGE ---
-        function parseCSVLine(text) {
-            const results = [];
-            let current = '';
-            let inQuotes = false;
-            for (let i = 0; i < text.length; i++) {
-                const char = text[i];
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ';' && !inQuotes) {
-                    results.push(current.trim());
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            results.push(current.trim());
-            return results;
-        }
-
         async function init() {
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
                 
-                // On sépare par ligne mais on ignore les lignes vides de fin de fichier
-                const lines = rawData.split(/\r?\n/).filter(l => l.trim().length > 10);
+                // --- LA CORRECTION MAGIQUE POUR LES IMAGES ---
+                // Cette ligne permet de découper le CSV en ignorant les retours à la ligne à l'intérieur des descriptions
+                const rows = rawData.match(/(".*?"|[^"\r\n]+)(?=\r?\n|$)/g) || [];
                 
-                allAnimes = lines.slice(1).map(line => {
-                    const c = parseCSVLine(line);
+                allAnimes = rows.slice(1).map(line => {
+                    // On découpe par point-virgule mais on protège ce qui est entre guillemets
+                    const c = line.match(/(".*?"|[^;]+)(?=;|$)/g) || [];
                     if (c.length < 8) return null;
+                    
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '').replace(/\r?\n|\r/g, " ") : "";
+
+                    // L'image est TOUJOURS le dernier élément
+                    let imgRaw = clean(c[c.length - 1]);
 
                     return {
-                        nom: c[0],
-                        popularite: c[1],
-                        score: c[2],
-                        sortie: c[3],
-                        episodes: c[4],
-                        censure: c[5],
-                        etat: c[6],
-                        img: c[8] ? c[8].replace(/\r/g, "") : ""
+                        nom: clean(c[0]),
+                        popularite: clean(c[1]),
+                        score: clean(c[2]),
+                        sortie: clean(c[3]),
+                        episodes: clean(c[4]),
+                        censure: clean(c[5]),
+                        etat: clean(c[6]),
+                        img: imgRaw
                     };
                 }).filter(a => a !== null && a.nom !== "");
 
@@ -132,8 +118,11 @@
                 card.className = 'card';
                 card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
                 
+                // On nettoie le nom du fichier (on enlève les espaces de début/fin)
+                const imgSrc = "img/" + a.img.trim();
+
                 card.innerHTML = `
-                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/220x280?text=Image+Introuvable'">
+                    <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/220x280?text=Image+Introuvable'">
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
                         <div class="info-line"><span class="label">Pop :</span> <span>${a.popularite}</span></div>
@@ -148,7 +137,7 @@
             });
         }
 
-        // Logique de tri
+        // Système de tri
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const mode = e.target.value;
