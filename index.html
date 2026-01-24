@@ -5,45 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="uysQ4sE5b19o93JOBGzo3ooKtm2KiSzBlKEkGlq2T-0" />
     <title>Le Malicieux - Catalogue d'Animes</title>
+    <meta name="description" content="Découvrez le catalogue d'animes du Malicieux. Popularité, score, épisodes et streaming.">
     
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; --header-bg: rgba(15,15,15,0.95); }
         body.light-mode { --bg: #EAEAEA; --card-bg: #FFFFFF; --text: #2d3436; --header-bg: rgba(234, 234, 234, 0.95); }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; display: flex; flex-direction: column; min-height: 100vh; }
         
-        .header-main { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto 20px auto; width: 100%; }
-        .site-logo { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 2px solid var(--primary); }
-        .header-text h1 { margin: 0; color: var(--primary); font-size: 2em; }
-        .header-text p { margin: 5px 0 0 0; opacity: 0.8; font-style: italic; }
-
-        .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; background: var(--header-bg); padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); width: 100%; box-sizing: border-box; }
+        .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; background: var(--header-bg); padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         input, select, button { padding: 10px 15px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; cursor: pointer; }
         body.light-mode input, body.light-mode select { background: #fff; color: #333; border: 1px solid #ccc; }
         button { background: var(--primary); border: none; font-weight: bold; }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; flex-grow: 1; }
         .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .card img { width: 100%; height: 280px; object-fit: cover; background: #000; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .card img { width: 100%; height: 280px; object-fit: cover; }
         
         .card-info { padding: 15px; font-size: 0.85em; flex-grow: 1; }
         .card-title { font-weight: bold; font-size: 1.1em; margin-bottom: 10px; color: var(--primary); height: 2.4em; overflow: hidden; }
         .info-line { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px; }
-        .label { color: #888; }
+        body.light-mode .info-line { border-bottom-color: rgba(0,0,0,0.05); }
+        .label { color: #888; font-weight: normal; }
 
         footer { margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #333; color: #888; }
         footer a { color: #7289da; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div class="header-main">
-        <img src="img/logo.jpg" alt="Logo" class="site-logo">
-        <div class="header-text">
-            <h1>Le Malicieux</h1>
-            <p>Catalogue d'animes malicieux</p>
-        </div>
-    </div>
 
     <div class="controls">
         <input type="text" id="search" placeholder="Rechercher...">
@@ -68,7 +57,6 @@
 
     <script>
         let allAnimes = [];
-
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
             const isLight = document.body.classList.contains('light-mode');
@@ -78,45 +66,18 @@
         if(localStorage.getItem('theme') === 'light') toggleTheme();
         document.getElementById('year').innerText = new Date().getFullYear();
 
-        const clean = (str) => (str || "").trim().replace(/^"|"$/g, "").trim();
+        const clean = (str) => (str || "").replace(/^"|"$/g, "").trim();
 
-        // Fonction ultra-robuste pour lire le CSV même avec des ";" dans les textes
-        function parseCSV(text) {
-            const lines = text.split(/\r?\n/).filter(l => l.includes(';'));
+        function splitCSVLine(line) {
             const result = [];
-            const headers = lines[0].split(';');
-
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-                if (line.replace(/;/g, '').trim().length < 5) continue;
-
-                let cells = [];
-                let current = "";
-                let inQuotes = false;
-
-                for (let char of line) {
-                    if (char === '"') inQuotes = !inQuotes;
-                    else if (char === ';' && !inQuotes) {
-                        cells.push(current);
-                        current = "";
-                    } else current += char;
-                }
-                cells.push(current);
-
-                // On vérifie que la ligne a bien le nom de l'anime (colonne 0)
-                if (cells[0] && cells[0].trim() !== "") {
-                    result.push({
-                        nom: clean(cells[0]),
-                        popularite: clean(cells[1]),
-                        score: clean(cells[2]),
-                        sortie: clean(cells[3]),
-                        episodes: clean(cells[4]),
-                        censure: clean(cells[5]),
-                        etat: clean(cells[6]),
-                        img: clean(cells[8]) // On prend la colonne image_url
-                    });
-                }
+            let current = "", inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                let char = line[i];
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ';' && !inQuotes) { result.push(current); current = ""; }
+                else current += char;
             }
+            result.push(current);
             return result;
         }
 
@@ -124,9 +85,18 @@
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
-                allAnimes = parseCSV(rawData);
+                const rows = rawData.split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/).filter(l => l.trim() !== "");
+                
+                allAnimes = rows.slice(1).map(line => {
+                    const c = splitCSVLine(line);
+                    return {
+                        nom: clean(c[0]), popularite: clean(c[1]), score: clean(c[2]),
+                        sortie: clean(c[3]), episodes: clean(c[4]), censure: clean(c[5]),
+                        etat: clean(c[6]), img: clean(c[8])
+                    };
+                }).filter(a => a.nom.length > 1);
                 displayAnimes(allAnimes);
-            } catch (err) { console.error("Erreur:", err); }
+            } catch (err) { console.error(err); }
         }
 
         function displayAnimes(list) {
@@ -136,12 +106,8 @@
                 const card = document.createElement('a');
                 card.className = 'card';
                 card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
-                
-                // On s'assure que le lien de l'image est propre pour le navigateur
-                const imgSrc = "img/" + a.img;
-
                 card.innerHTML = `
-                    <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/220x280?text=Image+Introuvable'">
+                    <img src="img/${encodeURI(a.img)}" onerror="this.src='https://via.placeholder.com/220x280?text=Pas+d+image'">
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
                         <div class="info-line"><span class="label">Pop :</span> <span>${a.popularite}</span></div>
@@ -159,10 +125,9 @@
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const mode = e.target.value;
-            if(!mode) return;
             if(mode === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
             if(mode === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.'))).reverse();
-            if(mode === "popularite") sorted.sort((a,b) => (parseInt(a.popularite.replace('#','')) || 9999) - (parseInt(b.popularite.replace('#','')) || 9999));
+            if(mode === "popularite") sorted.sort((a,b) => (parseInt(a.popularite.replace('#','')) || 999) - (parseInt(b.popularite.replace('#','')) || 999));
             if(mode === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
             if(mode === "episodes") sorted.sort((a,b) => (parseInt(a.episodes) || 0) - (parseInt(b.episodes) || 0)).reverse();
             displayAnimes(sorted);
