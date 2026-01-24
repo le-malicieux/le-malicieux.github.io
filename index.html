@@ -21,7 +21,7 @@
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
         
-        /* FIX: Hauteur fixe pour éviter que les cartes s'allongent */
+        /* Cartes à hauteur fixe pour un alignement parfait */
         .card { 
             background: var(--card-bg); 
             border-radius: 12px; 
@@ -34,15 +34,10 @@
             flex-direction: column;
             height: 480px; 
         }
-        
         .card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        
-        /* FIX: Taille d'image constante */
         .card img { width: 100%; height: 260px; object-fit: cover; background: #000; flex-shrink: 0; }
         
         .card-info { padding: 12px; font-size: 0.85em; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-        /* FIX: Empêche le titre de pousser le reste, max 2 lignes */
         .card-title { 
             font-weight: bold; 
             font-size: 1.05em; 
@@ -57,15 +52,7 @@
 
         .info-line { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .label { color: #888; }
-        
-        /* FIX: Pour l'état qui contient parfois des longs textes */
-        .val-text { 
-            text-align: right; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            max-width: 120px; 
-        }
+        .val-text { text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
 
         footer { margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #333; color: #888; }
         footer a { color: #7289da; text-decoration: none; font-weight: bold; }
@@ -119,27 +106,36 @@
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
                 
-                const rows = rawData.match(/(".*?"|[^"\r\n]+)(?=\r?\n|$)/g) || [];
+                // Découpage simple par ligne
+                const rows = rawData.split(/\r?\n/).filter(r => r.trim().length > 0);
                 
                 allAnimes = rows.slice(1).map(line => {
-                    const c = line.match(/(".*?"|[^;]+)(?=;|$)/g) || [];
-                    if (c.length < 8) return null;
-                    
-                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '').replace(/\r?\n|\r/g, " ") : "";
+                    const c = line.split(';');
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+
+                    const nomAnime = clean(c[0]);
+                    if (!nomAnime) return null;
+
+                    // On récupère l'image : soit en colonne 8, soit tout à la fin si décalage
+                    let imgFile = clean(c[8]);
+                    if (!imgFile || (!imgFile.endsWith('.jpg') && !imgFile.endsWith('.png'))) {
+                        imgFile = clean(c[c.length - 1]);
+                    }
 
                     return {
-                        nom: clean(c[0]),
-                        popularite: clean(c[1]),
-                        score: clean(c[2]),
-                        sortie: clean(c[3]),
-                        episodes: clean(c[4]),
-                        censure: clean(c[5]),
-                        etat: clean(c[6]),
-                        img: clean(c[c.length - 1])
+                        nom: nomAnime,
+                        popularite: clean(c[1]) || "?",
+                        score: clean(c[2]) || "0",
+                        sortie: clean(c[3]) || "?",
+                        episodes: clean(c[4]) || "?",
+                        censure: clean(c[5]) || "?",
+                        etat: clean(c[6]) || "?",
+                        img: imgFile
                     };
-                }).filter(a => a !== null && a.nom !== "");
+                }).filter(a => a !== null);
 
                 displayAnimes(allAnimes);
+                console.log(allAnimes.length + " animes chargés.");
             } catch (err) { console.error(err); }
         }
 
@@ -151,10 +147,8 @@
                 card.className = 'card';
                 card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
                 
-                const imgSrc = "img/" + a.img.trim();
-
                 card.innerHTML = `
-                    <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/220x280?text=Image+Introuvable'">
+                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/220x280?text=Image+Introuvable'">
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
                         <div class="info-line"><span class="label">Pop :</span> <span class="val-text">${a.popularite}</span></div>
@@ -169,6 +163,7 @@
             });
         }
 
+        // Système de tri identique
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const mode = e.target.value;
