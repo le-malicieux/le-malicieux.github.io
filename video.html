@@ -3,141 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <title>Visionnage - Le Malicieux</title>
-    <meta name="description" content="Regardez vos animes préférés sur Le Malicieux. Streaming, infos détaillées et catalogue complet.">
-    
-    <meta property="og:title" content="Le Malicieux - Streaming Anime">
-    <meta property="og:description" content="Catalogue d'animes complet avec lecteur intégré.">
-    <meta property="og:image" content="https://le-malicieux.github.io/img/logo.jpg">
-    <meta property="og:url" content="https://le-malicieux.github.io/">
-
     <style>
-        :root {
-            --primary: #ff4757;
-            --bg: #0f0f0f;
-            --card-bg: #1a1a1a;
-            --text: #eee;
-        }
-
-        /* Mode Clair (Gris Perle) */
-        body.light-mode {
-            --bg: #EAEAEA;
-            --card-bg: #FFFFFF;
-            --text: #2d3436;
-        }
-
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
+        body.light-mode { --bg: #EAEAEA; --card-bg: #FFFFFF; --text: #2d3436; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; transition: 0.3s; }
-        .container { max-width: 1100px; margin: 0 auto; }
+        .container { max-width: 1000px; margin: 0 auto; }
         
-        .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; }
-        .back-btn { padding: 10px 18px; background: #222; color: white; text-decoration: none; border-radius: 6px; border: 1px solid #444; font-weight: bold; }
+        .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .back-btn { padding: 10px 18px; background: #222; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; border: 1px solid #444; }
         body.light-mode .back-btn { background: #fff; color: #333; border-color: #ccc; }
-        .back-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        
-        .episode-selector { padding: 10px; border-radius: 6px; background: #1a1a1a; color: white; border: 1px solid var(--primary); }
-        body.light-mode .episode-selector { background: #fff; color: #333; }
 
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #333; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        /* Infos au-dessus */
+        .details-top { display: flex; gap: 25px; background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; flex-wrap: wrap; }
+        body.light-mode .details-top { border-color: #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .details-top img { width: 200px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .info-block { flex: 1; min-width: 300px; }
+        h1 { color: var(--primary); margin: 0 0 10px 0; }
+        .tag-row { margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag { background: #333; padding: 4px 12px; border-radius: 20px; font-size: 0.85em; color: white; }
+        .desc { line-height: 1.6; opacity: 0.9; white-space: pre-wrap; }
+
+        /* Lecteur en dessous */
+        .video-section { text-align: center; }
+        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #333; margin-top: 10px; }
         iframe { width: 100%; height: 100%; border: none; }
-        
-        .details { display: flex; gap: 20px; flex-wrap: wrap; background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; }
-        body.light-mode .details { border-color: #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        
-        .details img { width: 220px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .info { flex: 1; min-width: 300px; }
-        h1 { color: var(--primary); margin: 0 0 10px 0; font-size: 1.8em; }
-        .tag { background: #222; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; margin-right: 8px; border: 1px solid #333; color: white; }
-        body.light-mode .tag { background: #eee; color: #333; border-color: #ccc; }
-        .desc { line-height: 1.6; color: var(--text); opacity: 0.8; margin-top: 20px; white-space: pre-wrap; font-size: 1.05em; }
+        .episode-selector { padding: 10px; border-radius: 6px; background: #1a1a1a; color: white; border: 1px solid var(--primary); margin-bottom: 10px; width: 200px; }
+        body.light-mode .episode-selector { background: #fff; color: #333; }
     </style>
 </head>
-<body id="body-page">
+<body>
     <div class="container">
         <div class="header-nav">
             <a href="index.html" class="back-btn">← Catalogue</a>
             <div id="selector-container"></div>
         </div>
-        <div id="video-wrapper" class="video-container">
-            <p style="text-align:center; padding-top:20%;">Chargement du lecteur...</p>
-        </div>
+
         <div id="details-content"></div>
+
+        <div class="video-section">
+            <div id="video-wrapper" class="video-container">
+                <p style="text-align:center; padding-top:20%;">Sélectionnez un anime...</p>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Synchronisation du thème
-        if(localStorage.getItem('theme') === 'light') {
-            document.body.classList.add('light-mode');
-        }
-
+        if(localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
         const clean = (str) => (str || "").replace(/^"|"$/g, "").trim();
-
-        function splitCSVLine(line) {
-            const result = [];
-            let current = "", inQuotes = false;
-            for (let i = 0; i < line.length; i++) {
-                let char = line[i];
-                if (char === '"') inQuotes = !inQuotes;
-                else if (char === ';' && !inQuotes) { result.push(current); current = ""; }
-                else current += char;
-            }
-            result.push(current);
-            return result;
-        }
-
-        function formatSrc(url) {
-            if(!url || url.length < 5) return "";
-            let u = url.trim();
-            if(u.includes('streamtape.com/v/')) u = u.replace('/v/', '/e/');
-            return u;
-        }
 
         async function init() {
             const name = new URLSearchParams(window.location.search).get('name');
             try {
                 const res = await fetch('animes.csv');
-                const text = await res.text();
-                const rows = text.split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                const rows = (await res.text()).split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 
                 let a = null;
                 for(let i=1; i<rows.length; i++) {
-                    let c = splitCSVLine(rows[i]);
+                    let c = rowSplit(rows[i]);
                     if (clean(c[0]) === name) {
                         a = { 
-                            nom: clean(c[0]), 
-                            score: clean(c[2]), 
-                            eps: clean(c[4]), 
-                            desc: clean(c[7]), 
-                            img: clean(c[8]), 
-                            urls: clean(c[9]).split(',').filter(x => x.length > 5) 
+                            nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sort: clean(c[3]),
+                            eps: clean(c[4]), cens: clean(c[5]), etat: clean(c[6]), desc: clean(c[7]),
+                            img: clean(c[8]), urls: clean(c[9]).split(',').filter(x => x.length > 5) 
                         };
                         break;
                     }
                 }
 
                 if(a) {
-                    document.title = a.nom + " - Le Malicieux";
-                    if(a.urls.length > 0) {
-                        document.getElementById('video-wrapper').innerHTML = `<iframe id="player" src="${formatSrc(a.urls[0])}" allowfullscreen></iframe>`;
-                        if(a.urls.length > 1) {
-                            let s = `<select class="episode-selector" onchange="document.getElementById('player').src=this.value">`;
-                            a.urls.forEach((u, i) => s += `<option value="${formatSrc(u)}">Épisode ${i+1}</option>`);
-                            document.getElementById('selector-container').innerHTML = s + `</select>`;
-                        }
-                    } else {
-                        document.getElementById('video-wrapper').innerHTML = `<p style="text-align:center; padding-top:20%;">Vidéo bientôt disponible.</p>`;
-                    }
+                    // Affichage des infos en haut
                     document.getElementById('details-content').innerHTML = `
-                        <div class="details">
-                            <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/220x310'">
-                            <div class="info">
+                        <div class="details-top">
+                            <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/200x300'">
+                            <div class="info-block">
                                 <h1>${a.nom}</h1>
-                                <div><span class="tag">⭐ ${a.score}/10</span><span class="tag">📺 ${a.eps} épisodes</span></div>
+                                <div class="tag-row">
+                                    <span class="tag">⭐ ${a.score}/10</span>
+                                    <span class="tag">📺 ${a.eps} épisodes</span>
+                                    <span class="tag">📅 ${a.sort}</span>
+                                    <span class="tag">🔞 ${a.cens}</span>
+                                </div>
                                 <div class="desc">${a.desc}</div>
                             </div>
                         </div>`;
+
+                    // Affichage du lecteur en bas
+                    if(a.urls.length > 0) {
+                        const format = (u) => u.trim().replace('/v/', '/e/');
+                        document.getElementById('video-wrapper').innerHTML = `<iframe id="player" src="${format(a.urls[0])}" allowfullscreen></iframe>`;
+                        if(a.urls.length > 1) {
+                            let s = `<select class="episode-selector" onchange="document.getElementById('player').src=this.value">`;
+                            a.urls.forEach((u, i) => s += `<option value="${format(u)}">Épisode ${i+1}</option>`);
+                            document.getElementById('selector-container').innerHTML = s + `</select>`;
+                        }
+                    } else {
+                        document.getElementById('video-wrapper').innerHTML = `<p style="padding-top:20%;">Vidéo bientôt disponible.</p>`;
+                    }
                 }
             } catch(e) { console.error(e); }
+        }
+
+        function rowSplit(line) {
+            const result = []; let current = "", inQuotes = false;
+            for (let char of line) {
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ';' && !inQuotes) { result.push(current); current = ""; }
+                else current += char;
+            }
+            result.push(current); return result;
         }
         init();
     </script>
