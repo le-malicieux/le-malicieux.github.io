@@ -70,6 +70,7 @@
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
+                // Regex améliorée pour séparer les lignes CSV
                 const rows = rawData.split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/).filter(l => l.trim() !== "");
                 
                 allAnimes = rows.slice(1).map(line => {
@@ -88,7 +89,7 @@
                     };
                 }).filter(a => a.nom.length > 2);
                 displayAnimes(allAnimes);
-            } catch (err) { console.error("Erreur:", err); }
+            } catch (err) { console.error("Erreur de chargement CSV:", err); }
         }
 
         function displayAnimes(list) {
@@ -99,11 +100,11 @@
                 card.className = 'card';
                 card.onclick = () => openModal(anime);
                 
-                // --- CORRECTIF ICI : Encodage de l'URL pour gérer les espaces/parenthèses ---
-                const safeImgPath = encodeURI(anime.img);
+                // On utilise encodeURI pour gérer proprement les espaces et parenthèses
+                const imgUrl = encodeURI(anime.img);
 
                 card.innerHTML = `
-                    <img src="img/${safeImgPath}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x260?text=Image+Introuvable'">
+                    <img src="img/${imgUrl}" loading="lazy" onerror="this.onerror=null; this.src='https://via.placeholder.com/200x260?text=Image+Introuvable'">
                     <div class="card-info">
                         <div class="card-title">${anime.nom}</div>
                         <div class="card-score">⭐ ${anime.score > 0 ? anime.score + '/10' : 'N/A'}</div>
@@ -115,8 +116,8 @@
 
         function openModal(a) {
             document.getElementById('modal-title').innerText = a.nom;
-            const safeImgPath = encodeURI(a.img);
-            document.getElementById('modal-img').innerHTML = `<img src="img/${safeImgPath}" onerror="this.src='https://via.placeholder.com/400x600?text=Pas+d+image'">`;
+            const imgUrl = encodeURI(a.img);
+            document.getElementById('modal-img').innerHTML = `<img src="img/${imgUrl}" onerror="this.src='https://via.placeholder.com/400x600?text=Pas+d+image'">`;
             document.getElementById('modal-desc').innerText = a.desc;
             document.getElementById('modal-tags').innerHTML = `
                 <span class="tag">🏆 Pop: ${a.popularite}</span>
@@ -132,8 +133,10 @@
         function closeModal() { document.getElementById('animeModal').style.display = "none"; }
 
         function randomAnime() {
-            const random = allAnimes[Math.floor(Math.random() * allAnimes.length)];
-            openModal(random);
+            if(allAnimes.length > 0) {
+                const random = allAnimes[Math.floor(Math.random() * allAnimes.length)];
+                openModal(random);
+            }
         }
 
         document.getElementById('search').addEventListener('input', (e) => {
