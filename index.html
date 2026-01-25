@@ -7,114 +7,94 @@
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; --header-bg: rgba(15,15,15,0.95); }
         
-        /* --- STYLE WINDOWS XP --- */
+        /* --- STYLE WINDOWS XP (LUNA) --- */
         body.theme-xp { 
-            background-color: #245edb !important;
-            background-image: var(--bg-day) !important; 
-            background-size: cover; background-attachment: fixed; background-position: center;
-            --text: #000;
+            background: #245edb var(--bg-day) no-repeat center center fixed; 
+            background-size: cover; --text: #000; 
         }
         .theme-xp .card { 
-            background: #ece9d8 !important; 
-            border: 3px solid #0054e3 !important; 
-            border-radius: 8px 8px 0 0 !important; 
-            box-shadow: 4px 4px 10px rgba(0,0,0,0.4); 
-            height: 520px;
+            background: #ece9d8 !important; border: 2px solid #0054e3 !important; 
+            border-radius: 5px 5px 0 0 !important; box-shadow: 3px 3px 10px rgba(0,0,0,0.4); height: 520px;
         }
         .theme-xp .win-title { 
             background: linear-gradient(to bottom, #0058e6 0%, #0869ff 4%, #0054e3 6%, #0054e3 100%) !important;
-            color: white !important; padding: 6px 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;
+            color: white !important; padding: 4px 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;
         }
-        .theme-xp .card-title { color: #000 !important; border-bottom: 1px solid #7a7a7a; padding-bottom: 5px; }
-        .theme-xp .info-line { border-bottom: 1px solid #bdbe96 !important; color: #333; }
 
-        /* --- STYLE WINDOWS VISTA --- */
+        /* --- STYLE WINDOWS VISTA (AERO BLACK) --- */
         body.theme-vista { 
-            background-color: #000 !important;
-            background-image: var(--bg-day) !important;
-            background-size: cover; background-attachment: fixed; background-position: center;
-            --text: #fff;
+            background: #000 var(--bg-day) no-repeat center center fixed; 
+            background-size: cover; --text: #fff; 
         }
         .theme-vista .card { 
-            background: rgba(255, 255, 255, 0.1) !important; 
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.4) !important; 
-            border-radius: 12px !important; 
-            height: 520px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.6);
+            background: #1a1a1a !important; 
+            border: 1px solid #444 !important;
+            outline: 1px solid rgba(255,255,255,0.2); outline-offset: -2px;
+            border-radius: 8px 8px 0 0 !important; height: 520px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
         .theme-vista .win-title { 
-            background: rgba(0, 0, 0, 0.5) !important; 
-            padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.2);
-            color: white !important; display: flex; justify-content: space-between;
+            background: linear-gradient(to bottom, #4c4c4c 0%, #111 50%, #000 51%, #111 100%) !important;
+            padding: 8px 10px; border-bottom: 1px solid #000;
+            color: white !important; display: flex; justify-content: space-between; align-items: center;
         }
-        .theme-vista .card-title { color: #fff !important; }
+        .theme-vista .win-btns span { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); }
 
         /* --- BASES COMMUNES --- */
-        body { font-family: 'Tahoma', 'Segoe UI', sans-serif; margin: 0; padding: 20px; transition: 0.3s; background-color: var(--bg); color: var(--text); min-height: 100vh; }
+        body { font-family: 'Tahoma', 'Segoe UI', sans-serif; margin: 0; padding: 20px; transition: 0.3s; background-color: var(--bg); color: var(--text); }
         .header-main { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto 20px; background: var(--header-bg); padding: 15px; border-radius: 12px; }
-        .site-logo { width: 80px; height: 80px; object-fit: cover; border-radius: 10px; border: 2px solid var(--primary); }
-        .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; background: var(--header-bg); padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
+        .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; background: var(--header-bg); padding: 10px; border-radius: 12px; }
         
-        input, select, button { padding: 10px 15px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; cursor: pointer; }
+        input, select, button { padding: 8px 12px; border-radius: 4px; border: 1px solid #333; background: #222; color: white; cursor: pointer; }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 30px; }
         .card { text-decoration: none; color: inherit; display: flex; flex-direction: column; overflow: hidden; transition: 0.2s; background: var(--card-bg); border: 1px solid #333; border-radius: 12px; }
-        .card:hover { transform: translateY(-5px); z-index: 10; }
-        .card img { width: 100%; height: 260px; object-fit: cover; background: #000; flex-shrink: 0; }
+        .card img { width: 100%; height: 260px; object-fit: cover; border-bottom: 1px solid rgba(128,128,128,0.2); }
+        .card-info { padding: 15px; font-size: 0.85em; flex-grow: 1; }
+        .card-title { font-weight: bold; margin-bottom: 10px; color: var(--primary); height: 2.6em; overflow: hidden; }
         
-        .card-info { padding: 15px; font-size: 0.85em; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-title { font-weight: bold; font-size: 1.05em; margin-bottom: 10px; color: var(--primary); height: 2.6em; overflow: hidden; }
-        .info-line { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        /* Adaptation texte selon thème */
+        .theme-xp .card-title { color: #000 !important; }
+        .theme-vista .card-title { color: #00d2ff !important; }
         
-        .win-btn span { margin-left: 4px; border: 1px solid rgba(255,255,255,0.6); padding: 0 4px; font-size: 0.7em; border-radius: 2px; }
-        footer { margin-top: 50px; padding: 20px; text-align: center; color: #888; border-top: 1px solid #333; }
+        .info-line { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid rgba(128,128,128,0.1); }
+        .win-btns span { margin-left: 4px; padding: 0 6px; font-size: 0.8em; border-radius: 2px; }
     </style>
 </head>
 <body id="main-body">
 
     <div class="header-main">
-        <img src="img/logo.jpg" alt="Logo" class="site-logo">
+        <img src="img/logo.jpg" alt="Logo" style="width:70px; height:70px; border-radius:8px; border:2px solid var(--primary);">
         <div>
-            <h1 style="margin:0; color:var(--primary)">Le Malicieux</h1>
-            <p style="margin:0; opacity:0.8">Système d'Anime Rétro</p>
+            <h1 style="margin:0; color:var(--primary); font-size: 1.8em;">Le Malicieux</h1>
+            <p style="margin:0; opacity:0.8;">Catalogue Système</p>
         </div>
     </div>
 
     <div class="controls">
-        <input type="text" id="search" placeholder="Rechercher...">
+        <input type="text" id="search" placeholder="Rechercher un anime...">
         <select id="theme-select" onchange="applyTheme(this.value)">
-            <option value="default">Style Moderne (Dark)</option>
-            <option value="theme-xp">Windows XP (Luna)</option>
-            <option value="theme-vista">Windows Vista (Aero)</option>
-        </select>
-        <select id="sort">
-            <option value="nom">Nom (A-Z)</option>
-            <option value="score">Score</option>
-            <option value="popularite">Popularité</option>
+            <option value="default">Interface Moderne</option>
+            <option value="theme-xp">Windows XP Professional</option>
+            <option value="theme-vista">Windows Vista Aero</option>
         </select>
         <button onclick="randomAnime()">🎲 Aléatoire</button>
     </div>
 
     <div id="anime-container" class="grid"></div>
 
-    <footer>
-        <p>&copy; 2026 Le Malicieux - <a href="https://discord.gg/4DY3Zq4vW4" style="color:var(--primary)">Discord</a></p>
-    </footer>
-
     <script>
         let allAnimes = [];
 
         function applyTheme(theme) {
             const body = document.getElementById('main-body');
-            body.className = ""; // Reset
+            body.classList.remove('theme-xp', 'theme-vista');
             if (theme !== 'default') {
                 body.classList.add(theme);
-                const totalImages = 25; 
                 const d = new Date();
                 const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-                const imageId = (seed % totalImages) + 1;
-                body.style.setProperty('--bg-day', `url('img/fond${imageId}.jpg')`);
+                const imgNum = (seed % 25) + 1;
+                body.style.setProperty('--bg-day', `url('img/fond${imgNum}.jpg')`);
             } else {
                 body.style.backgroundImage = 'none';
             }
@@ -130,32 +110,26 @@
                 allAnimes = rows.slice(1).map(line => {
                     const c = line.split(';');
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    const nom = clean(c[0]);
-                    if (nom && nom.length > 1) {
-                        let img = clean(c[8]);
-                        if (!img || !img.includes('.')) img = clean(c[c.length - 1]);
-                        return {
-                            nom: nom,
-                            pop: clean(c[1]) || "?",
-                            score: clean(c[2]) || "0",
-                            sortie: clean(c[3]) || "?",
-                            censure: clean(c[5]) || "?",
-                            etat: clean(c[6]) || "?",
-                            img: img
-                        };
-                    }
-                    return null;
+                    if (clean(c[0]).length < 2) return null;
+                    return {
+                        nom: clean(c[0]),
+                        pop: clean(c[1]) || "?",
+                        score: clean(c[2]) || "0",
+                        sortie: clean(c[3]) || "?",
+                        censure: clean(c[5]) || "?",
+                        etat: clean(c[6]) || "?",
+                        img: clean(c[c.length - 1])
+                    };
                 }).filter(a => a !== null);
 
                 applyTheme('default');
-            } catch (err) { console.error(err); }
+            } catch (err) { console.error("Erreur de chargement CSV"); }
         }
 
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
             container.innerHTML = "";
-            const theme = document.getElementById('theme-select').value;
-            const isRetro = theme !== "default";
+            const currentTheme = document.getElementById('theme-select').value;
 
             list.forEach(a => {
                 const card = document.createElement('a');
@@ -163,44 +137,36 @@
                 card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
                 
                 let winHeader = "";
-                if (isRetro) {
+                if (currentTheme !== 'default') {
                     winHeader = `
                         <div class="win-title">
-                            <span>${a.nom.substring(0,18)}...</span>
-                            <div class="win-btn"><span>_</span><span>□</span><span>X</span></div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <img src="img/logo.jpg" style="width:14px; height:14px; border-radius:2px;"> 
+                                <span style="font-size:12px;">${a.nom.substring(0,18)}</span>
+                            </div>
+                            <div class="win-btns"><span>_</span><span>□</span><span style="background:#e81123;">X</span></div>
                         </div>
                     `;
                 }
 
                 card.innerHTML = `
                     ${winHeader}
-                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/240x260?text=No+Image'">
+                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/240x260?text=Image+Manquante'">
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
-                        <div class="info-line"><span>Pop :</span> <span>${a.pop}</span></div>
-                        <div class="info-line"><span>Score :</span> <span>⭐ ${a.score}</span></div>
-                        <div class="info-line"><span>Année :</span> <span>${a.sortie}</span></div>
-                        <div class="info-line"><span>Censure :</span> <span>${a.censure}</span></div>
-                        <div class="info-line"><span>État :</span> <span>${a.etat}</span></div>
+                        <div class="info-line"><span>Score:</span> <span>⭐ ${a.score}</span></div>
+                        <div class="info-line"><span>Sortie:</span> <span>${a.sortie}</span></div>
+                        <div class="info-line"><span>Censure:</span> <span>${a.censure}</span></div>
+                        <div class="info-line"><span>État:</span> <span>${a.etat}</span></div>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // Recherche et Tris
         document.getElementById('search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
-        });
-
-        document.getElementById('sort').addEventListener('change', (e) => {
-            const mode = e.target.value;
-            let sorted = [...allAnimes];
-            if(mode === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            else if(mode === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.'))).reverse();
-            else if(mode === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 9999) - (parseInt(b.pop.replace('#','')) || 9999));
-            displayAnimes(sorted);
         });
 
         function randomAnime() {
@@ -209,7 +175,6 @@
                 window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
             }
         }
-
         init();
     </script>
 </body>
