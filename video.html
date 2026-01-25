@@ -3,117 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visionnage - Le Malicieux</title>
+    <title>Le Malicieux - Visionnage</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
-        body.light-mode { --bg: #EAEAEA; --card-bg: #FFFFFF; --text: #2d3436; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; transition: 0.3s; }
-        .container { max-width: 1000px; margin: 0 auto; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         
-        .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .back-btn { padding: 10px 18px; background: #222; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; border: 1px solid #444; }
-        body.light-mode .back-btn { background: #fff; color: #333; border-color: #ccc; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 6px; transition: 0.3s; }
+        .back-btn:hover { background: var(--primary); color: white; }
 
-        /* Infos au-dessus */
-        .details-top { display: flex; gap: 25px; background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; flex-wrap: wrap; }
-        body.light-mode .details-top { border-color: #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .details-top img { width: 200px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .info-block { flex: 1; min-width: 300px; }
-        h1 { color: var(--primary); margin: 0 0 10px 0; }
-        .tag-row { margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 8px; }
-        .tag { background: #333; padding: 4px 12px; border-radius: 20px; font-size: 0.85em; color: white; }
-        .desc { line-height: 1.6; opacity: 0.9; white-space: pre-wrap; }
+        .anime-header { display: flex; gap: 30px; flex-wrap: wrap; background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
+        .anime-header img { width: 280px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .details { flex: 1; min-width: 300px; }
+        .details h1 { margin-top: 0; color: var(--primary); font-size: 2.2em; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+        .info-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border-left: 3px solid var(--primary); }
+        .info-item strong { color: #888; display: block; font-size: 0.8em; text-transform: uppercase; }
 
-        /* Lecteur en dessous */
-        .video-section { text-align: center; }
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #333; margin-top: 10px; }
-        iframe { width: 100%; height: 100%; border: none; }
-        .episode-selector { padding: 10px; border-radius: 6px; background: #1a1a1a; color: white; border: 1px solid var(--primary); margin-bottom: 10px; width: 200px; }
-        body.light-mode .episode-selector { background: #fff; color: #333; }
+        .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; }
+        
+        .discord-section { text-align: center; margin-top: 40px; padding: 20px; background: rgba(114, 137, 218, 0.1); border-radius: 15px; border: 1px dashed #7289da; }
+        .discord-link { color: #7289da; text-decoration: none; font-weight: bold; font-size: 1.1em; }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <div class="header-nav">
-            <a href="index.html" class="back-btn">← Catalogue</a>
-            <div id="selector-container"></div>
-        </div>
-
-        <div id="details-content"></div>
-
-        <div class="video-section">
-            <div id="video-wrapper" class="video-container">
-                <p style="text-align:center; padding-top:20%;">Sélectionnez un anime...</p>
-            </div>
+        <a href="index.html" class="back-btn">← Retour au catalogue</a>
+        <div id="video-content">Chargement de l'anime...</div>
+        
+        <div class="discord-section">
+            <p>Un problème avec cette vidéo ?</p>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-link">Signaler sur notre Discord</a>
         </div>
     </div>
 
     <script>
-        if(localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
-        const clean = (str) => (str || "").replace(/^"|"$/g, "").trim();
+        async function loadAnimeDetails() {
+            const params = new URLSearchParams(window.location.search);
+            const animeName = params.get('name');
+            if (!animeName) return;
 
-        async function init() {
-            const name = new URLSearchParams(window.location.search).get('name');
             try {
-                const res = await fetch('animes.csv');
-                const rows = (await res.text()).split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                const response = await fetch('animes.csv');
+                const rawData = await response.text();
+                const rows = rawData.split(/\r?\n/);
                 
-                let a = null;
-                for(let i=1; i<rows.length; i++) {
-                    let c = rowSplit(rows[i]);
-                    if (clean(c[0]) === name) {
-                        a = { 
-                            nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sort: clean(c[3]),
-                            eps: clean(c[4]), cens: clean(c[5]), etat: clean(c[6]), desc: clean(c[7]),
-                            img: clean(c[8]), urls: clean(c[9]).split(',').filter(x => x.length > 5) 
+                // Recherche de l'anime correspondant dans le CSV
+                let anime = null;
+                rows.slice(1).forEach(line => {
+                    const c = line.split(';');
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    if (clean(c[0]) === animeName) {
+                        anime = {
+                            nom: clean(c[0]),
+                            popularite: clean(c[1]) || "?",
+                            score: clean(c[2]) || "0",
+                            sortie: clean(c[3]) || "?",
+                            episodes: clean(c[4]) || "?",
+                            censure: clean(c[5]) || "?",
+                            etat: clean(c[6]) || "?",
+                            img: clean(c[8]) || clean(c[c.length - 1])
                         };
-                        break;
                     }
-                }
+                });
 
-                if(a) {
-                    // Affichage des infos en haut
-                    document.getElementById('details-content').innerHTML = `
-                        <div class="details-top">
-                            <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/200x300'">
-                            <div class="info-block">
-                                <h1>${a.nom}</h1>
-                                <div class="tag-row">
-                                    <span class="tag">⭐ ${a.score}/10</span>
-                                    <span class="tag">📺 ${a.eps} épisodes</span>
-                                    <span class="tag">📅 ${a.sort}</span>
-                                    <span class="tag">🔞 ${a.cens}</span>
-                                </div>
-                                <div class="desc">${a.desc}</div>
-                            </div>
-                        </div>`;
-
-                    // Affichage du lecteur en bas
-                    if(a.urls.length > 0) {
-                        const format = (u) => u.trim().replace('/v/', '/e/');
-                        document.getElementById('video-wrapper').innerHTML = `<iframe id="player" src="${format(a.urls[0])}" allowfullscreen></iframe>`;
-                        if(a.urls.length > 1) {
-                            let s = `<select class="episode-selector" onchange="document.getElementById('player').src=this.value">`;
-                            a.urls.forEach((u, i) => s += `<option value="${format(u)}">Épisode ${i+1}</option>`);
-                            document.getElementById('selector-container').innerHTML = s + `</select>`;
-                        }
-                    } else {
-                        document.getElementById('video-wrapper').innerHTML = `<p style="padding-top:20%;">Vidéo bientôt disponible.</p>`;
-                    }
+                if (anime) {
+                    document.title = "Le Malicieux - " + anime.nom;
+                    displayAnime(anime);
                 }
-            } catch(e) { console.error(e); }
+            } catch (err) { console.error(err); }
         }
 
-        function rowSplit(line) {
-            const result = []; let current = "", inQuotes = false;
-            for (let char of line) {
-                if (char === '"') inQuotes = !inQuotes;
-                else if (char === ';' && !inQuotes) { result.push(current); current = ""; }
-                else current += char;
-            }
-            result.push(current); return result;
+        function displayAnime(a) {
+            const container = document.getElementById('video-content');
+            container.innerHTML = `
+                <div class="anime-header">
+                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/280x400'">
+                    <div class="details">
+                        <h1>${a.nom}</h1>
+                        <div class="info-grid">
+                            <div class="info-item"><strong>Popularité</strong>${a.popularite}</div>
+                            <div class="info-item"><strong>Score</strong>⭐ ${a.score}/10</div>
+                            <div class="info-item"><strong>Année</strong>${a.sortie}</div>
+                            <div class="info-item"><strong>Épisodes</strong>${a.episodes}</div>
+                            <div class="info-item"><strong>Censure</strong>${a.censure}</div>
+                            <div class="info-item"><strong>État</strong>${a.etat}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="video-player">
+                    <div style="display:flex; height:100%; align-items:center; justify-content:center; color:#555;">
+                        Lecteur Vidéo (Espace réservé)
+                    </div>
+                </div>
+            `;
         }
-        init();
+
+        loadAnimeDetails();
     </script>
 </body>
 </html>
