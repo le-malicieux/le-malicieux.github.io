@@ -3,40 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Malicieux - Catalogue Rétro</title>
+    <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; --header-bg: rgba(15,15,15,0.95); }
         
-        /* STYLE WINDOWS XP */
-        body.theme-xp { background: #245edb var(--bg-day) no-repeat center fixed; background-size: cover; --text: #000; }
-        .theme-xp .card { background: #ece9d8 !important; border: 2px solid #0054e3 !important; border-radius: 5px 5px 0 0 !important; height: 520px; box-shadow: 4px 4px 0px rgba(0,0,0,0.2); }
-        .theme-xp .win-title { background: linear-gradient(to bottom, #0058e6 0%, #0054e3 100%); color: white; padding: 4px 8px; display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg); 
+            /* On prépare le fond aléatoire */
+            background-image: var(--bg-day);
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: var(--text); 
+            margin: 0; 
+            padding: 20px; 
+            transition: 0.3s; 
+        }
+        
+        .header-main { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto 20px auto; width: 100%; }
+        .site-logo { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 2px solid var(--primary); }
+        .header-text h1 { margin: 0; color: var(--primary); font-size: 2em; }
 
-        /* STYLE WINDOWS VISTA */
-        body.theme-vista { background: #000 var(--bg-day) no-repeat center fixed; background-size: cover; --text: #fff; }
-        .theme-vista .card { background: #1a1a1a !important; border: 1px solid #555 !important; border-radius: 8px 8px 0 0 !important; height: 520px; outline: 1px solid rgba(255,255,255,0.2); outline-offset: -2px; }
-        .theme-vista .win-title { background: linear-gradient(to bottom, #444, #000); color: white; padding: 6px 10px; display: flex; justify-content: space-between; border-bottom: 1px solid #000; }
+        .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; background: var(--header-bg); padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
+        input, select, button { padding: 10px 15px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; cursor: pointer; }
+        button { background: var(--primary); border: none; font-weight: bold; }
 
-        /* BASES */
-        body { font-family: 'Tahoma', sans-serif; margin: 0; padding: 20px; background-color: var(--bg); color: var(--text); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; }
-        .card { text-decoration: none; color: inherit; display: flex; flex-direction: column; overflow: hidden; background: var(--card-bg); border: 1px solid #333; border-radius: 12px; }
-        .card img { width: 100%; height: 260px; object-fit: cover; }
-        .card-info { padding: 15px; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 10px; height: 2.5em; overflow: hidden; }
-        .theme-xp .card-title { color: #000; }
-        .controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; background: var(--header-bg); padding: 15px; border-radius: 12px; position: sticky; top: 10px; z-index: 100; }
-        input, select, button { padding: 10px; border-radius: 5px; border: 1px solid #444; background: #222; color: white; cursor: pointer; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
+        .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; display: flex; flex-direction: column; height: 480px; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card img { width: 100%; height: 260px; object-fit: cover; background: #000; }
+        .card-info { padding: 12px; font-size: 0.85em; flex-grow: 1; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 8px; height: 2.6em; overflow: hidden; }
+        .info-line { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        footer { margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #333; color: #888; }
     </style>
 </head>
 <body id="main-body">
 
+    <div class="header-main">
+        <img src="img/logo.jpg" alt="Logo" class="site-logo">
+        <div class="header-text">
+            <h1>Le Malicieux</h1>
+            <p>Catalogue d'animes malicieux</p>
+        </div>
+    </div>
+
     <div class="controls">
         <input type="text" id="search" placeholder="Rechercher...">
-        <select id="theme-select" onchange="applyTheme(this.value)">
-            <option value="default">Moderne</option>
-            <option value="theme-xp">Windows XP</option>
-            <option value="theme-vista">Windows Vista</option>
+        <select id="sort">
+            <option value="nom">Nom (A-Z)</option>
+            <option value="score">Score</option>
+            <option value="sortie">Année</option>
         </select>
         <button onclick="randomAnime()">🎲 Aléatoire</button>
     </div>
@@ -46,57 +65,72 @@
     <script>
         let allAnimes = [];
 
-        function applyTheme(theme) {
-            const body = document.getElementById('main-body');
-            body.classList.remove('theme-xp', 'theme-vista');
-            if (theme !== 'default') {
-                body.classList.add(theme);
-                const d = new Date();
-                const imgNum = (d.getDate() % 25) + 1;
-                body.style.setProperty('--bg-day', `url('img/fond${imgNum}.jpg')`);
-            }
-            displayAnimes(allAnimes);
+        // --- SCRIPT FOND ALÉATOIRE ---
+        function setDailyBackground() {
+            const d = new Date();
+            // On crée un nombre basé sur la date du jour
+            const seed = d.getDate() + d.getMonth() + d.getFullYear();
+            const totalImages = 25;
+            const imgNum = (seed % totalImages) + 1; // Résultat entre 1 et 25
+            
+            document.getElementById('main-body').style.setProperty('--bg-day', `url('img/fond${imgNum}.jpg')`);
         }
 
         async function init() {
-            const response = await fetch('animes.csv');
-            const data = await response.text();
-            const rows = data.split('\n').slice(1);
-            allAnimes = rows.map(r => {
-                const c = r.split(';');
-                if (c.length < 5) return null;
-                return { nom: c[0].replace(/"/g,''), score: c[2], sortie: c[3], img: c[c.length-1].trim() };
-            }).filter(a => a);
-            displayAnimes(allAnimes);
+            setDailyBackground(); // Lance le fond aléatoire au démarrage
+            try {
+                const response = await fetch('animes.csv');
+                const rawData = await response.text();
+                const rows = rawData.split(/\r?\n/);
+                
+                allAnimes = rows.slice(1).map(line => {
+                    const c = line.split(';');
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    const nom = clean(c[0]);
+                    if (nom && nom.length > 1) {
+                        return {
+                            nom: nom,
+                            score: clean(c[2]) || "0",
+                            sortie: clean(c[3]) || "?",
+                            img: clean(c[8]) || clean(c[c.length - 1])
+                        };
+                    }
+                    return null;
+                }).filter(a => a !== null);
+
+                displayAnimes(allAnimes);
+            } catch (err) { console.error(err); }
         }
 
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
             container.innerHTML = "";
-            const isRetro = document.getElementById('theme-select').value !== 'default';
             list.forEach(a => {
                 const card = document.createElement('a');
                 card.className = 'card';
                 card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
                 card.innerHTML = `
-                    ${isRetro ? `<div class="win-title"><span>${a.nom.slice(0,15)}</span><span>_ □ X</span></div>` : ''}
-                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/240x260'">
+                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/220x280'">
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
-                        <div>⭐ ${a.score} | 📅 ${a.sortie}</div>
-                    </div>`;
+                        <div class="info-line"><span>Score :</span> <span>⭐ ${a.score}</span></div>
+                        <div class="info-line"><span>Année :</span> <span>${a.sortie}</span></div>
+                    </div>
+                `;
                 container.appendChild(card);
             });
         }
 
-        document.getElementById('search').addEventListener('input', e => {
+        document.getElementById('search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
         });
 
         function randomAnime() {
-            const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
-            window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+            if(allAnimes.length > 0) {
+                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
+                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+            }
         }
         init();
     </script>
