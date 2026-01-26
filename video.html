@@ -43,7 +43,7 @@
         <div id="video-content">Chargement de l'anime...</div>
 
         <div class="comment-section">
-            <div class="comment-header">Commentaire</div>
+            <div class="comment-header">Commentaires</div>
             <div id="auth-container" class="login-box">
                 <p>Tu dois te connecter pour commenter</p>
                 <button class="btn-google" id="btn-login">Se connecter avec Google</button>
@@ -59,7 +59,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",
@@ -79,6 +79,7 @@
         const animeName = new URLSearchParams(window.location.search).get('name');
         let currentUser = null;
 
+        // Connexion
         document.getElementById('btn-login').onclick = () => {
             signInWithPopup(auth, provider).catch(err => alert("Erreur : " + err.code));
         };
@@ -91,6 +92,7 @@
             }
         });
 
+        // Envoi de commentaire
         document.getElementById('btn-post').onclick = async () => {
             const text = document.getElementById('comment-input').value;
             if (!text.trim() || !animeName) return;
@@ -106,15 +108,21 @@
             } catch (e) { console.error("Erreur d'envoi:", e); }
         };
 
+        // Lecture des commentaires (Mode Test Simplifié)
         if (animeName) {
-            const q = query(collection(db, "commentaires"), where("anime", "==", animeName), orderBy("date", "desc"));
+            console.log("Tentative de lecture pour :", animeName);
+            const q = query(collection(db, "commentaires"), where("anime", "==", animeName));
+
             onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('comments-display');
+                console.log("Documents trouvés dans Firebase :", snapshot.size);
+                
                 container.innerHTML = "";
                 if (snapshot.empty) {
-                    container.innerHTML = "<p style='text-align:center;color:#ddd;'>Aucun commentaire pour le moment.</p>";
+                    container.innerHTML = `<p style='text-align:center;color:#ddd;'>Aucun commentaire pour "${animeName}".</p>`;
                     return;
                 }
+
                 snapshot.forEach((doc) => {
                     const d = doc.data();
                     const date = d.date ? new Date(d.date.seconds * 1000).toLocaleDateString() : "À l'instant";
@@ -128,6 +136,8 @@
                             </div>
                         </div>`;
                 });
+            }, (error) => {
+                console.error("Erreur Firebase :", error);
             });
         }
 
