@@ -8,7 +8,6 @@
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; --header-bg: rgba(15,15,15,0.95); }
         body.light-mode { --bg: #EAEAEA; --card-bg: #FFFFFF; --text: #2d3436; --header-bg: rgba(234, 234, 234, 0.95); }
         
-        /* Logique du fond d'écran aléatoire */
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background-color: var(--bg); 
@@ -19,7 +18,7 @@
             color: var(--text); 
             margin: 0; 
             padding: 20px; 
-            transition: 0.3s; 
+            transition: background-image 0.8s ease-in-out; /* Transition douce pour le fond */
         }
         
         .header-main { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto 20px auto; width: 100%; justify-content: space-between; }
@@ -88,11 +87,25 @@
         let allAnimes = [];
         document.getElementById('year').innerText = new Date().getFullYear();
 
-        function setDailyBackground() {
-            const d = new Date();
-            const seed = d.getDate() + d.getMonth() + d.getFullYear();
-            const imgNum = (seed % 25) + 1;
-            document.getElementById('main-body').style.setProperty('--bg-day', `url('img/fond${imgNum}.jpg')`);
+        // FONCTION AUTOMATIQUE SANS LIMITE
+        async function setRandomBackground() {
+            let count = 0;
+            let maxCheck = 100; // Il va tester jusqu'à 100 images maximum
+            
+            // Cette boucle compte combien d'images "fondX.jpg" existent réellement dans ton dossier img
+            for (let i = 1; i <= maxCheck; i++) {
+                try {
+                    const response = await fetch(`img/fond${i}.jpg`, { method: 'HEAD' });
+                    if (response.ok) count++;
+                    else break; // S'il ne trouve pas fond5.jpg, il s'arrête à 4
+                } catch (e) { break; }
+            }
+
+            // S'il a trouvé des images, il en choisit une au hasard
+            if (count > 0) {
+                const imgNum = Math.floor(Math.random() * count) + 1;
+                document.getElementById('main-body').style.setProperty('--bg-day', `url('img/fond${imgNum}.jpg')`);
+            }
         }
 
         function toggleTheme() {
@@ -102,7 +115,7 @@
         }
 
         async function init() {
-            setDailyBackground();
+            setRandomBackground(); // Appelé au démarrage
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
@@ -138,8 +151,6 @@
                 const card = document.createElement('a');
                 card.className = 'card';
                 card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
-                
-                // Ici on affiche TOUTES les infos demandées sur la carte
                 card.innerHTML = `
                     <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/220x280'">
                     <div class="card-info">
