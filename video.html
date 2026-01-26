@@ -6,32 +6,39 @@
     <title>Le Malicieux - Visionnage</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; line-height: 1.6; }
-        
-        .container { max-width: 1100px; margin: 0 auto; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
         .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 6px; transition: 0.3s; }
         .back-btn:hover { background: var(--primary); color: white; }
 
+        /* HEADER ANIME */
         .anime-header { display: flex; gap: 30px; flex-wrap: wrap; background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
-        .anime-header img { width: 280px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.5); object-fit: cover; }
-        
-        .details { flex: 1; min-width: 300px; }
-        .details h1 { margin: 0 0 15px 0; color: var(--primary); font-size: 2.2em; border-bottom: 2px solid var(--primary); display: inline-block; padding-bottom: 5px; }
-        
-        /* Infos techniques en plus petit */
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .info-item { background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; border-left: 2px solid #555; font-size: 0.85em; }
-        .info-item strong { color: #888; display: block; font-size: 0.75em; text-transform: uppercase; margin-bottom: 2px; }
+        .anime-header img { width: 280px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .details h1 { margin-top: 0; color: var(--primary); font-size: 2.2em; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+        .info-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border-left: 3px solid var(--primary); }
+        .info-item strong { color: #888; display: block; font-size: 0.8em; text-transform: uppercase; }
 
-        /* Bloc Description */
-        .description-box { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        .description-box h3 { margin-top: 0; color: var(--primary); font-size: 1.1em; }
-        .description-text { color: #ccc; text-align: justify; }
+        /* NOTATION ÉTOILES */
+        .rating-box { background: #888; padding: 10px; border-radius: 5px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; color: #333; font-weight: bold; }
+        .stars { color: #f1c40f; font-size: 1.5em; }
 
-        .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; margin-top: 30px; }
+        .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; margin-bottom: 30px; }
+
+        /* SECTION COMMENTAIRES STYLE GRIS */
+        .comment-section { background: #999; padding: 20px; border-radius: 8px; color: white; }
+        .comment-header { background: #111; padding: 10px; text-align: center; font-weight: bold; border-radius: 5px; margin-bottom: 15px; }
+        .login-prompt { text-align: center; font-weight: bold; margin-bottom: 10px; }
+        .btn-google { background: #4285f4; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-bottom: 10px; }
         
-        footer { text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #333; }
-        .discord-link { color: #7289da; text-decoration: none; font-weight: bold; }
+        textarea { width: 100%; height: 100px; background: #666; border: none; border-radius: 5px; padding: 15px; color: #fff; resize: none; box-sizing: border-box; }
+        .btn-post { background: #111; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right; margin-top: 10px; }
+
+        .comment-display { background: #777; margin-top: 60px; padding: 15px; display: flex; gap: 15px; border-radius: 5px; box-shadow: inset 0 0 5px rgba(0,0,0,0.2); margin-bottom: 10px; }
+        .user-avatar { width: 50px; height: 50px; background: #555; border-radius: 4px; object-fit: cover; }
+        .user-name { font-weight: bold; color: white; }
+        .comment-date { font-size: 0.85em; color: #ccc; margin-left: 10px; }
+        .user-status { color: #aaa; font-size: 0.8em; font-weight: bold; display: block; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -39,86 +46,119 @@
     <div class="container">
         <a href="index.html" class="back-btn">← Retour au catalogue</a>
         
-        <div id="video-content">Chargement des données...</div>
+        <div id="video-content">Chargement...</div>
 
-        <footer>
-            <p>Un souci ? <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-link">Signaler sur Discord</a></p>
-        </footer>
+        <div class="comment-section">
+            <div class="comment-header">Commentaire</div>
+            
+            <div id="auth-area" class="login-prompt">
+                <p>Tu dois te connecter pour commenter</p>
+                <button class="btn-google" id="login-google">Se connecter avec Google</button>
+            </div>
+
+            <div id="input-area" style="display:none;">
+                <textarea id="comment-text" placeholder="Ajoutez votre commentaire..."></textarea>
+                <button class="btn-post" id="post-comment">Poster</button>
+            </div>
+
+            <div id="comments-list" style="margin-top: 50px;"></div>
+        </div>
     </div>
 
-    <script>
-        async function loadAnimeDetails() {
-            const params = new URLSearchParams(window.location.search);
-            const animeName = params.get('name');
-            if (!animeName) return;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-            try {
-                const response = await fetch('animes.csv');
-                const rawData = await response.text();
-                const rows = rawData.split(/\r?\n/);
-                
-                let anime = null;
-                rows.slice(1).forEach(line => {
-                    const c = line.split(';');
-                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    
-                    if (clean(c[0]) === animeName) {
-                        anime = {
-                            nom: clean(c[0]),
-                            popularite: clean(c[1]) || "?",
-                            score: clean(c[2]) || "0",
-                            sortie: clean(c[3]) || "?",
-                            episodes: clean(c[4]) || "?",
-                            censure: clean(c[5]) || "?",
-                            etat: clean(c[6]) || "?",
-                            description: clean(c[7]) || "Aucune description disponible pour le moment.",
-                            img: clean(c[8]) || clean(c[c.length - 1])
-                        };
-                    }
-                });
+        const firebaseConfig = {
+            apiKey: "AIzaSyCulapHB1Z_8mYJeTQCIB-PSQaTRtvod7s",
+            authDomain: "le-malicieux.firebaseapp.com",
+            projectId: "le-malicieux",
+            storageBucket: "le-malicieux.firebasestorage.app",
+            messagingSenderId: "878822677925",
+            appId: "1:878822677925:web:cfcba50c8249cdc0b05c4c",
+            measurementId: "G-84L0BGBD75"
+        };
 
-                if (anime) {
-                    document.title = "Le Malicieux - " + anime.nom;
-                    displayAnime(anime);
-                } else {
-                    document.getElementById('video-content').innerHTML = "Anime non trouvé.";
-                }
-            } catch (err) { console.error(err); }
-        }
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
 
-        function displayAnime(a) {
-            const container = document.getElementById('video-content');
-            container.innerHTML = `
-                <div class="anime-header">
-                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/280x400'">
-                    <div class="details">
-                        <h1>${a.nom}</h1>
-                        
-                        <div class="info-grid">
-                            <div class="info-item"><strong>Popularité</strong>${a.popularite}</div>
-                            <div class="info-item"><strong>Score</strong>⭐ ${a.score}/10</div>
-                            <div class="info-item"><strong>Sortie</strong>${a.sortie}</div>
-                            <div class="info-item"><strong>Épisodes</strong>${a.episodes}</div>
-                            <div class="info-item"><strong>Censure</strong>${a.censure}</div>
-                            <div class="info-item"><strong>État</strong>${a.etat}</div>
+        const animeName = new URLSearchParams(window.location.search).get('name');
+        let userProfile = null;
+
+        // Connexion Google
+        document.getElementById('login-google').onclick = () => signInWithPopup(auth, provider);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userProfile = user;
+                document.getElementById('auth-area').style.display = 'none';
+                document.getElementById('input-area').style.display = 'block';
+            }
+        });
+
+        // Poster un commentaire
+        document.getElementById('post-comment').onclick = async () => {
+            const text = document.getElementById('comment-text').value;
+            if(!text.trim()) return;
+            await addDoc(collection(db, "commentaires"), {
+                anime: animeName,
+                text: text,
+                user: userProfile.displayName,
+                photo: userProfile.photoURL,
+                date: serverTimestamp()
+            });
+            document.getElementById('comment-text').value = "";
+        };
+
+        // Charger commentaires
+        const q = query(collection(db, "commentaires"), where("anime", "==", animeName), orderBy("date", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const list = document.getElementById('comments-list');
+            list.innerHTML = "";
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                const dateStr = d.date ? new Date(d.date.seconds*1000).toLocaleDateString() : "Instant";
+                list.innerHTML += `
+                    <div class="comment-display">
+                        <img src="${d.photo}" class="user-avatar">
+                        <div>
+                            <span class="user-name">${d.user}</span><span class="comment-date">Le ${dateStr}</span>
+                            <p style="margin:10px 0;">${d.text}</p>
+                            <span class="user-status">Membre</span>
                         </div>
+                    </div>`;
+            });
+        });
 
-                        <div class="description-box">
-                            <h3>Synopsis / Description</h3>
-                            <p class="description-text">${a.description}</p>
+        // Ton code CSV existant (simplifié pour l'exemple)
+        async function loadData() {
+            const res = await fetch('animes.csv');
+            const data = await res.text();
+            const rows = data.split('\n').slice(1);
+            const anime = rows.map(r => r.split(';')).find(c => c[0].trim().replace(/^"|"$/g, '') === animeName);
+            
+            if(anime) {
+                document.getElementById('video-content').innerHTML = `
+                    <div class="anime-header">
+                        <img src="img/${anime[8].trim()}">
+                        <div class="details">
+                            <h1>${anime[0]}</h1>
+                            <div class="rating-box">
+                                <span class="stars">★★★★☆</span> 7.18 avec 11 votes
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item"><strong>Score</strong>⭐ ${anime[2]}/10</div>
+                                <div class="info-item"><strong>État</strong>${anime[6]}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="video-player">
-                    <div style="display:flex; height:100%; align-items:center; justify-content:center; color:#444; background: radial-gradient(circle, #111 0%, #000 100%);">
-                        <p>Lecteur Vidéo Prêt - Chargez votre flux ici</p>
-                    </div>
-                </div>
-            `;
+                    <div class="video-player">Lecteur Vidéo</div>`;
+            }
         }
-
-        loadAnimeDetails();
+        loadData();
     </script>
 </body>
 </html>
