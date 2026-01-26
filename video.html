@@ -16,24 +16,23 @@
         .details { flex: 1; min-width: 300px; }
         .details h1 { margin-top: 0; color: var(--primary); font-size: 2.2em; }
         
-        /* Retour à la grille d'infos originale */
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
         .info-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border-left: 3px solid var(--primary); font-size: 0.9em; }
         .info-item strong { color: #888; display: block; font-size: 0.8em; text-transform: uppercase; }
 
-        /* Description en dessous */
-        .description-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid #333; margin-top: 15px; }
-        .description-box h3 { margin-top: 0; color: var(--primary); font-size: 1em; }
+        .synopsis { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid #333; margin-top: 15px; line-height: 1.5; }
 
         .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; margin-bottom: 30px; }
 
-        /* Style Commentaires */
+        /* Style Commentaires (Gris comme demandé) */
         .comment-section { background: #999; padding: 20px; border-radius: 8px; color: white; margin-top: 20px; }
         .comment-header { background: #111; padding: 10px; text-align: center; font-weight: bold; border-radius: 5px; margin-bottom: 15px; }
         .login-box { text-align: center; margin-bottom: 15px; }
         .btn-google { background: #4285F4; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
         #comment-form textarea { width: 100%; height: 80px; background: #666; border: none; border-radius: 5px; padding: 10px; color: white; margin-bottom: 10px; resize: none; box-sizing: border-box; }
-        #comment-form button { background: #111; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right; }
+        #comment-form button { background: #111; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right; font-weight: bold; }
+        
         .comment-list { margin-top: 50px; clear: both; }
         .comment-item { background: #777; padding: 15px; border-radius: 5px; display: flex; gap: 15px; margin-bottom: 10px; }
         .user-avatar { width: 45px; height: 45px; border-radius: 3px; }
@@ -64,6 +63,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Configuration corrigée selon ta capture image_af4daf.png
         const firebaseConfig = {
             apiKey: "AIzaSyCulapHB1Z_8mYJeTQCIB-PSQaTRtvod7s",
             authDomain: "le-malicieux.firebaseapp.com",
@@ -83,7 +83,9 @@
         let currentUser = null;
 
         document.getElementById('btn-login').onclick = () => {
-            signInWithPopup(auth, provider).catch(err => alert("Erreur de connexion : " + err.message));
+            signInWithPopup(auth, provider).catch(err => {
+                alert("Erreur : " + err.message);
+            });
         };
 
         onAuthStateChanged(auth, (user) => {
@@ -112,68 +114,61 @@
             const container = document.getElementById('comments-display');
             container.innerHTML = "";
             snapshot.forEach((doc) => {
-                const data = doc.data();
-                const date = data.date ? new Date(data.date.seconds * 1000).toLocaleDateString() : "Instant";
+                const d = doc.data();
+                const dateStr = d.date ? new Date(d.date.seconds * 1000).toLocaleDateString() : "Instant";
                 container.innerHTML += `
                     <div class="comment-item">
-                        <img src="${data.userPhoto}" class="user-avatar">
+                        <img src="${d.userPhoto}" class="user-avatar">
                         <div>
-                            <span style="font-weight:bold">${data.userName}</span> <span style="font-size:0.8em;color:#ccc">Le ${date}</span>
-                            <p style="margin:5px 0">${data.text}</p>
+                            <span style="font-weight:bold">${d.userName}</span> <span style="font-size:0.8em;color:#ccc">Le ${dateStr}</span>
+                            <p style="margin:5px 0">${d.text}</p>
                             <span style="font-size:0.7em;color:#bbb;font-weight:bold">MEMBRE</span>
                         </div>
                     </div>`;
             });
         });
 
-        async function loadAnimeDetails() {
+        async function loadData() {
             if (!animeName) return;
-            const response = await fetch('animes.csv');
-            const rawData = await response.text();
-            const rows = rawData.split(/\r?\n/);
-            let anime = null;
+            const res = await fetch('animes.csv');
+            const data = await res.text();
+            const rows = data.split(/\r?\n/);
+            let a = null;
+
             rows.slice(1).forEach(line => {
                 const c = line.split(';');
                 const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                 if (clean(c[0]) === animeName) {
-                    anime = {
-                        nom: clean(c[0]),
-                        popularite: clean(c[1]) || "?",
-                        score: clean(c[2]) || "0",
-                        sortie: clean(c[3]) || "?",
-                        episodes: clean(c[4]) || "?",
-                        censure: clean(c[5]) || "?",
-                        etat: clean(c[6]) || "?",
-                        desc: clean(c[7]) || "Pas de description.",
-                        img: clean(c[8]) || clean(c[c.length - 1])
+                    a = {
+                        nom: clean(c[0]), popularite: clean(c[1]), score: clean(c[2]),
+                        sortie: clean(c[3]), episodes: clean(c[4]), censure: clean(c[5]),
+                        etat: clean(c[6]), desc: clean(c[7]), img: clean(c[8])
                     };
                 }
             });
-            if (anime) {
+
+            if (a) {
                 document.getElementById('video-content').innerHTML = `
                     <div class="anime-header">
-                        <img src="img/${anime.img}" onerror="this.src='https://via.placeholder.com/280x400'">
+                        <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/280x400'">
                         <div class="details">
-                            <h1>${anime.nom}</h1>
+                            <h1>${a.nom}</h1>
                             <div class="info-grid">
-                                <div class="info-item"><strong>Popularité</strong>${anime.popularite}</div>
-                                <div class="info-item"><strong>Score</strong>⭐ ${anime.score}/10</div>
-                                <div class="info-item"><strong>Année</strong>${anime.sortie}</div>
-                                <div class="info-item"><strong>Épisodes</strong>${anime.episodes}</div>
-                                <div class="info-item"><strong>Censure</strong>${anime.censure}</div>
-                                <div class="info-item"><strong>État</strong>${anime.etat}</div>
+                                <div class="info-item"><strong>Popularité</strong>${a.popularite}</div>
+                                <div class="info-item"><strong>Score</strong>⭐ ${a.score}/10</div>
+                                <div class="info-item"><strong>Année</strong>${a.sortie}</div>
+                                <div class="info-item"><strong>Épisodes</strong>${a.episodes}</div>
+                                <div class="info-item"><strong>Censure</strong>${a.censure}</div>
+                                <div class="info-item"><strong>État</strong>${a.etat}</div>
                             </div>
-                            <div class="description-box">
-                                <h3>Synopsis</h3>
-                                <p>${anime.desc}</p>
-                            </div>
+                            <div class="synopsis"><h3>Synopsis</h3><p>${a.desc}</p></div>
                         </div>
                     </div>
                     <div class="video-player"><div style="display:flex;height:100%;align-items:center;justify-content:center;color:#555;">Lecteur Vidéo</div></div>
                 `;
             }
         }
-        loadAnimeDetails();
+        loadData();
     </script>
 </body>
 </html>
