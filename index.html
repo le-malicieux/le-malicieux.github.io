@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.8); }
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
         
         body { 
             font-family: 'Segoe UI', sans-serif; 
@@ -17,81 +17,56 @@
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: background-image 0.8s ease;
+            transition: background-image 0.5s ease;
         }
 
         /* Barre du haut style "image_128c3f.png" */
         .top-navbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            background: var(--nav-bg);
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; }
 
-        .nav-left { display: flex; align-items: center; gap: 15px; }
-        .nav-logo-small { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--primary); }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; margin: 0; }
-
-        .nav-center { display: flex; gap: 10px; align-items: center; flex-grow: 1; justify-content: center; max-width: 700px; }
+        .nav-center { display: flex; gap: 8px; align-items: center; }
         .nav-center input, .nav-center select, .nav-center button { 
-            background: rgba(0,0,0,0.5); border: 1px solid #444; color: white; padding: 7px 12px; border-radius: 6px; font-size: 0.9em; 
+            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; 
         }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; }
 
-        /* Section Centrale (Héros) pour voir le fond */
+        /* Section Héros avec Slogan lisible */
         .hero-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            min-height: 60vh; /* Espace pour voir le fond d'écran */
-            text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
+        }
+        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; }
+        .main-title { font-size: 2.8em; margin: 0; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
+        /* Slogan avec ombre portée pour visibilité maximale */
+        .main-slogan { 
+            font-size: 1.3em; font-weight: bold; margin-top: 10px; 
+            color: white; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 5px rgba(0,0,0,0.8); 
         }
 
-        .main-logo { width: 150px; height: 150px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        .main-title { font-size: 3em; margin: 0; color: white; letter-spacing: 1px; }
-        .main-slogan { font-size: 1.2em; opacity: 0.9; margin-top: 5px; color: #ccc; }
-
-        /* Grille d'animes abaissée et cartes rétrécies */
-        .content-area {
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 80%, transparent);
-            padding: 40px 20px;
-        }
-
+        /* Cartes réduites mais informatives */
+        .content-area { background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent); padding: 40px 10px; }
         .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Cartes plus petites */
-            gap: 20px; 
-            max-width: 1400px; 
-            margin: 0 auto; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
+            gap: 15px; max-width: 1300px; margin: 0 auto; 
         }
-
         .card { 
-            background: var(--card-bg); 
-            border-radius: 10px; 
-            overflow: hidden; 
-            transition: 0.3s; 
-            border: 1px solid #333; 
-            text-decoration: none; 
-            color: inherit; 
-            font-size: 0.8em;
+            background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; 
+            border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em;
         }
-        .card:hover { transform: translateY(-10px); border-color: var(--primary); }
-        .card img { width: 100%; height: 240px; object-fit: cover; }
-        .card-info { padding: 10px; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.5em; overflow: hidden; }
-        
-        .discord-btn { background: #7289da; color: white; text-decoration: none; padding: 7px 15px; border-radius: 6px; font-weight: bold; }
+        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
+        .card img { width: 100%; height: 230px; object-fit: cover; }
+        .card-info { padding: 8px; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.1em; }
+        .card-meta { color: #bbb; line-height: 1.4; }
+        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 1px 4px; border-radius: 3px; font-size: 0.85em; }
+
+        .discord-btn { background: #7289da; color: white; text-decoration: none; padding: 6px 12px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
     </style>
 </head>
 <body id="main-body">
@@ -101,19 +76,21 @@
             <img src="img/logo.jpg" class="nav-logo-small">
             <span class="nav-title">Le Malicieux</span>
         </div>
-        
         <div class="nav-center">
-            <input type="text" id="search" placeholder="Rechercher un anime...">
+            <input type="text" id="search" placeholder="Recherche...">
             <select id="sort">
                 <option value="">Trier par...</option>
                 <option value="nom">Nom (A-Z)</option>
+                <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
                 <option value="sortie">Année</option>
+                <option value="episodes">Épisodes</option>
+                <option value="censure">Censure</option>
+                <option value="etat">État</option>
             </select>
-            <button onclick="toggleTheme()" class="btn-red">🌓 Mode Clair</button>
-            <button onclick="randomAnime()" class="btn-red">🎲 Aléatoire</button>
+            <button onclick="toggleTheme()" class="btn-red">🌓 Mode</button>
+            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
-
         <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
     </div>
 
@@ -130,23 +107,23 @@
     <script>
         let allAnimes = [];
 
-        // Logique de fond aléatoire multi-format
+        // Fix écran noir : On lance l'image de secours immédiatement
+        document.getElementById('main-body').style.setProperty('--bg-day', `url('img/fond1.jpg')`);
+
         async function setRandomBackground() {
-            const extensions = ['jpg', 'png', 'jpeg', 'webp'];
+            const extensions = ['jpg', 'png', 'webp'];
             let foundFiles = [];
-            for (let i = 1; i <= 50; i++) {
+            // Limitation à 30 pour la rapidité
+            for (let i = 1; i <= 30; i++) {
                 let foundAny = false;
                 for (let ext of extensions) {
-                    try {
-                        const response = await fetch(`img/fond${i}.${ext}`, { method: 'HEAD' });
-                        if (response.ok) {
-                            foundFiles.push(`fond${i}.${ext}`);
-                            foundAny = true;
-                            break; 
-                        }
-                    } catch (e) {}
+                    const response = await fetch(`img/fond${i}.${ext}`, { method: 'HEAD' });
+                    if (response.ok) {
+                        foundFiles.push(`fond${i}.${ext}`);
+                        foundAny = true; break; 
+                    }
                 }
-                if (!foundAny) break; 
+                if (!foundAny && i > 5) break; 
             }
             if (foundFiles.length > 0) {
                 const randomImg = foundFiles[Math.floor(Math.random() * foundFiles.length)];
@@ -166,14 +143,14 @@
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                     if (clean(c[0])) {
                         allAnimes.push({
-                            nom: clean(c[0]),
-                            score: clean(c[2]) || "0",
-                            img: clean(c[8]) || "placeholder.jpg"
+                            nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]),
+                            sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]),
+                            etat: clean(c[6]), img: clean(c[8])
                         });
                     }
                 });
                 displayAnimes(allAnimes);
-            } catch (err) { console.error(err); }
+            } catch (err) {}
         }
 
         function displayAnimes(list) {
@@ -184,27 +161,36 @@
                 card.className = 'card';
                 card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
                 card.innerHTML = `
-                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/180x240'">
+                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/170x230'">
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
-                        <div style="color:#aaa">⭐ ${a.score}/10</div>
+                        <div class="card-meta">
+                            <span>📅 ${a.sortie}</span> • <span>📺 ${a.ep} ep</span><br>
+                            <span class="tag">${a.censure}</span> • ⭐ ${a.score}
+                        </div>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // Recherche et Tri
+        // Triage complet
+        document.getElementById('sort').addEventListener('change', (e) => {
+            let sorted = [...allAnimes];
+            const m = e.target.value;
+            if (m === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
+            if (m === "score") sorted.sort((a,b) => b.score - a.score);
+            if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
+            if (m === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
+            if (m === "episodes") sorted.sort((a,b) => parseInt(b.ep) - parseInt(a.ep));
+            if (m === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
+            if (m === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
+            displayAnimes(sorted);
+        });
+
         document.getElementById('search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
-        });
-
-        document.getElementById('sort').addEventListener('change', (e) => {
-            let sorted = [...allAnimes];
-            if(e.target.value === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            if(e.target.value === "score") sorted.sort((a,b) => b.score - a.score);
-            displayAnimes(sorted);
         });
 
         function randomAnime() {
@@ -212,9 +198,7 @@
             if(a) window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
         }
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-        }
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
 
         init();
     </script>
