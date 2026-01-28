@@ -23,7 +23,14 @@
         .synopsis { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid #333; margin-top: 15px; line-height: 1.5; font-size: 0.95em; }
         .synopsis h3 { margin-top: 0; color: var(--primary); font-size: 1.1em; }
 
+        /* NOUVEAU : Style pour la grille d'épisodes */
+        .episodes-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; justify-content: center; }
+        .ep-btn { background: #222; border: 1px solid #444; color: white; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .ep-btn:hover { background: var(--primary); border-color: var(--primary); }
+        .ep-btn.active { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
+
         .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; margin-bottom: 30px; }
+        .video-player iframe { width: 100%; height: 100%; border: none; }
 
         .comment-section { background: #999; padding: 20px; border-radius: 8px; color: white; margin-top: 20px; }
         .comment-header { background: #111; padding: 10px; text-align: center; font-weight: bold; border-radius: 5px; margin-bottom: 15px; }
@@ -41,6 +48,12 @@
     <div class="container">
         <a href="index.html" class="back-btn">← Retour au catalogue</a>
         <div id="video-content">Chargement de l'anime...</div>
+
+        <div class="episodes-grid" id="episodes-list"></div>
+
+        <div id="player-container" class="video-player" style="display:none;">
+            <iframe id="main-iframe" src="" allowfullscreen></iframe>
+        </div>
 
         <div class="comment-section">
             <div class="comment-header">Commentaires</div>
@@ -79,7 +92,6 @@
         const animeName = new URLSearchParams(window.location.search).get('name');
         let currentUser = null;
 
-        // Connexion
         document.getElementById('btn-login').onclick = () => {
             signInWithPopup(auth, provider).catch(err => alert("Erreur : " + err.code));
         };
@@ -92,7 +104,6 @@
             }
         });
 
-        // Envoi de commentaire
         document.getElementById('btn-post').onclick = async () => {
             const text = document.getElementById('comment-input').value;
             if (!text.trim() || !animeName) return;
@@ -108,21 +119,15 @@
             } catch (e) { console.error("Erreur d'envoi:", e); }
         };
 
-        // Lecture des commentaires (Mode Test Simplifié)
         if (animeName) {
-            console.log("Tentative de lecture pour :", animeName);
             const q = query(collection(db, "commentaires"), where("anime", "==", animeName));
-
             onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('comments-display');
-                console.log("Documents trouvés dans Firebase :", snapshot.size);
-                
                 container.innerHTML = "";
                 if (snapshot.empty) {
                     container.innerHTML = `<p style='text-align:center;color:#ddd;'>Aucun commentaire pour "${animeName}".</p>`;
                     return;
                 }
-
                 snapshot.forEach((doc) => {
                     const d = doc.data();
                     const date = d.date ? new Date(d.date.seconds * 1000).toLocaleDateString() : "À l'instant";
@@ -136,8 +141,6 @@
                             </div>
                         </div>`;
                 });
-            }, (error) => {
-                console.error("Erreur Firebase :", error);
             });
         }
 
@@ -148,17 +151,23 @@
                 const data = await response.text();
                 const rows = data.split(/\r?\n/);
                 let anime = null;
+                
                 rows.slice(1).forEach(line => {
                     const c = line.split(';');
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                     if (clean(c[0]) === animeName) {
+                        // NOUVEAU : On récupère tous les liens d'épisodes après l'image (index 9 et +)
+                        const links = c.slice(9).map(l => clean(l)).filter(l => l.length > 5);
+                        
                         anime = {
                             nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), 
-                            sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), 
-                            etat: clean(c[6]), desc: clean(c[7]), img: clean(c[8])
+                            sortie: clean(c[3]), epCount: clean(c[4]), censure: clean(c[5]), 
+                            etat: clean(c[6]), desc: clean(c[7]), img: clean(c[8]),
+                            episodes: links
                         };
                     }
                 });
+
                 if (anime) {
                     document.getElementById('video-content').innerHTML = `
                         <div class="anime-header">
@@ -169,14 +178,39 @@
                                     <div class="info-item"><strong>Popularité</strong>${anime.pop}</div>
                                     <div class="info-item"><strong>Score</strong>⭐ ${anime.score}/10</div>
                                     <div class="info-item"><strong>Année</strong>${anime.sortie}</div>
-                                    <div class="info-item"><strong>Épisodes</strong>${anime.ep}</div>
+                                    <div class="info-item"><strong>Épisodes</strong>${anime.epCount}</div>
                                     <div class="info-item"><strong>Censure</strong>${anime.censure}</div>
                                     <div class="info-item"><strong>État</strong>${anime.etat}</div>
                                 </div>
                                 <div class="synopsis"><h3>Synopsis</h3><p>${anime.desc}</p></div>
                             </div>
-                        </div>
-                        <div class="video-player"></div>`;
+                        </div>`;
+
+                    // NOUVEAU : Génération des boutons d'épisodes
+                    const epContainer = document.getElementById('episodes-list');
+                    const iframe = document.getElementById('main-iframe');
+                    const playerBox = document.getElementById('player-container');
+
+                    if (anime.episodes.length > 0) {
+                        playerBox.style.display = "block";
+                        anime.episodes.forEach((link, index) => {
+                            const btn = document.createElement('button');
+                            btn.className = 'ep-btn';
+                            btn.innerText = `ÉPISODE ${index + 1}`;
+                            btn.onclick = () => {
+                                iframe.src = link;
+                                document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active'));
+                                btn.classList.add('active');
+                            };
+                            epContainer.appendChild(btn);
+                            
+                            // Charger le premier épisode par défaut
+                            if (index === 0) {
+                                iframe.src = link;
+                                btn.classList.add('active');
+                            }
+                        });
+                    }
                 }
             } catch (err) { console.error(err); }
         }
