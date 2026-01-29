@@ -34,22 +34,20 @@
         .hero-section { height: 40vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; max-width: 1300px; margin: 0 auto; padding: 20px; }
         
-        /* STYLE DU BADGE TRES VISIBLE */
         .card { position: relative; background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em; transition: 0.3s; }
         .card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .card img { width: 100%; height: 230px; object-fit: cover; }
+        .card img { width: 100%; height: 230px; object-fit: cover; display: block; }
         
+        /* BADGE BLANC SUR ROUGE EN HAUT A GAUCHE */
         .status-badge {
-            position: absolute; top: 12px; left: -25px;
-            padding: 5px 30px; transform: rotate(-45deg);
-            font-size: 10px; font-weight: bold; color: white;
-            z-index: 10; text-transform: uppercase; text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            width: 100px;
+            position: absolute; top: 10px; left: 10px;
+            background: #ff0000; color: #fff;
+            padding: 4px 8px; font-weight: 900;
+            font-size: 11px; border-radius: 3px;
+            z-index: 20; text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+            border: 1px solid white;
         }
-        .status-badge.completed { background: #2ecc71; } 
-        .status-badge.waiting { background: #f1c40f; color: #000; } 
-        .status-badge.watching { background: #3498db; }
 
         .card-info { padding: 8px; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; }
@@ -90,19 +88,16 @@
         let allAnimes = [];
         let userPlaylist = {};
 
-        // Récupération des statuts Firebase
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
-                onSnapshot(q, (snapshot) => {
+                onSnapshot(query(collection(db, "playlists"), where("uid", "==", user.uid)), (snap) => {
                     userPlaylist = {};
-                    snapshot.forEach(doc => { userPlaylist[doc.data().anime] = doc.data().status; });
+                    snap.forEach(doc => { userPlaylist[doc.data().anime] = doc.data().status; });
                     displayAnimes(allAnimes);
                 });
             }
         });
 
-        // Système de fond d'écran d'origine
         async function setRandomBackground() {
             document.body.style.backgroundImage = "url('img/fond1.jpg')";
             const extensions = ['jpg', 'png', 'webp'];
@@ -143,8 +138,10 @@
                 const status = userPlaylist[a.nom] || "none";
                 let badge = "";
                 if(status !== "none") {
-                    const label = status === 'completed' ? 'Vu' : (status === 'waiting' ? 'Attente' : 'En cours');
-                    badge = `<div class="status-badge ${status}">${label}</div>`;
+                    let label = "VU";
+                    if(status === 'waiting') label = "ATTENTE";
+                    if(status === 'watching') label = "EN COURS";
+                    badge = `<div class="status-badge">${label}</div>`;
                 }
 
                 container.innerHTML += `
