@@ -7,19 +7,19 @@
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; max-width: 1200px; margin: 0 auto; }
-        .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid #333; text-decoration: none; color: inherit; position: relative; }
+        .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid #333; text-decoration: none; color: inherit; position: relative; padding-bottom: 10px; }
         .card img { width: 100%; height: 230px; object-fit: cover; }
         .status-tag { position: absolute; top: 8px; left: 8px; background: var(--primary); padding: 3px 7px; border-radius: 4px; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <a href="index.html" style="color:var(--primary); text-decoration:none; font-weight:bold;">← Retour Accueil</a>
-    <h1 style="text-align:center; color:var(--primary);">Ma Playlist</h1>
+    <a href="index.html" style="color:var(--primary); text-decoration:none; font-weight:bold;">← Accueil</a>
+    <h1 style="text-align:center;">Ma Playlist</h1>
     
     <div style="text-align:center; margin-bottom:20px;">
-        <select id="sort-playlist" onchange="render()" style="padding:10px; background:#222; color:white; border-radius:5px;">
+        <select id="sort-p" onchange="render()" style="padding:10px; background:#1a1a1a; color:white; border:1px solid #444;">
             <option value="nom">Nom A-Z</option>
-            <option value="note">Meilleures Notes</option>
+            <option value="note">Note /10</option>
         </select>
     </div>
 
@@ -40,6 +40,7 @@
             if (user) {
                 const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
                 const snap = await getDocs(q);
+                items = [];
                 snap.forEach(d => items.push(d.data()));
                 render();
             } else { window.location.href = "index.html"; }
@@ -47,14 +48,14 @@
 
         window.render = () => {
             const container = document.getElementById('playlist-grid');
-            const sort = document.getElementById('sort-playlist').value;
+            const sort = document.getElementById('sort-p').value;
             if(sort === "note") items.sort((a,b) => b.rating - a.rating);
             else items.sort((a,b) => a.anime.localeCompare(b.anime));
 
             container.innerHTML = "";
             items.forEach(a => {
                 if(a.status === 'none') return;
-                container.innerHTML += `<a href="video.html?name=${encodeURIComponent(a.anime)}" class="card"><div class="status-tag">${a.status.toUpperCase()}</div><img src="img/${a.anime}.jpg"><div style="padding:10px;"><strong>${a.anime}</strong><br><span style="color:#f1c40f;">${a.rating}/10 ★</span></div></a>`;
+                container.innerHTML += `<a href="video.html?name=${encodeURIComponent(a.anime)}" class="card"><div class="status-tag">${a.status.toUpperCase()}</div><img src="img/${a.anime}.jpg" onerror="this.src='https://via.placeholder.com/170x230'"><div style="padding:10px;"><strong>${a.anime}</strong><br><span style="color:#f1c40f;">${a.rating || 0}/10 ★</span></div></a>`;
             });
         };
     </script>
