@@ -10,12 +10,15 @@
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background-color: var(--bg); 
+            /* Définit fond1 par défaut immédiatement pour éviter le noir */
+            background-image: url('img/fond1.jpg');
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
+            transition: background-image 0.5s ease;
         }
 
         .top-navbar {
@@ -94,12 +97,14 @@
     <script>
         let allAnimes = [];
 
-        // SYSTÈME DE FOND D'ÉCRAN RÉCUPÉRÉ ET ADAPTÉ
         async function setRandomBackground() {
+            // Étape 1 : On définit tout de suite le fond1 pour remplacer le noir pendant les tests
+            document.body.style.backgroundImage = "url('img/fond1.jpg')";
+
             const extensions = ['jpg', 'png', 'webp'];
             let foundFiles = [];
             
-            // On scanne de 1 à 30 comme dans ton ancien fichier
+            // Étape 2 : On cherche les fichiers disponibles (jusqu'à 30)
             for (let i = 1; i <= 30; i++) {
                 let foundAny = false;
                 for (let ext of extensions) {
@@ -112,21 +117,18 @@
                         }
                     } catch(e) {}
                 }
-                // Si on ne trouve plus rien après le 5ème, on arrête pour gagner du temps
                 if (!foundAny && i > 5) break; 
             }
 
+            // Étape 3 : Si on a trouvé d'autres fonds, on en choisit un au hasard
             if (foundFiles.length > 0) {
                 const randomImg = foundFiles[Math.floor(Math.random() * foundFiles.length)];
                 document.body.style.backgroundImage = `url('img/${randomImg}')`;
-            } else {
-                // Fond par défaut si rien n'est trouvé
-                document.body.style.backgroundImage = "url('img/fond1.jpg')";
             }
         }
 
         async function init() {
-            setRandomBackground(); // Appel du système de fond
+            setRandomBackground();
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
@@ -170,7 +172,6 @@
             });
         }
 
-        // Système de tri
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const m = e.target.value;
