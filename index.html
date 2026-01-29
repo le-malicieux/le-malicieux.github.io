@@ -1,251 +1,85 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Malicieux - Catalogue d'Animes</title>
-    <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
-        
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: var(--bg); 
-            background-image: var(--bg-day); 
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            color: var(--text); 
-            margin: 0; 
-            min-height: 100vh;
-            transition: background-image 0.5s ease;
-        }
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, query, where, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        .top-navbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .nav-left { display: flex; align-items: center; gap: 12px; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; }
+    const firebaseConfig = {
+        apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",
+        authDomain: "le-malicieux-v2.firebaseapp.com",
+        projectId: "le-malicieux-v2",
+        storageBucket: "le-malicieux-v2.firebasestorage.app",
+        messagingSenderId: "938147445933",
+        appId: "1:938147445933:web:86f9c65ee0737e66a9da24"
+    };
 
-        .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .nav-center button, .btn-nav { 
-            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
-        }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        .hero-section {
-            height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 20px;
-        }
-        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; }
-        .main-title { font-size: 2.8em; margin: 0; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
-        .main-slogan { 
-            font-size: 1.3em; font-weight: bold; margin-top: 10px; 
-            color: white; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 5px rgba(0,0,0,0.8); 
-        }
+    let allAnimes = [];
+    let userPlaylist = {};
 
-        .content-area { background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent); padding: 40px 10px; }
-        .grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
-            gap: 15px; max-width: 1300px; margin: 0 auto; 
-        }
-        .card { 
-            background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; 
-            border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em;
-            position: relative;
-        }
-        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
-        .card img { width: 100%; height: 230px; object-fit: cover; }
-        .card-info { padding: 8px; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.1em; }
-        .card-meta { color: #bbb; line-height: 1.4; }
-        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 1px 4px; border-radius: 3px; font-size: 0.85em; }
+    document.getElementById('main-body').style.setProperty('--bg-day', `url('img/fond1.jpg')`);
 
-        .status-badge {
-            position: absolute; top: 8px; left: 8px; background: var(--primary); color: white; 
-            padding: 3px 7px; border-radius: 4px; font-size: 10px; font-weight: bold; 
-            z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .discord-btn { background: #7289da; color: white; text-decoration: none; padding: 6px 12px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
-    </style>
-</head>
-<body id="main-body">
-
-    <div class="top-navbar">
-        <div class="nav-left">
-            <img src="img/logo.jpg" class="nav-logo-small">
-            <span class="nav-title">Le Malicieux</span>
-        </div>
-        <div class="nav-center">
-            <input type="text" id="search" placeholder="Recherche...">
-            <select id="sort">
-                <option value="">Trier par...</option>
-                <option value="nom">Nom (A-Z)</option>
-                <option value="popularite">Popularité</option>
-                <option value="score">Score</option>
-                <option value="sortie">Année</option>
-                <option value="episodes">Épisodes</option>
-                <option value="censure">Censure</option>
-                <option value="etat">État</option>
-            </select>
-            <a href="playlist.html" class="btn-red btn-nav">📂 Ma Playlist</a>
-            <button onclick="toggleTheme()" class="btn-red">🌓 Mode</button>
-            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
-        </div>
-        <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
-    </div>
-
-    <div class="hero-section">
-        <img src="img/logo.jpg" class="main-logo">
-        <h1 class="main-title">le-malicieux.github.io</h1>
-        <p class="main-slogan">Catalogue d'animes malicieux</p>
-    </div>
-
-    <div class="content-area">
-        <div id="anime-container" class="grid"></div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",
-            authDomain: "le-malicieux-v2.firebaseapp.com",
-            projectId: "le-malicieux-v2",
-            storageBucket: "le-malicieux-v2.firebasestorage.app",
-            messagingSenderId: "938147445933",
-            appId: "1:938147445933:web:86f9c65ee0737e66a9da24"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let allAnimes = [];
-        let userPlaylist = {};
-
-        // Fix écran noir
-        document.getElementById('main-body').style.setProperty('--bg-day', `url('img/fond1.jpg')`);
-
-        // Surveillance de l'utilisateur pour les badges de playlist
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
-                onSnapshot(q, (snapshot) => {
-                    userPlaylist = {};
-                    snapshot.forEach(doc => {
-                        const d = doc.data();
-                        userPlaylist[d.anime] = d;
-                    });
-                    displayAnimes(allAnimes);
-                });
-            }
-        });
-
-        async function setRandomBackground() {
-            const extensions = ['jpg', 'png', 'webp'];
-            let foundFiles = [];
-            for (let i = 1; i <= 30; i++) {
-                let foundAny = false;
-                for (let ext of extensions) {
-                    const response = await fetch(`img/fond${i}.${ext}`, { method: 'HEAD' });
-                    if (response.ok) {
-                        foundFiles.push(`fond${i}.${ext}`);
-                        foundAny = true; break; 
-                    }
-                }
-                if (!foundAny && i > 5) break; 
-            }
-            if (foundFiles.length > 0) {
-                const randomImg = foundFiles[Math.floor(Math.random() * foundFiles.length)];
-                document.getElementById('main-body').style.setProperty('--bg-day', `url('img/${randomImg}')`);
-            }
-        }
-
-        async function init() {
-            setRandomBackground();
-            try {
-                const response = await fetch('animes.csv');
-                const rawData = await response.text();
-                const rows = rawData.split(/\r?\n/);
-                allAnimes = [];
-                rows.slice(1).forEach(line => {
-                    const c = line.split(';');
-                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    if (clean(c[0])) {
-                        allAnimes.push({
-                            nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]),
-                            sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]),
-                            etat: clean(c[6]), img: clean(c[8])
-                        });
-                    }
-                });
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
+            onSnapshot(q, (snapshot) => {
+                userPlaylist = {};
+                snapshot.forEach(doc => { userPlaylist[doc.data().anime] = doc.data(); });
                 displayAnimes(allAnimes);
-            } catch (err) {}
-        }
-
-        function displayAnimes(list) {
-            const container = document.getElementById('anime-container');
-            container.innerHTML = "";
-            list.forEach(a => {
-                const userData = userPlaylist[a.nom] || {};
-                const statusBadge = userData.status && userData.status !== 'none' 
-                    ? `<div class="status-badge">${userData.status.toUpperCase()}</div>` 
-                    : "";
-                const userStars = userData.rating 
-                    ? `<div style="color:#f1c40f; font-size:12px; margin-top:3px;">${"★".repeat(userData.rating)}${"☆".repeat(5-userData.rating)}</div>` 
-                    : "";
-
-                const card = document.createElement('a');
-                card.className = 'card';
-                card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
-                card.innerHTML = `
-                    ${statusBadge}
-                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/170x230'">
-                    <div class="card-info">
-                        <div class="card-title">${a.nom}</div>
-                        <div class="card-meta">
-                            <span>📅 ${a.sortie}</span> • <span>📺 ${a.ep} ep</span><br>
-                            <span class="tag">${a.censure}</span> • ⭐ ${a.score}
-                            ${userStars}
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
             });
         }
+    });
 
-        document.getElementById('sort').addEventListener('change', (e) => {
-            let sorted = [...allAnimes];
-            const m = e.target.value;
-            if (m === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            if (m === "score") sorted.sort((a,b) => b.score - a.score);
-            if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
-            if (m === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
-            if (m === "episodes") sorted.sort((a,b) => parseInt(b.ep) - parseInt(a.ep));
-            if (m === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
-            if (m === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
-            displayAnimes(sorted);
-        });
-
-        document.getElementById('search').addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
-        });
-
-        window.randomAnime = function() {
-            const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
-            if(a) window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+    // Fonction de mise à jour / Ajout / Suppression
+    window.updateAnime = async function(name, status, rating) {
+        const user = auth.currentUser;
+        if (!user) return alert("Connectez-vous pour gérer votre playlist !");
+        const docRef = doc(db, "playlists", `${user.uid}_${name}`);
+        if (status === 'none') {
+            await deleteDoc(docRef);
+        } else {
+            await setDoc(docRef, {
+                uid: user.uid, anime: name, status: status,
+                rating: parseInt(rating) || 0, updatedAt: serverTimestamp()
+            });
         }
+    };
 
-        window.toggleTheme = function() { document.body.classList.toggle('light-mode'); }
+    // (Gardez vos fonctions init() et setRandomBackground() identiques)
 
-        init();
-    </script>
-</body>
-</html>
+    function displayAnimes(list) {
+        const container = document.getElementById('anime-container');
+        container.innerHTML = "";
+        list.forEach(a => {
+            const userData = userPlaylist[a.nom] || { status: 'none', rating: 0 };
+            const statusBadge = userData.status !== 'none' ? `<div class="status-badge">${userData.status.toUpperCase()}</div>` : "";
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                ${statusBadge}
+                <a href="video.html?name=${encodeURIComponent(a.nom)}">
+                    <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/170x230'">
+                </a>
+                <div class="card-info">
+                    <div class="card-title">${a.nom}</div>
+                    <select onchange="updateAnime('${a.nom}', this.value, ${userData.rating})" style="width:100%; font-size:10px; background:#111; color:white; border:1px solid #444; margin-top:5px;">
+                        <option value="none" ${userData.status === 'none' ? 'selected' : ''}>➕ Ajouter/Modifier</option>
+                        <option value="en-attente" ${userData.status === 'en-attente' ? 'selected' : ''}>⏳ En attente</option>
+                        <option value="vu" ${userData.status === 'vu' ? 'selected' : ''}>✅ Vu</option>
+                        <option value="pas-vu" ${userData.status === 'pas-vu' ? 'selected' : ''}>❌ Pas vu</option>
+                    </select>
+                    <div style="display:flex; align-items:center; gap:5px; margin-top:5px; font-size:10px;">
+                        Note: <input type="number" min="0" max="10" value="${userData.rating}" 
+                        onchange="updateAnime('${a.nom}', '${userData.status}', this.value)" 
+                        style="width:30px; background:#111; color:white; border:1px solid #444;"> <span style="color:#f1c40f;">★</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+    // ... reste du script (sort, search, toggleTheme)
+</script>
