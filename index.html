@@ -120,7 +120,6 @@
         let allAnimes = [];
         let userPlaylist = {};
 
-        // Écoute des changements de statut en temps réel
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
@@ -174,20 +173,18 @@
             container.innerHTML = "";
             list.forEach(a => {
                 const status = userPlaylist[a.nom] || "none";
-                let badge = "";
+                let badgeHtml = "";
                 
-                // Logique de badge simplifiée pour éviter les erreurs d'affichage
+                // Correction directe du texte des badges
                 if (status === 'completed') {
-                    badge = `<div class="status-badge">VU</div>`;
+                    badgeHtml = `<div class="status-badge">VU</div>`;
                 } else if (status === 'waiting') {
-                    badge = `<div class="status-badge">EN ATTENTE</div>`;
-                } else if (status === 'watching') {
-                    badge = `<div class="status-badge">EN COURS</div>`;
+                    badgeHtml = `<div class="status-badge">EN ATTENTE</div>`;
                 }
 
                 container.innerHTML += `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
-                        ${badge}
+                        ${badgeHtml}
                         <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/170x230'">
                         <div class="card-info">
                             <div class="card-title">${a.nom}</div>
