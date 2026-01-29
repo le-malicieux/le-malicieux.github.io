@@ -25,20 +25,36 @@
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; }
+
         .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .btn-red { 
+        .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
             background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
         }
-        .btn-red { background: var(--primary); border: none; font-weight: bold; cursor: pointer; }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
-        .hero-section { height: 40vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; max-width: 1300px; margin: 0 auto; padding: 20px; }
+        .hero-section {
+            height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
+        }
+        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; }
+        .main-title { font-size: 2.8em; margin: 0; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
+        .main-slogan { font-size: 1.3em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
+
+        .content-area { background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent); padding: 40px 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; max-width: 1300px; margin: 0 auto; }
         
-        .card { position: relative; background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em; transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .card img { width: 100%; height: 230px; object-fit: cover; display: block; }
-        
-        /* BADGE BLANC SUR ROUGE EN HAUT A GAUCHE */
+        .card { 
+            position: relative;
+            background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; 
+            border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em;
+        }
+        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
+        .card img { width: 100%; height: 230px; object-fit: cover; }
+
+        /* BADGE VISIBLE BLANC SUR ROUGE */
         .status-badge {
             position: absolute; top: 10px; left: 10px;
             background: #ff0000; color: #fff;
@@ -50,30 +66,46 @@
         }
 
         .card-info { padding: 8px; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.1em; }
+        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 1px 4px; border-radius: 3px; }
+        
+        .discord-btn { background: #7289da; color: white; text-decoration: none; padding: 6px 12px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
     </style>
 </head>
 <body>
+
     <div class="top-navbar">
-        <div style="font-weight:bold;color:var(--primary);">Le Malicieux</div>
+        <div class="nav-left">
+            <img src="img/logo.jpg" class="nav-logo-small">
+            <span class="nav-title">Le Malicieux</span>
+        </div>
         <div class="nav-center">
             <input type="text" id="search" placeholder="Recherche...">
             <select id="sort">
-                <option value="nom">Nom</option>
+                <option value="">Trier par...</option>
+                <option value="nom">Nom (A-Z)</option>
+                <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
                 <option value="sortie">Année</option>
+                <option value="episodes">Épisodes</option>
+                <option value="censure">Censure</option>
+                <option value="etat">État</option>
             </select>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
+        <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
     </div>
 
     <div class="hero-section">
-        <h1>le-malicieux.github.io</h1>
-        <p>Catalogue d'animes malicieux</p>
+        <img src="img/logo.jpg" class="main-logo">
+        <h1 class="main-title">le-malicieux.github.io</h1>
+        <p class="main-slogan">Catalogue d'animes malicieux</p>
     </div>
 
-    <div id="anime-container" class="grid"></div>
+    <div class="content-area">
+        <div id="anime-container" class="grid"></div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -120,15 +152,17 @@
 
         async function init() {
             setRandomBackground();
-            const response = await fetch('animes.csv');
-            const rawData = await response.text();
-            allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
-                const c = line.split(';');
-                const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                if (!c[0]) return null;
-                return { nom: clean(c[0]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), img: clean(c[8]) };
-            }).filter(a => a !== null);
-            displayAnimes(allAnimes);
+            try {
+                const response = await fetch('animes.csv');
+                const rawData = await response.text();
+                allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
+                    const c = line.split(';');
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    if (!c[0] || c.length < 9) return null;
+                    return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), img: clean(c[8]) };
+                }).filter(a => a !== null);
+                displayAnimes(allAnimes);
+            } catch (err) { console.error(err); }
         }
 
         function displayAnimes(list) {
@@ -138,19 +172,19 @@
                 const status = userPlaylist[a.nom] || "none";
                 let badge = "";
                 if(status !== "none") {
-                    let label = "VU";
-                    if(status === 'waiting') label = "ATTENTE";
-                    if(status === 'watching') label = "EN COURS";
+                    let label = status === 'completed' ? 'VU' : (status === 'waiting' ? 'ATTENTE' : 'EN COURS');
                     badge = `<div class="status-badge">${label}</div>`;
                 }
-
                 container.innerHTML += `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                         ${badge}
                         <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/170x230'">
                         <div class="card-info">
                             <div class="card-title">${a.nom}</div>
-                            <div>📅 ${a.sortie} • ⭐ ${a.score}</div>
+                            <div class="card-meta">
+                                <span>📅 ${a.sortie}</span> • <span>📺 ${a.ep} ep</span><br>
+                                <span class="tag">${a.censure}</span> • ⭐ ${a.score}
+                            </div>
                         </div>
                     </a>`;
             });
@@ -162,7 +196,6 @@
                 window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
             }
         };
-
         init();
     </script>
 </body>
