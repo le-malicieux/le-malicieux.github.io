@@ -3,23 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Malicieux - Catalogue</title>
+    <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg) url('img/fond1.jpg') fixed center/cover; color: var(--text); margin: 0; min-height: 100vh; }
-        .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg); 
+            background-image: url('img/fond1.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: var(--text); 
+            margin: 0; 
+            min-height: 100vh;
+            transition: background-image 0.5s ease;
+        }
+
+        .top-navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
         .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .btn-red { background: #222; border: 1px solid #444; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.85em; text-decoration: none; }
+        .nav-center input, .nav-center select, .btn-red { 
+            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
+        }
         .btn-red { background: var(--primary); border: none; font-weight: bold; cursor: pointer; }
+
         .hero-section { height: 40vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; max-width: 1300px; margin: 0 auto; padding: 20px; }
-        .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em; position: relative; transition: 0.3s; }
+        
+        /* STYLE DU BADGE TRES VISIBLE */
+        .card { position: relative; background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em; transition: 0.3s; }
         .card:hover { transform: translateY(-5px); border-color: var(--primary); }
         .card img { width: 100%; height: 230px; object-fit: cover; }
+        
+        .status-badge {
+            position: absolute; top: 12px; left: -25px;
+            padding: 5px 30px; transform: rotate(-45deg);
+            font-size: 10px; font-weight: bold; color: white;
+            z-index: 10; text-transform: uppercase; text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            width: 100px;
+        }
+        .status-badge.completed { background: #2ecc71; } 
+        .status-badge.waiting { background: #f1c40f; color: #000; } 
+        .status-badge.watching { background: #3498db; }
+
         .card-info { padding: 8px; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; }
-        .status-badge { position: absolute; top: 8px; left: 8px; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: white; z-index: 5; text-transform: uppercase; }
-        .status-badge.completed { background: #2ecc71; } .status-badge.waiting { background: #f1c40f; color: #000; } .status-badge.watching { background: #3498db; }
     </style>
 </head>
 <body>
@@ -27,12 +60,21 @@
         <div style="font-weight:bold;color:var(--primary);">Le Malicieux</div>
         <div class="nav-center">
             <input type="text" id="search" placeholder="Recherche...">
-            <select id="sort"><option value="nom">Nom</option><option value="score">Score</option></select>
+            <select id="sort">
+                <option value="nom">Nom</option>
+                <option value="score">Score</option>
+                <option value="sortie">Année</option>
+            </select>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
-            <button onclick="location.reload()" class="btn-red">🎲 Random</button>
+            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
     </div>
-    <div class="hero-section"><h1>le-malicieux.github.io</h1><p>Catalogue d'animes malicieux</p></div>
+
+    <div class="hero-section">
+        <h1>le-malicieux.github.io</h1>
+        <p>Catalogue d'animes malicieux</p>
+    </div>
+
     <div id="anime-container" class="grid"></div>
 
     <script type="module">
@@ -41,29 +83,89 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
-        const app = initializeApp(firebaseConfig); const db = getFirestore(app); const auth = getAuth(app);
-        let allAnimes = []; let userPlaylist = {};
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        onAuthStateChanged(auth, (u) => {
-            if (u) { onSnapshot(query(collection(db, "playlists"), where("uid", "==", u.uid)), (s) => { userPlaylist = {}; s.forEach(d => userPlaylist[d.data().anime] = d.data().status); display(allAnimes); }); }
+        let allAnimes = [];
+        let userPlaylist = {};
+
+        // Récupération des statuts Firebase
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
+                onSnapshot(q, (snapshot) => {
+                    userPlaylist = {};
+                    snapshot.forEach(doc => { userPlaylist[doc.data().anime] = doc.data().status; });
+                    displayAnimes(allAnimes);
+                });
+            }
         });
 
-        async function init() {
-            const r = await fetch('animes.csv'); const d = await r.text();
-            allAnimes = d.split(/\r?\n/).slice(1).map(l => {
-                const c = l.split(';'); const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                if(!c[0]) return null; return { nom: cl(c[0]), score: cl(c[2]), sortie: cl(c[3]), ep: cl(c[4]), censure: cl(c[5]), img: cl(c[8]) };
-            }).filter(x => x); display(allAnimes);
+        // Système de fond d'écran d'origine
+        async function setRandomBackground() {
+            document.body.style.backgroundImage = "url('img/fond1.jpg')";
+            const extensions = ['jpg', 'png', 'webp'];
+            let foundFiles = [];
+            for (let i = 1; i <= 30; i++) {
+                let foundAny = false;
+                for (let ext of extensions) {
+                    try {
+                        const response = await fetch(`img/fond${i}.${ext}`, { method: 'HEAD' });
+                        if (response.ok) { foundFiles.push(`fond${i}.${ext}`); foundAny = true; break; }
+                    } catch(e) {}
+                }
+                if (!foundAny && i > 5) break; 
+            }
+            if (foundFiles.length > 0) {
+                const randomImg = foundFiles[Math.floor(Math.random() * foundFiles.length)];
+                document.body.style.backgroundImage = `url('img/${randomImg}')`;
+            }
         }
 
-        function display(list) {
-            const c = document.getElementById('anime-container'); c.innerHTML = "";
+        async function init() {
+            setRandomBackground();
+            const response = await fetch('animes.csv');
+            const rawData = await response.text();
+            allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
+                const c = line.split(';');
+                const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                if (!c[0]) return null;
+                return { nom: clean(c[0]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), img: clean(c[8]) };
+            }).filter(a => a !== null);
+            displayAnimes(allAnimes);
+        }
+
+        function displayAnimes(list) {
+            const container = document.getElementById('anime-container');
+            container.innerHTML = "";
             list.forEach(a => {
-                const s = userPlaylist[a.nom] || "none";
-                const b = s !== "none" ? `<div class="status-badge ${s}">${s}</div>` : "";
-                c.innerHTML += `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">${b}<img src="img/${a.img}"><div class="card-info"><div class="card-title">${a.nom}</div><div>📅 ${a.sortie} • ⭐ ${a.score}</div></div></a>`;
+                const status = userPlaylist[a.nom] || "none";
+                let badge = "";
+                if(status !== "none") {
+                    const label = status === 'completed' ? 'Vu' : (status === 'waiting' ? 'Attente' : 'En cours');
+                    badge = `<div class="status-badge ${status}">${label}</div>`;
+                }
+
+                container.innerHTML += `
+                    <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
+                        ${badge}
+                        <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/170x230'">
+                        <div class="card-info">
+                            <div class="card-title">${a.nom}</div>
+                            <div>📅 ${a.sortie} • ⭐ ${a.score}</div>
+                        </div>
+                    </a>`;
             });
         }
+
+        window.randomAnime = function() {
+            if(allAnimes.length > 0) {
+                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
+                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+            }
+        };
+
         init();
     </script>
 </body>
