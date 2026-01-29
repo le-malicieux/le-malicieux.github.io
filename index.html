@@ -129,10 +129,8 @@
         let allAnimes = [];
         let userPlaylist = {};
 
-        // Fix écran noir
         document.getElementById('main-body').style.setProperty('--bg-day', `url('img/fond1.jpg')`);
 
-        // Surveillance de l'utilisateur pour les badges de playlist
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
@@ -142,7 +140,10 @@
                         const d = doc.data();
                         userPlaylist[d.anime] = d;
                     });
-                    displayAnimes(allAnimes);
+                    // Sécurité : on ne rafraîchit que si le CSV est chargé
+                    if (allAnimes.length > 0) {
+                        displayAnimes(allAnimes);
+                    }
                 });
             }
         });
@@ -153,11 +154,13 @@
             for (let i = 1; i <= 30; i++) {
                 let foundAny = false;
                 for (let ext of extensions) {
-                    const response = await fetch(`img/fond${i}.${ext}`, { method: 'HEAD' });
-                    if (response.ok) {
-                        foundFiles.push(`fond${i}.${ext}`);
-                        foundAny = true; break; 
-                    }
+                    try {
+                        const response = await fetch(`img/fond${i}.${ext}`, { method: 'HEAD' });
+                        if (response.ok) {
+                            foundFiles.push(`fond${i}.${ext}`);
+                            foundAny = true; break; 
+                        }
+                    } catch(e) {}
                 }
                 if (!foundAny && i > 5) break; 
             }
@@ -186,11 +189,12 @@
                     }
                 });
                 displayAnimes(allAnimes);
-            } catch (err) {}
+            } catch (err) { console.error("Erreur CSV:", err); }
         }
 
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
+            if (!container) return;
             container.innerHTML = "";
             list.forEach(a => {
                 const userData = userPlaylist[a.nom] || {};
