@@ -30,7 +30,7 @@
             const s = await getDocs(q); const c = document.getElementById('playlist-grid');
             s.forEach(d => {
                 const data = d.data(); if(data.status === "none") return;
-                c.innerHTML += `<a href="video.html?name=${encodeURIComponent(data.anime)}" class="card"><img src="img/${data.img}"><div class="card-info"><b>${data.anime}</b><br>Ma note: ${"⭐".repeat(data.rating)}</div></a>`;
+                c.innerHTML += `<a href="video.html?name=${encodeURIComponent(data.anime)}" class="card"><img src="img/${data.img}"><div class="card-info"><b>${data.anime}</b><br>Ma note: ${data.rating}/10</div></a>`;
             });
         });
     </script>
