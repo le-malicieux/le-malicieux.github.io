@@ -54,7 +54,6 @@
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
         .card img { width: 100%; height: 230px; object-fit: cover; }
 
-        /* BADGE VISIBLE BLANC SUR ROUGE */
         .status-badge {
             position: absolute; top: 10px; left: 10px;
             background: #ff0000; color: #fff;
@@ -172,8 +171,12 @@
                 const status = userPlaylist[a.nom] || "none";
                 let badge = "";
                 if(status !== "none") {
-                    let label = status === 'completed' ? 'VU' : (status === 'waiting' ? 'ATTENTE' : 'EN COURS');
-                    badge = `<div class="status-badge">${label}</div>`;
+                    let label = "";
+                    if(status === 'completed') label = "VU";
+                    else if(status === 'waiting') label = "EN ATTENTE";
+                    else if(status === 'watching') label = "EN COURS";
+                    
+                    if(label) badge = `<div class="status-badge">${label}</div>`;
                 }
                 container.innerHTML += `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
@@ -189,6 +192,24 @@
                     </a>`;
             });
         }
+
+        document.getElementById('sort').addEventListener('change', (e) => {
+            let sorted = [...allAnimes];
+            const m = e.target.value;
+            if (m === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
+            if (m === "score") sorted.sort((a,b) => parseFloat(b.score) - parseFloat(a.score));
+            if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
+            if (m === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
+            if (m === "episodes") sorted.sort((a,b) => parseInt(b.ep) - parseInt(a.ep));
+            if (m === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
+            if (m === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
+            displayAnimes(sorted);
+        });
+
+        document.getElementById('search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
+        });
 
         window.randomAnime = function() {
             if(allAnimes.length > 0) {
