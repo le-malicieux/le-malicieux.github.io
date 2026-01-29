@@ -52,8 +52,9 @@
             border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em;
         }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
-        .card img { width: 100%; height: 230px; object-fit: cover; }
+        .card img { width: 100%; height: 230px; object-fit: cover; display: block; }
 
+        /* BADGE VISIBLE BLANC SUR ROUGE */
         .status-badge {
             position: absolute; top: 10px; left: 10px;
             background: #ff0000; color: #fff;
@@ -119,11 +120,15 @@
         let allAnimes = [];
         let userPlaylist = {};
 
+        // Écoute des changements de statut en temps réel
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                onSnapshot(query(collection(db, "playlists"), where("uid", "==", user.uid)), (snap) => {
+                const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
+                onSnapshot(q, (snap) => {
                     userPlaylist = {};
-                    snap.forEach(doc => { userPlaylist[doc.data().anime] = doc.data().status; });
+                    snap.forEach(doc => { 
+                        userPlaylist[doc.data().anime] = doc.data().status; 
+                    });
                     displayAnimes(allAnimes);
                 });
             }
@@ -170,14 +175,16 @@
             list.forEach(a => {
                 const status = userPlaylist[a.nom] || "none";
                 let badge = "";
-                if(status !== "none") {
-                    let label = "";
-                    if(status === 'completed') label = "VU";
-                    else if(status === 'waiting') label = "EN ATTENTE";
-                    else if(status === 'watching') label = "EN COURS";
-                    
-                    if(label) badge = `<div class="status-badge">${label}</div>`;
+                
+                // Logique de badge simplifiée pour éviter les erreurs d'affichage
+                if (status === 'completed') {
+                    badge = `<div class="status-badge">VU</div>`;
+                } else if (status === 'waiting') {
+                    badge = `<div class="status-badge">EN ATTENTE</div>`;
+                } else if (status === 'watching') {
+                    badge = `<div class="status-badge">EN COURS</div>`;
                 }
+
                 container.innerHTML += `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                         ${badge}
