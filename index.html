@@ -94,15 +94,39 @@
     <script>
         let allAnimes = [];
 
-        // Gestion du fond d'écran aléatoire au chargement
-        function applyRandomBackground() {
-            const randomNum = Math.floor(Math.random() * 11) + 1; // De 1 à 11
-            const imgPath = `img/fond${randomNum}.jpg`;
-            document.body.style.backgroundImage = `url('${imgPath}')`;
+        // SYSTÈME DE FOND D'ÉCRAN RÉCUPÉRÉ ET ADAPTÉ
+        async function setRandomBackground() {
+            const extensions = ['jpg', 'png', 'webp'];
+            let foundFiles = [];
+            
+            // On scanne de 1 à 30 comme dans ton ancien fichier
+            for (let i = 1; i <= 30; i++) {
+                let foundAny = false;
+                for (let ext of extensions) {
+                    try {
+                        const response = await fetch(`img/fond${i}.${ext}`, { method: 'HEAD' });
+                        if (response.ok) {
+                            foundFiles.push(`fond${i}.${ext}`);
+                            foundAny = true; 
+                            break; 
+                        }
+                    } catch(e) {}
+                }
+                // Si on ne trouve plus rien après le 5ème, on arrête pour gagner du temps
+                if (!foundAny && i > 5) break; 
+            }
+
+            if (foundFiles.length > 0) {
+                const randomImg = foundFiles[Math.floor(Math.random() * foundFiles.length)];
+                document.body.style.backgroundImage = `url('img/${randomImg}')`;
+            } else {
+                // Fond par défaut si rien n'est trouvé
+                document.body.style.backgroundImage = "url('img/fond1.jpg')";
+            }
         }
 
         async function init() {
-            applyRandomBackground();
+            setRandomBackground(); // Appel du système de fond
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
@@ -146,7 +170,7 @@
             });
         }
 
-        // Système de tri complet
+        // Système de tri
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const m = e.target.value;
