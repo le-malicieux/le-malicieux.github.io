@@ -20,7 +20,6 @@
             transition: background-image 0.5s ease;
         }
 
-        /* Barre du haut style "image_128c3f.png" */
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
@@ -31,25 +30,22 @@
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; }
 
         .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .nav-center button { 
-            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; 
+        .nav-center input, .nav-center select, .nav-center button, .btn-nav { 
+            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
         }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
-        /* Section Héros avec Slogan lisible */
         .hero-section {
             height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 20px;
         }
         .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; }
         .main-title { font-size: 2.8em; margin: 0; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
-        /* Slogan avec ombre portée pour visibilité maximale */
         .main-slogan { 
             font-size: 1.3em; font-weight: bold; margin-top: 10px; 
             color: white; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 5px rgba(0,0,0,0.8); 
         }
 
-        /* Cartes réduites mais informatives */
         .content-area { background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent); padding: 40px 10px; }
         .grid { 
             display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
@@ -58,6 +54,7 @@
         .card { 
             background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; 
             border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em;
+            position: relative;
         }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
         .card img { width: 100%; height: 230px; object-fit: cover; }
@@ -65,6 +62,12 @@
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.1em; }
         .card-meta { color: #bbb; line-height: 1.4; }
         .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 1px 4px; border-radius: 3px; font-size: 0.85em; }
+
+        .status-badge {
+            position: absolute; top: 8px; left: 8px; background: var(--primary); color: white; 
+            padding: 3px 7px; border-radius: 4px; font-size: 10px; font-weight: bold; 
+            z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+        }
 
         .discord-btn { background: #7289da; color: white; text-decoration: none; padding: 6px 12px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
     </style>
@@ -88,6 +91,7 @@
                 <option value="censure">Censure</option>
                 <option value="etat">État</option>
             </select>
+            <a href="playlist.html" class="btn-red btn-nav">📂 Ma Playlist</a>
             <button onclick="toggleTheme()" class="btn-red">🌓 Mode</button>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
@@ -104,16 +108,48 @@
         <div id="anime-container" class="grid"></div>
     </div>
 
-    <script>
-        let allAnimes = [];
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Fix écran noir : On lance l'image de secours immédiatement
+        const firebaseConfig = {
+            apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",
+            authDomain: "le-malicieux-v2.firebaseapp.com",
+            projectId: "le-malicieux-v2",
+            storageBucket: "le-malicieux-v2.firebasestorage.app",
+            messagingSenderId: "938147445933",
+            appId: "1:938147445933:web:86f9c65ee0737e66a9da24"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allAnimes = [];
+        let userPlaylist = {};
+
+        // Fix écran noir
         document.getElementById('main-body').style.setProperty('--bg-day', `url('img/fond1.jpg')`);
+
+        // Surveillance de l'utilisateur pour les badges de playlist
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
+                onSnapshot(q, (snapshot) => {
+                    userPlaylist = {};
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        userPlaylist[d.anime] = d;
+                    });
+                    displayAnimes(allAnimes);
+                });
+            }
+        });
 
         async function setRandomBackground() {
             const extensions = ['jpg', 'png', 'webp'];
             let foundFiles = [];
-            // Limitation à 30 pour la rapidité
             for (let i = 1; i <= 30; i++) {
                 let foundAny = false;
                 for (let ext of extensions) {
@@ -157,16 +193,26 @@
             const container = document.getElementById('anime-container');
             container.innerHTML = "";
             list.forEach(a => {
+                const userData = userPlaylist[a.nom] || {};
+                const statusBadge = userData.status && userData.status !== 'none' 
+                    ? `<div class="status-badge">${userData.status.toUpperCase()}</div>` 
+                    : "";
+                const userStars = userData.rating 
+                    ? `<div style="color:#f1c40f; font-size:12px; margin-top:3px;">${"★".repeat(userData.rating)}${"☆".repeat(5-userData.rating)}</div>` 
+                    : "";
+
                 const card = document.createElement('a');
                 card.className = 'card';
                 card.href = `video.html?name=${encodeURIComponent(a.nom)}`;
                 card.innerHTML = `
+                    ${statusBadge}
                     <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/170x230'">
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
                         <div class="card-meta">
                             <span>📅 ${a.sortie}</span> • <span>📺 ${a.ep} ep</span><br>
                             <span class="tag">${a.censure}</span> • ⭐ ${a.score}
+                            ${userStars}
                         </div>
                     </div>
                 `;
@@ -174,7 +220,6 @@
             });
         }
 
-        // Triage complet
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const m = e.target.value;
@@ -193,12 +238,12 @@
             displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
         });
 
-        function randomAnime() {
+        window.randomAnime = function() {
             const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
             if(a) window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
         }
 
-        function toggleTheme() { document.body.classList.toggle('light-mode'); }
+        window.toggleTheme = function() { document.body.classList.toggle('light-mode'); }
 
         init();
     </script>
