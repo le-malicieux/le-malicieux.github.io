@@ -10,14 +10,12 @@
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background-color: var(--bg); 
-            background-image: var(--bg-day); 
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
-            transition: background-image 0.5s ease;
         }
 
         .top-navbar {
@@ -30,8 +28,8 @@
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; }
 
         .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .nav-center button, .btn-nav { 
-            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
+        .nav-center input, .nav-center select, .nav-center button { 
+            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em;
         }
         .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
@@ -41,32 +39,25 @@
         }
         .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; }
         .main-title { font-size: 2.8em; margin: 0; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
-        .main-slogan { 
-            font-size: 1.3em; font-weight: bold; margin-top: 10px; 
-            color: white; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 5px rgba(0,0,0,0.8); 
-        }
+        .main-slogan { font-size: 1.3em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
 
         .content-area { background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent); padding: 40px 10px; }
-        .grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
-            gap: 15px; max-width: 1300px; margin: 0 auto; 
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; max-width: 1300px; margin: 0 auto; }
+        
         .card { 
             background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; 
             border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em;
-            position: relative;
         }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
         .card img { width: 100%; height: 230px; object-fit: cover; }
         .card-info { padding: 8px; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.1em; }
-        .card-meta { color: #bbb; line-height: 1.4; }
-        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 1px 4px; border-radius: 3px; font-size: 0.85em; }
-
+        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 1px 4px; border-radius: 3px; }
+        
         .discord-btn { background: #7289da; color: white; text-decoration: none; padding: 6px 12px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
     </style>
 </head>
-<body id="main-body">
+<body>
 
     <div class="top-navbar">
         <div class="nav-left">
@@ -81,8 +72,10 @@
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
                 <option value="sortie">Année</option>
+                <option value="episodes">Épisodes</option>
+                <option value="censure">Censure</option>
+                <option value="etat">État</option>
             </select>
-            <button onclick="toggleTheme()" class="btn-red">🌓 Mode</button>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
         <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
@@ -101,17 +94,15 @@
     <script>
         let allAnimes = [];
 
-        // Image par défaut si le random échoue
-        document.getElementById('main-body').style.setProperty('--bg-day', `url('img/fond1.jpg')`);
-
-        async function setRandomBackground() {
-            const randomNum = Math.floor(Math.random() * 10) + 1; // Test sur 10 fonds
+        // Gestion du fond d'écran aléatoire au chargement
+        function applyRandomBackground() {
+            const randomNum = Math.floor(Math.random() * 11) + 1; // De 1 à 11
             const imgPath = `img/fond${randomNum}.jpg`;
-            document.getElementById('main-body').style.setProperty('--bg-day', `url('${imgPath}')`);
+            document.body.style.backgroundImage = `url('${imgPath}')`;
         }
 
         async function init() {
-            setRandomBackground();
+            applyRandomBackground();
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
@@ -120,7 +111,7 @@
                 allAnimes = rows.slice(1).map(line => {
                     const c = line.split(';');
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    if (!c[0]) return null;
+                    if (!c[0] || c.length < 9) return null;
                     return {
                         nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]),
                         sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]),
@@ -130,15 +121,13 @@
 
                 displayAnimes(allAnimes);
             } catch (err) {
-                console.error("Erreur de chargement du catalogue:", err);
+                console.error("Erreur catalogue:", err);
             }
         }
 
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
-            if (!container) return;
             container.innerHTML = "";
-            
             list.forEach(a => {
                 const card = document.createElement('a');
                 card.className = 'card';
@@ -157,33 +146,30 @@
             });
         }
 
-        // Recherche
-        document.getElementById('search').addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            const filtered = allAnimes.filter(a => a.nom.toLowerCase().includes(val));
-            displayAnimes(filtered);
-        });
-
-        // Tri
+        // Système de tri complet
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const m = e.target.value;
             if (m === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            if (m === "score") sorted.sort((a,b) => b.score - a.score);
-            if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop) || 999) - (parseInt(b.pop) || 999));
+            if (m === "score") sorted.sort((a,b) => parseFloat(b.score) - parseFloat(a.score));
+            if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
             if (m === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
+            if (m === "episodes") sorted.sort((a,b) => parseInt(b.ep) - parseInt(a.ep));
+            if (m === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
+            if (m === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
             displayAnimes(sorted);
         });
 
-        window.randomAnime = function() {
+        document.getElementById('search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
+        });
+
+        function randomAnime() {
             if(allAnimes.length > 0) {
                 const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
                 window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
             }
-        }
-
-        window.toggleTheme = function() {
-            document.body.classList.toggle('light-mode');
         }
 
         init();
