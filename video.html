@@ -9,11 +9,9 @@
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; }
         .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 6px; }
-        .anime-header { display: flex; gap: 30px; background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
-        .anime-header img { width: 280px; border-radius: 10px; border: 2px solid var(--primary); }
-        .controls-box { background: #222; padding: 15px; border-radius: 10px; margin-top: 15px; display: flex; gap: 15px; align-items: center; }
+        .controls-box { background: #1a1a1a; padding: 15px; border-radius: 10px; border: 1px solid #333; margin: 20px 0; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         select, input, button { background: #111; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; }
-        .btn-save { background: var(--primary); border: none; font-weight: bold; cursor: pointer; }
+        .btn-save { background: var(--primary); border: none; font-weight: bold; cursor: pointer; color: white; }
     </style>
 </head>
 <body>
@@ -29,11 +27,11 @@
                 <option value="vu">✅ Vu</option>
                 <option value="pas-vu">❌ Pas vu</option>
             </select>
-            <input type="number" id="p-rating" min="0" max="10" placeholder="Note /10">
+            <input type="number" id="p-rating" min="0" max="10" placeholder="Note /10" style="width:80px;">
             <button id="p-save" class="btn-save">Sauvegarder</button>
         </div>
 
-        <div id="player-container" style="margin-top:30px; display:none;">
+        <div id="player-container" style="margin-top:30px;">
             <iframe id="main-iframe" width="100%" height="500px" frameborder="0" allowfullscreen></iframe>
             <div id="episodes-list" style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;"></div>
         </div>
@@ -58,34 +56,33 @@
                 const docRef = doc(db, "playlists", `${user.uid}_${animeName}`);
                 const snap = await getDoc(docRef);
                 if (snap.exists()) {
-                    document.getElementById('p-status').value = snap.data().status;
-                    document.getElementById('p-rating').value = snap.data().rating;
+                    document.getElementById('p-status').value = snap.data().status || "none";
+                    document.getElementById('p-rating').value = snap.data().rating || 0;
                 }
                 document.getElementById('p-save').onclick = async () => {
                     await setDoc(docRef, { uid: user.uid, anime: animeName, status: document.getElementById('p-status').value, rating: parseInt(document.getElementById('p-rating').value) || 0, updatedAt: serverTimestamp() });
-                    alert("Enregistré !");
+                    alert("C'est enregistré !");
                 };
             }
         });
 
-        // Logique de chargement CSV et Iframe (identique à ton video.html)
         async function load() {
+            if(!animeName) return;
             const resp = await fetch('animes.csv');
             const data = await resp.text();
             const rows = data.split('\n').slice(1);
-            const anime = rows.map(r => r.split(';')).find(c => c[0].trim().replace(/^"|"$/g, '') === animeName);
+            const anime = rows.map(r => r.split(';')).find(c => c[0] && c[0].trim().replace(/^"|"$/g, '') === animeName);
             if (anime) {
-                document.getElementById('anime-details').innerHTML = `<h1>${anime[0]}</h1><img src="img/${anime[8]}" style="width:200px;"><p>${anime[7]}</p>`;
-                const epList = anime[9].replace(/^"|"$/g, '').split(',');
-                const frame = document.getElementById('main-iframe');
+                document.getElementById('anime-details').innerHTML = `<h1>${anime[0]}</h1><p>${anime[7] || ""}</p>`;
+                const epLinks = anime[9].replace(/^"|"$/g, '').split(',');
                 const list = document.getElementById('episodes-list');
-                document.getElementById('player-container').style.display = 'block';
-                epList.forEach((link, i) => {
+                const iframe = document.getElementById('main-iframe');
+                epLinks.forEach((link, i) => {
                     const btn = document.createElement('button');
-                    btn.innerText = `Épisode ${i+1}`;
-                    btn.onclick = () => frame.src = link.trim();
+                    btn.innerText = `EP ${i+1}`;
+                    btn.onclick = () => iframe.src = link.trim();
                     list.appendChild(btn);
-                    if(i===0) frame.src = link.trim();
+                    if(i===0) iframe.src = link.trim();
                 });
             }
         }
