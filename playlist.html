@@ -1,110 +1,75 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Malicieux - Ma Playlist</title>
-    <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; }
-        select, button { background: #222; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; cursor: pointer; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-        .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid #333; text-decoration: none; color: inherit; position: relative; transition: 0.3s; }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .card img { width: 100%; height: 250px; object-fit: cover; }
-        .badge { position: absolute; top: 10px; left: 10px; background: var(--primary); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .rating-tag { color: #f1c40f; font-weight: bold; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="nav-header">
-            <a href="index.html" style="color:var(--primary); text-decoration:none; font-weight:bold;">← Retour au Catalogue</a>
+<div class="container">
+    <a href="index.html" class="back-btn">← Retour au catalogue</a>
+    <div id="playlist-content" style="display:none;">
+        <div class="header-box">
             <h1 id="user-title">Ma Playlist</h1>
+            <div style="margin-top:15px; display:flex; gap:10px; justify-content:center;">
+                <select id="filter-status" onchange="renderPlaylist()">
+                    <option value="all">Tous</option>
+                    <option value="vu">Vus</option>
+                    <option value="en-attente">En attente</option>
+                </select>
+                <select id="sort-playlist" onchange="renderPlaylist()">
+                    <option value="nom">Nom A-Z</option>
+                    <option value="note">Note max</option>
+                </select>
+            </div>
         </div>
-
-        <div class="filter-bar">
-            <select id="filter-status">
-                <option value="all">Tous les statuts</option>
-                <option value="vu">✅ Vus</option>
-                <option value="en-cours">📺 En cours</option>
-                <option value="en-attente">⏳ En attente</option>
-            </select>
-            <select id="sort-playlist">
-                <option value="recent">Plus récent</option>
-                <option value="note">Meilleure note</option>
-                <option value="nom">Nom (A-Z)</option>
-            </select>
-        </div>
-
-        <div id="playlist-grid" class="grid"></div>
+        <div class="grid" id="playlist-grid"></div>
     </div>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, query, where, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",
-            authDomain: "le-malicieux-v2.firebaseapp.com",
-            projectId: "le-malicieux-v2",
-            storageBucket: "le-malicieux-v2.firebasestorage.app",
-            messagingSenderId: "938147445933",
-            appId: "1:938147445933:web:86f9c65ee0737e66a9da24"
-        };
+    // (Config identique)
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    let userItems = [];
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        let userPlaylist = [];
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('user-title').innerText = `Playlist de ${user.displayName}`;
-                const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
-                onSnapshot(q, (snapshot) => {
-                    userPlaylist = [];
-                    snapshot.forEach(doc => userPlaylist.push(doc.data()));
-                    renderPlaylist();
-                });
-            } else { window.location.href = "index.html"; }
-        });
-
-        function renderPlaylist() {
-            const statusFilter = document.getElementById('filter-status').value;
-            const sortBy = document.getElementById('sort-playlist').value;
-            
-            let filtered = userPlaylist.filter(a => statusFilter === 'all' || a.status === statusFilter);
-
-            if (sortBy === "note") filtered.sort((a,b) => b.rating - a.rating);
-            if (sortBy === "nom") filtered.sort((a,b) => a.anime.localeCompare(b.anime));
-
-            const container = document.getElementById('playlist-grid');
-            container.innerHTML = filtered.length === 0 ? "<p>Aucun anime trouvé dans cette catégorie.</p>" : "";
-            
-            filtered.forEach(a => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="badge">${a.status.toUpperCase()}</div>
-                    <a href="video.html?name=${encodeURIComponent(a.anime)}">
-                        <img src="img/${a.anime}.jpg" onerror="this.src='https://via.placeholder.com/180x250'">
-                    </a>
-                    <div style="padding:10px;">
-                        <div style="font-weight:bold; margin-bottom:5px;">${a.anime}</div>
-                        <div class="rating-tag">⭐ ${a.rating}/10</div>
-                    </div>
-                `;
-                container.appendChild(card);
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('playlist-content').style.display = 'block';
+            const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
+            onSnapshot(q, (snapshot) => {
+                userItems = [];
+                snapshot.forEach(doc => userItems.push(doc.data()));
+                renderPlaylist();
             });
         }
+    });
 
-        document.getElementById('filter-status').onchange = renderPlaylist;
-        document.getElementById('sort-playlist').onchange = renderPlaylist;
-    </script>
-</body>
-</html>
+    window.removeAnime = async (name) => {
+        if(confirm(`Supprimer ${name} ?`)) await deleteDoc(doc(db, "playlists", `${auth.currentUser.uid}_${name}`));
+    };
+
+    window.renderPlaylist = () => {
+        const container = document.getElementById('playlist-grid');
+        const filter = document.getElementById('filter-status').value;
+        const sort = document.getElementById('sort-playlist').value;
+
+        let list = userItems.filter(i => filter === 'all' || i.status === filter);
+        if(sort === 'note') list.sort((a,b) => b.rating - a.rating);
+        else list.sort((a,b) => a.anime.localeCompare(b.anime));
+
+        container.innerHTML = "";
+        list.forEach(a => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="status-tag">${a.status.toUpperCase()}</div>
+                <button onclick="removeAnime('${a.anime}')" style="position:absolute; top:5px; right:5px; z-index:10; background:red; color:white; border:none; cursor:pointer;">X</button>
+                <a href="video.html?name=${encodeURIComponent(a.anime)}">
+                    <img src="img/${a.anime}.jpg" onerror="this.src='https://via.placeholder.com/180x250'">
+                    <div class="card-info">
+                        <strong>${a.anime}</strong><br>
+                        <span style="color:#f1c40f;">${a.rating}/10 ★</span>
+                    </div>
+                </a>`;
+            container.appendChild(card);
+        });
+    };
+</script>
