@@ -27,7 +27,8 @@
 
         .playlist-box { background: #222; margin-top: 15px; padding: 15px; border-radius: 10px; border: 1px solid #444; }
         .playlist-box select { width: 100%; background: #111; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; }
-        .star-rating { font-size: 24px; color: #444; text-align: center; cursor: pointer; user-select: none; margin-bottom: 10px; }
+        
+        .star-rating { font-size: 22px; color: #444; text-align: center; cursor: pointer; user-select: none; margin-bottom: 10px; display: flex; justify-content: center; }
         .star-rating span.active { color: #f1c40f; text-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
         .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; }
 
@@ -36,45 +37,29 @@
         .ep-btn.active { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
         .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; margin-bottom: 30px; }
         .video-player iframe { width: 100%; height: 100%; border: none; }
-        .comment-section { background: #333; padding: 20px; border-radius: 8px; color: white; margin-top: 20px; }
-        .comment-header { background: #111; padding: 10px; text-align: center; font-weight: bold; border-radius: 5px; margin-bottom: 15px; }
-        #comment-form textarea { width: 100%; height: 80px; background: #666; border: none; border-radius: 5px; padding: 10px; color: white; margin-bottom: 10px; resize: none; box-sizing: border-box; }
-        #comment-form button { background: #111; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right; font-weight: bold; }
-        .comment-item { background: #444; padding: 15px; border-radius: 5px; display: flex; gap: 15px; margin-bottom: 10px; }
-        .user-avatar { width: 45px; height: 45px; border-radius: 3px; }
     </style>
 </head>
 <body>
     <div class="container">
         <a href="index.html" class="back-btn">← Retour au catalogue</a>
-        <div id="video-content">Chargement de l'anime...</div>
+        <div id="video-content">Chargement...</div>
         <div class="episodes-grid" id="episodes-list"></div>
         <div id="player-container" class="video-player" style="display:none;"><iframe id="main-iframe" allowfullscreen></iframe></div>
-        <div class="comment-section">
-            <div class="comment-header">Commentaires</div>
-            <div id="auth-container" style="text-align:center;"><button style="background:#4285F4;color:white;border:none;padding:10px;border-radius:5px;cursor:pointer;" id="btn-login">Se connecter avec Google</button></div>
-            <div id="comment-form" style="display:none;"><textarea id="comment-input" placeholder="Ajoutez votre commentaire..."></textarea><button id="btn-post">Poster</button></div>
-            <div id="comments-display" style="margin-top:50px;"></div>
-        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
         const animeName = new URLSearchParams(window.location.search).get('name');
-        let currentUser = null; let userRating = 0;
+        let userRating = 0;
 
-        onAuthStateChanged(auth, (user) => { if (user) { currentUser = user; document.getElementById('auth-container').style.display = 'none'; document.getElementById('comment-form').style.display = 'block'; } });
-        document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
-
-        async function loadDetails() {
+        async function load() {
             const resp = await fetch('animes.csv'); const data = await resp.text();
             const anime = data.split(/\r?\n/).slice(1).map(l => {
                 const c = l.split(';'); const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
@@ -84,20 +69,53 @@
             if (anime) {
                 document.getElementById('video-content').innerHTML = `
                     <div class="anime-header">
-                        <div class="left-column"><img src="img/${anime.img}"><div id="playlist-ui" class="playlist-box" style="display:none;"><select id="user-status"><option value="none">Ajouter...</option><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Vu</option></select><div class="star-rating" id="stars"><span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div><button class="btn-save" id="save-btn">Sauvegarder</button></div></div>
-                        <div class="details"><h1>${anime.nom}</h1><div class="info-grid"><div class="info-item"><strong>Pop.</strong>${anime.pop}</div><div class="info-item"><strong>Score</strong>⭐ ${anime.score}</div><div class="info-item"><strong>Année</strong>${anime.sortie}</div><div class="info-item"><strong>EP</strong>${anime.ep}</div><div class="info-item"><strong>Censure</strong>${anime.censure}</div><div class="info-item"><strong>État</strong>${anime.etat}</div></div><div class="synopsis"><h3>Synopsis</h3><p>${anime.desc}</p></div></div>
+                        <div class="left-column">
+                            <img src="img/${anime.img}">
+                            <div id="playlist-ui" class="playlist-box" style="display:none;">
+                                <select id="user-status">
+                                    <option value="none">Statut...</option>
+                                    <option value="watching">En cours</option>
+                                    <option value="waiting">En attente</option>
+                                    <option value="completed">Vu</option>
+                                </select>
+                                <div class="star-rating" id="stars">
+                                    ${Array.from({length:10}, (_,i) => `<span data-v="${i+1}">★</span>`).join('')}
+                                </div>
+                                <button class="btn-save" id="save-btn">Enregistrer</button>
+                            </div>
+                        </div>
+                        <div class="details">
+                            <h1>${anime.nom}</h1>
+                            <div class="info-grid">
+                                <div class="info-item"><strong>Score</strong> ⭐ ${anime.score}</div>
+                                <div class="info-item"><strong>Sortie</strong> ${anime.sortie}</div>
+                                <div class="info-item"><strong>Episodes</strong> ${anime.ep}</div>
+                                <div class="info-item"><strong>Censure</strong> ${anime.censure}</div>
+                            </div>
+                            <div class="synopsis"><h3>Synopsis</h3><p>${anime.desc}</p></div>
+                        </div>
                     </div>`;
-                
+
                 const stars = document.querySelectorAll('#stars span');
-                stars.forEach(s => s.onclick = () => { userRating = s.dataset.v; stars.forEach(st => st.classList.toggle('active', st.dataset.v <= userRating)); });
+                stars.forEach(s => s.onclick = () => {
+                    userRating = s.dataset.v;
+                    stars.forEach(st => st.classList.toggle('active', st.dataset.v <= userRating));
+                });
 
                 onAuthStateChanged(auth, async (u) => {
                     if (u) {
                         document.getElementById('playlist-ui').style.display = 'block';
                         const docRef = doc(db, "playlists", `${u.uid}_${animeName}`);
                         const snap = await getDoc(docRef);
-                        if (snap.exists()) { document.getElementById('user-status').value = snap.data().status; userRating = snap.data().rating; stars.forEach(st => st.classList.toggle('active', st.dataset.v <= userRating)); }
-                        document.getElementById('save-btn').onclick = () => setDoc(docRef, { uid: u.uid, anime: animeName, img: anime.img, status: document.getElementById('user-status').value, rating: parseInt(userRating) }).then(() => alert("Ok!"));
+                        if (snap.exists()) {
+                            document.getElementById('user-status').value = snap.data().status;
+                            userRating = snap.data().rating;
+                            stars.forEach(st => st.classList.toggle('active', st.dataset.v <= userRating));
+                        }
+                        document.getElementById('save-btn').onclick = () => {
+                            setDoc(docRef, { uid: u.uid, anime: animeName, img: anime.img, status: document.getElementById('user-status').value, rating: parseInt(userRating) })
+                            .then(() => alert("Sauvegardé !"));
+                        };
                     }
                 });
 
@@ -106,12 +124,13 @@
                     anime.links.forEach((l, i) => {
                         const b = document.createElement('button'); b.className = 'ep-btn'; b.innerText = `EP ${i+1}`;
                         b.onclick = () => { document.getElementById('main-iframe').src = l; document.querySelectorAll('.ep-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); };
-                        document.getElementById('episodes-list').appendChild(b); if (i === 0) { b.click(); }
+                        document.getElementById('episodes-list').appendChild(b);
+                        if (i === 0) b.click();
                     });
                 }
             }
         }
-        loadDetails();
+        load();
     </script>
 </body>
 </html>
