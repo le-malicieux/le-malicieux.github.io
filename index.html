@@ -39,15 +39,12 @@
                 <option value="score">Score</option>
             </select>
             <a href="playlist.html" class="btn-red btn-nav">📂 Ma Playlist</a>
-            <button onclick="toggleTheme()" class="btn-red">🌓 Mode</button>
         </div>
     </div>
-
     <div class="hero-section">
         <img src="img/logo.jpg" class="main-logo">
         <h1 class="main-title">Catalogue d'Animes</h1>
     </div>
-
     <div class="content-area">
         <div id="anime-container" class="grid"></div>
     </div>
@@ -77,15 +74,18 @@
         });
 
         async function init() {
-            const response = await fetch('animes.csv');
-            const rawData = await response.text();
-            const rows = rawData.split(/\r?\n/);
-            allAnimes = rows.slice(1).map(line => {
-                const c = line.split(';');
-                const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                return { nom: clean(c[0]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), img: clean(c[8]) };
-            }).filter(a => a.nom);
-            displayAnimes(allAnimes);
+            try {
+                const response = await fetch('animes.csv');
+                const rawData = await response.text();
+                const rows = rawData.split(/\r?\n/);
+                allAnimes = rows.slice(1).map(line => {
+                    const c = line.split(';');
+                    if (c.length < 9) return null;
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    return { nom: clean(c[0]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), img: clean(c[8]) };
+                }).filter(a => a && a.nom);
+                displayAnimes(allAnimes);
+            } catch (err) { console.error(err); }
         }
 
         function displayAnimes(list) {
