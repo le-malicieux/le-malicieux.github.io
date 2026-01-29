@@ -54,7 +54,6 @@
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
         .card img { width: 100%; height: 230px; object-fit: cover; display: block; }
 
-        /* BADGE VISIBLE BLANC SUR ROUGE */
         .status-badge {
             position: absolute; top: 10px; left: 10px;
             background: #ff0000; color: #fff;
@@ -122,11 +121,13 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                // On écoute tous les documents de la collection "playlists" appartenant à l'utilisateur
                 const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
                 onSnapshot(q, (snap) => {
                     userPlaylist = {};
                     snap.forEach(doc => { 
-                        userPlaylist[doc.data().anime] = doc.data().status; 
+                        const data = doc.data();
+                        userPlaylist[data.anime] = data.status; 
                     });
                     displayAnimes(allAnimes);
                 });
@@ -175,11 +176,13 @@
                 const status = userPlaylist[a.nom] || "none";
                 let badgeHtml = "";
                 
-                // Correction directe du texte des badges
+                // Correspondance avec les textes demandés
                 if (status === 'completed') {
                     badgeHtml = `<div class="status-badge">VU</div>`;
                 } else if (status === 'waiting') {
                     badgeHtml = `<div class="status-badge">EN ATTENTE</div>`;
+                } else if (status === 'watching') {
+                    badgeHtml = `<div class="status-badge">EN COURS</div>`;
                 }
 
                 container.innerHTML += `
