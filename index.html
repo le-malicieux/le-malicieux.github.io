@@ -6,72 +6,42 @@
     <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
-        
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: var(--bg); 
-            background-image: url('img/fond1.jpg');
-            background-size: cover; background-attachment: fixed; background-position: center;
-            color: var(--text); margin: 0; min-height: 100vh; transition: background-image 0.5s ease;
-        }
-
-        .top-navbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); background-image: url('img/fond1.jpg'); background-size: cover; background-attachment: fixed; background-position: center; color: var(--text); margin: 0; min-height: 100vh; }
+        .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .nav-left { display: flex; align-items: center; gap: 12px; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); }
-        .nav-title { color: var(--primary); font-weight: bold; }
-
         .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
-            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
-        }
+        .nav-center input, .nav-center select, .nav-center button, .nav-center a { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none; }
         .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; }
-
         .nav-right { display: flex; gap: 10px; align-items: center; }
         .user-info { font-size: 0.85em; color: #888; }
-
-        .hero-section { height: 50vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .main-logo { width: 120px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; }
+        .hero-section { height: 40vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .main-logo { width: 100px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 10px; }
         .content-area { background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent); padding: 40px 10px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; max-width: 1300px; margin: 0 auto; }
-        
         .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em; }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
         .card img { width: 100%; height: 230px; object-fit: cover; }
         .card-info { padding: 8px; }
-        .card-title { font-weight: bold; color: var(--primary); height: 2.4em; overflow: hidden; }
     </style>
 </head>
 <body>
-
     <div class="top-navbar">
         <div class="nav-left">
             <img src="img/logo.jpg" class="nav-logo-small">
-            <span class="nav-title">Le Malicieux</span>
+            <span style="color:var(--primary); font-weight:bold;">Le Malicieux</span>
         </div>
-        
         <div class="nav-center">
-            <input type="text" id="search" placeholder="Recherche...">
-            <select id="sort">
-                <option value="">Trier par...</option>
-                <option value="nom">Nom</option>
-                <option value="score">Score</option>
-                <option value="sortie">Année</option>
-            </select>
-            <a href="playlist.html" id="nav-playlist" style="display:none;" class="btn-red">📂 Playlist</a>
+            <input type="text" id="search" placeholder="Rechercher...">
+            <a href="playlist.html" id="nav-playlist" style="display:none;" class="btn-red">📂 Ma Liste</a>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
-
         <div class="nav-right" id="auth-ui"></div>
     </div>
 
     <div class="hero-section">
         <img src="img/logo.jpg" class="main-logo">
-        <h1 style="font-size: 2.5em; margin:0;">le-malicieux.github.io</h1>
-        <p style="font-weight:bold;">Catalogue d'animes malicieux</p>
+        <h1 style="margin:0;">Catalogue d'Animes</h1>
     </div>
 
     <div class="content-area">
@@ -87,44 +57,32 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        let allAnimes = [];
-
         onAuthStateChanged(auth, (user) => {
             const authUi = document.getElementById('auth-ui');
-            const playlistBtn = document.getElementById('nav-playlist');
+            const plBtn = document.getElementById('nav-playlist');
             if (user) {
-                playlistBtn.style.display = "block";
-                authUi.innerHTML = `<span class="user-info">${user.displayName || 'Membre'}</span><button id="logout-btn" style="background:none; border:1px solid #444; color:white; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:0.8em;">Déconnexion</button>`;
-                document.getElementById('logout-btn').onclick = () => signOut(auth);
+                plBtn.style.display = "block";
+                authUi.innerHTML = `<span class="user-info">${user.displayName}</span> <button onclick="auth.signOut()" style="background:none; border:1px solid #444; color:white; cursor:pointer; padding:4px 8px; border-radius:4px;">Déconnexion</button>`;
             } else {
-                playlistBtn.style.display = "none";
-                authUi.innerHTML = `<button id="login-btn" class="btn-red">🚀 Connexion Google</button>`;
-                document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
+                plBtn.style.display = "none";
+                authUi.innerHTML = `<button id="login-nav" class="btn-red">Connexion Google</button>`;
+                document.getElementById('login-nav').onclick = () => signInWithPopup(auth, provider);
             }
         });
 
         async function init() {
             const resp = await fetch('animes.csv');
             const data = await resp.text();
-            allAnimes = data.split(/\r?\n/).slice(1).map(l => {
-                const c = l.split(';'); const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+            const list = data.split(/\r?\n/).slice(1).map(l => {
+                const c = l.split(';');
                 if(!c[0]) return null;
-                return { nom: cl(c[0]), sortie: cl(c[3]), ep: cl(c[4]), score: cl(c[2]), img: cl(c[8]) };
+                return { nom: c[0].replace(/"/g,''), img: c[8].trim().replace(/"/g,''), sortie: c[3] };
             }).filter(a => a);
-            displayAnimes(allAnimes);
-        }
-
-        function displayAnimes(list) {
             const container = document.getElementById('anime-container');
-            container.innerHTML = "";
             list.forEach(a => {
-                container.innerHTML += `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="card"><img src="img/${a.img}"><div class="card-info"><div class="card-title">${a.nom}</div><div style="color:#888;">${a.sortie} • ${a.ep} ep</div></div></a>`;
+                container.innerHTML += `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="card"><img src="img/${a.img}"><div class="card-info"><b>${a.nom}</b><br><span style="color:#888">${a.sortie}</span></div></a>`;
             });
         }
-
-        document.getElementById('search').oninput = (e) => displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(e.target.value.toLowerCase())));
-        window.randomAnime = () => { if(allAnimes.length) window.location.href = `video.html?name=${encodeURIComponent(allAnimes[Math.floor(Math.random()*allAnimes.length)].nom)}`; };
-
         init();
     </script>
 </body>
