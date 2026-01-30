@@ -20,27 +20,20 @@
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         .info-item { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--primary); font-size: 0.85em; display: flex; justify-content: space-between; align-items: center; }
         .info-item strong { color: #888; font-size: 0.75em; text-transform: uppercase; margin-right: 10px; }
-        .synopsis { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid #333; line-height: 1.4; font-size: 0.9em; }
-        .synopsis h3 { margin-top: 0; color: var(--primary); font-size: 1em; margin-bottom: 5px; }
-
+        
         .playlist-box { background: #222; margin-top: 15px; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-        .playlist-box select, .playlist-box input { width: 100%; background: #111; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; box-sizing: border-box; }
+        .playlist-box select, .playlist-box input { width: 100%; background: #111; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; margin-bottom: 10px; box-sizing: border-box; }
         .star-rating { font-size: 18px; color: #444; text-align: center; cursor: pointer; user-select: none; margin-bottom: 10px; display: flex; justify-content: center; gap: 2px; }
-        .star-rating span.active { color: #f1c40f; text-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
-        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-delete { width: 100%; background: transparent; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
-        .btn-delete:hover { background: rgba(255,71,87,0.1); }
+        .star-rating span.active { color: #f1c40f; }
+        
+        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .btn-delete { width: 100%; background: transparent; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
         .episodes-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; justify-content: center; }
         .ep-btn { background: #222; border: 1px solid #444; color: white; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .ep-btn.active { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .ep-btn.active { background: var(--primary); border-color: var(--primary); }
         .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; margin-bottom: 30px; }
         .video-player iframe { width: 100%; height: 100%; border: none; }
-
-        .comment-section { background: #7c7c7c; padding: 20px; border-radius: 10px; color: white; margin-top: 20px; }
-        .comment-header { background: #1b1b1b; padding: 12px; text-align: center; font-weight: 900; font-size: 1.5em; border-radius: 5px; margin-bottom: 15px; border-bottom: 2px solid #333; }
-        .comment-item { background: #8e8e8e; padding: 15px; border-radius: 8px; display: flex; gap: 15px; margin-bottom: 15px; border: 1px solid #999; }
-        .user-avatar { width: 55px; height: 55px; border-radius: 5px; border: 1px solid #777; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -49,17 +42,12 @@
         <div id="video-content">Chargement...</div>
         <div class="episodes-grid" id="episodes-list"></div>
         <div id="player-container" class="video-player" style="display:none;"><iframe id="main-iframe" allowfullscreen></iframe></div>
-        
-        <div class="comment-section">
-            <div class="comment-header">Commentaire</div>
-            <div id="comments-display"></div>
-        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, query, where, onSnapshot, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig);
@@ -68,7 +56,7 @@
         const animeName = new URLSearchParams(window.location.search).get('name');
         let userRating = 0;
 
-        // Gestion du bouton retour intelligent
+        // Retour intelligent
         if (document.referrer.includes('playlist.html')) {
             const link = document.getElementById('back-link');
             link.href = 'playlist.html';
@@ -88,7 +76,17 @@
                         <div class="left-column">
                             <img src="img/${anime.img}">
                             <div id="playlist-ui" class="playlist-box" style="display:none;">
-                                <select id="user-status"><option value="none">Statut...</option><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
+                                <select id="user-status">
+                                    <option value="none">Statut...</option>
+                                    <option value="watching">En cours</option>
+                                    <option value="waiting">En attente</option>
+                                    <option value="completed">Terminé</option>
+                                </select>
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                    <span style="font-size:0.8em; color:#888;">Vus :</span>
+                                    <input type="number" id="user-ep" min="0" max="${anime.ep}" value="0" style="margin:0; width:60px; text-align:center;">
+                                    <span style="font-size:0.8em; color:#888;">/ ${anime.ep}</span>
+                                </div>
                                 <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
                                 <input type="text" id="user-tags" placeholder="Bloc-note (Étiquettes)...">
                                 <button class="btn-save" id="save-btn">Sauvegarder</button>
@@ -118,27 +116,31 @@
                 onAuthStateChanged(auth, async (u) => {
                     if (u) {
                         document.getElementById('playlist-ui').style.display = 'block';
-                        const docRef = doc(db, "playlists", `${u.uid}_${animeName}`);
+                        // ID UNIQUE ANTI-DOUBLON
+                        const docId = `${u.uid}_${anime.nom.replace(/\s+/g, '_')}`;
+                        const docRef = doc(db, "playlists", docId);
+                        
                         const snap = await getDoc(docRef);
                         if (snap.exists()) { 
                             const d = snap.data();
                             document.getElementById('user-status').value = d.status || "none"; 
+                            document.getElementById('user-ep').value = d.epSeen || 0;
                             document.getElementById('user-tags').value = d.tags || "";
                             userRating = d.rating || 0; 
                             stars.forEach(st => st.classList.toggle('active', parseInt(st.dataset.v) <= userRating)); 
                         }
 
                         document.getElementById('save-btn').onclick = () => setDoc(docRef, { 
-                            uid: u.uid, anime: animeName, img: anime.img, 
+                            uid: u.uid, anime: anime.nom, img: anime.img, 
                             status: document.getElementById('user-status').value, 
+                            epSeen: parseInt(document.getElementById('user-ep').value),
                             rating: parseInt(userRating),
                             tags: document.getElementById('user-tags').value
-                        }).then(() => alert("Sauvegardé !"));
+                        }).then(() => alert("Mis à jour !"));
 
                         document.getElementById('delete-btn').onclick = async () => {
                             if(confirm("Supprimer de votre liste ?")) {
                                 await deleteDoc(docRef);
-                                alert("Supprimé !");
                                 window.location.reload();
                             }
                         };
