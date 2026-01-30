@@ -1,78 +1,168 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8"><title>Mes Playlists</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ma Playlist - Le Malicieux</title>
     <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --text: #eee; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
-        .header { padding: 20px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-        .nav-controls { display: flex; gap: 10px; align-items: center; }
-        select { background: #222; color: white; border: 1px solid #444; padding: 10px; border-radius: 5px; font-size: 1em; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; padding: 20px; }
-        .card { background: #1a1a1a; border-radius: 8px; overflow: hidden; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em; }
-        .card img { width: 100%; height: 230px; object-fit: cover; }
-        .card-info { padding: 10px; }
-        .btn-red { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer; }
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; --header-blue: #2e51a2; /* On va remplacer par du gris/rouge */ }
+        
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        
+        /* BANNIÈRE STYLE MAL */
+        .mal-banner { background: #1a1a1a; border-bottom: 2px solid var(--primary); padding: 20px; display: flex; align-items: center; gap: 20px; }
+        .mal-logo { width: 80px; height: 80px; border-radius: 10px; border: 2px solid var(--primary); }
+        .mal-titles h1 { margin: 0; color: var(--primary); font-size: 1.8em; }
+        .mal-titles p { margin: 5px 0 0; color: #888; font-style: italic; }
+
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+        
+        /* ONGLETS */
+        .tabs { display: flex; background: #222; border-radius: 5px 5px 0 0; overflow: hidden; border: 1px solid #333; }
+        .tab { padding: 12px 20px; cursor: pointer; border-right: 1px solid #333; font-weight: bold; font-size: 0.9em; transition: 0.3s; color: #bbb; }
+        .tab:hover { background: #2a2a2a; color: white; }
+        .tab.active { background: var(--primary); color: white; border-bottom: none; }
+
+        /* TABLEAU */
+        .list-table { width: 100%; border-collapse: collapse; background: #1a1a1a; border: 1px solid #333; }
+        .list-table thead { background: #111; color: var(--primary); text-transform: uppercase; font-size: 0.75em; }
+        .list-table th { padding: 12px; text-align: left; border-bottom: 2px solid #333; }
+        .list-table td { padding: 10px; border-bottom: 1px solid #222; font-size: 0.9em; vertical-align: middle; }
+        
+        .col-num { width: 30px; text-align: center; color: #666; font-weight: bold; }
+        .col-img img { width: 50px; height: 70px; object-fit: cover; border-radius: 4px; border: 1px solid #444; }
+        .col-title { font-weight: bold; color: white; text-decoration: none; }
+        .col-title:hover { color: var(--primary); }
+        .col-progress { color: #aaa; font-size: 0.85em; }
+        .col-score { color: #f1c40f; font-weight: bold; }
+        .tag-censure { background: rgba(255,71,87,0.15); color: var(--primary); padding: 3px 8px; border-radius: 4px; font-size: 0.8em; border: 1px solid rgba(255,71,87,0.3); }
+
+        .btn-back { display: inline-block; margin-bottom: 15px; color: white; text-decoration: none; font-size: 0.9em; opacity: 0.7; transition: 0.3s; }
+        .btn-back:hover { opacity: 1; color: var(--primary); }
+
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .status-watching { background: #2ecc71; }
+        .status-completed { background: #3498db; }
+        .status-waiting { background: #f1c40f; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div style="display:flex; align-items:center; gap:20px;">
-            <a href="index.html" class="btn-red">← Accueil</a>
-            <h1>Mes Playlists</h1>
-        </div>
-        <div class="nav-controls">
-            <select id="my-playlists-dropdown"><option value="">Sélectionner une liste...</option></select>
-            <button id="btn-create-list" class="btn-red">＋ Créer</button>
+
+    <div class="mal-banner">
+        <img src="img/logo.jpg" class="mal-logo">
+        <div class="mal-titles">
+            <h1>Le Malicieux</h1>
+            <p>Catalogue d'animes malicieux - Ma Liste Personnelle</p>
         </div>
     </div>
 
-    <div id="playlist-grid" class="grid"></div>
+    <div class="container">
+        <a href="index.html" class="btn-back">← Retour au catalogue</a>
+
+        <div class="tabs">
+            <div class="tab active" onclick="filterList('all', this)">Tous les animes</div>
+            <div class="tab" onclick="filterList('watching', this)">En cours</div>
+            <div class="tab" onclick="filterList('completed', this)">Terminé</div>
+            <div class="tab" onclick="filterList('waiting', this)">En attente</div>
+        </div>
+
+        <table class="list-table">
+            <thead>
+                <tr>
+                    <th class="col-num">#</th>
+                    <th>Image</th>
+                    <th>Titre de l'anime</th>
+                    <th>Progression</th>
+                    <th>Étiquettes</th>
+                    <th>Année</th>
+                    <th>Ma Note</th>
+                </tr>
+            </thead>
+            <tbody id="list-body">
+                </tbody>
+        </table>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
-        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig); 
+        const auth = getAuth(app); 
+        const db = getFirestore(app);
 
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) { window.location.href = "index.html"; return; }
+        let userItems = [];
+
+        onAuthStateChanged(auth, async (u) => {
+            if (!u) { window.location.href = "index.html"; return; }
             
-            // 1. Charger les noms des playlists dans le menu
-            const qNames = query(collection(db, "user_playlists_names"), where("uid", "==", user.uid));
-            onSnapshot(qNames, (snap) => {
-                const dropdown = document.getElementById('my-playlists-dropdown');
-                dropdown.innerHTML = '<option value="">Sélectionner une liste...</option>';
-                snap.forEach(doc => { dropdown.innerHTML += `<option value="${doc.id}">${doc.data().name}</option>`; });
+            // 1. Charger le CSV pour avoir les infos (Censure, Année, Episodes max)
+            const resp = await fetch('animes.csv');
+            const csvText = await resp.text();
+            const allAnimesData = csvText.split(/\r?\n/).slice(1).map(l => {
+                const c = l.split(';');
+                const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                return { nom: cl(c[0]), sortie: cl(c[3]), epMax: cl(c[4]), censure: cl(c[5]) };
             });
+
+            // 2. Charger la playlist Firebase
+            const q = query(collection(db, "playlists"), where("uid", "==", u.uid));
+            const s = await getDocs(q);
+            
+            userItems = [];
+            s.forEach(d => {
+                const data = d.data();
+                if(data.status === "none") return;
+                
+                // On fusionne avec les infos du CSV
+                const csvInfo = allAnimesData.find(a => a.nom === data.anime) || {};
+                userItems.push({ ...data, ...csvInfo });
+            });
+
+            renderTable(userItems);
         });
 
-        // 2. Afficher les animes de la playlist sélectionnée
-        document.getElementById('my-playlists-dropdown').onchange = (e) => {
-            const playlistId = e.target.value;
-            if (!playlistId) return;
-
-            const qAnimes = query(collection(db, "playlists"), 
-                where("uid", "==", auth.currentUser.uid),
-                where("playlistId", "==", playlistId)
-            );
-
-            onSnapshot(qAnimes, (snap) => {
-                const container = document.getElementById('playlist-grid');
-                container.innerHTML = "";
-                snap.forEach(d => {
-                    const data = d.data();
-                    container.innerHTML += `<a href="video.html?name=${encodeURIComponent(data.anime)}" class="card"><img src="img/${data.img}"><div class="card-info"><b>${data.anime}</b><br>Statut: ${data.status}<br>Note: ${data.rating}/10</div></a>`;
-                });
+        function renderTable(items) {
+            const body = document.getElementById('list-body');
+            body.innerHTML = "";
+            items.forEach((item, index) => {
+                const statusClass = `status-${item.status}`;
+                // Logique progression : si terminé -> epMax/epMax, sinon ?/epMax
+                const prog = item.status === 'completed' ? item.epMax : `?`;
+                
+                body.innerHTML += `
+                    <tr class="list-item" data-status="${item.status}">
+                        <td class="col-num">${index + 1}</td>
+                        <td class="col-img"><img src="img/${item.img}" onerror="this.src='https://via.placeholder.com/50x70'"></td>
+                        <td>
+                            <span class="status-dot ${statusClass}"></span>
+                            <a href="video.html?name=${encodeURIComponent(item.anime)}" class="col-title">${item.anime}</a>
+                        </td>
+                        <td class="col-progress">${prog} / ${item.epMax} ep</td>
+                        <td><span class="tag-censure">${item.censure || 'N/A'}</span></td>
+                        <td>${item.sortie || '????'}</td>
+                        <td class="col-score">⭐ ${item.rating}/10</td>
+                    </tr>
+                `;
             });
+        }
+
+        window.filterList = (status, el) => {
+            // UI Onglets
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+
+            // Filtrage
+            if (status === 'all') {
+                renderTable(userItems);
+            } else {
+                const filtered = userItems.filter(i => i.status === status);
+                renderTable(filtered);
+            }
         };
 
-        document.getElementById('btn-create-list').onclick = async () => {
-            const name = prompt("Nom de la playlist :");
-            if (name) await addDoc(collection(db, "user_playlists_names"), { uid: auth.currentUser.uid, name: name });
-        };
     </script>
 </body>
 </html>
