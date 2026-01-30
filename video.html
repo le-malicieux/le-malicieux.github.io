@@ -50,7 +50,7 @@
         
         <div class="comment-section">
             <h3>Commentaires</h3>
-            <div id="comment-form" style="margin-bottom:20px;">
+            <div id="comment-form-container" style="margin-bottom:20px;">
                 <textarea id="comment-input" placeholder="Ajouter un commentaire..." style="width:100%; height:60px; background:#111; color:white; border:1px solid #444; border-radius:5px; padding:10px; box-sizing:border-box;"></textarea>
                 <button id="btn-post" class="btn-save" style="margin-top:10px; width:auto; padding:8px 20px;">Poster</button>
                 <p id="comm-hint" style="font-size:0.75em; color:#777; margin-top:5px;">Connectez-vous pour commenter</p>
@@ -70,14 +70,9 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
         const animeName = new URLSearchParams(window.location.search).get('name');
+        
         let currentUser = null;
         let userRating = 0;
-
-        if (document.referrer.includes('playlist.html')) {
-            const link = document.getElementById('back-link');
-            link.href = 'playlist.html';
-            link.innerText = '← Retour à ma playlist';
-        }
 
         async function load() {
             const resp = await fetch('animes.csv'); const data = await resp.text();
@@ -87,11 +82,12 @@
             }).find(a => a.nom === animeName);
 
             if (anime) {
+                // Remplissage de l'interface
                 document.getElementById('video-content').innerHTML = `
                     <div class="anime-header">
                         <div class="left-column">
                             <img src="img/${anime.img}">
-                            <div id="playlist-ui" class="playlist-box">
+                            <div class="playlist-box">
                                 <select id="user-status">
                                     <option value="none">Statut...</option>
                                     <option value="watching">En cours</option>
@@ -104,7 +100,7 @@
                                     <span style="font-size:0.8em; color:#888;">/ ${anime.ep}</span>
                                 </div>
                                 <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
-                                <input type="text" id="user-tags" placeholder="Bloc-note (Étiquettes)...">
+                                <input type="text" id="user-tags" placeholder="Bloc-note...">
                                 <button class="btn-save" id="save-btn">Sauvegarder</button>
                                 <p id="save-hint" style="font-size:0.7em; text-align:center; color:#888; margin-top:5px;">Connectez-vous pour sauvegarder</p>
                                 <button class="btn-delete" id="delete-btn">Supprimer de la liste</button>
@@ -113,12 +109,10 @@
                         <div class="details">
                             <h1>${anime.nom}</h1>
                             <div class="info-grid">
-                                <div class="info-item"><strong>Popularité</strong>${anime.pop}</div>
                                 <div class="info-item"><strong>Score</strong>⭐ ${anime.score}/10</div>
                                 <div class="info-item"><strong>Année</strong>${anime.sortie}</div>
                                 <div class="info-item"><strong>Épisodes</strong>${anime.ep}</div>
                                 <div class="info-item"><strong>Censure</strong>${anime.censure}</div>
-                                <div class="info-item"><strong>État</strong>${anime.etat}</div>
                             </div>
                             <div class="synopsis"><h3>Synopsis</h3><p>${anime.desc}</p></div>
                         </div>
@@ -126,13 +120,16 @@
 
                 const stars = document.querySelectorAll('#stars span');
                 const updateStars = (val) => stars.forEach(st => st.classList.toggle('active', parseInt(st.dataset.v) <= val));
-                const requireAuth = (fn) => { if(!currentUser) signInWithPopup(auth, provider); else fn(); };
+                const loginPrompt = () => signInWithPopup(auth, provider);
 
-                stars.forEach(s => s.onclick = () => requireAuth(() => { 
-                    userRating = parseInt(s.dataset.v); 
+                // Étoiles : Connexion requise au clic
+                stars.forEach(s => s.onclick = () => {
+                    if(!currentUser) return loginPrompt();
+                    userRating = parseInt(s.dataset.v);
                     updateStars(userRating);
-                }));
+                });
 
+                // Gestion Auth
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     document.getElementById('comm-hint').style.display = u ? 'none' : 'block';
@@ -142,41 +139,35 @@
                         const docId = `${u.uid}_${anime.nom.replace(/\s+/g, '_')}`;
                         const docRef = doc(db, "playlists", docId);
                         const snap = await getDoc(docRef);
-                        if (snap.exists()) { 
+                        if (snap.exists()) {
                             const d = snap.data();
-                            document.getElementById('user-status').value = d.status || "none"; 
+                            document.getElementById('user-status').value = d.status || "none";
                             document.getElementById('user-ep').value = d.epSeen || 0;
                             document.getElementById('user-tags').value = d.tags || "";
-                            userRating = d.rating || 0; 
+                            userRating = d.rating || 0;
                             updateStars(userRating);
                         }
 
-                        document.getElementById('save-btn').onclick = () => setDoc(docRef, { 
-                            uid: u.uid, anime: anime.nom, img: anime.img, 
-                            status: document.getElementById('user-status').value, 
-                            epSeen: parseInt(document.getElementById('user-ep').value),
-                            rating: parseInt(userRating),
-                            tags: document.getElementById('user-tags').value
-                        }).then(() => alert("Mis à jour !"));
+                        document.getElementById('save-btn').onclick = () => {
+                            setDoc(docRef, {
+                                uid: u.uid, anime: anime.nom, img: anime.img,
+                                status: document.getElementById('user-status').value,
+                                epSeen: parseInt(document.getElementById('user-ep').value),
+                                rating: parseInt(userRating),
+                                tags: document.getElementById('user-tags').value
+                            }).then(() => alert("Enregistré !"));
+                        };
 
                         document.getElementById('delete-btn').onclick = async () => {
-                            if(confirm("Supprimer de votre liste ?")) { await deleteDoc(docRef); window.location.reload(); }
+                            if(confirm("Supprimer ?")) { await deleteDoc(docRef); window.location.reload(); }
                         };
                     } else {
-                        document.getElementById('save-btn').onclick = () => signInWithPopup(auth, provider);
-                        document.getElementById('delete-btn').onclick = () => signInWithPopup(auth, provider);
+                        document.getElementById('save-btn').onclick = loginPrompt;
+                        document.getElementById('delete-btn').onclick = loginPrompt;
                     }
                 });
 
-                document.getElementById('btn-post').onclick = () => requireAuth(async () => {
-                    const txt = document.getElementById('comment-input').value;
-                    if(!txt.trim()) return;
-                    await addDoc(collection(db, "commentaires"), { 
-                        anime: animeName, text: txt, userName: currentUser.displayName, userPhoto: currentUser.photoURL, date: serverTimestamp() 
-                    });
-                    document.getElementById('comment-input').value = "";
-                });
-
+                // Vidéo
                 if (anime.links.length > 0) {
                     document.getElementById('player-container').style.display = "block";
                     anime.links.forEach((l, i) => {
@@ -186,17 +177,36 @@
                     });
                 }
 
+                // POSTER COMMENTAIRE (Action)
+                document.getElementById('btn-post').onclick = () => {
+                    if(!currentUser) return loginPrompt();
+                    const txt = document.getElementById('comment-input').value;
+                    if(!txt.trim()) return;
+                    addDoc(collection(db, "commentaires"), {
+                        anime: animeName, text: txt, userName: currentUser.displayName, userPhoto: currentUser.photoURL, date: serverTimestamp()
+                    }).then(() => { document.getElementById('comment-input').value = ""; });
+                };
+
+                // CHARGEMENT DES COMMENTAIRES (Toujours actif, hors de Auth)
                 const qComments = query(collection(db, "commentaires"), where("anime", "==", animeName), orderBy("date", "desc"));
                 onSnapshot(qComments, (snap) => {
-                    const c = document.getElementById('comments-display'); c.innerHTML = "";
-                    if(snap.empty) c.innerHTML = "<p style='color:#666; font-size:0.9em;'>Aucun commentaire pour le moment.</p>";
-                    snap.forEach(doc => { 
-                        const d = doc.data(); 
+                    const cDisplay = document.getElementById('comments-display');
+                    cDisplay.innerHTML = "";
+                    if(snap.empty) {
+                        cDisplay.innerHTML = "<p style='color:#666;'>Aucun avis pour le moment.</p>";
+                        return;
+                    }
+                    snap.forEach(doc => {
+                        const d = doc.data();
                         const dateStr = d.date ? new Date(d.date.seconds * 1000).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : "A l'instant";
-                        c.innerHTML += `<div class="comment-item">
-                            <img src="${d.userPhoto || 'https://via.placeholder.com/40'}" class="user-avatar">
-                            <div><b>${d.userName}</b><span class="comment-date">${dateStr}</span><p style="margin:5px 0; font-size:0.9em;">${d.text}</p></div>
-                        </div>`; 
+                        cDisplay.innerHTML += `
+                            <div class="comment-item">
+                                <img src="${d.userPhoto || 'https://via.placeholder.com/40'}" class="user-avatar">
+                                <div>
+                                    <b>${d.userName}</b> <span class="comment-date">${dateStr}</span>
+                                    <p style="margin:5px 0; font-size:0.9em; color:#ccc;">${d.text}</p>
+                                </div>
+                            </div>`;
                     });
                 });
             }
