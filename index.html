@@ -121,7 +121,7 @@
         let allAnimes = [];
         const grid = document.getElementById('grid');
 
-        // Fonds d'écran aléatoires préservés
+        // Conservation stricte de tes fonds d'écran aléatoires
         const backgrounds = ['img/fond1.jpg', 'img/fond2.jpg', 'img/fond3.jpg', 'img/fond4.jpg', 'img/fond5.jpg'];
         document.body.style.backgroundImage = `url('${backgrounds[Math.floor(Math.random() * backgrounds.length)]}')`;
 
@@ -147,7 +147,7 @@
 
         function displayAnimes(list) {
             grid.innerHTML = "";
-            const fragment = document.createDocumentFragment(); // Optimisation : prépare tout en mémoire
+            const fragment = document.createDocumentFragment(); // Accélère le rendu
             
             list.forEach(anime => {
                 const card = document.createElement('a');
@@ -166,8 +166,10 @@
                 `;
                 fragment.appendChild(card);
             });
-            grid.appendChild(fragment); // Injection unique : plus de freeze
+            grid.appendChild(fragment); // Injection finale ultra-rapide
         }
+
+        document.getElementById('sort').addEventListener('change', (e) => sortAnimes(e.target.value));
 
         function sortAnimes(m) {
             let sorted = [...allAnimes];
@@ -181,17 +183,10 @@
             displayAnimes(sorted);
         }
 
-        // Recherche optimisée (Debounce)
-        let searchTimeout;
         document.getElementById('search').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                const val = e.target.value.toLowerCase();
-                displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
-            }, 150);
+            const val = e.target.value.toLowerCase();
+            displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
         });
-
-        document.getElementById('sort').addEventListener('change', (e) => sortAnimes(e.target.value));
 
         window.randomAnime = function() {
             if(allAnimes.length > 0) {
