@@ -12,26 +12,28 @@
         .back-btn:hover { background: var(--primary); color: white; }
 
         .anime-header { display: flex; gap: 20px; background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; align-items: flex-start; }
-        .left-column { width: 280px; flex-shrink: 0; }
-        .left-column img { width: 100%; border-radius: 10px; border: 2px solid var(--primary); object-fit: cover; }
+        
+        /* FIX IMAGE : PAS ÉTIRER */
+        .left-column { width: 280px; flex-shrink: 0; display: flex; flex-direction: column; }
+        .left-column img { width: 100%; height: auto; border-radius: 10px; border: 2px solid var(--primary); object-fit: contain; background: #000; }
         
         .details { flex: 1; }
         .details h1 { margin: 0 0 15px 0; color: var(--primary); font-size: 1.8em; }
         
-        /* GRILLE INFO COMPACTE (6 INFOS) */
+        /* INFOS COMPACTES */
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         .info-item { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--primary); font-size: 0.85em; display: flex; justify-content: space-between; align-items: center; }
         .info-item strong { color: #888; font-size: 0.75em; text-transform: uppercase; margin-right: 10px; }
 
-        .synopsis { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid #333; line-height: 1.4; font-size: 0.9em; }
+        .synopsis { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid #333; line-height: 1.4; font-size: 0.9em; max-height: 150px; overflow-y: auto; }
         .synopsis h3 { margin-top: 0; color: var(--primary); font-size: 1em; margin-bottom: 5px; }
 
-        /* BLOC PLAYLIST ET NOTE */
+        /* AJOUT PLAYLIST + NOTE PERSO */
         .playlist-box { background: #222; margin-top: 15px; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-        .playlist-box select { width: 100%; background: #111; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; }
+        .playlist-box select { width: 100%; background: #111; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; margin-bottom: 8px; cursor: pointer; }
         .star-rating { font-size: 18px; color: #444; text-align: center; cursor: pointer; user-select: none; margin-bottom: 10px; display: flex; justify-content: center; gap: 2px; }
         .star-rating span.active { color: #f1c40f; text-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
-        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; }
 
         .episodes-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; justify-content: center; }
         .ep-btn { background: #222; border: 1px solid #444; color: white; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
@@ -39,7 +41,6 @@
         .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; margin-bottom: 30px; }
         .video-player iframe { width: 100%; height: 100%; border: none; }
 
-        /* COMMENTAIRES */
         .comment-section { background: #333; padding: 20px; border-radius: 8px; color: white; margin-top: 20px; }
         .comment-header { background: #111; padding: 10px; text-align: center; font-weight: bold; border-radius: 5px; margin-bottom: 15px; }
         #comment-form textarea { width: 100%; height: 80px; background: #666; border: none; border-radius: 5px; padding: 10px; color: white; margin-bottom: 10px; resize: none; box-sizing: border-box; }
@@ -74,15 +75,30 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
         const animeName = new URLSearchParams(window.location.search).get('name');
-        let currentUser = null; let userRating = 0;
+        let currentUser = null; 
+        let userRating = 0;
+
+        async function loadUserPlaylists() {
+            if (!currentUser) return;
+            const q = query(collection(db, "user_playlists_names"), where("uid", "==", currentUser.uid));
+            onSnapshot(q, (snap) => {
+                const select = document.getElementById('select-playlist-choice');
+                if(!select) return;
+                select.innerHTML = '<option value="">Choisir une playlist...</option>';
+                snap.forEach(doc => { select.innerHTML += `<option value="${doc.id}">${doc.data().name}</option>`; });
+                select.innerHTML += '<option value="NEW">+ Créer une nouvelle playlist...</option>';
+            });
+        }
 
         onAuthStateChanged(auth, (user) => { 
             if (user) { 
                 currentUser = user; 
                 document.getElementById('auth-container').style.display = 'none'; 
-                document.getElementById('comment-form').style.display = 'block'; 
+                document.getElementById('comment-form').style.display = 'block';
+                loadUserPlaylists();
             } 
         });
+
         document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
 
         document.getElementById('btn-post').onclick = async () => {
@@ -105,9 +121,10 @@
                         <div class="left-column">
                             <img src="img/${anime.img}">
                             <div id="playlist-ui" class="playlist-box" style="display:none;">
+                                <select id="select-playlist-choice"><option value="">Chargement playlists...</option></select>
                                 <select id="user-status"><option value="none">Statut...</option><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Vu</option></select>
                                 <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
-                                <button class="btn-save" id="save-btn">Sauvegarder</button>
+                                <button class="btn-save" id="save-btn">Ajouter / Mettre à jour</button>
                             </div>
                         </div>
                         <div class="details">
@@ -127,15 +144,32 @@
                 const stars = document.querySelectorAll('#stars span');
                 stars.forEach(s => s.onclick = () => { userRating = s.dataset.v; stars.forEach(st => st.classList.toggle('active', st.dataset.v <= userRating)); });
 
-                onAuthStateChanged(auth, async (u) => {
-                    if (u) {
-                        document.getElementById('playlist-ui').style.display = 'block';
-                        const docRef = doc(db, "playlists", `${u.uid}_${animeName}`);
-                        const snap = await getDoc(docRef);
-                        if (snap.exists()) { document.getElementById('user-status').value = snap.data().status; userRating = snap.data().rating; stars.forEach(st => st.classList.toggle('active', st.dataset.v <= userRating)); }
-                        document.getElementById('save-btn').onclick = () => setDoc(docRef, { uid: u.uid, anime: animeName, img: anime.img, status: document.getElementById('user-status').value, rating: parseInt(userRating) }).then(() => alert("Sauvegardé !"));
+                if(currentUser) {
+                    document.getElementById('playlist-ui').style.display = 'block';
+                    loadUserPlaylists();
+                }
+
+                document.getElementById('save-btn').onclick = async () => {
+                    let playlistId = document.getElementById('select-playlist-choice').value;
+                    if (playlistId === "NEW") {
+                        const name = prompt("Nom de la nouvelle playlist :");
+                        if (!name) return;
+                        const newDoc = await addDoc(collection(db, "user_playlists_names"), { uid: currentUser.uid, name: name });
+                        playlistId = newDoc.id;
                     }
-                });
+                    if (!playlistId) { alert("Choisissez une playlist !"); return; }
+
+                    await setDoc(doc(db, "playlists", `${currentUser.uid}_${playlistId}_${animeName}`), {
+                        uid: currentUser.uid,
+                        playlistId: playlistId,
+                        anime: animeName,
+                        img: anime.img,
+                        status: document.getElementById('user-status').value,
+                        rating: parseInt(userRating),
+                        updatedAt: serverTimestamp()
+                    });
+                    alert("Enregistré dans la playlist !");
+                };
 
                 if (anime.links.length > 0) {
                     document.getElementById('player-container').style.display = "block";
