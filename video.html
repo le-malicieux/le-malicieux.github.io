@@ -24,10 +24,12 @@
         .synopsis h3 { margin-top: 0; color: var(--primary); font-size: 1em; margin-bottom: 5px; }
 
         .playlist-box { background: #222; margin-top: 15px; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-        .playlist-box select { width: 100%; background: #111; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; }
+        .playlist-box select, .playlist-box input { width: 100%; background: #111; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; box-sizing: border-box; }
         .star-rating { font-size: 18px; color: #444; text-align: center; cursor: pointer; user-select: none; margin-bottom: 10px; display: flex; justify-content: center; gap: 2px; }
         .star-rating span.active { color: #f1c40f; text-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
         .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-delete { width: 100%; background: transparent; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .btn-delete:hover { background: rgba(255,71,87,0.1); }
 
         .episodes-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; justify-content: center; }
         .ep-btn { background: #222; border: 1px solid #444; color: white; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
@@ -35,81 +37,43 @@
         .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; margin-bottom: 30px; }
         .video-player iframe { width: 100%; height: 100%; border: none; }
 
-        /* --- DESIGN COMMENTAIRES STYLE CAPTURE --- */
         .comment-section { background: #7c7c7c; padding: 20px; border-radius: 10px; color: white; margin-top: 20px; }
         .comment-header { background: #1b1b1b; padding: 12px; text-align: center; font-weight: 900; font-size: 1.5em; border-radius: 5px; margin-bottom: 15px; border-bottom: 2px solid #333; }
-        
-        .auth-notice { text-align: center; font-weight: bold; margin-bottom: 15px; font-size: 0.9em; }
-        
-        #comment-form textarea { width: 100%; height: 100px; background: #606060; border: 1px solid #555; border-radius: 5px; padding: 15px; color: #ccc; margin-bottom: 10px; resize: none; box-sizing: border-box; font-family: monospace; }
-        #btn-post { background: #333; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; float: right; font-weight: bold; border: 1px solid #444; }
-
-        .comment-item { background: #8e8e8e; padding: 15px; border-radius: 8px; display: flex; gap: 15px; margin-bottom: 15px; border: 1px solid #999; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+        .comment-item { background: #8e8e8e; padding: 15px; border-radius: 8px; display: flex; gap: 15px; margin-bottom: 15px; border: 1px solid #999; }
         .user-avatar { width: 55px; height: 55px; border-radius: 5px; border: 1px solid #777; object-fit: cover; }
-        .comment-body { flex: 1; }
-        .comment-body b { font-size: 1.1em; margin-right: 10px; }
-        .comment-date { font-size: 0.8em; color: #ccc; }
-        .comment-text { margin: 8px 0; font-weight: 500; font-size: 0.95em; }
-        .comment-role { font-size: 0.75em; color: #ccc; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="index.html" class="back-btn">← Retour au catalogue</a>
+        <a href="index.html" id="back-link" class="back-btn">← Retour au catalogue</a>
         <div id="video-content">Chargement...</div>
         <div class="episodes-grid" id="episodes-list"></div>
         <div id="player-container" class="video-player" style="display:none;"><iframe id="main-iframe" allowfullscreen></iframe></div>
         
         <div class="comment-section">
             <div class="comment-header">Commentaire</div>
-            <div id="auth-container" class="auth-notice">
-                Tu dois te connecter pour commenter<br><br>
-                <button style="background:#4285F4;color:white;border:none;padding:10px;border-radius:5px;cursor:pointer;" id="btn-login">Connexion Google</button>
-            </div>
-            <div id="comment-form" style="display:none;">
-                <textarea id="comment-input" placeholder="Ajoutez votre commentaire ..."></textarea>
-                <button id="btn-post">Poster</button>
-                <div style="clear:both;"></div>
-            </div>
-            <div id="comments-display" style="margin-top:20px;"></div>
+            <div id="comments-display"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, query, where, onSnapshot, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
         const animeName = new URLSearchParams(window.location.search).get('name');
-        let currentUser = null; let userRating = 0;
+        let userRating = 0;
 
-        onAuthStateChanged(auth, (user) => { 
-            if (user) { 
-                currentUser = user; 
-                document.getElementById('auth-container').style.display = 'none'; 
-                document.getElementById('comment-form').style.display = 'block'; 
-                document.getElementById('comment-input').placeholder = `Ajoutez votre commentaire ... (Connecté en tant que ${user.displayName})`;
-            } 
-        });
-        document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
-
-        document.getElementById('btn-post').onclick = async () => {
-            const text = document.getElementById('comment-input').value;
-            if (!text.trim()) return;
-            await addDoc(collection(db, "commentaires"), { 
-                anime: animeName, 
-                text: text, 
-                userName: currentUser.displayName, 
-                userPhoto: currentUser.photoURL, 
-                date: serverTimestamp() 
-            });
-            document.getElementById('comment-input').value = "";
-        };
+        // Gestion du bouton retour intelligent
+        if (document.referrer.includes('playlist.html')) {
+            const link = document.getElementById('back-link');
+            link.href = 'playlist.html';
+            link.innerText = '← Retour à ma playlist';
+        }
 
         async function load() {
             const resp = await fetch('animes.csv'); const data = await resp.text();
@@ -124,9 +88,11 @@
                         <div class="left-column">
                             <img src="img/${anime.img}">
                             <div id="playlist-ui" class="playlist-box" style="display:none;">
-                                <select id="user-status"><option value="none">Statut...</option><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Vu</option></select>
+                                <select id="user-status"><option value="none">Statut...</option><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
                                 <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
+                                <input type="text" id="user-tags" placeholder="Bloc-note (Étiquettes)...">
                                 <button class="btn-save" id="save-btn">Sauvegarder</button>
+                                <button class="btn-delete" id="delete-btn">Supprimer de la liste</button>
                             </div>
                         </div>
                         <div class="details">
@@ -146,10 +112,7 @@
                 const stars = document.querySelectorAll('#stars span');
                 stars.forEach(s => s.onclick = () => { 
                     userRating = parseInt(s.dataset.v); 
-                    stars.forEach(st => {
-                        const val = parseInt(st.dataset.v);
-                        st.classList.toggle('active', val <= userRating);
-                    });
+                    stars.forEach(st => st.classList.toggle('active', parseInt(st.dataset.v) <= userRating));
                 });
 
                 onAuthStateChanged(auth, async (u) => {
@@ -158,11 +121,27 @@
                         const docRef = doc(db, "playlists", `${u.uid}_${animeName}`);
                         const snap = await getDoc(docRef);
                         if (snap.exists()) { 
-                            document.getElementById('user-status').value = snap.data().status; 
-                            userRating = snap.data().rating; 
+                            const d = snap.data();
+                            document.getElementById('user-status').value = d.status || "none"; 
+                            document.getElementById('user-tags').value = d.tags || "";
+                            userRating = d.rating || 0; 
                             stars.forEach(st => st.classList.toggle('active', parseInt(st.dataset.v) <= userRating)); 
                         }
-                        document.getElementById('save-btn').onclick = () => setDoc(docRef, { uid: u.uid, anime: animeName, img: anime.img, status: document.getElementById('user-status').value, rating: parseInt(userRating) }).then(() => alert("Sauvegardé !"));
+
+                        document.getElementById('save-btn').onclick = () => setDoc(docRef, { 
+                            uid: u.uid, anime: animeName, img: anime.img, 
+                            status: document.getElementById('user-status').value, 
+                            rating: parseInt(userRating),
+                            tags: document.getElementById('user-tags').value
+                        }).then(() => alert("Sauvegardé !"));
+
+                        document.getElementById('delete-btn').onclick = async () => {
+                            if(confirm("Supprimer de votre liste ?")) {
+                                await deleteDoc(docRef);
+                                alert("Supprimé !");
+                                window.location.reload();
+                            }
+                        };
                     }
                 });
 
@@ -174,25 +153,6 @@
                         document.getElementById('episodes-list').appendChild(b); if (i === 0) b.click();
                     });
                 }
-
-                // Chargement des commentaires triés par date
-                const qComments = query(collection(db, "commentaires"), where("anime", "==", animeName), orderBy("date", "desc"));
-                onSnapshot(qComments, (snap) => {
-                    const c = document.getElementById('comments-display'); c.innerHTML = "";
-                    snap.forEach(doc => { 
-                        const d = doc.data(); 
-                        const dateStr = d.date ? new Date(d.date.seconds * 1000).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : "A l'instant";
-                        c.innerHTML += `
-                        <div class="comment-item">
-                            <img src="${d.userPhoto || 'https://via.placeholder.com/50'}" class="user-avatar">
-                            <div class="comment-body">
-                                <b>${d.userName}</b> <span class="comment-date">Le ${dateStr}</span>
-                                <p class="comment-text">${d.text}</p>
-                                <span class="comment-role">Membre</span>
-                            </div>
-                        </div>`; 
-                    });
-                });
             }
         }
         load();
