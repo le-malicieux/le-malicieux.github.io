@@ -10,7 +10,6 @@
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background-color: var(--bg); 
-            background-image: url('img/fond1.jpg');
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
@@ -117,29 +116,27 @@
         const auth = getAuth(app);
 
         let allAnimes = [];
-        let userPlaylistStatus = {}; 
+        let userPlaylist = {};
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
                 onSnapshot(q, (snap) => {
-                    userPlaylistStatus = {};
+                    userPlaylist = {};
                     snap.forEach(doc => { 
                         const data = doc.data();
-                        if (userPlaylistStatus[data.anime] !== 'completed') {
-                            userPlaylistStatus[data.anime] = data.status; 
-                        }
+                        userPlaylist[data.anime] = data.status; 
                     });
                     displayAnimes(allAnimes);
                 });
             }
         });
 
-        // OPTIMISATION : Sélection directe sans boucle fetch
+        // OPTIMISATION : Plus de boucle fetch. On applique l'image directement.
         function setRandomBackground() {
-            const totalFonds = 55;
-            const randomNum = Math.floor(Math.random() * totalFonds) + 1;
-            // On tente en .jpg par défaut, le navigateur gérera l'erreur si besoin
+            const nbFonds = 55;
+            const randomNum = Math.floor(Math.random() * nbFonds) + 1;
+            // On tente en jpg par défaut (le format le plus courant)
             document.body.style.backgroundImage = `url('img/fond${randomNum}.jpg')`;
         }
 
@@ -162,7 +159,7 @@
             const container = document.getElementById('anime-container');
             container.innerHTML = "";
             list.forEach(a => {
-                const status = userPlaylistStatus[a.nom] || "none";
+                const status = userPlaylist[a.nom] || "none";
                 let badgeHtml = "";
                 if (status === 'completed') badgeHtml = `<div class="status-badge">VU</div>`;
                 else if (status === 'waiting') badgeHtml = `<div class="status-badge">EN ATTENTE</div>`;
