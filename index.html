@@ -111,30 +111,21 @@
         import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const firebaseConfig = { 
-            apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", 
-            authDomain: "le-malicieux-v2.firebaseapp.com", 
-            projectId: "le-malicieux-v2", 
-            storageBucket: "le-malicieux-v2.firebasestorage.app", 
-            messagingSenderId: "938147445933", 
-            appId: "1:938147445933:web:86f9c65ee0737e66a9da24" 
-        };
+        const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
         let allAnimes = [];
-        let userPlaylistStatus = {}; // Stocke le meilleur statut par anime
+        let userPlaylistStatus = {}; 
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // On écoute TOUS les documents de la collection "playlists" appartenant à l'utilisateur
                 const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
                 onSnapshot(q, (snap) => {
                     userPlaylistStatus = {};
                     snap.forEach(doc => { 
                         const data = doc.data();
-                        // Priorité : si l'anime est 'completed' dans n'importe quelle liste, on garde 'completed'
                         if (userPlaylistStatus[data.anime] !== 'completed') {
                             userPlaylistStatus[data.anime] = data.status; 
                         }
@@ -144,24 +135,12 @@
             }
         });
 
-        async function setRandomBackground() {
-            document.body.style.backgroundImage = "url('img/fond1.jpg')";
-            const extensions = ['jpg', 'png', 'webp'];
-            let foundFiles = [];
-            for (let i = 1; i <= 30; i++) {
-                let foundAny = false;
-                for (let ext of extensions) {
-                    try {
-                        const response = await fetch(`img/fond${i}.${ext}`, { method: 'HEAD' });
-                        if (response.ok) { foundFiles.push(`fond${i}.${ext}`); foundAny = true; break; }
-                    } catch(e) {}
-                }
-                if (!foundAny && i > 5) break; 
-            }
-            if (foundFiles.length > 0) {
-                const randomImg = foundFiles[Math.floor(Math.random() * foundFiles.length)];
-                document.body.style.backgroundImage = `url('img/${randomImg}')`;
-            }
+        // OPTIMISATION : Sélection directe sans boucle fetch
+        function setRandomBackground() {
+            const totalFonds = 55;
+            const randomNum = Math.floor(Math.random() * totalFonds) + 1;
+            // On tente en .jpg par défaut, le navigateur gérera l'erreur si besoin
+            document.body.style.backgroundImage = `url('img/fond${randomNum}.jpg')`;
         }
 
         async function init() {
@@ -173,16 +152,7 @@
                     const c = line.split(';');
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                     if (!c[0] || c.length < 9) return null;
-                    return { 
-                        nom: clean(c[0]), 
-                        pop: clean(c[1]), 
-                        score: clean(c[2]), 
-                        sortie: clean(c[3]), 
-                        ep: clean(c[4]), 
-                        censure: clean(c[5]), 
-                        etat: clean(c[6]), 
-                        img: clean(c[8]) 
-                    };
+                    return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), img: clean(c[8]) };
                 }).filter(a => a !== null);
                 displayAnimes(allAnimes);
             } catch (err) { console.error(err); }
@@ -194,15 +164,9 @@
             list.forEach(a => {
                 const status = userPlaylistStatus[a.nom] || "none";
                 let badgeHtml = "";
-                
-                // Correspondance avec les textes demandés
-                if (status === 'completed') {
-                    badgeHtml = `<div class="status-badge">VU</div>`;
-                } else if (status === 'waiting') {
-                    badgeHtml = `<div class="status-badge">EN ATTENTE</div>`;
-                } else if (status === 'watching') {
-                    badgeHtml = `<div class="status-badge">EN COURS</div>`;
-                }
+                if (status === 'completed') badgeHtml = `<div class="status-badge">VU</div>`;
+                else if (status === 'waiting') badgeHtml = `<div class="status-badge">EN ATTENTE</div>`;
+                else if (status === 'watching') badgeHtml = `<div class="status-badge">EN COURS</div>`;
 
                 container.innerHTML += `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
