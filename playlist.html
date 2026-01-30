@@ -1,38 +1,78 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8"><title>Ma Playlist</title>
+    <meta charset="UTF-8"><title>Mes Playlists</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --text: #eee; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
-        .header { padding: 20px; background: rgba(255,255,255,0.05); display: flex; align-items: center; gap: 20px; }
+        .header { padding: 20px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .nav-controls { display: flex; gap: 10px; align-items: center; }
+        select { background: #222; color: white; border: 1px solid #444; padding: 10px; border-radius: 5px; font-size: 1em; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; padding: 20px; }
         .card { background: #1a1a1a; border-radius: 8px; overflow: hidden; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em; }
         .card img { width: 100%; height: 230px; object-fit: cover; }
         .card-info { padding: 10px; }
-        .btn-red { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+        .btn-red { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="header"><a href="index.html" class="btn-red">← Accueil</a><h1>Ma Playlist</h1></div>
+    <div class="header">
+        <div style="display:flex; align-items:center; gap:20px;">
+            <a href="index.html" class="btn-red">← Accueil</a>
+            <h1>Mes Playlists</h1>
+        </div>
+        <div class="nav-controls">
+            <select id="my-playlists-dropdown"><option value="">Sélectionner une liste...</option></select>
+            <button id="btn-create-list" class="btn-red">＋ Créer</button>
+        </div>
+    </div>
+
     <div id="playlist-grid" class="grid"></div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
 
-        onAuthStateChanged(auth, async (u) => {
-            if (!u) { window.location.href = "index.html"; return; }
-            const q = query(collection(db, "playlists"), where("uid", "==", u.uid));
-            const s = await getDocs(q); const c = document.getElementById('playlist-grid');
-            s.forEach(d => {
-                const data = d.data(); if(data.status === "none") return;
-                c.innerHTML += `<a href="video.html?name=${encodeURIComponent(data.anime)}" class="card"><img src="img/${data.img}"><div class="card-info"><b>${data.anime}</b><br>Ma note: ${data.rating}/10</div></a>`;
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+            
+            // 1. Charger les noms des playlists dans le menu
+            const qNames = query(collection(db, "user_playlists_names"), where("uid", "==", user.uid));
+            onSnapshot(qNames, (snap) => {
+                const dropdown = document.getElementById('my-playlists-dropdown');
+                dropdown.innerHTML = '<option value="">Sélectionner une liste...</option>';
+                snap.forEach(doc => { dropdown.innerHTML += `<option value="${doc.id}">${doc.data().name}</option>`; });
             });
         });
+
+        // 2. Afficher les animes de la playlist sélectionnée
+        document.getElementById('my-playlists-dropdown').onchange = (e) => {
+            const playlistId = e.target.value;
+            if (!playlistId) return;
+
+            const qAnimes = query(collection(db, "playlists"), 
+                where("uid", "==", auth.currentUser.uid),
+                where("playlistId", "==", playlistId)
+            );
+
+            onSnapshot(qAnimes, (snap) => {
+                const container = document.getElementById('playlist-grid');
+                container.innerHTML = "";
+                snap.forEach(d => {
+                    const data = d.data();
+                    container.innerHTML += `<a href="video.html?name=${encodeURIComponent(data.anime)}" class="card"><img src="img/${data.img}"><div class="card-info"><b>${data.anime}</b><br>Statut: ${data.status}<br>Note: ${data.rating}/10</div></a>`;
+                });
+            });
+        };
+
+        document.getElementById('btn-create-list').onclick = async () => {
+            const name = prompt("Nom de la playlist :");
+            if (name) await addDoc(collection(db, "user_playlists_names"), { uid: auth.currentUser.uid, name: name });
+        };
     </script>
 </body>
 </html>
