@@ -17,6 +17,8 @@
             margin: 0; 
             min-height: 100vh;
             transition: background-image 0.5s ease;
+            /* On met un fond par défaut pour éviter le flash noir au chargement */
+            background-image: url('img/fond1.jpg');
         }
 
         .top-navbar {
@@ -116,28 +118,54 @@
         const auth = getAuth(app);
 
         let allAnimes = [];
-        let userPlaylist = {};
+        let userPlaylistStatus = {}; 
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
                 onSnapshot(q, (snap) => {
-                    userPlaylist = {};
+                    userPlaylistStatus = {};
                     snap.forEach(doc => { 
                         const data = doc.data();
-                        userPlaylist[data.anime] = data.status; 
+                        if (userPlaylistStatus[data.anime] !== 'completed') {
+                            userPlaylistStatus[data.anime] = data.status; 
+                        }
                     });
                     displayAnimes(allAnimes);
                 });
             }
         });
 
-        // OPTIMISATION : Plus de boucle fetch. On applique l'image directement.
+        // OPTIMISATION ULTIME : On charge le .jpg direct, s'il n'existe pas, on tente les autres
         function setRandomBackground() {
-            const nbFonds = 55;
-            const randomNum = Math.floor(Math.random() * nbFonds) + 1;
-            // On tente en jpg par défaut (le format le plus courant)
-            document.body.style.backgroundImage = `url('img/fond${randomNum}.jpg')`;
+            const totalFonds = 55;
+            const num = Math.floor(Math.random() * totalFonds) + 1;
+            const body = document.body;
+            
+            // On définit l'URL cible (priorité au jpg comme demandé)
+            const urlJpg = `img/fond${num}.jpg`;
+            
+            const tempImg = new Image();
+            tempImg.src = urlJpg;
+            
+            tempImg.onload = () => {
+                body.style.backgroundImage = `url('${urlJpg}')`;
+            };
+
+            tempImg.onerror = () => {
+                // Si le JPG fondX n'existe pas, on tente webp ou png rapidement
+                const fallbackExts = ['webp', 'png'];
+                let i = 0;
+                const tryNext = () => {
+                    if (i >= fallbackExts.length) return;
+                    const nextUrl = `img/fond${num}.${fallbackExts[i]}`;
+                    const nextImg = new Image();
+                    nextImg.src = nextUrl;
+                    nextImg.onload = () => { body.style.backgroundImage = `url('${nextUrl}')`; };
+                    nextImg.onerror = () => { i++; tryNext(); };
+                };
+                tryNext();
+            };
         }
 
         async function init() {
@@ -159,16 +187,20 @@
             const container = document.getElementById('anime-container');
             container.innerHTML = "";
             list.forEach(a => {
-                const status = userPlaylist[a.nom] || "none";
+                const status = userPlaylistStatus[a.nom] || "none";
                 let badgeHtml = "";
                 if (status === 'completed') badgeHtml = `<div class="status-badge">VU</div>`;
                 else if (status === 'waiting') badgeHtml = `<div class="status-badge">EN ATTENTE</div>`;
                 else if (status === 'watching') badgeHtml = `<div class="status-badge">EN COURS</div>`;
 
+                // On prend le nom du fichier image sans l'extension pour tester
+                const baseImg = a.img.includes('.') ? a.img.split('.')[0] : a.img; 
+
                 container.innerHTML += `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                         ${badgeHtml}
-                        <img src="img/${a.img}" onerror="this.src='https://via.placeholder.com/170x230'">
+                        <img src="img/${baseImg}.jpg" 
+                             onerror="this.onerror=function(){this.onerror=function(){this.src='https://via.placeholder.com/170x230'};this.src='img/${baseImg}.png'};this.src='img/${baseImg}.webp'">
                         <div class="card-info">
                             <div class="card-title">${a.nom}</div>
                             <div class="card-meta">
