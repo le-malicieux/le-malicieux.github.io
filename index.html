@@ -25,199 +25,151 @@
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .nav-left { display: flex; align-items: center; gap: 12px; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; }
 
-        .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
-            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
-        }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
-
-        .hero-section {
-            height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 20px;
-        }
-        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; }
-        .main-title { font-size: 2.8em; margin: 0; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
-        .main-slogan { font-size: 1.3em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
-
-        .content-area { background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent); padding: 40px 10px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; max-width: 1300px; margin: 0 auto; }
+        .nav-left { display: flex; align-items: center; gap: 20px; }
+        .logo-text { font-size: 1.5em; font-weight: bold; color: var(--primary); text-decoration: none; text-transform: uppercase; letter-spacing: 2px; }
         
-        .card { 
-            position: relative;
-            background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; 
-            border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em;
+        .search-container { flex: 1; max-width: 500px; margin: 0 20px; position: relative; }
+        .search-container input {
+            width: 100%; padding: 10px 15px 10px 40px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+            color: white; outline: none; transition: 0.3s;
         }
-        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
-        .card img { width: 100%; height: 230px; object-fit: cover; display: block; }
+        .search-container input:focus { background: rgba(255,255,255,0.15); border-color: var(--primary); }
 
-        .status-badge {
-            position: absolute; top: 10px; left: 10px;
-            background: #ff0000; color: #fff;
-            padding: 4px 8px; font-weight: 900;
-            font-size: 11px; border-radius: 3px;
-            z-index: 20; text-transform: uppercase;
-            box-shadow: 0 0 10px rgba(0,0,0,0.8);
-            border: 1px solid white;
-        }
+        .nav-right { display: flex; align-items: center; gap: 15px; }
+        .nav-link { color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; transition: 0.3s; font-size: 0.9em; font-weight: 500; }
+        .nav-link:hover { background: var(--primary); }
 
-        .card-info { padding: 8px; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.1em; }
-        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 1px 4px; border-radius: 3px; }
+        .container { padding: 20px; max-width: 1400px; margin: 0 auto; }
         
-        .discord-btn { background: #7289da; color: white; text-decoration: none; padding: 6px 12px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
-        .auth-status { font-size: 0.8em; color: #888; margin-right: 10px; }
+        .filters { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; }
+        .filter-group { display: flex; align-items: center; gap: 10px; }
+        .filter-group label { font-size: 0.8em; color: #888; text-transform: uppercase; }
+        
+        select {
+            background: #222; color: white; border: 1px solid #444; padding: 8px 12px;
+            border-radius: 5px; cursor: pointer; outline: none;
+        }
+
+        .anime-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 25px;
+        }
+
+        .anime-card {
+            background: var(--card-bg); border-radius: 12px; overflow: hidden;
+            transition: 0.3s; text-decoration: none; color: white;
+            border: 1px solid rgba(255,255,255,0.05); position: relative;
+        }
+        .anime-card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
+        
+        .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+        
+        .anime-info { padding: 12px; }
+        .anime-info h3 { margin: 0; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .anime-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.8em; }
+        .score { color: #f1c40f; font-weight: bold; }
+        .year { color: #888; }
+        
+        .badge-pop {
+            position: absolute; top: 10px; left: 10px; background: var(--primary);
+            color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.7em; font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <div class="top-navbar">
+    <nav class="top-navbar">
         <div class="nav-left">
-            <img src="img/logo.jpg" class="nav-logo-small">
-            <span class="nav-title">Le Malicieux</span>
+            <a href="index.html" class="logo-text">Le Malicieux</a>
+            <div class="nav-right">
+                <a href="playlist.html" class="nav-link">Ma Playlist</a>
+                <button onclick="randomAnime()" class="nav-link" style="background:none; border:1px solid var(--primary); cursor:pointer;">Aléatoire</button>
+            </div>
         </div>
-        <div class="nav-center">
-            <input type="text" id="search" placeholder="Recherche...">
-            <select id="sort">
-                <option value="">Trier par...</option>
-                <option value="nom">Nom (A-Z)</option>
-                <option value="popularite">Popularité</option>
-                <option value="score">Score</option>
-                <option value="sortie">Année</option>
-                <option value="episodes">Épisodes</option>
-                <option value="censure">Censure</option>
-                <option value="etat">État</option>
-            </select>
-            <a href="playlist.html" class="btn-red">📂 Playlist</a>
-            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
+        
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Rechercher un anime...">
         </div>
-        <div id="auth-ui" style="display:flex; align-items:center;">
-             <button id="login-btn" class="discord-btn" style="background:var(--primary); border:none; cursor:pointer;">Se connecter</button>
+
+        <div class="nav-right">
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Trier par</label>
+                    <select id="sort">
+                        <option value="popularite">Popularité</option>
+                        <option value="nom">Nom A-Z</option>
+                        <option value="score">Score</option>
+                        <option value="sortie">Date de sortie</option>
+                        <option value="episodes">Nombre d'épisodes</option>
+                        <option value="censure">Censure</option>
+                        <option value="etat">État</option>
+                    </select>
+                </div>
+            </div>
         </div>
-        <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
+    </nav>
+
+    <div class="container">
+        <div class="anime-grid" id="grid"></div>
     </div>
 
-    <div class="hero-section">
-        <img src="img/logo.jpg" class="main-logo">
-        <h1 class="main-title">le-malicieux.github.io</h1>
-        <p class="main-slogan">Catalogue d'animes malicieux</p>
-    </div>
-
-    <div class="content-area">
-        <div id="anime-container" class="grid"></div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
+    <script>
         let allAnimes = [];
-        let userPlaylistStatus = {}; 
+        const grid = document.getElementById('grid');
 
-        onAuthStateChanged(auth, (user) => {
-            const authUi = document.getElementById('auth-ui');
-            if (user) {
-                authUi.innerHTML = `<span class="auth-status">${user.displayName}</span><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Déconnexion</button>`;
-                document.getElementById('logout-btn').onclick = () => signOut(auth);
+        const backgrounds = ['img/fond1.jpg', 'img/fond2.jpg', 'img/fond3.jpg', 'img/fond4.jpg', 'img/fond5.jpg'];
+        document.body.style.backgroundImage = `url('${backgrounds[Math.floor(Math.random() * backgrounds.length)]}')`;
 
-                const q = query(collection(db, "playlists"), where("uid", "==", user.uid));
-                onSnapshot(q, (snap) => {
-                    userPlaylistStatus = {};
-                    snap.forEach(doc => { 
-                        const data = doc.data();
-                        if (userPlaylistStatus[data.anime] !== 'completed') {
-                            userPlaylistStatus[data.anime] = data.status; 
-                        }
-                    });
-                    displayAnimes(allAnimes);
-                });
-            } else {
-                authUi.innerHTML = `<button id="login-btn" class="discord-btn" style="background:var(--primary); border:none; cursor:pointer;">Se connecter</button>`;
-                document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
-                userPlaylistStatus = {};
-                displayAnimes(allAnimes);
-            }
-        });
-
-        function setRandomBackground() {
-            const totalFonds = 55;
-            const num = Math.floor(Math.random() * totalFonds) + 1;
-            const body = document.body;
-            const urlJpg = `img/fond${num}.jpg`;
-            const tempImg = new Image();
-            tempImg.src = urlJpg;
-            tempImg.onload = () => { body.style.backgroundImage = `url('${urlJpg}')`; };
-            tempImg.onerror = () => {
-                const fallbackExts = ['webp', 'png'];
-                let i = 0;
-                const tryNext = () => {
-                    if (i >= fallbackExts.length) return;
-                    const nextUrl = `img/fond${num}.${fallbackExts[i]}`;
-                    const nextImg = new Image();
-                    nextImg.src = nextUrl;
-                    nextImg.onload = () => { body.style.backgroundImage = `url('${nextUrl}')`; };
-                    nextImg.onerror = () => { i++; tryNext(); };
-                };
-                tryNext();
-            };
-        }
-
-        async function init() {
-            setRandomBackground();
+        async function loadAnimes() {
             try {
-                const response = await fetch('animes.csv');
-                const rawData = await response.text();
-                allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
+                const resp = await fetch('animes.csv');
+                const text = await resp.text();
+                
+                allAnimes = text.split(/\r?\n/).slice(1).map(line => {
                     const c = line.split(';');
-                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    if (!c[0] || c.length < 9) return null;
-                    return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), img: clean(c[8]) };
-                }).filter(a => a !== null);
-                displayAnimes(allAnimes);
-            } catch (err) { console.error(err); }
+                    const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    if (c.length < 9) return null;
+                    return {
+                        nom: cl(c[0]), pop: cl(c[1]), score: cl(c[2]), 
+                        sortie: cl(c[3]), ep: cl(c[4]), censure: cl(c[5]),
+                        etat: cl(c[6]), desc: cl(c[7]), img: cl(c[8])
+                    };
+                }).filter(a => a && a.nom);
+
+                sortAnimes("popularite");
+            } catch (e) { console.error(e); }
         }
 
         function displayAnimes(list) {
-            const container = document.getElementById('anime-container');
-            container.innerHTML = "";
-            list.forEach(a => {
-                const status = userPlaylistStatus[a.nom] || "none";
-                let badgeHtml = "";
-                if (status === 'completed') badgeHtml = `<div class="status-badge">VU</div>`;
-                else if (status === 'waiting') badgeHtml = `<div class="status-badge">EN ATTENTE</div>`;
-                else if (status === 'watching') badgeHtml = `<div class="status-badge">EN COURS</div>`;
-
-                const baseImg = a.img.includes('.') ? a.img.split('.')[0] : a.img; 
-
-                container.innerHTML += `
-                    <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
-                        ${badgeHtml}
-                        <img src="img/${baseImg}.jpg" 
-                             onerror="this.onerror=function(){this.onerror=function(){this.src='https://via.placeholder.com/170x230'};this.src='img/${baseImg}.png'};this.src='img/${baseImg}.webp'">
-                        <div class="card-info">
-                            <div class="card-title">${a.nom}</div>
-                            <div class="card-meta">
-                                <span>📅 ${a.sortie}</span> • <span>📺 ${a.ep} ep</span><br>
-                                <span class="tag">${a.censure}</span> • ⭐ ${a.score}
-                            </div>
+            grid.innerHTML = "";
+            const fragment = document.createDocumentFragment(); // Cette ligne supprime le freeze
+            
+            list.forEach(anime => {
+                const card = document.createElement('a');
+                card.href = `video.html?name=${encodeURIComponent(anime.nom)}`;
+                card.className = 'anime-card';
+                card.innerHTML = `
+                    <div class="badge-pop">${anime.pop}</div>
+                    <img src="img/${anime.img}" loading="lazy" onerror="this.src='https://via.placeholder.com/180x250'">
+                    <div class="anime-info">
+                        <h3>${anime.nom}</h3>
+                        <div class="anime-meta">
+                            <span class="score">⭐ ${anime.score}</span>
+                            <span class="year">${anime.sortie}</span>
                         </div>
-                    </a>`;
+                    </div>
+                `;
+                fragment.appendChild(card);
             });
+            grid.appendChild(fragment); // Affiche tout d'un coup
         }
 
-        document.getElementById('sort').addEventListener('change', (e) => {
+        function sortAnimes(m) {
             let sorted = [...allAnimes];
-            const m = e.target.value;
             if (m === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
             if (m === "score") sorted.sort((a,b) => parseFloat(b.score) - parseFloat(a.score));
             if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
@@ -226,7 +178,9 @@
             if (m === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
             if (m === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
             displayAnimes(sorted);
-        });
+        }
+
+        document.getElementById('sort').addEventListener('change', (e) => sortAnimes(e.target.value));
 
         document.getElementById('search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
@@ -235,11 +189,12 @@
 
         window.randomAnime = function() {
             if(allAnimes.length > 0) {
-                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
-                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+                const rand = allAnimes[Math.floor(Math.random() * allAnimes.length)];
+                window.location.href = `video.html?name=${encodeURIComponent(rand.nom)}`;
             }
         };
-        init();
+
+        loadAnimes();
     </script>
 </body>
 </html>
