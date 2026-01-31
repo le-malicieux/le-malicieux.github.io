@@ -33,11 +33,15 @@
 
         .container { padding: 20px; max-width: 1300px; margin: 0 auto; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; }
-        .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em; }
+        .card { position: relative; background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em; }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
         .card img { width: 100%; height: 230px; object-fit: cover; }
         .card-info { padding: 8px; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.1em; }
+        
+        .delete-btn-overlay { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #ff4757; border: none; border-radius: 4px; padding: 5px; cursor: pointer; z-index: 10; opacity: 0; transition: 0.3s; }
+        .card:hover .delete-btn-overlay { opacity: 1; }
+
         .empty-msg { text-align: center; font-size: 1.2em; color: #888; margin-top: 50px; grid-column: 1 / -1; }
     </style>
 </head>
@@ -54,9 +58,8 @@
         <div class="controls-row">
             <button class="btn-create" onclick="createPlaylist()">+ Créer une playlist</button>
             <select id="custom-selector" class="playlist-select">
-                <option value="all">Toutes mes listes</option>
-                <option value="default">Liste Principale</option>
-            </select>
+                <option value="all">Toutes mes playlists</option>
+                </select>
         </div>
         <div class="playlist-selector">
             <div class="select-card active" data-status="watching"><h3>En cours</h3></div>
@@ -71,7 +74,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, query, where, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, addDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
@@ -89,9 +92,8 @@
             img.src = `img/fond${num}.jpg`;
             img.onload = () => document.body.style.backgroundImage = `url('${img.src}')`;
             img.onerror = () => {
-                const nextImg = new Image();
-                nextImg.src = `img/fond${num}.png`;
-                nextImg.onload = () => document.body.style.backgroundImage = `url('${nextImg.src}')`;
+                const nImg = new Image(); nImg.src = `img/fond${num}.png`;
+                nImg.onload = () => document.body.style.backgroundImage = `url('${nImg.src}')`;
             };
         }
 
@@ -99,22 +101,27 @@
             currentUser = user;
             if (user) {
                 setRandomBackground();
-                // Playlists Perso
+                // Playlists Perso : Chargement uniquement des playlists utilisateur
                 onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", user.uid)), (snap) => {
                     const selector = document.getElementById('custom-selector');
-                    selector.innerHTML = '<option value="all">Toutes mes listes</option><option value="default">Liste Principale</option>';
+                    selector.innerHTML = '<option value="all">Toutes mes playlists</option>';
                     snap.forEach(doc => selector.innerHTML += `<option value="${doc.data().name}">${doc.data().name}</option>`);
                 });
-                // Données Animes
+                // Animes
                 onSnapshot(query(collection(db, "playlists"), where("uid", "==", user.uid)), (snap) => {
                     userAnimes = [];
-                    snap.forEach(doc => userAnimes.push(doc.data()));
+                    snap.forEach(d => userAnimes.push({ id: d.id, ...d.data() }));
                     refreshDisplay();
                 });
-            } else {
-                document.getElementById('playlist-grid').innerHTML = '<div class="empty-msg">Connectez-vous sur l\'accueil.</div>';
             }
         });
+
+        window.removeAnime = async (e, id) => {
+            e.preventDefault(); e.stopPropagation();
+            if(confirm("Supprimer cet anime de la liste ?")) {
+                await deleteDoc(doc(db, "playlists", id));
+            }
+        };
 
         window.createPlaylist = async () => {
             if(!currentUser) return;
@@ -131,13 +138,13 @@
             };
         });
 
-        document.getElementById('custom-selector').onchange = () => refreshDisplay();
+        document.getElementById('custom-selector').onchange = refreshDisplay;
 
         function refreshDisplay() {
             const selectedList = document.getElementById('custom-selector').value;
             let filtered = userAnimes.filter(a => a.status === currentStatus);
             if (selectedList !== 'all') {
-                filtered = filtered.filter(a => a.playlistTarget === selectedList || (!a.playlistTarget && selectedList === 'default'));
+                filtered = filtered.filter(a => a.playlistTarget === selectedList);
             }
             const grid = document.getElementById('playlist-grid');
             if(filtered.length === 0) {
@@ -145,13 +152,16 @@
                 return;
             }
             grid.innerHTML = filtered.map(a => `
-                <a href="video.html?name=${encodeURIComponent(a.anime)}" class="card">
-                    <img src="img/${a.img.split('.')[0]}.jpg" onerror="this.src='img/${a.img.split('.')[0]}.png'">
-                    <div class="card-info">
-                        <div class="card-title">${a.anime}</div>
-                        <div>⭐ Note: ${a.rating}/10 • Ep: ${a.epSeen}</div>
-                    </div>
-                </a>`).join('');
+                <div class="card">
+                    <button class="delete-btn-overlay" onclick="removeAnime(event, '${a.id}')">🗑️</button>
+                    <a href="video.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;">
+                        <img src="img/${a.img.split('.')[0]}.jpg" onerror="this.src='img/${a.img.split('.')[0]}.png'">
+                        <div class="card-info">
+                            <div class="card-title">${a.anime}</div>
+                            <div>⭐ ${a.rating}/10 • Ep: ${a.epSeen}</div>
+                        </div>
+                    </a>
+                </div>`).join('');
         }
     </script>
 </body>
