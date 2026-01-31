@@ -34,7 +34,7 @@
 
         .container { padding: 20px; max-width: 1300px; margin: 0 auto; }
         
-        /* Mode Grille */
+        /* Grille */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; }
         .card { position: relative; background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em; }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
@@ -44,7 +44,7 @@
         .delete-btn-overlay { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #ff4757; border: none; border-radius: 4px; padding: 5px; cursor: pointer; z-index: 10; opacity: 0; transition: 0.3s; }
         .card:hover .delete-btn-overlay { opacity: 1; }
 
-        /* Mode Liste (Style MAL) */
+        /* Liste (Style MAL) */
         .list-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; overflow: hidden; display: none; font-size: 0.9em; }
         .list-table th { background: #111; padding: 12px; text-align: left; color: var(--primary); border-bottom: 2px solid #333; }
         .list-table td { padding: 10px; border-bottom: 1px solid #222; }
@@ -99,21 +99,10 @@
 
     <div class="container">
         <div id="playlist-grid" class="grid"></div>
-        
         <table id="playlist-table" class="list-table">
             <thead>
                 <tr>
-                    <th class="status-bar"></th>
-                    <th>#</th>
-                    <th>Image</th>
-                    <th>Titre de l'anime</th>
-                    <th>Ma Note</th>
-                    <th>Progrès</th>
-                    <th>Score MAL</th>
-                    <th>Pop.</th>
-                    <th>Année</th>
-                    <th>Censure</th>
-                    <th>Action</th>
+                    <th class="status-bar"></th><th>#</th><th>Image</th><th>Titre</th><th>Ma Note</th><th>Progrès</th><th>Score MAL</th><th>Pop.</th><th>Année</th><th>Censure</th><th>Action</th>
                 </tr>
             </thead>
             <tbody id="list-body"></tbody>
@@ -135,7 +124,20 @@
         let csvDataMap = {};
         let currentStatus = 'watching';
 
-        // 1. Charger le CSV pour les 6 infos supplémentaires
+        // Gestion du fond aléatoire (JPG -> PNG -> WEBP)
+        function setRandomBackground() {
+            const num = Math.floor(Math.random() * 55) + 1;
+            const tryLoad = (exts) => {
+                if (exts.length === 0) return;
+                const ext = exts.shift();
+                const img = new Image();
+                img.src = `img/fond${num}.${ext}`;
+                img.onload = () => document.body.style.backgroundImage = `url('${img.src}')`;
+                img.onerror = () => tryLoad(exts);
+            };
+            tryLoad(['jpg', 'png', 'webp']);
+        }
+
         async function loadCSV() {
             const resp = await fetch('animes.csv');
             const text = await resp.text();
@@ -145,7 +147,7 @@
                 if(c[0]) {
                     csvDataMap[cl(c[0])] = {
                         pop: cl(c[1]), score: cl(c[2]), sortie: cl(c[3]), 
-                        epMax: cl(c[4]), censure: cl(c[5]), etat: cl(c[6])
+                        epMax: cl(c[4]), censure: cl(c[5])
                     };
                 }
             });
@@ -154,8 +156,8 @@
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
+                setRandomBackground();
                 await loadCSV();
-                // Playlists Perso
                 onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", user.uid)), (snap) => {
                     const selector = document.getElementById('custom-selector');
                     const currentVal = selector.value;
@@ -164,7 +166,6 @@
                     selector.value = currentVal;
                     toggleDeleteBtn();
                 });
-                // Animes de la playlist
                 onSnapshot(query(collection(db, "playlists"), where("uid", "==", user.uid)), (snap) => {
                     userAnimes = [];
                     snap.forEach(d => {
@@ -177,27 +178,25 @@
             }
         });
 
-        // Suppression Anime
         window.removeAnime = async (e, id) => {
             e.preventDefault(); e.stopPropagation();
-            if(confirm("Supprimer cet anime de la liste ?")) await deleteDoc(doc(db, "playlists", id));
+            if(confirm("Supprimer cet anime ?")) await deleteDoc(doc(db, "playlists", id));
         };
 
-        // Création Playlist
         window.createPlaylist = async () => {
             const name = prompt("Nom de la playlist :");
             if(name) await addDoc(collection(db, "playlists_custom"), { uid: currentUser.uid, name: name });
         };
 
-        // Suppression Playlist Courante
         document.getElementById('btn-del-playlist').onclick = async () => {
             const name = document.getElementById('custom-selector').value;
             if(name === "all") return;
-            if(confirm(`Supprimer la playlist "${name}" ? (Les animes resteront en base)`)) {
+            if(confirm(`Supprimer la playlist "${name}" ?`)) {
                 const q = query(collection(db, "playlists_custom"), where("uid", "==", currentUser.uid), where("name", "==", name));
                 const snap = await getDocs(q);
-                snap.forEach(async (d) => await deleteDoc(doc(db, "playlists_custom"), d.id));
+                snap.forEach(async (d) => await deleteDoc(doc(db, "playlists_custom", d.id)));
                 document.getElementById('custom-selector').value = "all";
+                toggleDeleteBtn();
             }
         };
 
@@ -206,7 +205,6 @@
             document.getElementById('btn-del-playlist').style.display = (sel.value === "all") ? "none" : "inline-block";
         }
 
-        // Switch Status Tabs
         document.querySelectorAll('.select-card').forEach(card => {
             card.onclick = () => {
                 document.querySelectorAll('.select-card').forEach(c => c.classList.remove('active'));
@@ -225,11 +223,9 @@
             const mode = document.getElementById('display-mode').value;
             const sortVal = document.getElementById('sort-selector').value;
 
-            // Filtrage
             let filtered = userAnimes.filter(a => a.status === currentStatus);
             if (selectedList !== 'all') filtered = filtered.filter(a => a.playlistTarget === selectedList);
 
-            // Tri
             filtered.sort((a, b) => {
                 if (sortVal === "nom") return a.anime.localeCompare(b.anime);
                 if (sortVal === "score_mal") return parseFloat(b.score || 0) - parseFloat(a.score || 0);
@@ -237,7 +233,7 @@
                 if (sortVal === "sortie") return b.sortie?.localeCompare(a.sortie);
                 if (sortVal === "episodes") return (parseInt(b.epMax) || 0) - (parseInt(a.epMax) || 0);
                 if (sortVal === "note_perso") return (b.rating || 0) - (a.rating || 0);
-                return 0; // "date" par défaut (ordre Firestore)
+                return 0;
             });
 
             const grid = document.getElementById('playlist-grid');
