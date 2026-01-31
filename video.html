@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Malicieux - Visionnage</title>
+    <title>Visionnage - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
@@ -18,13 +18,13 @@
         .anime-title { font-size: 2em; color: var(--primary); margin: 0 0 10px 0; }
         
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid #444; }
-        .playlist-box select, .playlist-box input { background: #333; color: white; border: 1px solid #555; padding: 5px; border-radius: 4px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
+        .playlist-box select, .playlist-box input { background: #333; color: white; border: 1px solid #555; padding: 7px; border-radius: 4px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
         
-        .star-rating { font-size: 1.5em; color: #444; cursor: pointer; margin: 10px 0; }
+        .star-rating { font-size: 1.5em; color: #444; cursor: pointer; margin: 10px 0; text-align: center; }
         .star-rating span.active { color: #f1c40f; }
         
-        .btn-save { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 5px; }
-        .btn-delete { background: #333; color: #ff4757; border: 1px solid #ff4757; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; }
+        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 5px; }
+        .btn-delete { background: #333; color: #ff4757; border: 1px solid #ff4757; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
 
         .player-section { margin-top: 30px; background: #000; border-radius: 15px; overflow: hidden; display: none; }
         iframe { width: 100%; aspect-ratio: 16/9; border: none; }
@@ -32,7 +32,6 @@
         .ep-btn { background: #222; color: white; border: 1px solid #444; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
         .ep-btn.active { background: var(--primary); border-color: var(--primary); }
 
-        .comments-section { margin-top: 40px; background: var(--card-bg); padding: 20px; border-radius: 15px; }
         .comment-input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; }
     </style>
 </head>
@@ -42,7 +41,7 @@
         <div id="anime-details">Chargement...</div>
         <div class="player-section" id="player-container"><iframe id="main-iframe" allowfullscreen></iframe></div>
         <div class="episodes-container" id="episodes-list"></div>
-        <div class="comments-section">
+        <div class="comments-section" style="margin-top:40px; background:var(--card-bg); padding:20px; border-radius:15px;">
             <h3>Commentaires</h3>
             <textarea id="comment-input" class="comment-input" placeholder="Ajouter un commentaire..." rows="3"></textarea>
             <button id="btn-post" class="btn-save" style="width: auto; padding: 10px 30px;">Publier</button>
@@ -53,13 +52,12 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
 
         const params = new URLSearchParams(window.location.search);
         const animeName = params.get('name');
@@ -71,8 +69,7 @@
             const data = await resp.text();
             const lines = data.split(/\r?\n/).slice(1);
             const anime = lines.map(l => {
-                const c = l.split(';');
-                const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                const c = l.split(';'); const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                 if(cl(c[0]) === animeName) return { nom: cl(c[0]), desc: cl(c[7]), img: cl(c[8]), ep: cl(c[4]), links: c.slice(9).map(cl).filter(x => x) };
             }).find(x => x);
 
@@ -82,51 +79,53 @@
                         <div class="left-column">
                             <img src="img/${anime.img.split('.')[0]}.jpg" onerror="this.src='img/${anime.img.split('.')[0]}.png'">
                             <div class="playlist-box">
-                                <label style="font-size:0.8em; color:#888;">Statut</label>
+                                <label style="font-size:0.75em; color:#888;">Statut</label>
                                 <select id="user-status"><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
-                                <label style="font-size:0.8em; color:#888;">Playlist cible</label>
-                                <select id="target-playlist"><option value="default">Liste Principale</option></select>
-                                <label style="font-size:0.8em; color:#888;">Épisodes vus</label>
+                                <label style="font-size:0.75em; color:#888;">Playlist cible</label>
+                                <select id="target-playlist"><option value="">Chargement...</option></select>
+                                <label style="font-size:0.75em; color:#888;">Épisodes vus</label>
                                 <input type="number" id="user-ep" min="0" max="${anime.ep}" value="0">
                                 <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
                                 <button class="btn-save" id="save-btn">Sauvegarder sur...</button>
-                                <button class="btn-delete" id="delete-btn">Supprimer</button>
+                                <button class="btn-delete" id="delete-btn">Supprimer de la liste</button>
                             </div>
                         </div>
                         <div class="right-column">
                             <h1 class="anime-title">${anime.nom}</h1>
-                            <p>${anime.desc}</p>
+                            <p style="line-height:1.6; color:#ccc;">${anime.desc}</p>
                         </div>
                     </div>`;
 
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
-                        // Charger Playlists Perso
+                        // Charger les playlists perso de l'utilisateur
                         onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", u.uid)), (snap) => {
                             const sel = document.getElementById('target-playlist');
-                            sel.innerHTML = '<option value="default">Liste Principale</option>';
+                            sel.innerHTML = snap.empty ? '<option value="">(Aucune playlist)</option>' : '';
                             snap.forEach(d => sel.innerHTML += `<option value="${d.data().name}">${d.data().name}</option>`);
                         });
-                        // Charger données actuelles
+
                         const docRef = doc(db, "playlists", u.uid + "_" + anime.nom);
-                        const snap = await getDoc(docRef);
-                        if(snap.exists()) {
-                            const d = snap.data();
+                        const docSnap = await getDoc(docRef);
+                        if(docSnap.exists()) {
+                            const d = docSnap.data();
                             document.getElementById('user-status').value = d.status;
                             document.getElementById('user-ep').value = d.epSeen;
-                            if(d.playlistTarget) document.getElementById('target-playlist').value = d.playlistTarget;
-                            userRating = d.rating;
+                            userRating = d.rating || 0;
                             updateStars(userRating);
+                            setTimeout(() => { if(d.playlistTarget) document.getElementById('target-playlist').value = d.playlistTarget; }, 600);
                         }
+
                         document.getElementById('save-btn').onclick = () => {
+                            const target = document.getElementById('target-playlist').value;
+                            if(!target) return alert("Créez d'abord une playlist dans l'onglet Playlist !");
                             setDoc(docRef, {
                                 uid: u.uid, anime: anime.nom, img: anime.img, status: document.getElementById('user-status').value,
-                                epSeen: parseInt(document.getElementById('user-ep').value), rating: userRating,
-                                playlistTarget: document.getElementById('target-playlist').value
-                            }).then(() => alert("Sauvegardé !"));
+                                epSeen: parseInt(document.getElementById('user-ep').value), rating: userRating, playlistTarget: target
+                            }).then(() => alert("Sauvegardé dans " + target));
                         };
-                        document.getElementById('delete-btn').onclick = () => deleteDoc(docRef).then(() => location.reload());
+                        document.getElementById('delete-btn').onclick = () => deleteDoc(docRef).then(() => { alert("Supprimé"); location.reload(); });
                     }
                 });
 
@@ -140,14 +139,14 @@
                     snap.forEach(doc => {
                         const d = doc.data();
                         cDisp.innerHTML += `<div style="margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
-                            <b>${d.userName}</b> <small style="color:#666">${d.date?.toDate().toLocaleDateString() || ''}</small>
+                            <b style="color:var(--primary)">${d.userName}</b> <small style="color:#666">${d.date?.toDate().toLocaleDateString() || ''}</small>
                             <p style="margin:5px 0;">${d.text}</p>
                         </div>`;
                     });
                 });
 
                 document.getElementById('btn-post').onclick = async () => {
-                    if(!currentUser) return signInWithPopup(auth, provider);
+                    if(!currentUser) return alert("Connectez-vous sur l'accueil !");
                     const txt = document.getElementById('comment-input').value;
                     if(txt.trim()) {
                         await addDoc(collection(db, "commentaires"), { anime: animeName, text: txt, userName: currentUser.displayName, date: serverTimestamp() });
