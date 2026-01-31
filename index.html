@@ -17,6 +17,7 @@
             margin: 0; 
             min-height: 100vh;
             transition: background-image 0.5s ease;
+            /* Fond par défaut immédiat */
             background-image: url('img/fond1.jpg');
         }
 
@@ -125,10 +126,29 @@
             displayAnimes(allAnimes);
         });
 
-        // Corrigé pour éviter le freeze : on applique le fond sans attendre le téléchargement complet
+        // Version améliorée : charge le fond sans bloquer l'initialisation
         function setRandomBackground() {
             const num = Math.floor(Math.random() * 55) + 1;
-            document.body.style.backgroundImage = `url('img/fond${num}.jpg')`;
+            const body = document.body;
+            
+            // On tente le JPG directement
+            const img = new Image();
+            img.src = `img/fond${num}.jpg`;
+            img.onload = () => body.style.backgroundImage = `url('${img.src}')`;
+            
+            // Si le JPG rate, on essaie les autres sans freezer
+            img.onerror = () => {
+                const fallbacks = ['webp', 'png'];
+                let i = 0;
+                const tryNext = () => {
+                    if (i >= fallbacks.length) return;
+                    const nextImg = new Image();
+                    nextImg.src = `img/fond${num}.${fallbacks[i]}`;
+                    nextImg.onload = () => body.style.backgroundImage = `url('${nextImg.src}')`;
+                    nextImg.onerror = () => { i++; tryNext(); };
+                };
+                tryNext();
+            };
         }
 
         async function init() {
