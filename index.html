@@ -125,27 +125,10 @@
             displayAnimes(allAnimes);
         });
 
+        // Corrigé pour éviter le freeze : on applique le fond sans attendre le téléchargement complet
         function setRandomBackground() {
-            const totalFonds = 55;
-            const num = Math.floor(Math.random() * totalFonds) + 1;
-            const body = document.body;
-            const urlJpg = `img/fond${num}.jpg`;
-            const tempImg = new Image();
-            tempImg.src = urlJpg;
-            tempImg.onload = () => { body.style.backgroundImage = `url('${urlJpg}')`; };
-            tempImg.onerror = () => {
-                const fallbackExts = ['webp', 'png'];
-                let i = 0;
-                const tryNext = () => {
-                    if (i >= fallbackExts.length) return;
-                    const nextUrl = `img/fond${num}.${fallbackExts[i]}`;
-                    const nextImg = new Image();
-                    nextImg.src = nextUrl;
-                    nextImg.onload = () => { body.style.backgroundImage = `url('${nextUrl}')`; };
-                    nextImg.onerror = () => { i++; tryNext(); };
-                };
-                tryNext();
-            };
+            const num = Math.floor(Math.random() * 55) + 1;
+            document.body.style.backgroundImage = `url('img/fond${num}.jpg')`;
         }
 
         async function init() {
