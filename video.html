@@ -11,32 +11,37 @@
         .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 6px; transition: 0.3s; }
         .back-btn:hover { background: var(--primary); color: white; }
 
-        .anime-header { display: flex; gap: 25px; background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
-        .left-column { width: 280px; flex-shrink: 0; }
+        .anime-header { display: flex; gap: 25px; background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; align-items: flex-start; }
+        
+        .left-column { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
         .left-column img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        
         .right-column { flex: 1; display: flex; flex-direction: column; gap: 15px; }
-        
         .anime-title { font-size: 2.2em; color: var(--primary); margin: 0; }
-        
-        /* Layout colonnes dans le header */
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-        .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-        .playlist-box select, .playlist-box input { background: #333; color: white; border: 1px solid #555; padding: 7px; border-radius: 4px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
+        /* Infos CSV */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+        .stat-item { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; }
+        .stat-item small { color: var(--primary); font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+        .stat-item span { font-weight: bold; font-size: 0.9em; }
+
+        /* Blocs sous l'image */
+        .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; width: 100%; box-sizing: border-box; }
+        .playlist-box select, .playlist-box input { background: #333; color: white; border: 1px solid #555; padding: 8px; border-radius: 4px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
         
-        .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); height: fit-content; }
-        .link-title { font-size: 0.9em; font-weight: bold; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+        .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); width: 100%; box-sizing: border-box; }
+        .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
         
-        .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 8px; border-radius: 5px; margin-bottom: 8px; font-size: 0.85em; text-align: center; border: 1px solid #444; transition: 0.3s; }
+        .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 8px; border-radius: 5px; margin-bottom: 8px; font-size: 0.85em; text-align: center; border: 1px solid #444; transition: 0.3s; width: 100%; box-sizing: border-box; cursor: pointer; }
         .btn-link:hover { background: var(--primary); border-color: var(--primary); }
 
-        .star-rating { font-size: 1.3em; color: #444; cursor: pointer; margin: 5px 0; text-align: center; }
+        .star-rating { font-size: 1.3em; color: #444; cursor: pointer; margin: 5px 0; text-align: center; display: flex; justify-content: center; }
         .star-rating span.active { color: #f1c40f; }
         
-        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 5px; }
-        .btn-delete { background: #333; color: #ff4757; border: 1px solid #ff4757; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 0.8em; }
+        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
+        .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
 
-        .player-section { margin-top: 30px; background: #000; border-radius: 15px; overflow: hidden; display: none; }
+        .player-section { margin-top: 20px; background: #000; border-radius: 15px; overflow: hidden; display: none; }
         iframe { width: 100%; aspect-ratio: 16/9; border: none; }
 
         .comment-input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box; }
@@ -85,10 +90,8 @@
                 const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                 if(cl(c[0]) === animeName) {
                     return { 
-                        nom: cl(c[0]), 
-                        ep: cl(c[4]), 
-                        desc: cl(c[7]), 
-                        img: cl(c[8]),
+                        nom: cl(c[0]), pop: cl(c[1]), score: cl(c[2]), year: cl(c[3]), ep: cl(c[4]), 
+                        censure: cl(c[5]), etat: cl(c[6]), desc: cl(c[7]), img: cl(c[8]),
                         streamLinks: c[9] ? c[9].split(',').map(cl) : [],
                         downloadLinks: c[10] ? c[10].split(',').map(cl) : []
                     };
@@ -100,66 +103,69 @@
                     <div class="anime-header">
                         <div class="left-column">
                             <img src="img/${anime.img.split('.')[0]}.jpg" onerror="this.src='img/${anime.img.split('.')[0]}.png'">
+                            
+                            <div class="playlist-box">
+                                <label style="font-size:0.7em; color:#888; text-transform:uppercase;">Ma Liste</label>
+                                <select id="user-status"><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
+                                <select id="target-playlist"><option value="">Chargement...</option></select>
+                                <input type="number" id="user-ep" min="0" max="${anime.ep}" value="0">
+                                <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
+                                <button class="btn-save" id="save-btn">Enregistrer</button>
+                                <button class="btn-delete" id="delete-btn">Supprimer de la liste</button>
+                            </div>
+
+                            <div class="link-box">
+                                <div class="link-title">📥 Téléchargement</div>
+                                <div id="dl-area"></div>
+                                <div class="link-title" style="margin-top:15px;">🎬 Visionnage</div>
+                                <div id="stream-area"></div>
+                            </div>
                         </div>
+
                         <div class="right-column">
                             <h1 class="anime-title">${anime.nom}</h1>
-                            <p style="font-size:0.9em; color:#bbb; margin:0;">${anime.desc}</p>
                             
-                            <div class="info-grid">
-                                <div class="playlist-box">
-                                    <label style="font-size:0.7em; color:#888; text-transform:uppercase;">Ma Playlist</label>
-                                    <select id="user-status"><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
-                                    <select id="target-playlist"><option value="">Chargement...</option></select>
-                                    <input type="number" id="user-ep" min="0" max="${anime.ep}" value="0">
-                                    <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
-                                    <button class="btn-save" id="save-btn">Sauvegarder</button>
-                                    <button class="btn-delete" id="delete-btn">Retirer de la liste</button>
-                                </div>
-
-                                <div class="link-box">
-                                    <div class="link-title">📥 TÉLÉCHARGEMENT</div>
-                                    <div id="dl-area"></div>
-                                    
-                                    <div class="link-title" style="margin-top:20px;">🎬 VISIONNAGE</div>
-                                    <div id="stream-area"></div>
-                                </div>
+                            <div class="stats-grid">
+                                <div class="stat-item"><small>Pop.</small><span>${anime.pop}</span></div>
+                                <div class="stat-item"><small>Score MAL</small><span>⭐ ${anime.score}</span></div>
+                                <div class="stat-item"><small>Année</small><span>${anime.year}</span></div>
+                                <div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div>
+                                <div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div>
+                                <div class="stat-item"><small>État</small><span>${anime.etat}</span></div>
                             </div>
+
+                            <p style="line-height:1.6; color:#ccc;">${anime.desc}</p>
                         </div>
                     </div>`;
 
-                // Génération des liens de téléchargement
+                // Liens
                 const dlArea = document.getElementById('dl-area');
-                if(anime.downloadLinks.length > 0) {
-                    anime.downloadLinks.forEach((link, i) => {
-                        dlArea.innerHTML += `<a href="${link}" target="_blank" class="btn-link">Lien Terabox ${anime.downloadLinks.length > 1 ? i+1 : ''}</a>`;
-                    });
-                } else { dlArea.innerHTML = "<small style='color:#666'>Aucun lien</small>"; }
+                if(anime.downloadLinks.length > 0 && anime.downloadLinks[0] !== "") {
+                    anime.downloadLinks.forEach((link, i) => dlArea.innerHTML += `<a href="${link}" target="_blank" class="btn-link">Terabox ${anime.downloadLinks.length > 1 ? i+1 : ''}</a>`);
+                } else dlArea.innerHTML = "<small style='color:#555'>Non disponible</small>";
 
-                // Génération des liens de visionnage
                 const streamArea = document.getElementById('stream-area');
-                if(anime.streamLinks.length > 0) {
+                if(anime.streamLinks.length > 0 && anime.streamLinks[0] !== "") {
                     anime.streamLinks.forEach((link, i) => {
                         const b = document.createElement('button');
                         b.className = 'btn-link';
-                        b.style.width = "100%";
-                        b.style.cursor = "pointer";
                         b.innerText = `Lecteur ${i+1}`;
                         b.onclick = () => {
                             document.getElementById('player-container').style.display = "block";
                             document.getElementById('main-iframe').src = link;
-                            window.scrollTo({ top: 500, behavior: 'smooth' });
+                            window.scrollTo({ top: document.getElementById('player-container').offsetTop - 20, behavior: 'smooth' });
                         };
                         streamArea.appendChild(b);
                     });
-                } else { streamArea.innerHTML = "<small style='color:#666'>Aucun lien</small>"; }
+                } else streamArea.innerHTML = "<small style='color:#555'>Non disponible</small>";
 
-                // --- GESTION FIREBASE ---
+                // Firebase
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
                         onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", u.uid)), (snap) => {
                             const sel = document.getElementById('target-playlist');
-                            sel.innerHTML = snap.empty ? '<option value="">(Aucune playlist)</option>' : '';
+                            sel.innerHTML = snap.empty ? '<option value="">(Par défaut)</option>' : '';
                             snap.forEach(d => sel.innerHTML += `<option value="${d.data().name}">${d.data().name}</option>`);
                         });
 
@@ -171,18 +177,17 @@
                             document.getElementById('user-ep').value = d.epSeen;
                             userRating = d.rating || 0;
                             updateStars(userRating);
-                            setTimeout(() => { if(d.playlistTarget) document.getElementById('target-playlist').value = d.playlistTarget; }, 600);
+                            setTimeout(() => { if(d.playlistTarget) document.getElementById('target-playlist').value = d.playlistTarget; }, 500);
                         }
 
                         document.getElementById('save-btn').onclick = () => {
-                            const target = document.getElementById('target-playlist').value;
-                            if(!target) return alert("Choisissez une playlist !");
                             setDoc(docRef, {
                                 uid: u.uid, anime: anime.nom, img: anime.img, status: document.getElementById('user-status').value,
-                                epSeen: parseInt(document.getElementById('user-ep').value), rating: userRating, playlistTarget: target
-                            }).then(() => alert("Sauvegardé !"));
+                                epSeen: parseInt(document.getElementById('user-ep').value), rating: userRating, 
+                                playlistTarget: document.getElementById('target-playlist').value, epMax: anime.ep
+                            }).then(() => alert("Mis à jour !"));
                         };
-                        document.getElementById('delete-btn').onclick = () => deleteDoc(docRef).then(() => { alert("Supprimé"); location.reload(); });
+                        document.getElementById('delete-btn').onclick = () => { if(confirm("Enlever ?")) deleteDoc(docRef).then(() => location.reload()); };
                     }
                 });
 
@@ -203,7 +208,7 @@
                 });
 
                 document.getElementById('btn-post').onclick = async () => {
-                    if(!currentUser) return alert("Connectez-vous !");
+                    if(!currentUser) return alert("Connecte-toi d'abord !");
                     const txt = document.getElementById('comment-input').value;
                     if(txt.trim()) {
                         await addDoc(collection(db, "commentaires"), { anime: animeName, text: txt, userName: currentUser.displayName, date: serverTimestamp() });
