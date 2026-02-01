@@ -11,34 +11,40 @@
         .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 6px; transition: 0.3s; }
         .back-btn:hover { background: var(--primary); color: white; }
 
-        .anime-header { display: flex; gap: 25px; background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; align-items: flex-start; }
+        .anime-header { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
         
-        .left-column { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
-        .left-column img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        /* Layout Principal */
+        .top-info { display: flex; gap: 25px; margin-bottom: 25px; }
+        .poster { width: 280px; flex-shrink: 0; }
+        .poster img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         
-        .right-column { flex: 1; display: flex; flex-direction: column; gap: 15px; }
+        .main-details { flex: 1; display: flex; flex-direction: column; gap: 15px; }
         .anime-title { font-size: 2.2em; color: var(--primary); margin: 0; }
 
-        /* Infos CSV */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .stat-item { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; }
         .stat-item small { color: var(--primary); font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 4px; }
         .stat-item span { font-weight: bold; font-size: 0.9em; }
 
-        /* Blocs sous l'image */
-        .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; width: 100%; box-sizing: border-box; }
+        /* Zone Bas : Playlist et Liens côte à côte */
+        .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
+
+        .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
         .playlist-box select, .playlist-box input { background: #333; color: white; border: 1px solid #555; padding: 8px; border-radius: 4px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
         
-        .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); width: 100%; box-sizing: border-box; }
-        .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
-        
+        .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); }
+        .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+        .ublock-tip { font-size: 0.75em; color: #888; text-transform: none; font-weight: normal; }
+        .ublock-tip a { color: #3498db; text-decoration: none; }
+
         .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 8px; border-radius: 5px; margin-bottom: 8px; font-size: 0.85em; text-align: center; border: 1px solid #444; transition: 0.3s; width: 100%; box-sizing: border-box; cursor: pointer; }
         .btn-link:hover { background: var(--primary); border-color: var(--primary); }
 
         .star-rating { font-size: 1.3em; color: #444; cursor: pointer; margin: 5px 0; text-align: center; display: flex; justify-content: center; }
         .star-rating span.active { color: #f1c40f; }
         
-        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
+        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
 
         .player-section { margin-top: 20px; background: #000; border-radius: 15px; overflow: hidden; display: none; }
@@ -101,47 +107,54 @@
             if(anime) {
                 document.getElementById('anime-details').innerHTML = `
                     <div class="anime-header">
-                        <div class="left-column">
-                            <img src="img/${anime.img.split('.')[0]}.jpg" onerror="this.src='img/${anime.img.split('.')[0]}.png'">
-                            
+                        <div class="top-info">
+                            <div class="poster">
+                                <img src="img/${anime.img.split('.')[0]}.jpg" onerror="this.src='img/${anime.img.split('.')[0]}.png'">
+                            </div>
+                            <div class="main-details">
+                                <h1 class="anime-title">${anime.nom}</h1>
+                                <div class="stats-grid">
+                                    <div class="stat-item"><small>Pop.</small><span>${anime.pop}</span></div>
+                                    <div class="stat-item"><small>Score MAL</small><span>⭐ ${anime.score}</span></div>
+                                    <div class="stat-item"><small>Année</small><span>${anime.year}</span></div>
+                                    <div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div>
+                                    <div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div>
+                                    <div class="stat-item"><small>État</small><span>${anime.etat}</span></div>
+                                </div>
+                                <p style="line-height:1.5; color:#ccc; margin:0;">${anime.desc}</p>
+                            </div>
+                        </div>
+
+                        <div class="bottom-controls">
                             <div class="playlist-box">
-                                <label style="font-size:0.7em; color:#888; text-transform:uppercase;">Ma Liste</label>
+                                <label style="font-size:0.75em; color:var(--primary); font-weight:bold; text-transform:uppercase; display:block; margin-bottom:10px;">Ma Liste Personnelle</label>
                                 <select id="user-status"><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
                                 <select id="target-playlist"><option value="">Chargement...</option></select>
-                                <input type="number" id="user-ep" min="0" max="${anime.ep}" value="0">
+                                <input type="number" id="user-ep" min="0" max="${anime.ep}" value="0" placeholder="Épisode">
                                 <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
-                                <button class="btn-save" id="save-btn">Enregistrer</button>
-                                <button class="btn-delete" id="delete-btn">Supprimer de la liste</button>
+                                <button class="btn-save" id="save-btn">Mettre à jour ma liste</button>
+                                <button class="btn-delete" id="delete-btn">Retirer de ma liste</button>
                             </div>
 
                             <div class="link-box">
                                 <div class="link-title">📥 Téléchargement</div>
-                                <div id="dl-area"></div>
-                                <div class="link-title" style="margin-top:15px;">🎬 Visionnage</div>
-                                <div id="stream-area"></div>
+                                <div id="dl-area" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                                
+                                <div class="link-title" style="margin-top:20px;">
+                                    🎬 Visionnage 
+                                    <span class="ublock-tip">Conseillé : <a href="https://ublockorigin.com" target="_blank">uBlock Origin</a></span>
+                                </div>
+                                <div id="stream-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
                             </div>
-                        </div>
-
-                        <div class="right-column">
-                            <h1 class="anime-title">${anime.nom}</h1>
-                            
-                            <div class="stats-grid">
-                                <div class="stat-item"><small>Pop.</small><span>${anime.pop}</span></div>
-                                <div class="stat-item"><small>Score MAL</small><span>⭐ ${anime.score}</span></div>
-                                <div class="stat-item"><small>Année</small><span>${anime.year}</span></div>
-                                <div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div>
-                                <div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div>
-                                <div class="stat-item"><small>État</small><span>${anime.etat}</span></div>
-                            </div>
-
-                            <p style="line-height:1.6; color:#ccc;">${anime.desc}</p>
                         </div>
                     </div>`;
 
-                // Liens
+                // Remplissage des liens
                 const dlArea = document.getElementById('dl-area');
                 if(anime.downloadLinks.length > 0 && anime.downloadLinks[0] !== "") {
-                    anime.downloadLinks.forEach((link, i) => dlArea.innerHTML += `<a href="${link}" target="_blank" class="btn-link">Terabox ${anime.downloadLinks.length > 1 ? i+1 : ''}</a>`);
+                    anime.downloadLinks.forEach((link, i) => {
+                        dlArea.innerHTML += `<a href="${link}" target="_blank" class="btn-link" style="flex:1; min-width:120px;">Terabox ${anime.downloadLinks.length > 1 ? i+1 : ''}</a>`;
+                    });
                 } else dlArea.innerHTML = "<small style='color:#555'>Non disponible</small>";
 
                 const streamArea = document.getElementById('stream-area');
@@ -159,7 +172,7 @@
                     });
                 } else streamArea.innerHTML = "<small style='color:#555'>Non disponible</small>";
 
-                // Firebase
+                // Firebase Sync
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
@@ -185,9 +198,9 @@
                                 uid: u.uid, anime: anime.nom, img: anime.img, status: document.getElementById('user-status').value,
                                 epSeen: parseInt(document.getElementById('user-ep').value), rating: userRating, 
                                 playlistTarget: document.getElementById('target-playlist').value, epMax: anime.ep
-                            }).then(() => alert("Mis à jour !"));
+                            }).then(() => alert("Liste mise à jour !"));
                         };
-                        document.getElementById('delete-btn').onclick = () => { if(confirm("Enlever ?")) deleteDoc(docRef).then(() => location.reload()); };
+                        document.getElementById('delete-btn').onclick = () => { if(confirm("Supprimer cet anime de ta liste ?")) deleteDoc(docRef).then(() => location.reload()); };
                     }
                 });
 
@@ -208,7 +221,7 @@
                 });
 
                 document.getElementById('btn-post').onclick = async () => {
-                    if(!currentUser) return alert("Connecte-toi d'abord !");
+                    if(!currentUser) return alert("Connecte-toi sur l'accueil !");
                     const txt = document.getElementById('comment-input').value;
                     if(txt.trim()) {
                         await addDoc(collection(db, "commentaires"), { anime: animeName, text: txt, userName: currentUser.displayName, date: serverTimestamp() });
