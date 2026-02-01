@@ -35,7 +35,8 @@
         .ublock-tip { font-size: 0.75em; color: #888; text-transform: none; font-weight: normal; }
         .ublock-tip a { color: #3498db; text-decoration: none; }
 
-        .watch-info-box { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--primary); padding: 8px 12px; margin-bottom: 15px; border-radius: 4px; font-size: 0.85em; color: #bbb; line-height: 1.4; }
+        /* Style de la boîte d'infos de visionnage */
+        .watch-info-box { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--primary); padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 0.85em; color: #bbb; min-height: 20px; }
 
         .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 8px; border-radius: 5px; margin-bottom: 8px; font-size: 0.85em; text-align: center; border: 1px solid #444; transition: 0.3s; width: 100%; box-sizing: border-box; cursor: pointer; }
         .btn-link:hover { background: var(--primary); border-color: var(--primary); }
@@ -100,7 +101,7 @@
                         img: cl(c[8]),
                         streamLinks: c[9] ? c[9].split(',').map(cl) : [],
                         downloadLinks: c[10] ? c[10].split(',').map(cl) : [],
-                        visionnageInfo: cl(c[11]) // Lecture colonne L (index 11)
+                        visionnageInfo: cl(c[11]) // Colonne L (index 11)
                     };
                 }
             }).find(x => x);
@@ -146,17 +147,17 @@
                                     <span class="ublock-tip">Conseillé : <a href="https://ublockorigin.com" target="_blank">uBlock Origin</a></span>
                                 </div>
 
-                                ${anime.visionnageInfo ? `
                                 <div class="watch-info-box">
-                                    <b>Informations de visionnage :</b><br>
-                                    ${anime.visionnageInfo}
-                                </div>` : ''}
+                                    <small style="color:var(--primary); font-weight:bold;">Informations :</small><br>
+                                    <span id="visionnage-text">${anime.visionnageInfo ? anime.visionnageInfo : "Aucune information spécifique pour cet anime."}</span>
+                                </div>
 
                                 <div id="stream-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
                             </div>
                         </div>
                     </div>`;
 
+                // Remplissage des liens Téléchargement
                 const dlArea = document.getElementById('dl-area');
                 if(anime.downloadLinks.length > 0 && anime.downloadLinks[0] !== "") {
                     anime.downloadLinks.forEach((link, i) => {
@@ -164,6 +165,7 @@
                     });
                 } else dlArea.innerHTML = "<small style='color:#555'>Non disponible</small>";
 
+                // Remplissage des liens Streaming
                 const streamArea = document.getElementById('stream-area');
                 if(anime.streamLinks.length > 0 && anime.streamLinks[0] !== "") {
                     anime.streamLinks.forEach((link, i) => {
@@ -179,6 +181,7 @@
                     });
                 } else streamArea.innerHTML = "<small style='color:#555'>Non disponible</small>";
 
+                // Firebase et Playlist
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
@@ -206,13 +209,14 @@
                                 playlistTarget: document.getElementById('target-playlist').value, epMax: anime.ep
                             }).then(() => alert("Liste mise à jour !"));
                         };
-                        document.getElementById('delete-btn').onclick = () => { if(confirm("Supprimer cet anime de ta liste ?")) deleteDoc(docRef).then(() => location.reload()); };
+                        document.getElementById('delete-btn').onclick = () => { if(confirm("Supprimer de ta liste ?")) deleteDoc(docRef).then(() => location.reload()); };
                     }
                 });
 
                 const updateStars = (v) => document.querySelectorAll('#stars span').forEach(s => s.classList.toggle('active', s.dataset.v <= v));
                 document.getElementById('stars').onclick = (e) => { if(e.target.dataset.v) { userRating = parseInt(e.target.dataset.v); updateStars(userRating); } };
 
+                // Commentaires
                 onSnapshot(query(collection(db, "commentaires"), where("anime", "==", animeName), orderBy("date", "desc")), (snap) => {
                     const cDisp = document.getElementById('comments-display');
                     cDisp.innerHTML = "";
