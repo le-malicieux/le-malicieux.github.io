@@ -13,7 +13,6 @@
 
         .anime-header { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
         
-        /* Layout Principal */
         .top-info { display: flex; gap: 25px; margin-bottom: 25px; }
         .poster { width: 280px; flex-shrink: 0; }
         .poster img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
@@ -21,13 +20,11 @@
         .main-details { flex: 1; display: flex; flex-direction: column; gap: 15px; }
         .anime-title { font-size: 2.2em; color: var(--primary); margin: 0; }
 
-        /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .stat-item { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; }
         .stat-item small { color: var(--primary); font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 4px; }
         .stat-item span { font-weight: bold; font-size: 0.9em; }
 
-        /* Zone Bas : Playlist et Liens côte à côte */
         .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
 
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
@@ -37,6 +34,8 @@
         .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
         .ublock-tip { font-size: 0.75em; color: #888; text-transform: none; font-weight: normal; }
         .ublock-tip a { color: #3498db; text-decoration: none; }
+
+        .watch-info-box { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--primary); padding: 8px 12px; margin-bottom: 15px; border-radius: 4px; font-size: 0.85em; color: #bbb; line-height: 1.4; }
 
         .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 8px; border-radius: 5px; margin-bottom: 8px; font-size: 0.85em; text-align: center; border: 1px solid #444; transition: 0.3s; width: 100%; box-sizing: border-box; cursor: pointer; }
         .btn-link:hover { background: var(--primary); border-color: var(--primary); }
@@ -96,10 +95,12 @@
                 const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                 if(cl(c[0]) === animeName) {
                     return { 
-                        nom: cl(c[0]), pop: cl(c[1]), score: cl(c[2]), year: cl(c[3]), ep: cl(c[4]), 
-                        censure: cl(c[5]), etat: cl(c[6]), desc: cl(c[7]), img: cl(c[8]),
+                        nom: cl(c[0]), pop: cl(c[1]), score: cl(c[2]), year: cl(c[3]), 
+                        ep: cl(c[4]), censure: cl(c[5]), etat: cl(c[6]), desc: cl(c[7]), 
+                        img: cl(c[8]),
                         streamLinks: c[9] ? c[9].split(',').map(cl) : [],
-                        downloadLinks: c[10] ? c[10].split(',').map(cl) : []
+                        downloadLinks: c[10] ? c[10].split(',').map(cl) : [],
+                        visionnageInfo: cl(c[11]) // Lecture colonne L (index 11)
                     };
                 }
             }).find(x => x);
@@ -144,12 +145,18 @@
                                     🎬 Visionnage 
                                     <span class="ublock-tip">Conseillé : <a href="https://ublockorigin.com" target="_blank">uBlock Origin</a></span>
                                 </div>
+
+                                ${anime.visionnageInfo ? `
+                                <div class="watch-info-box">
+                                    <b>Informations de visionnage :</b><br>
+                                    ${anime.visionnageInfo}
+                                </div>` : ''}
+
                                 <div id="stream-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
                             </div>
                         </div>
                     </div>`;
 
-                // Remplissage des liens
                 const dlArea = document.getElementById('dl-area');
                 if(anime.downloadLinks.length > 0 && anime.downloadLinks[0] !== "") {
                     anime.downloadLinks.forEach((link, i) => {
@@ -172,7 +179,6 @@
                     });
                 } else streamArea.innerHTML = "<small style='color:#555'>Non disponible</small>";
 
-                // Firebase Sync
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
@@ -207,7 +213,6 @@
                 const updateStars = (v) => document.querySelectorAll('#stars span').forEach(s => s.classList.toggle('active', s.dataset.v <= v));
                 document.getElementById('stars').onclick = (e) => { if(e.target.dataset.v) { userRating = parseInt(e.target.dataset.v); updateStars(userRating); } };
 
-                // Commentaires
                 onSnapshot(query(collection(db, "commentaires"), where("anime", "==", animeName), orderBy("date", "desc")), (snap) => {
                     const cDisp = document.getElementById('comments-display');
                     cDisp.innerHTML = "";
