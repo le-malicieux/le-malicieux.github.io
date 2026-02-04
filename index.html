@@ -8,10 +8,17 @@
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
         
         body { 
-            font-family: 'Segoe UI', sans-serif; background-color: var(--bg); 
-            background-size: cover; background-attachment: fixed; background-position: center;
-            color: var(--text); margin: 0; min-height: 100vh; transition: background-image 0.5s ease;
-            background-image: url('img/fond1.webp'); /* Version WebP */
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg); 
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: var(--text); 
+            margin: 0; 
+            min-height: 100vh;
+            transition: background-image 0.5s ease;
+            /* Fond par défaut immédiat */
+            background-image: url('img/fond1.jpg');
         }
 
         .top-navbar {
@@ -19,122 +26,177 @@
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; }
 
-        .search-container { flex: 1; margin: 0 20px; position: relative; }
-        #search { width: 100%; padding: 10px 15px; border-radius: 20px; border: none; background: rgba(255,255,255,0.1); color: white; outline: none; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
-        #search:focus { background: rgba(255,255,255,0.2); border-color: var(--primary); }
-
-        .nav-links { display: flex; align-items: center; gap: 15px; }
-        .nav-links a { color: white; text-decoration: none; font-weight: 500; transition: 0.3s; }
-        .nav-links a:hover { color: var(--primary); }
-
-        .anime-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-            gap: 25px; padding: 30px; 
+        .nav-center { display: flex; gap: 8px; align-items: center; }
+        .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
+            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
         }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
-        .anime-card {
-            background: var(--card-bg); border-radius: 12px; overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s; border: 1px solid rgba(255,255,255,0.05);
-            text-decoration: none; color: white; display: block;
+        .hero-section {
+            height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
         }
+        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; }
+        .main-title { font-size: 2.8em; margin: 0; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
+        .main-slogan { font-size: 1.3em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
 
-        .anime-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.6); border-color: var(--primary); }
-        .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; transition: 0.3s; }
-        .anime-card:hover img { filter: brightness(1.1); }
-        .anime-info { padding: 15px; }
-        .anime-title { font-weight: bold; font-size: 1em; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.6em; }
-
-        /* Correction Mobile */
-        @media (max-width: 600px) {
-            .top-navbar { padding: 10px; flex-direction: column; gap: 10px; }
-            .search-container { width: 90%; margin: 5px 0; }
-            .anime-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; padding: 12px; }
+        .content-area { background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent); padding: 40px 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; max-width: 1300px; margin: 0 auto; }
+        
+        .card { 
+            position: relative;
+            background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; 
+            border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em;
         }
+        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
+        .card img { width: 100%; height: 230px; object-fit: cover; display: block; }
+
+        .card-info { padding: 8px; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.1em; }
+        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 1px 4px; border-radius: 3px; }
+        
+        .discord-btn { background: #7289da; color: white; text-decoration: none; padding: 6px 12px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
+        .auth-status { font-size: 0.8em; color: #888; margin-right: 10px; }
     </style>
 </head>
 <body>
 
-    <nav class="top-navbar">
-        <a href="index.html" style="color:var(--primary); font-weight:bold; text-decoration:none; font-size:1.4em; letter-spacing:1px;">LE MALICIEUX</a>
-        
-        <div class="search-container">
-            <input type="text" id="search" placeholder="Rechercher un anime...">
+    <div class="top-navbar">
+        <div class="nav-left">
+            <img src="img/logo.jpg" class="nav-logo-small">
+            <span class="nav-title">Le Malicieux</span>
         </div>
-
-        <div class="nav-links">
-            <select id="sort" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 5px; cursor: pointer; outline: none;">
+        <div class="nav-center">
+            <input type="text" id="search" placeholder="Recherche...">
+            <select id="sort">
+                <option value="">Trier par...</option>
+                <option value="nom">Nom (A-Z)</option>
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
-                <option value="nom">Nom (A-Z)</option>
                 <option value="sortie">Année</option>
                 <option value="episodes">Épisodes</option>
+                <option value="censure">Censure</option>
+                <option value="etat">État</option>
             </select>
-            <a href="playlist.html">Ma Liste</a>
-            <button onclick="randomAnime()" style="background:var(--primary); border:none; color:white; padding:8px 15px; border-radius:20px; cursor:pointer; font-weight:bold;">Aléatoire</button>
+            <a href="playlist.html" class="btn-red">📂 Playlist</a>
+            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
-    </nav>
+        <div id="auth-ui" style="display:flex; align-items:center;">
+             <button id="login-btn" class="discord-btn" style="background:var(--primary); border:none; cursor:pointer;">Se connecter</button>
+        </div>
+        <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
+    </div>
 
-    <div class="anime-grid" id="anime-grid"></div>
+    <div class="hero-section">
+        <img src="img/logo.jpg" class="main-logo">
+        <h1 class="main-title">le-malicieux.github.io</h1>
+        <p class="main-slogan">Catalogue d'animes malicieux</p>
+    </div>
 
-    <script>
+    <div class="content-area">
+        <div id="anime-container" class="grid"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
         let allAnimes = [];
-        const fonds = ['fond1.webp', 'fond2.webp', 'fond3.webp'];
-        document.body.style.backgroundImage = `url('img/${fonds[Math.floor(Math.random() * fonds.length)]}')`;
 
-        async function loadAnimes() {
+        onAuthStateChanged(auth, (user) => {
+            const authUi = document.getElementById('auth-ui');
+            if (user) {
+                authUi.innerHTML = `<span class="auth-status">${user.displayName}</span><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Déconnexion</button>`;
+                document.getElementById('logout-btn').onclick = () => signOut(auth);
+            } else {
+                authUi.innerHTML = `<button id="login-btn" class="discord-btn" style="background:var(--primary); border:none; cursor:pointer;">Se connecter</button>`;
+                document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
+            }
+            displayAnimes(allAnimes);
+        });
+
+        // Version améliorée : charge le fond sans bloquer l'initialisation
+        function setRandomBackground() {
+            const num = Math.floor(Math.random() * 55) + 1;
+            const body = document.body;
+            
+            // On tente le JPG directement
+            const img = new Image();
+            img.src = `img/fond${num}.jpg`;
+            img.onload = () => body.style.backgroundImage = `url('${img.src}')`;
+            
+            // Si le JPG rate, on essaie les autres sans freezer
+            img.onerror = () => {
+                const fallbacks = ['webp', 'png'];
+                let i = 0;
+                const tryNext = () => {
+                    if (i >= fallbacks.length) return;
+                    const nextImg = new Image();
+                    nextImg.src = `img/fond${num}.${fallbacks[i]}`;
+                    nextImg.onload = () => body.style.backgroundImage = `url('${nextImg.src}')`;
+                    nextImg.onerror = () => { i++; tryNext(); };
+                };
+                tryNext();
+            };
+        }
+
+        async function init() {
+            setRandomBackground();
             try {
                 const response = await fetch('animes.csv');
-                const data = await response.text();
-                const lines = data.split(/\r?\n/).filter(line => line.trim() !== "");
-                const headers = lines[0].split(';');
-
-                allAnimes = lines.slice(1).map(line => {
-                    const columns = line.split(';');
-                    return {
-                        nom: columns[0]?.trim(),
-                        pop: columns[1]?.trim(),
-                        score: columns[2]?.trim(),
-                        sortie: columns[3]?.trim(),
-                        ep: columns[4]?.trim(),
-                        censure: columns[5]?.trim(),
-                        etat: columns[6]?.trim(),
-                        desc: columns[7]?.trim(),
-                        img: columns[8]?.trim()
-                    };
-                }).filter(a => a.nom);
-
+                const rawData = await response.text();
+                allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
+                    const c = line.split(';');
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    if (!c[0] || c.length < 9) return null;
+                    return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), img: clean(c[8]) };
+                }).filter(a => a !== null);
                 displayAnimes(allAnimes);
-            } catch (error) {
-                console.error("Erreur de chargement du CSV:", error);
-            }
+            } catch (err) { console.error(err); }
         }
 
         function displayAnimes(list) {
-            const grid = document.getElementById('anime-grid');
-            grid.innerHTML = list.map(anime => `
-                <a href="video.html?name=${encodeURIComponent(anime.nom)}" class="anime-card">
-                    <img src="img/${anime.img}" loading="lazy" onerror="this.src='img/default.jpg'">
-                    <div class="anime-info">
-                        <div class="anime-title">${anime.nom}</div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85em; color:var(--primary);">
-                            <span>⭐ ${anime.score}</span>
-                            <span style="color:#888;">${anime.sortie}</span>
+            const container = document.getElementById('anime-container');
+            container.innerHTML = "";
+            list.forEach(a => {
+                const baseImg = a.img.includes('.') ? a.img.split('.')[0] : a.img; 
+
+                container.innerHTML += `
+                    <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
+                        <img src="img/${baseImg}.jpg" 
+                             onerror="this.onerror=function(){this.onerror=function(){this.src='https://via.placeholder.com/170x230'};this.src='img/${baseImg}.png'};this.src='img/${baseImg}.webp'">
+                        <div class="card-info">
+                            <div class="card-title">${a.nom}</div>
+                            <div class="card-meta">
+                                <span>📅 ${a.sortie}</span> • <span>📺 ${a.ep} ep</span><br>
+                                <span class="tag">${a.censure}</span> • ⭐ ${a.score}
+                            </div>
                         </div>
-                    </div>
-                </a>
-            `).join('');
+                    </a>`;
+            });
         }
 
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const m = e.target.value;
             if (m === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            else if (m === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.'))).reverse();
-            else if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
-            else if (m === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
-            else if (m === "episodes") sorted.sort((a,b) => parseInt(b.ep) - parseInt(a.ep));
+            if (m === "score") sorted.sort((a,b) => parseFloat(b.score) - parseFloat(a.score));
+            if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
+            if (m === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
+            if (m === "episodes") sorted.sort((a,b) => parseInt(b.ep) - parseInt(a.ep));
+            if (m === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
+            if (m === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
             displayAnimes(sorted);
         });
 
@@ -145,12 +207,11 @@
 
         window.randomAnime = function() {
             if(allAnimes.length > 0) {
-                const lucky = allAnimes[Math.floor(Math.random() * allAnimes.length)];
-                window.location.href = `video.html?name=${encodeURIComponent(lucky.nom)}`;
+                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
+                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
             }
         };
-
-        loadAnimes();
+        init();
     </script>
 </body>
 </html>
