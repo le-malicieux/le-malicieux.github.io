@@ -1,445 +1,243 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Malicieux - Catalogue d'Animes</title>
-    <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
-        
-        body {
-            /* Masqué jusqu'au chargement JS pour éviter blocage mobile */
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Malicieux - Catalogue d'Animes</title>
 
-        body:not(.js-ready) .mobile-menu,
-        body:not(.js-ready) .mobile-overlay {
-            display: none !important;
-        }
+<style>
+:root{--primary:#ff4757;--bg:#0f0f0f;--card-bg:rgba(20,20,20,.9);--text:#eee;--nav-bg:rgba(15,15,15,.85)}
 
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: var(--bg); 
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            color: var(--text); 
-            margin: 0; 
-            min-height: 100vh;
-            transition: background-image 0.5s ease;
-            background-image: url('img/fond1.jpg');
-        }
+body{
+font-family:'Segoe UI',sans-serif;
+background:var(--bg) url('img/fond1.jpg') center/cover fixed;
+color:var(--text);
+margin:0;min-height:100vh;
+}
 
-        /* ================= NAVBAR PC ================= */
-        .top-navbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
+/* NAVBAR PC */
+.top-navbar{
+display:flex;align-items:center;justify-content:space-between;
+padding:10px 20px;background:var(--nav-bg);
+position:sticky;top:0;z-index:1000;
+border-bottom:1px solid rgba(255,255,255,.1)
+}
 
-        .nav-left { display: flex; align-items: center; gap: 12px; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; }
+.nav-left{display:flex;align-items:center;gap:12px}
+.nav-logo-small{width:35px;height:35px;border-radius:5px;border:1px solid var(--primary)}
+.nav-title{color:var(--primary);font-weight:700}
 
-        .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
-            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
-        }
+.nav-center{display:flex;gap:8px;align-items:center}
+.nav-center input,.nav-center select,.nav-center button,.nav-center a{
+background:#222;border:1px solid #444;color:#fff;padding:6px 10px;border-radius:4px;font-size:.85em;text-decoration:none}
 
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
+.btn-red{background:var(--primary)!important;border:none!important;font-weight:700;color:#fff!important}
+.discord-btn{background:#7289da;color:#fff;padding:6px 12px;border-radius:5px;font-size:.85em;font-weight:700;text-decoration:none}
 
-        .discord-btn { background: #7289da; color: white; text-decoration: none; padding: 6px 12px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
-        .auth-status { font-size: 0.8em; color: #888; margin-right: 10px; }
+/* MOBILE MENU */
+.mobile-btn{display:none;font-size:22px;background:none;border:none;color:#fff;cursor:pointer}
 
-        /* ================= MENU MOBILE ================= */
+.mobile-menu{
+position:fixed;top:0;left:-260px;width:250px;height:100%;
+background:rgba(15,15,15,.98);
+z-index:3000;padding:20px;
+display:flex;flex-direction:column;gap:12px;
+transition:.25s ease;
+pointer-events:none
+}
 
-        .mobile-btn {
-            display: none;
-            font-size: 22px;
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-        }
+.mobile-menu.active{
+left:0;pointer-events:auto
+}
 
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            left: -260px;
-            width: 250px;
-            height: 100%;
-            background: rgba(15,15,15,0.97);
-            backdrop-filter: blur(10px);
-            z-index: 2000;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            transition: 0.3s ease;
-        }
+.mobile-menu input,.mobile-menu select,.mobile-menu button,.mobile-menu a{
+width:100%;background:#222;border:1px solid #444;color:#fff;padding:8px;border-radius:5px;text-align:center;text-decoration:none}
 
-        .mobile-menu.active {
-            left: 0;
-        }
+.mobile-overlay{
+position:fixed;inset:0;background:rgba(0,0,0,.5);
+z-index:2500;opacity:0;pointer-events:none;transition:.2s
+}
 
-        .mobile-menu h3 {
-            color: var(--primary);
-            margin: 0 0 10px 0;
-            text-align: center;
-        }
+.mobile-overlay.active{opacity:1;pointer-events:auto}
 
-        .mobile-menu input,
-        .mobile-menu select,
-        .mobile-menu button,
-        .mobile-menu a {
-            width: 100%;
-            background: #222;
-            border: 1px solid #444;
-            color: white;
-            padding: 8px;
-            border-radius: 5px;
-            font-size: 0.9em;
-            text-decoration: none;
-            text-align: center;
-        }
+/* HERO */
+.hero-section{height:55vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+.main-logo{width:130px;height:130px;border-radius:20px;border:3px solid var(--primary);margin-bottom:15px}
+.main-title{font-size:2.5em;margin:0}
+.main-slogan{font-size:1.2em;font-weight:700}
 
-        .mobile-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1500;
-            display: none;
-        }
+/* CONTENT */
+.content-area{background:linear-gradient(to top,rgba(0,0,0,.95)70%,transparent);padding:40px 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:15px;max-width:1300px;margin:auto}
 
-        .mobile-overlay.active {
-            display: block;
-        }
+.card{background:var(--card-bg);border-radius:8px;overflow:hidden;transition:.2s;border:1px solid #333;font-size:.75em;color:inherit;text-decoration:none}
+.card:hover{transform:translateY(-6px);border-color:var(--primary)}
+.card img{width:100%;height:230px;object-fit:cover}
+.card-info{padding:8px}
+.card-title{font-weight:700;color:var(--primary);height:2.4em;overflow:hidden}
+.tag{background:rgba(255,71,87,.2);color:var(--primary);padding:1px 4px;border-radius:3px}
 
-        /* ================= HERO ================= */
-
-        .hero-section {
-            height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 20px;
-        }
-
-        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; }
-        .main-title { font-size: 2.8em; margin: 0; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
-        .main-slogan { font-size: 1.3em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
-
-        /* ================= CONTENT ================= */
-
-        .content-area { background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent); padding: 40px 10px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; max-width: 1300px; margin: 0 auto; }
-        
-        .card { 
-            position: relative;
-            background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; 
-            border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em;
-        }
-
-        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
-        .card img { width: 100%; height: 230px; object-fit: cover; display: block; }
-
-        .card-info { padding: 8px; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.1em; }
-        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 1px 4px; border-radius: 3px; }
-
-        /* ================= RESPONSIVE ================= */
-
-        @media (max-width: 900px) {
-
-            .nav-center,
-            #auth-ui,
-            .top-navbar > .discord-btn {
-                display: none;
-            }
-
-            .mobile-btn {
-                display: block;
-            }
-
-            .main-title {
-                font-size: 2em;
-            }
-
-            .hero-section {
-                height: 45vh;
-            }
-        }
-
-    </style>
+/* RESPONSIVE */
+@media(max-width:900px){
+.nav-center,#auth-ui,.top-navbar>.discord-btn{display:none}
+.mobile-btn{display:block}
+.hero-section{height:45vh}
+.main-title{font-size:2em}
+}
+</style>
 </head>
 <body>
 
-    <!-- OVERLAY -->
-    <div class="mobile-overlay" id="mobile-overlay"></div>
-
-    <!-- MENU MOBILE -->
-    <div class="mobile-menu" id="mobile-menu">
-        <h3>☰ Menu</h3>
-
-        <input type="text" id="m-search" placeholder="Recherche...">
-
-        <select id="m-sort">
-            <option value="">Trier par...</option>
-            <option value="nom">Nom (A-Z)</option>
-            <option value="popularite">Popularité</option>
-            <option value="score">Score</option>
-            <option value="sortie">Année</option>
-            <option value="episodes">Épisodes</option>
-            <option value="censure">Censure</option>
-            <option value="etat">État</option>
-        </select>
-
-        <a href="playlist.html" class="btn-red">📂 Playlist</a>
-        <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
-
-        <div id="mobile-auth"></div>
-
-        <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
-    </div>
-
-    <!-- NAVBAR -->
-    <div class="top-navbar">
-        <div class="nav-left">
-            <button class="mobile-btn" id="menu-btn">☰</button>
-            <img src="img/logo.jpg" class="nav-logo-small">
-            <span class="nav-title">Le Malicieux</span>
-        </div>
-
-        <div class="nav-center">
-            <input type="text" id="search" placeholder="Recherche...">
-            <select id="sort">
-                <option value="">Trier par...</option>
-                <option value="nom">Nom (A-Z)</option>
-                <option value="popularite">Popularité</option>
-                <option value="score">Score</option>
-                <option value="sortie">Année</option>
-                <option value="episodes">Épisodes</option>
-                <option value="censure">Censure</option>
-                <option value="etat">État</option>
-            </select>
-            <a href="playlist.html" class="btn-red">📂 Playlist</a>
-            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
-        </div>
-
-        <div id="auth-ui"></div>
-        <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
-    </div>
-
-    <!-- HERO -->
-    <div class="hero-section">
-        <img src="img/logo.jpg" class="main-logo">
-        <h1 class="main-title">le-malicieux.github.io</h1>
-        <p class="main-slogan">Catalogue d'animes malicieux</p>
-    </div>
-
-    <!-- CONTENT -->
-    <div class="content-area">
-        <div id="anime-container" class="grid"></div>
-    </div>
-
-    <script>
-        /* Active l’interface immédiatement */
-        document.addEventListener('DOMContentLoaded',()=>{
-            document.body.classList.add('js-ready');
-        });
-    </script>
-
-    <script type="module">
-
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
-        let allAnimes = [];
-
-        /* ================= MENU MOBILE ================= */
-
-        const menuBtn = document.getElementById('menu-btn');
-        const menu = document.getElementById('mobile-menu');
-        const overlay = document.getElementById('mobile-overlay');
-
-        function closeMenu() {
-            menu.classList.remove('active');
-            overlay.classList.remove('active');
-        }
-
-        menuBtn.onclick = () => {
-            menu.classList.toggle('active');
-            overlay.classList.toggle('active');
-        };
-
-        overlay.onclick = closeMenu;
-
-        /* ================= AUTH ================= */
-
-        onAuthStateChanged(auth, (user) => {
-
-            const authUi = document.getElementById('auth-ui');
-            const mobileAuth = document.getElementById('mobile-auth');
-
-            if (user) {
-
-                const html = `
-                    <span class="auth-status">${user.displayName}</span>
-                    <button id="logout-btn" class="discord-btn" style="background:#333;">Déconnexion</button>`;
-
-                authUi.innerHTML = html;
-                mobileAuth.innerHTML = html;
-
-                document.getElementById('logout-btn').onclick = () => signOut(auth);
-
-            } else {
-
-                const html = `<button id="login-btn" class="discord-btn" style="background:var(--primary);">Se connecter</button>`;
-
-                authUi.innerHTML = html;
-                mobileAuth.innerHTML = html;
-
-                document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
-            }
-
-            displayAnimes(allAnimes);
-        });
-
-        /* ================= BACKGROUND ================= */
-
-        function setRandomBackground() {
-            const num = Math.floor(Math.random() * 55) + 1;
-            const body = document.body;
-            const img = new Image();
-
-            img.src = `img/fond${num}.jpg`;
-            img.onload = () => body.style.backgroundImage = `url('${img.src}')`;
-
-            img.onerror = () => {
-                const fallbacks = ['webp', 'png'];
-                let i = 0;
-
-                const tryNext = () => {
-                    if (i >= fallbacks.length) return;
-                    const nextImg = new Image();
-                    nextImg.src = `img/fond${num}.${fallbacks[i]}`;
-                    nextImg.onload = () => body.style.backgroundImage = `url('${nextImg.src}')`;
-                    nextImg.onerror = () => { i++; tryNext(); };
-                };
-
-                tryNext();
-            };
-        }
-
-        /* ================= DATA ================= */
-
-        async function init() {
-
-            setRandomBackground();
-
-            try {
-                const response = await fetch('animes.csv');
-                const rawData = await response.text();
-
-                allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
-
-                    const c = line.split(';');
-                    const clean = s => s ? s.trim().replace(/^"|"$/g, '') : "";
-
-                    if (!c[0] || c.length < 9) return null;
-
-                    return {
-                        nom: clean(c[0]),
-                        pop: clean(c[1]),
-                        score: clean(c[2]),
-                        sortie: clean(c[3]),
-                        ep: clean(c[4]),
-                        censure: clean(c[5]),
-                        etat: clean(c[6]),
-                        img: clean(c[8])
-                    };
-
-                }).filter(a => a !== null);
-
-                displayAnimes(allAnimes);
-
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        function displayAnimes(list) {
-
-            const container = document.getElementById('anime-container');
-            container.innerHTML = "";
-
-            list.forEach(a => {
-
-                const baseImg = a.img.includes('.') ? a.img.split('.')[0] : a.img;
-
-                container.innerHTML += `
-                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
-                    <img src="img/${baseImg}.jpg" 
-                        onerror="this.onerror=function(){this.onerror=function(){this.src='https://via.placeholder.com/170x230'};this.src='img/${baseImg}.png'};this.src='img/${baseImg}.webp'">
-
-                    <div class="card-info">
-                        <div class="card-title">${a.nom}</div>
-                        <div class="card-meta">
-                            <span>📅 ${a.sortie}</span> • <span>📺 ${a.ep} ep</span><br>
-                            <span class="tag">${a.censure}</span> • ⭐ ${a.score}
-                        </div>
-                    </div>
-                </a>`;
-            });
-        }
-
-        /* ================= SORT & SEARCH ================= */
-
-        function applySort(val) {
-
-            let sorted = [...allAnimes];
-
-            if (val === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            if (val === "score") sorted.sort((a,b) => parseFloat(b.score) - parseFloat(a.score));
-            if (val === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#',''))||999)-(parseInt(b.pop.replace('#',''))||999));
-            if (val === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
-            if (val === "episodes") sorted.sort((a,b) => parseInt(b.ep) - parseInt(a.ep));
-            if (val === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
-            if (val === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
-
-            displayAnimes(sorted);
-        }
-
-        document.getElementById('sort').onchange = e => applySort(e.target.value);
-        document.getElementById('m-sort').onchange = e => {
-            applySort(e.target.value);
-            closeMenu();
-        };
-
-        function applySearch(val) {
-            val = val.toLowerCase();
-            displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
-        }
-
-        document.getElementById('search').oninput = e => applySearch(e.target.value);
-        document.getElementById('m-search').oninput = e => applySearch(e.target.value);
-
-        /* ================= RANDOM ================= */
-
-        window.randomAnime = function() {
-            if(allAnimes.length > 0) {
-                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
-                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
-            }
-        };
-
-        init();
-
-    </script>
+<div class="mobile-overlay" id="overlay"></div>
+
+<div class="mobile-menu" id="mobile-menu">
+<h3 style="color:var(--primary);text-align:center">☰ Menu</h3>
+<input id="m-search" placeholder="Recherche">
+<select id="m-sort">
+<option value="">Trier...</option>
+<option value="nom">Nom</option>
+<option value="score">Score</option>
+<option value="sortie">Année</option>
+</select>
+<a href="playlist.html" class="btn-red">📂 Playlist</a>
+<button onclick="randomAnime()" class="btn-red">🎲 Random</button>
+<div id="mobile-auth"></div>
+<a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
+</div>
+
+<div class="top-navbar">
+<div class="nav-left">
+<button class="mobile-btn" id="menu-btn">☰</button>
+<img src="img/logo.jpg" class="nav-logo-small">
+<span class="nav-title">Le Malicieux</span>
+</div>
+
+<div class="nav-center">
+<input id="search" placeholder="Recherche">
+<select id="sort">
+<option value="">Trier...</option>
+<option value="nom">Nom</option>
+<option value="score">Score</option>
+<option value="sortie">Année</option>
+</select>
+<a href="playlist.html" class="btn-red">📂 Playlist</a>
+<button onclick="randomAnime()" class="btn-red">🎲 Random</button>
+</div>
+
+<div id="auth-ui"></div>
+<a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
+</div>
+
+<div class="hero-section">
+<img src="img/logo.jpg" class="main-logo">
+<h1 class="main-title">le-malicieux.github.io</h1>
+<p class="main-slogan">Catalogue d'animes malicieux</p>
+</div>
+
+<div class="content-area">
+<div id="anime-container" class="grid"></div>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInWithPopup,GoogleAuthProvider,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const app=initializeApp({apiKey:"AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",authDomain:"le-malicieux-v2.firebaseapp.com",projectId:"le-malicieux-v2"});
+const auth=getAuth(app);
+const provider=new GoogleAuthProvider();
+
+let allAnimes=[];
+let chunk=0;
+const CHUNK_SIZE=40;
+
+/* MENU */
+const menu=document.getElementById('mobile-menu');
+const overlay=document.getElementById('overlay');
+
+document.getElementById('menu-btn').onclick=()=>{
+menu.classList.add('active');
+overlay.classList.add('active');
+}
+
+overlay.onclick=()=>{
+menu.classList.remove('active');
+overlay.classList.remove('active');
+}
+
+/* AUTH */
+onAuthStateChanged(auth,u=>{
+const h=u?`<span>${u.displayName}</span><button id=\"out\" class=\"discord-btn\">Déco</button>`:`<button id=\"in\" class=\"discord-btn\" style=\"background:var(--primary)\">Connexion</button>`;
+
+auth-ui.innerHTML=h;
+mobile-auth.innerHTML=h;
+
+if(u)out.onclick=()=>signOut(auth);
+else in.onclick=()=>signInWithPopup(auth,provider);
+});
+
+/* LOAD DATA PROGRESSIF */
+async function init(){
+const r=await fetch('animes.csv');
+const t=await r.text();
+
+allAnimes=t.split(/\r?\n/).slice(1).map(l=>{
+const c=l.split(';');
+if(c.length<8)return null;
+return{nom:c[0],score:c[2],sortie:c[3],ep:c[4],censure:c[5],img:c[8]}
+}).filter(Boolean);
+
+loadChunk();
+}
+
+function loadChunk(){
+const start=chunk*CHUNK_SIZE;
+const part=allAnimes.slice(start,start+CHUNK_SIZE);
+
+part.forEach(a=>addCard(a));
+chunk++;
+
+if(start+CHUNK_SIZE<allAnimes.length){
+requestIdleCallback(loadChunk);
+}
+}
+
+function addCard(a){
+const base=a.img?.split('.')[0]||a.img;
+const d=document.createElement('a');
+d.className='card';
+d.href=`video.html?name=${encodeURIComponent(a.nom)}`;
+
+d.innerHTML=`
+<img loading="lazy" src="img/${base}.jpg" onerror="this.src='https://via.placeholder.com/170x230'">
+<div class="card-info">
+<div class="card-title">${a.nom}</div>
+<div>📅 ${a.sortie} • 📺 ${a.ep}</div>
+<span class="tag">${a.censure}</span> ⭐ ${a.score}
+</div>`;
+
+anime-container.appendChild(d);
+}
+
+/* SEARCH */
+function applySearch(v){
+v=v.toLowerCase();
+anime-container.innerHTML="";chunk=0;
+allAnimes=allAnimes.filter(a=>a.nom.toLowerCase().includes(v));
+loadChunk();
+}
+
+search.oninput=e=>applySearch(e.target.value);
+m-search.oninput=e=>applySearch(e.target.value);
+
+/* RANDOM */
+window.randomAnime=()=>{
+if(allAnimes.length){
+const a=allAnimes[Math.floor(Math.random()*allAnimes.length)];
+location=`video.html?name=${encodeURIComponent(a.nom)}`;
+}
+}
+
+init();
+</script>
 </body>
 </html>
