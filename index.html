@@ -12,10 +12,10 @@ body{
 font-family:'Segoe UI',sans-serif;
 background:var(--bg) url('img/fond1.jpg') center/cover fixed;
 color:var(--text);
-margin:0;min-height:100vh;
+margin:0;min-height:100vh
 }
 
-/* NAVBAR */
+/* NAVBAR PC */
 .top-navbar{
 display:flex;align-items:center;justify-content:space-between;
 padding:10px 20px;background:var(--nav-bg);
@@ -38,7 +38,7 @@ background:#222;border:1px solid #444;color:#fff;padding:6px 10px;border-radius:
 .mobile-btn{display:none;font-size:22px;background:none;border:none;color:#fff;cursor:pointer}
 
 .mobile-menu{
-position:fixed;top:0;left:-260px;width:250px;height:100%;
+position:fixed;top:0;left:-270px;width:260px;height:100%;
 background:rgba(15,15,15,.98);
 z-index:3000;padding:20px;
 display:flex;flex-direction:column;gap:12px;
@@ -86,14 +86,16 @@ width:100%;background:#222;border:1px solid #444;color:#fff;padding:8px;border-r
 </head>
 <body>
 
+<!-- MOBILE -->
 <div class="mobile-overlay" id="overlay"></div>
 
 <div class="mobile-menu" id="mobile-menu">
 <h3 style="color:var(--primary);text-align:center">☰ Menu</h3>
-<input id="m-search" placeholder="Recherche">
+<input id="m-search" placeholder="Recherche...">
 <select id="m-sort">
 <option value="">Trier...</option>
 <option value="nom">Nom</option>
+<option value="popularite">Popularité</option>
 <option value="score">Score</option>
 <option value="sortie">Année</option>
 </select>
@@ -103,6 +105,7 @@ width:100%;background:#222;border:1px solid #444;color:#fff;padding:8px;border-r
 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
 </div>
 
+<!-- NAVBAR -->
 <div class="top-navbar">
 <div class="nav-left">
 <button class="mobile-btn" id="menu-btn">☰</button>
@@ -111,10 +114,11 @@ width:100%;background:#222;border:1px solid #444;color:#fff;padding:8px;border-r
 </div>
 
 <div class="nav-center">
-<input id="search" placeholder="Recherche">
+<input id="search" placeholder="Recherche...">
 <select id="sort">
 <option value="">Trier...</option>
 <option value="nom">Nom</option>
+<option value="popularite">Popularité</option>
 <option value="score">Score</option>
 <option value="sortie">Année</option>
 </select>
@@ -126,12 +130,14 @@ width:100%;background:#222;border:1px solid #444;color:#fff;padding:8px;border-r
 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
 </div>
 
+<!-- HERO -->
 <div class="hero-section">
 <img src="img/logo.jpg" class="main-logo">
 <h1 class="main-title">le-malicieux.github.io</h1>
 <p class="main-slogan">Catalogue d'animes malicieux</p>
 </div>
 
+<!-- CONTENT -->
 <div class="content-area">
 <div id="anime-container" class="grid"></div>
 </div>
@@ -140,18 +146,14 @@ width:100%;background:#222;border:1px solid #444;color:#fff;padding:8px;border-r
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged,signInWithPopup,GoogleAuthProvider,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const app=initializeApp({apiKey:"AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",authDomain:"le-malicieux-v2.firebaseapp.com",projectId:"le-malicieux-v2"});
+const firebaseConfig={apiKey:"AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",authDomain:"le-malicieux-v2.firebaseapp.com",projectId:"le-malicieux-v2"};
+const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const provider=new GoogleAuthProvider();
 
-const container=document.getElementById('anime-container');
-const authUI=document.getElementById('auth-ui');
-const mobileAuth=document.getElementById('mobile-auth');
-
 let allAnimes=[];
-let displayList=[];
-let chunk=0;
-const CHUNK_SIZE=40;
+
+const container=document.getElementById('anime-container');
 
 /* MENU */
 const menu=document.getElementById('mobile-menu');
@@ -168,9 +170,12 @@ overlay.classList.remove('active');
 };
 
 /* AUTH */
-onAuthStateChanged(auth,u=>{
-if(u){
-const html=`<span>${u.displayName}</span><button id="out" class="discord-btn">Déco</button>`;
+onAuthStateChanged(auth,user=>{
+const authUI=document.getElementById('auth-ui');
+const mobileAuth=document.getElementById('mobile-auth');
+
+if(user){
+const html=`<span class="auth-status">${user.displayName}</span><button id="out" class="discord-btn" style="background:#333">Déconnexion</button>`;
 authUI.innerHTML=html;
 mobileAuth.innerHTML=html;
 out.onclick=()=>signOut(auth);
@@ -182,79 +187,80 @@ in.onclick=()=>signInWithPopup(auth,provider);
 }
 });
 
-/* LOAD CSV */
+/* LOAD CSV (LOGIQUE ORIGINALE) */
 async function init(){
 try{
-const r=await fetch('animes.csv');
-const t=await r.text();
+const response=await fetch('animes.csv');
+const raw=await response.text();
 
-allAnimes=t.split(/\r?\n/).slice(1).map(l=>{
-const c=l.split(';');
-if(!c[0]||c.length<8)return null;
+allAnimes=raw.split(/\r?\n/).slice(1).map(line=>{
+const c=line.split(';');
+const clean=s=>s?s.trim().replace(/^"|"$/g,''):"";
+
+if(!c[0]||c.length<9)return null;
+
 return{
-nom:c[0].trim(),
-score:c[2],
-sortie:c[3],
-ep:c[4],
-censure:c[5],
-img:c[8]
+nom:clean(c[0]),
+pop:clean(c[1]),
+score:clean(c[2]),
+sortie:clean(c[3]),
+ep:clean(c[4]),
+censure:clean(c[5]),
+etat:clean(c[6]),
+img:clean(c[8])
 };
 }).filter(Boolean);
 
-displayList=[...allAnimes];
-loadChunk();
+displayAnimes(allAnimes);
+
 }catch(e){console.error(e)}
 }
 
-/* CHUNK DISPLAY */
-function loadChunk(){
-const start=chunk*CHUNK_SIZE;
-const part=displayList.slice(start,start+CHUNK_SIZE);
-
-part.forEach(a=>addCard(a));
-chunk++;
-
-if(start+CHUNK_SIZE<displayList.length){
-setTimeout(loadChunk,10);
-}
-}
-
-function resetAndReload(list){
+/* DISPLAY (ORIGINAL) */
+function displayAnimes(list){
 container.innerHTML="";
-displayList=list;
-chunk=0;
-loadChunk();
-}
 
-function addCard(a){
-const base=a.img?.includes('.')?a.img.split('.')[0]:a.img;
-const d=document.createElement('a');
-d.className='card';
-d.href=`video.html?name=${encodeURIComponent(a.nom)}`;
+list.forEach(a=>{
+const base=a.img.includes('.')?a.img.split('.')[0]:a.img;
 
-d.innerHTML=`
+container.innerHTML+=`
+<a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
 <img loading="lazy" src="img/${base}.jpg" onerror="this.src='https://via.placeholder.com/170x230'">
 <div class="card-info">
 <div class="card-title">${a.nom}</div>
 <div>📅 ${a.sortie} • 📺 ${a.ep}</div>
 <span class="tag">${a.censure}</span> ⭐ ${a.score}
-</div>`;
-
-container.appendChild(d);
+</div>
+</a>`;
+});
 }
+
+/* SORT */
+function applySort(v){
+let sorted=[...allAnimes];
+
+if(v==="nom")sorted.sort((a,b)=>a.nom.localeCompare(b.nom));
+if(v==="score")sorted.sort((a,b)=>parseFloat(b.score)-parseFloat(a.score));
+if(v==="popularite")sorted.sort((a,b)=>(parseInt(a.pop.replace('#',''))||999)-(parseInt(b.pop.replace('#',''))||999));
+if(v==="sortie")sorted.sort((a,b)=>b.sortie.localeCompare(a.sortie));
+
+displayAnimes(sorted);
+}
+
+sort.onchange=e=>applySort(e.target.value);
+m-sort.onchange=e=>{applySort(e.target.value);menu.classList.remove('active');overlay.classList.remove('active');};
 
 /* SEARCH */
 function applySearch(v){
 v=v.toLowerCase();
-const res=allAnimes.filter(a=>a.nom.toLowerCase().includes(v));
-resetAndReload(res);
+displayAnimes(allAnimes.filter(a=>a.nom.toLowerCase().includes(v)));
 }
 
 search.oninput=e=>applySearch(e.target.value);
 m-search.oninput=e=>applySearch(e.target.value);
 
 /* RANDOM */
-window.randomAnime=()=>{
+window.randomAnime=function(){
 if(allAnimes.length){
 const a=allAnimes[Math.floor(Math.random()*allAnimes.length)];
 location=`video.html?name=${encodeURIComponent(a.nom)}`;
