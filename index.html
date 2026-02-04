@@ -7,6 +7,15 @@
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
         
+        body {
+            /* Masqué jusqu'au chargement JS pour éviter blocage mobile */
+        }
+
+        body:not(.js-ready) .mobile-menu,
+        body:not(.js-ready) .mobile-overlay {
+            display: none !important;
+        }
+
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background-color: var(--bg); 
@@ -229,6 +238,13 @@
     <div class="content-area">
         <div id="anime-container" class="grid"></div>
     </div>
+
+    <script>
+        /* Active l’interface immédiatement */
+        document.addEventListener('DOMContentLoaded',()=>{
+            document.body.classList.add('js-ready');
+        });
+    </script>
 
     <script type="module">
 
