@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
-        /* --- DESIGN ORIGINAL (PC) --- */
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
         
         body { 
@@ -19,7 +17,8 @@
             margin: 0; 
             min-height: 100vh;
             transition: background-image 0.5s ease;
-            background-image: url('img/fond1.webp');
+            /* Fond par défaut (PC) */
+            background-image: url('img/fond1.jpg');
         }
 
         .top-navbar {
@@ -49,43 +48,42 @@
         .anime-info { padding: 15px; }
         .anime-title { font-weight: bold; font-size: 1em; height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-        /* Élément Burger caché sur PC */
-        .burger-menu { display: none; font-size: 30px; cursor: pointer; color: white; }
+        /* Éléments pour le menu mobile (cachés sur PC) */
+        .burger-icon { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 15px; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1050; }
 
-        /* --- INTERFACE TÉLÉPHONE (CARTE BLANCHE) --- */
+        /* ============================================================
+           INTERFACE TÉLÉPHONE (CARTE BLANCHE - OPTIMISÉ)
+           ============================================================ */
         @media (max-width: 950px) {
-            .burger-menu { display: block; }
+            body { background-image: url('img/fond1.webp'); } /* Utilise WebP sur tel pour la vitesse */
+
+            .burger-icon { display: block; }
+            .mobile-overlay.active { display: block; }
 
             .nav-links {
                 position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
                 background: #111; flex-direction: column; align-items: flex-start;
-                padding: 60px 20px; transition: 0.4s ease; z-index: 1100;
+                padding: 60px 25px; transition: 0.4s ease; z-index: 1100;
             }
             .nav-links.active { left: 0; }
-            .mobile-overlay.active { display: block; }
 
             .nav-links a, .nav-links button, .nav-links select { 
                 width: 100%; text-align: left; padding: 15px 0; border-bottom: 1px solid #222; 
             }
 
-            .search-container { margin: 0 10px; }
-
-            /* Grille optimisée : 3 colonnes */
-            .anime-grid { 
-                grid-template-columns: repeat(3, 1fr); 
-                gap: 8px; padding: 10px; 
-            }
-            .anime-title { font-size: 0.75em; height: 2.2em; }
+            /* Grille mobile : 3 colonnes pour voir plus d'animes */
+            .anime-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
             .anime-info { padding: 8px; }
+            .anime-title { font-size: 0.75em; height: 2.2em; }
         }
     </style>
 </head>
 <body>
 
     <nav class="top-navbar">
-        <div class="burger-menu" onclick="toggleMobileMenu()">☰</div>
-        <div class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+        <div class="burger-icon" onclick="toggleMenu()">☰</div>
+        <div class="mobile-overlay" id="overlay" onclick="toggleMenu()"></div>
 
         <a href="index.html" style="color:var(--primary); font-weight:bold; text-decoration:none; font-size:1.4em;">LE MALICIEUX</a>
         
@@ -93,7 +91,7 @@
             <input type="text" id="search" placeholder="Rechercher un anime...">
         </div>
 
-        <div class="nav-links" id="menuSide">
+        <div class="nav-links" id="navLinks">
             <select id="sort" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 5px;">
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
@@ -151,8 +149,10 @@
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
         let allAnimes = [];
-        const fonds = ['fond1.webp', 'fond2.webp', 'fond3.webp'];
-        document.body.style.backgroundImage = `url('img/${fonds[Math.floor(Math.random() * fonds.length)]}')`;
+        const fonds = ['fond1.jpg', 'fond2.jpg', 'fond3.jpg'];
+        // Sur mobile, on préfère les webp s'ils existent
+        const ext = window.innerWidth <= 950 ? 'webp' : 'jpg';
+        document.body.style.backgroundImage = `url('img/fond${Math.floor(Math.random() * 3) + 1}.${ext}')`;
 
         async function load() {
             const resp = await fetch('animes.csv');
@@ -185,16 +185,16 @@
         };
 
         // Fonction Menu Mobile
-        window.toggleMobileMenu = function() {
-            document.getElementById('menuSide').classList.toggle('active');
-            document.querySelector('.mobile-overlay').classList.toggle('active');
+        window.toggleMenu = function() {
+            document.getElementById('navLinks').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
         };
 
         document.getElementById('sort').addEventListener('change', (e) => {
             let sorted = [...allAnimes];
             const m = e.target.value;
             if (m === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            if (m === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.'))).reverse();
+            if (m === "score") sorted.sort((a,b) => parseFloat(a.score.replace(',','.')) - parseFloat(b.score.replace(',','.'))).reverse();
             if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
             if (m === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
             displayAnimes(sorted);
