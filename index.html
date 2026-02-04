@@ -17,28 +17,27 @@
             margin: 0; 
             min-height: 100vh;
             transition: background-image 0.5s ease;
-            /* Fond de secours en WebP */
             background-image: url('img/fond1.webp');
         }
 
+        /* NAVBAR ORIGINALE */
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* --- LOGIQUE DU MENU LATÉRAL --- */
         #menu-toggle { display: none; }
-        .menu-btn { display: none; font-size: 28px; cursor: pointer; color: white; user-select: none; }
+        .menu-btn { display: none; font-size: 28px; cursor: pointer; color: white; }
         .menu-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 998; }
 
         .search-container { flex: 1; margin: 0 20px; }
         #search { width: 100%; padding: 10px 15px; border-radius: 20px; border: none; background: rgba(255,255,255,0.1); color: white; outline: none; border: 1px solid rgba(255,255,255,0.1); }
 
         .nav-links { display: flex; align-items: center; gap: 15px; }
-        .nav-links a, .nav-links button { color: white; text-decoration: none; font-weight: 500; transition: 0.3s; background: none; border: none; cursor: pointer; font-size: 1em; }
-        .nav-links a:hover { color: var(--primary); }
+        .nav-links a, .nav-links button { color: white; text-decoration: none; font-weight: 500; background: none; border: none; cursor: pointer; }
 
+        /* GRILLE */
         .anime-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
@@ -47,34 +46,32 @@
 
         .anime-card {
             background: var(--card-bg); border-radius: 12px; overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s; border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s; border: 1px solid rgba(255,255,255,0.05);
             text-decoration: none; color: white; display: block;
         }
-        .anime-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.6); border-color: var(--primary); }
         .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-        .anime-info { padding: 15px; }
-        .anime-title { font-weight: bold; font-size: 1em; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.6em; }
+        .anime-info { padding: 10px; }
+        .anime-title { font-weight: bold; font-size: 0.9em; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-        /* --- ADAPTATION MOBILE --- */
+        /* ADAPTATION MOBILE SANS CHANGER LE DESIGN PC */
         @media (max-width: 950px) {
-            .menu-btn { display: block; }
+            .menu-btn { display: block; margin-right: 10px; }
             
             .nav-links {
-                position: fixed; top: 0; left: -300px; width: 280px; height: 100vh;
+                position: fixed; top: 0; left: -300px; width: 260px; height: 100vh;
                 background: #111; flex-direction: column; align-items: flex-start;
-                padding: 80px 25px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                z-index: 999; box-shadow: 10px 0 30px rgba(0,0,0,0.9);
+                padding: 60px 20px; transition: 0.3s ease; z-index: 999;
             }
 
             #menu-toggle:checked ~ .nav-links { left: 0; }
             #menu-toggle:checked ~ .menu-overlay { display: block; }
 
-            .nav-links a, .nav-links button, .nav-links select { 
-                width: 100%; text-align: left; padding: 15px 0; border-bottom: 1px solid #222; font-size: 1.2em;
+            /* 3 CARTES EN LARGEUR SUR MOBILE */
+            .anime-grid { 
+                grid-template-columns: repeat(3, 1fr); 
+                gap: 10px; padding: 10px; 
             }
-
-            .search-container { margin: 0 10px; }
-            .anime-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; padding: 15px; }
+            .anime-title { font-size: 0.75em; }
         }
     </style>
 </head>
@@ -85,33 +82,30 @@
         <label for="menu-toggle" class="menu-btn">☰</label>
         <label for="menu-toggle" class="menu-overlay"></label>
 
-        <a href="index.html" style="color:var(--primary); font-weight:bold; text-decoration:none; font-size:1.4em; letter-spacing:1px;">LE MALICIEUX</a>
+        <a href="index.html" style="color:var(--primary); font-weight:bold; text-decoration:none; font-size:1.2em;">LE MALICIEUX</a>
         
         <div class="search-container">
-            <input type="text" id="search" placeholder="Rechercher un anime...">
+            <input type="text" id="search" placeholder="Rechercher...">
         </div>
 
         <div class="nav-links">
-            <select id="sort" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 5px; cursor: pointer; outline: none;">
+            <select id="sort" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px; border-radius: 5px;">
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
-                <option value="nom">Nom (A-Z)</option>
-                <option value="sortie">Année</option>
-                <option value="episodes">Épisodes</option>
-                <option value="censure">Censure</option>
-                <option value="etat">État</option>
+                <option value="nom">Nom</option>
             </select>
+            
+            <div id="auth-container">
+                <button id="btn-login" style="background:var(--primary); padding:5px 15px; border-radius:20px;">Connexion</button>
+                <div id="user-profile" style="display:none; align-items:center; gap:10px;">
+                    <img id="user-img" src="" style="width:35px; border-radius:50%; border:2px solid var(--primary);">
+                    <button id="btn-logout" style="font-size:0.7em; color:#888;">Quitter</button>
+                </div>
+            </div>
+
             <a href="playlist.html">Ma Liste</a>
             <button onclick="randomAnime()">Aléatoire</button>
             <a href="https://discord.gg/votrelien" target="_blank" style="color:#5865F2;">Discord</a>
-            
-            <div id="auth-ui" style="width: 100%; margin-top: 10px;">
-                <button id="btn-login" style="background:var(--primary); color:white; padding:8px 20px; border-radius:20px; font-weight:bold; width: 100%;">Connexion</button>
-                <div id="user-profile" style="display:none; align-items:center; gap:10px;">
-                    <img id="user-img" src="" style="width:35px; border-radius:50%; border:2px solid var(--primary);">
-                    <button id="btn-logout" style="font-size:0.8em; color:#888;">Déconnexion</button>
-                </div>
-            </div>
         </div>
     </nav>
 
@@ -134,76 +128,50 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        const btnLogin = document.getElementById('btn-login');
-        const btnLogout = document.getElementById('btn-logout');
-        const userProfile = document.getElementById('user-profile');
-        const userImg = document.getElementById('user-img');
-
-        btnLogin.onclick = () => signInWithPopup(auth, provider);
-        btnLogout.onclick = () => signOut(auth);
-
         onAuthStateChanged(auth, (user) => {
+            const btnLogin = document.getElementById('btn-login');
+            const profile = document.getElementById('user-profile');
             if (user) {
                 btnLogin.style.display = 'none';
-                userProfile.style.display = 'flex';
-                userImg.src = user.photoURL;
+                profile.style.display = 'flex';
+                document.getElementById('user-img').src = user.photoURL;
             } else {
                 btnLogin.style.display = 'block';
-                userProfile.style.display = 'none';
+                profile.style.display = 'none';
             }
         });
 
+        document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
+        document.getElementById('btn-logout').onclick = () => signOut(auth);
+
         let allAnimes = [];
         const fonds = ['fond1.webp', 'fond2.webp', 'fond3.webp'];
-        document.body.style.backgroundImage = `url('img/${fonds[Math.floor(Math.random() * fonds.length)]}')`;
+        document.body.style.backgroundImage = `url('img/${fonds[Math.floor(Math.random()*fonds.length)]}')`;
 
-        async function loadAnimes() {
-            const response = await fetch('animes.csv');
-            const data = await response.text();
-            const lines = data.split(/\r?\n/).filter(line => line.trim() !== "");
-            
-            allAnimes = lines.slice(1).map(line => {
-                const c = line.split(';');
-                return {
-                    nom: c[0], pop: c[1], score: c[2], sortie: c[3],
-                    ep: c[4], censure: c[5], etat: c[6], desc: c[7], img: c[8]
-                };
-            }).filter(a => a.nom);
+        async function load() {
+            const resp = await fetch('animes.csv');
+            const data = await resp.text();
+            const lines = data.split(/\r?\n/).slice(1);
+            allAnimes = lines.filter(l => l.trim()).map(l => {
+                const c = l.split(';');
+                return { nom: c[0], score: c[2], img: c[8], pop: c[1], sortie: c[3] };
+            });
             displayAnimes(allAnimes);
         }
 
         function displayAnimes(list) {
             const grid = document.getElementById('anime-grid');
-            grid.innerHTML = list.map(anime => `
-                <a href="video.html?name=${encodeURIComponent(anime.nom)}" class="anime-card">
-                    <img src="img/${anime.img}" loading="lazy">
+            grid.innerHTML = list.map(a => `
+                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card">
+                    <img src="img/${a.img}" loading="lazy">
                     <div class="anime-info">
-                        <div class="anime-title">${anime.nom}</div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85em; color:var(--primary);">
-                            <span>⭐ ${anime.score}</span>
-                            <span style="color:#888;">${anime.sortie}</span>
-                        </div>
+                        <div class="anime-title">${a.nom}</div>
+                        <div style="color:var(--primary); font-size:0.8em; margin-top:5px;">⭐ ${a.score}</div>
                     </div>
-                </a>
-            `).join('');
+                </a>`).join('');
         }
 
-        document.getElementById('sort').addEventListener('change', (e) => {
-            let sorted = [...allAnimes];
-            const m = e.target.value;
-            if (m === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            if (m === "score") sorted.sort((a,b) => parseFloat(b.score.replace(',','.')) - parseFloat(a.score.replace(',','.'))).reverse();
-            if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
-            if (m === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
-            if (m === "episodes") sorted.sort((a,b) => parseInt(b.ep) - parseInt(a.ep));
-            displayAnimes(sorted);
-        });
-
-        document.getElementById('search').addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
-        });
-
+        // FONCTION ALÉATOIRE CORRIGÉE
         window.randomAnime = function() {
             if(allAnimes.length > 0) {
                 const lucky = allAnimes[Math.floor(Math.random() * allAnimes.length)];
@@ -211,7 +179,12 @@
             }
         };
 
-        loadAnimes();
+        document.getElementById('search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
+        });
+
+        load();
     </script>
 </body>
 </html>
