@@ -15,7 +15,7 @@ color:var(--text);
 margin:0;min-height:100vh;
 }
 
-/* NAVBAR PC */
+/* NAVBAR */
 .top-navbar{
 display:flex;align-items:center;justify-content:space-between;
 padding:10px 20px;background:var(--nav-bg);
@@ -46,12 +46,7 @@ transition:.25s ease;
 pointer-events:none
 }
 
-.mobile-menu.active{
-left:0;pointer-events:auto
-}
-
-.mobile-menu input,.mobile-menu select,.mobile-menu button,.mobile-menu a{
-width:100%;background:#222;border:1px solid #444;color:#fff;padding:8px;border-radius:5px;text-align:center;text-decoration:none}
+.mobile-menu.active{left:0;pointer-events:auto}
 
 .mobile-overlay{
 position:fixed;inset:0;background:rgba(0,0,0,.5);
@@ -59,6 +54,9 @@ z-index:2500;opacity:0;pointer-events:none;transition:.2s
 }
 
 .mobile-overlay.active{opacity:1;pointer-events:auto}
+
+.mobile-menu input,.mobile-menu select,.mobile-menu button,.mobile-menu a{
+width:100%;background:#222;border:1px solid #444;color:#fff;padding:8px;border-radius:5px;text-align:center;text-decoration:none}
 
 /* HERO */
 .hero-section{height:55vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
@@ -146,7 +144,12 @@ const app=initializeApp({apiKey:"AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",authDo
 const auth=getAuth(app);
 const provider=new GoogleAuthProvider();
 
+const container=document.getElementById('anime-container');
+const authUI=document.getElementById('auth-ui');
+const mobileAuth=document.getElementById('mobile-auth');
+
 let allAnimes=[];
+let displayList=[];
 let chunk=0;
 const CHUNK_SIZE=40;
 
@@ -157,52 +160,74 @@ const overlay=document.getElementById('overlay');
 document.getElementById('menu-btn').onclick=()=>{
 menu.classList.add('active');
 overlay.classList.add('active');
-}
+};
 
 overlay.onclick=()=>{
 menu.classList.remove('active');
 overlay.classList.remove('active');
-}
+};
 
 /* AUTH */
 onAuthStateChanged(auth,u=>{
-const h=u?`<span>${u.displayName}</span><button id=\"out\" class=\"discord-btn\">Déco</button>`:`<button id=\"in\" class=\"discord-btn\" style=\"background:var(--primary)\">Connexion</button>`;
-
-auth-ui.innerHTML=h;
-mobile-auth.innerHTML=h;
-
-if(u)out.onclick=()=>signOut(auth);
-else in.onclick=()=>signInWithPopup(auth,provider);
+if(u){
+const html=`<span>${u.displayName}</span><button id="out" class="discord-btn">Déco</button>`;
+authUI.innerHTML=html;
+mobileAuth.innerHTML=html;
+out.onclick=()=>signOut(auth);
+}else{
+const html=`<button id="in" class="discord-btn" style="background:var(--primary)">Connexion</button>`;
+authUI.innerHTML=html;
+mobileAuth.innerHTML=html;
+in.onclick=()=>signInWithPopup(auth,provider);
+}
 });
 
-/* LOAD DATA PROGRESSIF */
+/* LOAD CSV */
 async function init(){
+try{
 const r=await fetch('animes.csv');
 const t=await r.text();
 
 allAnimes=t.split(/\r?\n/).slice(1).map(l=>{
 const c=l.split(';');
-if(c.length<8)return null;
-return{nom:c[0],score:c[2],sortie:c[3],ep:c[4],censure:c[5],img:c[8]}
+if(!c[0]||c.length<8)return null;
+return{
+nom:c[0].trim(),
+score:c[2],
+sortie:c[3],
+ep:c[4],
+censure:c[5],
+img:c[8]
+};
 }).filter(Boolean);
 
+displayList=[...allAnimes];
 loadChunk();
+}catch(e){console.error(e)}
 }
 
+/* CHUNK DISPLAY */
 function loadChunk(){
 const start=chunk*CHUNK_SIZE;
-const part=allAnimes.slice(start,start+CHUNK_SIZE);
+const part=displayList.slice(start,start+CHUNK_SIZE);
 
 part.forEach(a=>addCard(a));
 chunk++;
 
-if(start+CHUNK_SIZE<allAnimes.length){
-requestIdleCallback(loadChunk);
+if(start+CHUNK_SIZE<displayList.length){
+setTimeout(loadChunk,10);
 }
 }
 
+function resetAndReload(list){
+container.innerHTML="";
+displayList=list;
+chunk=0;
+loadChunk();
+}
+
 function addCard(a){
-const base=a.img?.split('.')[0]||a.img;
+const base=a.img?.includes('.')?a.img.split('.')[0]:a.img;
 const d=document.createElement('a');
 d.className='card';
 d.href=`video.html?name=${encodeURIComponent(a.nom)}`;
@@ -215,15 +240,14 @@ d.innerHTML=`
 <span class="tag">${a.censure}</span> ⭐ ${a.score}
 </div>`;
 
-anime-container.appendChild(d);
+container.appendChild(d);
 }
 
 /* SEARCH */
 function applySearch(v){
 v=v.toLowerCase();
-anime-container.innerHTML="";chunk=0;
-allAnimes=allAnimes.filter(a=>a.nom.toLowerCase().includes(v));
-loadChunk();
+const res=allAnimes.filter(a=>a.nom.toLowerCase().includes(v));
+resetAndReload(res);
 }
 
 search.oninput=e=>applySearch(e.target.value);
@@ -235,7 +259,7 @@ if(allAnimes.length){
 const a=allAnimes[Math.floor(Math.random()*allAnimes.length)];
 location=`video.html?name=${encodeURIComponent(a.nom)}`;
 }
-}
+};
 
 init();
 </script>
