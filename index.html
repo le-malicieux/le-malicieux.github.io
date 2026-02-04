@@ -16,7 +16,7 @@
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
-            background-image: url('img/fond1.webp'); /* Fond de secours immédiat */
+            background-image: url('img/fond1.webp'); /* Sécurité WebP */
         }
 
         .top-navbar {
@@ -26,7 +26,7 @@
         }
         .nav-left { display: flex; align-items: center; gap: 12px; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.2em; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
 
         .nav-center { display: flex; gap: 8px; align-items: center; }
         .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
@@ -34,50 +34,54 @@
         }
         .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
+        /* Menu Mobile avec Flèche de retour */
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
+
         .hero-section {
-            height: 65vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 20px;
         }
-        .main-logo { width: 140px; height: 140px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 20px rgba(255,71,87,0.4); }
-        .main-title { font-size: 3.2em; margin: 0; color: white; text-shadow: 3px 3px 15px rgba(0,0,0,0.9); font-weight: 800; }
-        .main-slogan { font-size: 1.5em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
+        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px rgba(255,71,87,0.3); }
+        .main-title { font-size: 3em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
+        .main-slogan { font-size: 1.4em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
 
-        .content-area { background: linear-gradient(to top, rgba(0,0,0,1) 85%, transparent); padding: 50px 15px; min-height: 500px; }
+        .content-area { background: linear-gradient(to top, rgba(0,0,0,1) 80%, transparent); padding: 40px 15px; min-height: 600px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
         
         .card { 
-            background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: transform 0.3s; 
+            background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
             border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
             display: flex; flex-direction: column;
         }
-        .card:hover { transform: translateY(-10px); border-color: var(--primary); }
-        .card .img-container { width: 100%; aspect-ratio: 2/3; background: #1a1a1a; overflow: hidden; }
+        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
+        .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
 
         .card-info { padding: 12px; flex-grow: 1; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.1em; }
-        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.05em; }
+        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.9em; }
         
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
-        .auth-status { font-size: 0.9em; color: #ccc; margin-right: 15px; }
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
+        .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
 
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
 
         @media (max-width: 1000px) {
             .burger { display: block; }
+            .close-menu { display: block; }
             .nav-center {
                 position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
-                background: #111; flex-direction: column; padding: 60px 20px;
-                transition: 0.4s ease; z-index: 1100; align-items: flex-start;
+                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
+                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1100; align-items: stretch;
             }
             .nav-center.active { left: 0; }
-            .nav-center * { width: 100% !important; margin: 5px 0; }
+            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
             .mobile-overlay.active { display: block; }
-            .main-title { font-size: 2.2em; }
+            .main-title { font-size: 2.1em; }
             .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
-            .card-info { padding: 6px; }
-            .card-title { font-size: 0.9em; }
+            .card-info { padding: 8px; }
+            .card-title { font-size: 0.85em; }
         }
     </style>
 </head>
@@ -89,21 +93,31 @@
             <img src="img/logo.jpg" class="nav-logo-small">
             <span class="nav-title">LE MALICIEUX</span>
         </div>
+
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
+
         <div class="nav-center" id="menu">
-            <input type="text" id="search" placeholder="Rechercher...">
+            <div class="close-menu" onclick="toggleM()">← Retour</div>
+            <input type="text" id="search" placeholder="Rechercher un anime...">
             <select id="sort">
                 <option value="">Trier par...</option>
-                <option value="nom">Nom (A-Z)</option>
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
+                <option value="nom">Nom (A-Z)</option>
                 <option value="sortie">Année</option>
+                <option value="episodes">Épisodes (Nombre)</option>
+                <option value="etat">État (Fini/En cours)</option>
+                <option value="censure">Censure</option>
             </select>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
-        <div id="auth-ui" style="display:flex; align-items:center;">
-            <button id="login-btn" class="btn-red" style="padding:8px 15px;">Connexion</button>
+
+        <div style="display:flex; align-items:center;">
+            <div id="auth-ui" style="display:flex; align-items:center;">
+                <button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>
+            </div>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" style="margin-left:10px;">Discord</a>
         </div>
     </div>
 
@@ -134,18 +148,16 @@
                 authUi.innerHTML = `<span class="auth-status">${user.displayName}</span><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
                 document.getElementById('logout-btn').onclick = () => signOut(auth);
             } else {
-                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:8px 15px;">Connexion</button>`;
+                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;
                 document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
             }
         });
 
-        function setRandomBackground() {
+        async function init() {
+            // Fond aléatoire optimisé
             const num = Math.floor(Math.random() * 55) + 1;
             document.body.style.backgroundImage = `url('img/fond${num}.webp')`;
-        }
 
-        async function init() {
-            setRandomBackground();
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
@@ -153,15 +165,15 @@
                     const c = line.split(';');
                     if (!c[0] || c.length < 9) return null;
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), img: clean(c[8]) };
+                    return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), img: clean(c[8]) };
                 }).filter(a => a !== null);
                 displayAnimes(allAnimes);
-            } catch (err) { console.error(err); }
+            } catch (err) { console.error("Erreur CSV:", err); }
         }
 
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
-            // On pré-construit tout le HTML pour éviter le clignotement
+            // Construction groupée pour éviter le bug de disparition sur mobile
             const html = list.map(a => {
                 const baseImg = a.img.split('.')[0];
                 return `
@@ -173,7 +185,7 @@
                             <div class="card-title">${a.nom}</div>
                             <div class="card-meta">
                                 📅 ${a.sortie} • ⭐ ${a.score}<br>
-                                <span class="tag">${a.censure}</span>
+                                <span class="tag">${a.censure}</span> • ${a.etat}
                             </div>
                         </div>
                     </a>`;
@@ -193,6 +205,9 @@
             if (m === "score") sorted.sort((a,b) => parseFloat(b.score) - parseFloat(a.score));
             if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
             if (m === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
+            if (m === "episodes") sorted.sort((a,b) => parseInt(b.ep) - parseInt(a.ep));
+            if (m === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
+            if (m === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
             displayAnimes(sorted);
         };
 
