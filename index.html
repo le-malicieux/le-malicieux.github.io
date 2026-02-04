@@ -17,27 +17,31 @@
             margin: 0; 
             min-height: 100vh;
             transition: background-image 0.5s ease;
+            /* Fond par défaut en WebP */
             background-image: url('img/fond1.webp');
         }
 
-        /* NAVBAR ORIGINALE */
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
+        /* --- MENU MOBILE --- */
         #menu-toggle { display: none; }
         .menu-btn { display: none; font-size: 28px; cursor: pointer; color: white; }
-        .menu-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 998; }
+        .menu-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); z-index: 1001; 
+        }
 
         .search-container { flex: 1; margin: 0 20px; }
         #search { width: 100%; padding: 10px 15px; border-radius: 20px; border: none; background: rgba(255,255,255,0.1); color: white; outline: none; border: 1px solid rgba(255,255,255,0.1); }
 
         .nav-links { display: flex; align-items: center; gap: 15px; }
-        .nav-links a, .nav-links button { color: white; text-decoration: none; font-weight: 500; background: none; border: none; cursor: pointer; }
+        .nav-links a, .nav-links button { color: white; text-decoration: none; font-weight: 500; transition: 0.3s; background: none; border: none; cursor: pointer; }
 
-        /* GRILLE */
+        /* --- GRILLE --- */
         .anime-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
@@ -46,33 +50,46 @@
 
         .anime-card {
             background: var(--card-bg); border-radius: 12px; overflow: hidden;
-            transition: 0.3s; border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.3s; border: 1px solid rgba(255,255,255,0.05);
             text-decoration: none; color: white; display: block;
         }
         .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-        .anime-info { padding: 10px; }
-        .anime-title { font-weight: bold; font-size: 0.9em; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .anime-info { padding: 15px; }
+        .anime-title { font-weight: bold; font-size: 1em; height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-        /* ADAPTATION MOBILE SANS CHANGER LE DESIGN PC */
+        /* --- RESPONSIVE : RESPECT DU DESIGN --- */
         @media (max-width: 950px) {
-            .menu-btn { display: block; margin-right: 10px; }
+            .menu-btn { display: block; }
             
             .nav-links {
-                position: fixed; top: 0; left: -300px; width: 260px; height: 100vh;
+                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
                 background: #111; flex-direction: column; align-items: flex-start;
-                padding: 60px 20px; transition: 0.3s ease; z-index: 999;
+                padding: 40px 20px; transition: 0.4s ease; z-index: 1002;
             }
+
+            /* Bouton Fermer pour Mobile */
+            .close-menu { display: block; align-self: flex-end; font-size: 30px; color: var(--primary); margin-bottom: 20px; cursor: pointer; }
 
             #menu-toggle:checked ~ .nav-links { left: 0; }
             #menu-toggle:checked ~ .menu-overlay { display: block; }
 
-            /* 3 CARTES EN LARGEUR SUR MOBILE */
+            .nav-links a, .nav-links button, .nav-links select { 
+                width: 100%; text-align: left; padding: 15px 0; border-bottom: 1px solid #222; 
+            }
+
+            .search-container { margin: 0 10px; }
+            
+            /* 3 COLONNES SUR MOBILE */
             .anime-grid { 
                 grid-template-columns: repeat(3, 1fr); 
-                gap: 10px; padding: 10px; 
+                gap: 8px; padding: 10px; 
             }
-            .anime-title { font-size: 0.75em; }
+            .anime-title { font-size: 0.7em; height: 2.2em; }
+            .anime-info { padding: 8px; }
         }
+
+        /* Masquer la croix sur PC */
+        .close-menu { display: none; }
     </style>
 </head>
 <body>
@@ -82,24 +99,26 @@
         <label for="menu-toggle" class="menu-btn">☰</label>
         <label for="menu-toggle" class="menu-overlay"></label>
 
-        <a href="index.html" style="color:var(--primary); font-weight:bold; text-decoration:none; font-size:1.2em;">LE MALICIEUX</a>
+        <a href="index.html" style="color:var(--primary); font-weight:bold; text-decoration:none; font-size:1.4em;">LE MALICIEUX</a>
         
         <div class="search-container">
-            <input type="text" id="search" placeholder="Rechercher...">
+            <input type="text" id="search" placeholder="Rechercher un anime...">
         </div>
 
         <div class="nav-links">
-            <select id="sort" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px; border-radius: 5px;">
+            <label for="menu-toggle" class="close-menu">✕</label>
+
+            <select id="sort" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 5px;">
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
                 <option value="nom">Nom</option>
             </select>
             
-            <div id="auth-container">
-                <button id="btn-login" style="background:var(--primary); padding:5px 15px; border-radius:20px;">Connexion</button>
+            <div id="auth-ui">
+                <button id="btn-login" style="background:var(--primary); color:white; padding:8px 20px; border-radius:20px; font-weight:bold;">Connexion</button>
                 <div id="user-profile" style="display:none; align-items:center; gap:10px;">
                     <img id="user-img" src="" style="width:35px; border-radius:50%; border:2px solid var(--primary);">
-                    <button id="btn-logout" style="font-size:0.7em; color:#888;">Quitter</button>
+                    <button id="btn-logout" style="font-size:0.8em; color:#888;">Quitter</button>
                 </div>
             </div>
 
@@ -130,14 +149,14 @@
 
         onAuthStateChanged(auth, (user) => {
             const btnLogin = document.getElementById('btn-login');
-            const profile = document.getElementById('user-profile');
+            const userProf = document.getElementById('user-profile');
             if (user) {
                 btnLogin.style.display = 'none';
-                profile.style.display = 'flex';
+                userProf.style.display = 'flex';
                 document.getElementById('user-img').src = user.photoURL;
             } else {
                 btnLogin.style.display = 'block';
-                profile.style.display = 'none';
+                userProf.style.display = 'none';
             }
         });
 
@@ -146,7 +165,7 @@
 
         let allAnimes = [];
         const fonds = ['fond1.webp', 'fond2.webp', 'fond3.webp'];
-        document.body.style.backgroundImage = `url('img/${fonds[Math.floor(Math.random()*fonds.length)]}')`;
+        document.body.style.backgroundImage = `url('img/${fonds[Math.floor(Math.random() * fonds.length)]}')`;
 
         async function load() {
             const resp = await fetch('animes.csv');
@@ -156,10 +175,10 @@
                 const c = l.split(';');
                 return { nom: c[0], score: c[2], img: c[8], pop: c[1], sortie: c[3] };
             });
-            displayAnimes(allAnimes);
+            display(allAnimes);
         }
 
-        function displayAnimes(list) {
+        function display(list) {
             const grid = document.getElementById('anime-grid');
             grid.innerHTML = list.map(a => `
                 <a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card">
@@ -171,7 +190,7 @@
                 </a>`).join('');
         }
 
-        // FONCTION ALÉATOIRE CORRIGÉE
+        // CORRECTION ALÉATOIRE
         window.randomAnime = function() {
             if(allAnimes.length > 0) {
                 const lucky = allAnimes[Math.floor(Math.random() * allAnimes.length)];
@@ -179,10 +198,10 @@
             }
         };
 
-        document.getElementById('search').addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            displayAnimes(allAnimes.filter(a => a.nom.toLowerCase().includes(val)));
-        });
+        document.getElementById('search').oninput = (e) => {
+            const v = e.target.value.toLowerCase();
+            display(allAnimes.filter(a => a.nom.toLowerCase().includes(v)));
+        };
 
         load();
     </script>
