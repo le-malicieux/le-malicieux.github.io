@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
-        /* ============================================================
-           TON CODE ORIGINAL (PC) - INCHANGÉ
-           ============================================================ */
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
         
         body { 
@@ -20,6 +17,7 @@
             margin: 0; 
             min-height: 100vh;
             transition: background-image 0.5s ease;
+            /* Fond par défaut immédiat */
             background-image: url('img/fond1.jpg');
         }
 
@@ -52,37 +50,30 @@
         .anime-info { padding: 15px; }
         .anime-title { font-weight: bold; font-size: 1em; height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-        /* Éléments masqués sur PC */
-        .burger-btn, .mobile-overlay { display: none; }
-
-        /* ============================================================
-           OPTIMISATION TÉLÉPHONE (CARTE BLANCHE - SEULEMENT SI < 900px)
-           ============================================================ */
+        /* --- OPTIMISATION MOBILE (NE S'ACTIVE PAS SUR PC) --- */
+        .burger-icon { display: none; }
+        
         @media (max-width: 900px) {
-            .burger-btn { display: block; font-size: 28px; cursor: pointer; color: white; margin-right: 15px; }
-            .mobile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; display: none; }
-            .mobile-overlay.active { display: block; }
-
+            .burger-icon { display: block; font-size: 28px; cursor: pointer; color: white; margin-right: 15px; }
             .nav-links {
                 position: fixed; top: 0; left: -100%; width: 260px; height: 100vh;
                 background: #111; flex-direction: column; align-items: flex-start;
-                padding: 60px 20px; transition: 0.4s ease; z-index: 1100;
+                padding: 60px 20px; transition: 0.3s ease; z-index: 1100;
             }
             .nav-links.active { left: 0; }
-            .nav-links a, .nav-links button, .nav-links select { width: 100%; text-align: left; padding: 15px 0; border-bottom: 1px solid #222; }
-
-            /* Grille 3 colonnes pour mobile */
+            .nav-links a, .nav-links button, .nav-links select { width: 100%; text-align: left; padding: 12px 0; border-bottom: 1px solid #222; }
             .anime-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
-            .anime-info { padding: 8px; }
-            .anime-title { font-size: 0.75em; height: 2.2em; }
+            .anime-title { font-size: 0.75em; }
+            .mobile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 1050; }
+            .mobile-overlay.active { display: block; }
         }
     </style>
 </head>
 <body>
 
     <nav class="top-navbar">
-        <div class="burger-btn" onclick="toggleMenu()">☰</div>
-        <div class="mobile-overlay" id="overlay" onclick="toggleMenu()"></div>
+        <div class="burger-icon" onclick="toggleM()">☰</div>
+        <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
 
         <a href="index.html" style="color:var(--primary); font-weight:bold; text-decoration:none; font-size:1.4em;">LE MALICIEUX</a>
         
@@ -90,13 +81,15 @@
             <input type="text" id="search" placeholder="Rechercher un anime...">
         </div>
 
-        <div class="nav-links" id="navLinks">
+        <div class="nav-links" id="links">
             <select id="sort" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 5px;">
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
                 <option value="nom">Nom</option>
                 <option value="sortie">Année</option>
                 <option value="episodes">Épisodes</option>
+                <option value="censure">Censure</option>
+                <option value="etat">État</option>
             </select>
             
             <div id="auth-ui" style="display: flex; align-items: center;">
@@ -158,7 +151,7 @@
             const lines = data.split(/\r?\n/).slice(1);
             allAnimes = lines.filter(l => l.trim()).map(l => {
                 const c = l.split(';');
-                return { nom: c[0], pop: c[1], score: c[2], sortie: c[3], ep: c[4], img: c[8] };
+                return { nom: c[0], pop: c[1], score: c[2], sortie: c[3], ep: c[4], censure: c[5], etat: c[6], img: c[8] };
             });
             displayAnimes(allAnimes);
         }
@@ -175,9 +168,9 @@
                 </a>`).join('');
         }
 
-        // Fonction Menu Mobile
-        window.toggleMenu = function() {
-            document.getElementById('navLinks').classList.toggle('active');
+        // Script menu mobile uniquement
+        window.toggleM = function() {
+            document.getElementById('links').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
         };
 
