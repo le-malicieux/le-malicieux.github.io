@@ -175,15 +175,15 @@ const authUI=document.getElementById('auth-ui');
 const mobileAuth=document.getElementById('mobile-auth');
 
 if(user){
-const html=`<span class="auth-status">${user.displayName}</span><button id="out" class="discord-btn" style="background:#333">Déconnexion</button>`;
+const html=`<span class="auth-status">${user.displayName}</span><button id="logoutBtn" class="discord-btn" style="background:#333">Déconnexion</button>`;
 authUI.innerHTML=html;
 mobileAuth.innerHTML=html;
-out.onclick=()=>signOut(auth);
+document.getElementById('logoutBtn').onclick=()=>signOut(auth);
 }else{
-const html=`<button id="in" class="discord-btn" style="background:var(--primary)">Connexion</button>`;
+const html=`<button id="loginBtn" class="discord-btn" style="background:var(--primary)">Connexion</button>`;
 authUI.innerHTML=html;
 mobileAuth.innerHTML=html;
-in.onclick=()=>signInWithPopup(auth,provider);
+document.getElementById('loginBtn').onclick=()=>signInWithPopup(auth,provider);
 }
 });
 
