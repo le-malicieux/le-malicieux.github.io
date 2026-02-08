@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    
     <title>Visionnage - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
@@ -50,13 +52,6 @@
         iframe { width: 100%; aspect-ratio: 16/9; border: none; }
 
         .comment-input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box; }
-
-        @media (max-width: 800px) {
-            .top-info { flex-direction: column; align-items: center; }
-            .poster { width: 200px; }
-            .bottom-controls { grid-template-columns: 1fr; }
-            .anime-title { text-align: center; font-size: 1.6em; }
-        }
     </style>
 </head>
 <body>
@@ -66,12 +61,7 @@
         <div id="anime-details">Chargement...</div>
 
         <div class="player-section" id="player-container">
-            <iframe id="main-iframe" 
-                allowfullscreen 
-                allow="autoplay; encrypted-media; picture-in-picture" 
-                referrerpolicy="no-referrer"
-                sandbox="allow-forms allow-scripts allow-same-origin allow-presentation">
-            </iframe>
+            <iframe id="main-iframe" allowfullscreen referrerpolicy="no-referrer" sandbox="allow-forms allow-scripts allow-same-origin allow-presentation"></iframe>
         </div>
 
         <div class="comments-section" style="margin-top:40px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333;">
@@ -172,11 +162,18 @@
                     btn.onclick = () => {
                         const player = document.getElementById('player-container');
                         const ifr = document.getElementById('main-iframe');
-                        // On force le HTTPS pour éviter le blocage Mixed Content
-                        const secureLink = link.startsWith('http://') ? link.replace('http://', 'https://') : link;
+                        
+                        // TENTATIVE 1 : AFFICHAGE DANS L'IFRAME
                         player.style.display = "block";
-                        ifr.src = secureLink;
+                        ifr.src = link;
                         player.scrollIntoView({ behavior: 'smooth' });
+
+                        // TENTATIVE 2 : SI BLOCAGE DÉTECTÉ APRÈS 2 SECONDES (Sécurité de secours)
+                        setTimeout(() => {
+                            if (confirm("Le lecteur semble bloqué par votre navigateur. Voulez-vous l'ouvrir dans un nouvel onglet ?")) {
+                                window.open(link, '_blank');
+                            }
+                        }, 2500);
                     };
                     streamArea.appendChild(btn);
                 });
@@ -228,7 +225,7 @@
                 });
 
                 document.getElementById('btn-post').onclick = async () => {
-                    if(!currentUser) return alert("Connecte-toi !");
+                    if(!currentUser) return alert("Connectez-vous sur la page d'accueil !");
                     const txt = document.getElementById('comment-input').value;
                     if(txt.trim()) {
                         await addDoc(collection(db, "commentaires"), { anime: animeName, text: txt, userName: currentUser.displayName, date: serverTimestamp() });
