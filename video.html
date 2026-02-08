@@ -35,7 +35,6 @@
         .ublock-tip { font-size: 0.75em; color: #888; text-transform: none; font-weight: normal; }
         .ublock-tip a { color: #3498db; text-decoration: none; }
 
-        /* Style de la boîte d'infos de visionnage */
         .watch-info-box { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--primary); padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 0.85em; color: #bbb; min-height: 20px; }
 
         .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 8px; border-radius: 5px; margin-bottom: 8px; font-size: 0.85em; text-align: center; border: 1px solid #444; transition: 0.3s; width: 100%; box-sizing: border-box; cursor: pointer; }
@@ -48,6 +47,7 @@
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
 
         .player-section { margin-top: 20px; background: #000; border-radius: 15px; overflow: hidden; display: none; }
+        /* AJOUT DE SÉCURITÉ POUR L'IFRAME */
         iframe { width: 100%; aspect-ratio: 16/9; border: none; }
 
         .comment-input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box; }
@@ -60,7 +60,7 @@
         <div id="anime-details">Chargement...</div>
 
         <div class="player-section" id="player-container">
-            <iframe id="main-iframe" allowfullscreen></iframe>
+            <iframe id="main-iframe" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture" sandbox="allow-forms allow-scripts allow-same-origin allow-presentation"></iframe>
         </div>
 
         <div class="comments-section" style="margin-top:40px; background:var(--card-bg); padding:20px; border-radius:15px;">
@@ -101,7 +101,7 @@
                         img: cl(c[8]),
                         streamLinks: c[9] ? c[9].split(',').map(cl) : [],
                         downloadLinks: c[10] ? c[10].split(',').map(cl) : [],
-                        visionnageInfo: cl(c[11]) // Colonne L (index 11)
+                        visionnageInfo: cl(c[11])
                     };
                 }
             }).find(x => x);
@@ -149,7 +149,7 @@
 
                                 <div class="watch-info-box">
                                     <small style="color:var(--primary); font-weight:bold;">Informations :</small><br>
-                                    <span id="visionnage-text">${anime.visionnageInfo ? anime.visionnageInfo : "Aucune information spécifique pour cet anime."}</span>
+                                    <span id="visionnage-text">${anime.visionnageInfo ? anime.visionnageInfo : "Aucune information spécifique."}</span>
                                 </div>
 
                                 <div id="stream-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
@@ -157,7 +157,6 @@
                         </div>
                     </div>`;
 
-                // Remplissage des liens Téléchargement
                 const dlArea = document.getElementById('dl-area');
                 if(anime.downloadLinks.length > 0 && anime.downloadLinks[0] !== "") {
                     anime.downloadLinks.forEach((link, i) => {
@@ -165,7 +164,6 @@
                     });
                 } else dlArea.innerHTML = "<small style='color:#555'>Non disponible</small>";
 
-                // Remplissage des liens Streaming
                 const streamArea = document.getElementById('stream-area');
                 if(anime.streamLinks.length > 0 && anime.streamLinks[0] !== "") {
                     anime.streamLinks.forEach((link, i) => {
@@ -181,7 +179,6 @@
                     });
                 } else streamArea.innerHTML = "<small style='color:#555'>Non disponible</small>";
 
-                // Firebase et Playlist
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
@@ -209,28 +206,32 @@
                                 playlistTarget: document.getElementById('target-playlist').value, epMax: anime.ep
                             }).then(() => alert("Liste mise à jour !"));
                         };
-                        document.getElementById('delete-btn').onclick = () => { if(confirm("Supprimer de ta liste ?")) deleteDoc(docRef).then(() => location.reload()); };
+                        document.getElementById('delete-btn').onclick = () => { if(confirm("Supprimer ?")) deleteDoc(docRef).then(() => location.reload()); };
                     }
                 });
 
                 const updateStars = (v) => document.querySelectorAll('#stars span').forEach(s => s.classList.toggle('active', s.dataset.v <= v));
                 document.getElementById('stars').onclick = (e) => { if(e.target.dataset.v) { userRating = parseInt(e.target.dataset.v); updateStars(userRating); } };
 
-                // Commentaires
-                onSnapshot(query(collection(db, "commentaires"), where("anime", "==", animeName), orderBy("date", "desc")), (snap) => {
+                // RÉPARATION DU BUG DES COMMENTAIRES (Tri simplifié pour éviter l'erreur d'index Firebase)
+                onSnapshot(query(collection(db, "commentaires"), where("anime", "==", animeName)), (snap) => {
                     const cDisp = document.getElementById('comments-display');
                     cDisp.innerHTML = "";
-                    snap.forEach(doc => {
-                        const d = doc.data();
+                    // On trie manuellement en JavaScript pour contourner le besoin d'index Firebase
+                    const docs = [];
+                    snap.forEach(d => docs.push(d.data()));
+                    docs.sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
+
+                    docs.forEach(d => {
                         cDisp.innerHTML += `<div style="margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
-                            <b style="color:var(--primary)">${d.userName}</b> <small style="color:#666">${d.date?.toDate().toLocaleDateString() || ''}</small>
+                            <b style="color:var(--primary)">${d.userName}</b> <small style="color:#666">${d.date?.toDate().toLocaleDateString() || 'À l\'instant'}</small>
                             <p style="margin:5px 0;">${d.text}</p>
                         </div>`;
                     });
                 });
 
                 document.getElementById('btn-post').onclick = async () => {
-                    if(!currentUser) return alert("Connecte-toi sur l'accueil !");
+                    if(!currentUser) return alert("Connecte-toi d'abord !");
                     const txt = document.getElementById('comment-input').value;
                     if(txt.trim()) {
                         await addDoc(collection(db, "commentaires"), { anime: animeName, text: txt, userName: currentUser.displayName, date: serverTimestamp() });
