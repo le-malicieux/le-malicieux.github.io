@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    
     <title>Visionnage - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
@@ -33,25 +31,27 @@
         .playlist-box select, .playlist-box input { background: #333; color: white; border: 1px solid #555; padding: 8px; border-radius: 4px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
         
         .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); }
-        .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
-        .ublock-tip { font-size: 0.75em; color: #888; text-transform: none; font-weight: normal; }
-        .ublock-tip a { color: #3498db; text-decoration: none; }
+        .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
 
-        .watch-info-box { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--primary); padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 0.85em; color: #bbb; min-height: 20px; }
+        .watch-info-box { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--primary); padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 0.85em; color: #bbb; }
 
-        .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 8px; border-radius: 5px; margin-bottom: 8px; font-size: 0.85em; text-align: center; border: 1px solid #444; transition: 0.3s; width: 100%; box-sizing: border-box; cursor: pointer; }
-        .btn-link:hover { background: var(--primary); border-color: var(--primary); }
+        .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 10px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9em; text-align: center; border: 1px solid #444; transition: 0.3s; width: 100%; box-sizing: border-box; font-weight: bold; }
+        .btn-link:hover { background: var(--primary); border-color: var(--primary); transform: translateY(-2px); }
 
-        .star-rating { font-size: 1.3em; color: #444; cursor: pointer; margin: 5px 0; text-align: center; display: flex; justify-content: center; }
-        .star-rating span.active { color: #f1c40f; }
-        
         .btn-save { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
 
-        .player-section { margin-top: 20px; background: #000; border-radius: 15px; overflow: hidden; display: none; border: 2px solid #333; }
-        iframe { width: 100%; aspect-ratio: 16/9; border: none; }
-
         .comment-input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box; }
+        
+        .star-rating { font-size: 1.3em; color: #444; cursor: pointer; margin: 5px 0; text-align: center; display: flex; justify-content: center; }
+        .star-rating span.active { color: #f1c40f; }
+
+        @media (max-width: 800px) {
+            .top-info { flex-direction: column; align-items: center; }
+            .poster { width: 220px; }
+            .bottom-controls { grid-template-columns: 1fr; }
+            .anime-title { text-align: center; font-size: 1.8em; }
+        }
     </style>
 </head>
 <body>
@@ -59,10 +59,6 @@
         <a href="index.html" class="back-btn">← Retour au catalogue</a>
         
         <div id="anime-details">Chargement...</div>
-
-        <div class="player-section" id="player-container">
-            <iframe id="main-iframe" allowfullscreen referrerpolicy="no-referrer" sandbox="allow-forms allow-scripts allow-same-origin allow-presentation"></iframe>
-        </div>
 
         <div class="comments-section" style="margin-top:40px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333;">
             <h3>Commentaires</h3>
@@ -142,7 +138,7 @@
                             <div class="link-box">
                                 <div class="link-title">📥 Téléchargement</div>
                                 <div id="dl-area" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
-                                <div class="link-title" style="margin-top:20px;">🎬 Visionnage</div>
+                                <div class="link-title" style="margin-top:20px;">🎬 Visionnage (Nouvel onglet)</div>
                                 <div class="watch-info-box">${anime.visionnageInfo || "Aucune info."}</div>
                                 <div id="stream-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
                             </div>
@@ -151,31 +147,13 @@
 
                 const dlArea = document.getElementById('dl-area');
                 anime.downloadLinks.filter(l => l).forEach((link, i) => {
-                    dlArea.innerHTML += `<a href="${link}" target="_blank" class="btn-link">Lien ${i+1}</a>`;
+                    dlArea.innerHTML += `<a href="${link}" target="_blank" rel="noopener noreferrer" class="btn-link">Lien ${i+1}</a>`;
                 });
 
                 const streamArea = document.getElementById('stream-area');
                 anime.streamLinks.filter(l => l).forEach((link, i) => {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-link';
-                    btn.innerText = `Lecteur ${i+1}`;
-                    btn.onclick = () => {
-                        const player = document.getElementById('player-container');
-                        const ifr = document.getElementById('main-iframe');
-                        
-                        // TENTATIVE 1 : AFFICHAGE DANS L'IFRAME
-                        player.style.display = "block";
-                        ifr.src = link;
-                        player.scrollIntoView({ behavior: 'smooth' });
-
-                        // TENTATIVE 2 : SI BLOCAGE DÉTECTÉ APRÈS 2 SECONDES (Sécurité de secours)
-                        setTimeout(() => {
-                            if (confirm("Le lecteur semble bloqué par votre navigateur. Voulez-vous l'ouvrir dans un nouvel onglet ?")) {
-                                window.open(link, '_blank');
-                            }
-                        }, 2500);
-                    };
-                    streamArea.appendChild(btn);
+                    // VERSION LIEN DIRECT POUR ÉVITER LE BLOCAGE POPUP
+                    streamArea.innerHTML += `<a href="${link}" target="_blank" rel="noopener noreferrer" class="btn-link">Lecteur ${i+1} ↗</a>`;
                 });
 
                 onAuthStateChanged(auth, async (u) => {
