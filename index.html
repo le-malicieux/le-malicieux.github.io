@@ -16,7 +16,6 @@
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
-            background-image: none; /* Gestion dynamique par JS */
         }
 
         .top-navbar {
@@ -129,7 +128,7 @@
         let allAnimes = [];
 
         async function init() {
-            // FOND ALEATOIRE OPTIMISÉ
+            // FIX FOND NOIR
             const num = Math.floor(Math.random() * 55) + 1;
             const img = new Image();
             const src = `img/fond${num}.webp`;
@@ -191,6 +190,8 @@
             if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
             if (m === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
             if (m === "episodes") sorted.sort((a,b) => parseInt(b.ep) - parseInt(a.ep));
+            if (m === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
+            if (m === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
             displayAnimes(sorted);
         };
 
