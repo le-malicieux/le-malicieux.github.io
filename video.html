@@ -27,10 +27,40 @@
         /* Contrôles & Playlists */
         .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-        select { background: #333; color: white; border: 1px solid #555; padding: 10px; width: 100%; border-radius: 4px; margin-bottom: 10px; cursor: pointer; }
         
-        .ep-row { display: flex; align-items: center; gap: 8px; background: #333; border: 1px solid #555; padding: 5px 12px; border-radius: 4px; margin-bottom: 10px; }
-        #user-ep { background: transparent; border: none; flex-grow: 1; margin-bottom: 0; }
+        /* CORRECTIF COULEURS ET LISIBILITÉ */
+        select { 
+            background: #fdfdfd; 
+            color: #111; /* Texte bien noir pour être lisible */
+            border: 1px solid #555; 
+            padding: 10px; 
+            width: 100%; 
+            border-radius: 4px; 
+            margin-bottom: 10px; 
+            cursor: pointer; 
+            font-weight: 500;
+        }
+        select option { background: #fff; color: #111; }
+
+        /* ALIGNEMENT "VU : X / TOTAL" */
+        .ep-row { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 12px; 
+            background: #333; 
+            border: 1px solid #555; 
+            padding: 8px 15px; 
+            border-radius: 4px; 
+            margin-bottom: 15px; 
+        }
+        .ep-row span { font-size: 0.9em; font-weight: bold; color: #ccc; white-space: nowrap; }
+        #user-ep { 
+            margin-bottom: 0; 
+            width: 80px; /* Taille fixe pour éviter que ça pousse le reste */
+            padding: 5px;
+            text-align: center;
+        }
 
         /* Etoiles */
         .star-rating { font-size: 1.4em; color: #444; cursor: pointer; margin: 10px 0; text-align: center; display: flex; justify-content: center; gap: 2px; }
@@ -46,7 +76,6 @@
         .btn-save { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
 
-        /* Texte Attention */
         .user-note { background: #111; padding: 15px; border-radius: 10px; font-size: 0.8em; line-height: 1.5; color: #aaa; margin-top: 20px; border: 1px solid #333; }
 
         @media (max-width: 800px) { .top-info { flex-direction: column; } .bottom-controls { grid-template-columns: 1fr; } }
@@ -131,14 +160,16 @@
 
                         <div class="bottom-controls">
                             <div class="playlist-box">
-                                <label style="font-size:0.7em; color:var(--primary); font-weight:bold; text-transform:uppercase;">Ma Progression</label>
+                                <label style="font-size:0.7em; color:var(--primary); font-weight:bold; text-transform:uppercase; margin-bottom:5px; display:block;">Ma Progression</label>
                                 <select id="user-status"><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
                                 <select id="target-playlist"><option value="">Chargement playlists...</option></select>
+                                
                                 <div class="ep-row">
-                                    <span style="font-size:0.8em; color:#888;">Vu :</span>
+                                    <span>Vu :</span>
                                     <select id="user-ep">${epOptions}</select>
-                                    <span style="font-size:0.8em; color:#888;">/ ${maxEp}</span>
+                                    <span>/ ${maxEp}</span>
                                 </div>
+
                                 <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
                                 <button class="btn-save" id="save-btn">Enregistrer</button>
                                 <button class="btn-delete" id="delete-btn">Retirer de ma liste</button>
