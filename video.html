@@ -33,7 +33,6 @@
         .star-rating span.active { color: #f1c40f; }
         .btn-save { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
-        .comment-input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -43,7 +42,7 @@
 
         <div class="comments-section" style="margin-top:20px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333;">
             <h3>Commentaires</h3>
-            <textarea id="comment-input" class="comment-input" placeholder="Ajouter un commentaire..." rows="3"></textarea>
+            <textarea id="comment-input" style="width:100%; background:#222; border:1px solid #444; color:white; padding:10px; border-radius:5px; margin-bottom:10px; resize:none;" placeholder="Ajouter un commentaire..." rows="3"></textarea>
             <button id="btn-post" class="btn-save" style="width: auto; padding: 10px 30px;">Publier</button>
             <div id="comments-display" style="margin-top: 20px;"></div>
         </div>
@@ -79,8 +78,8 @@
 
                 if(anime) {
                     let epOptions = "";
-                    const maxEp = parseInt(anime.ep) || 0;
-                    for(let i=0; i <= maxEp; i++) epOptions += `<option value="${i}">${i}</option>`;
+                    const totalEp = parseInt(anime.ep) || 0;
+                    for(let i=0; i <= totalEp; i++) epOptions += `<option value="${i}">${i}</option>`;
 
                     document.getElementById('anime-details').innerHTML = `
                         <div class="anime-header">
@@ -106,7 +105,7 @@
                                     <select id="target-playlist"><option value="">Chargement...</option></select>
                                     <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
                                     <button class="btn-save" id="save-btn">Mettre à jour</button>
-                                    <button class="btn-delete" id="delete-btn">Retirer</button>
+                                    <button class="btn-delete" id="delete-btn">Retirer de ma liste</button>
                                 </div>
                                 <div class="link-box">
                                     <div class="link-title">📥 Téléchargement</div><div id="dl-area" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
@@ -114,14 +113,18 @@
                                     <div class="watch-info-box">${anime.visionnageInfo || "Aucune info."}</div>
                                     <div id="stream-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
                                     <div style="font-size:0.75em; color:#777; margin-top:15px; border-top:1px solid #333; padding-top:10px;">
-                                        Attention : Quand une œuvre possède une deuxième saison qui porte le même nom ou un nom très ressemblant, je créé une seule carte pour toutes les saisons donc les informations comme la popularité sont plus générales, les liens de visionnage et de téléchargement sont biens présents, j'ai aussi inclus par exemple pour l'anime Furifure/2, le slash (/) sépare la saison 1 de la saison 2. Donc quand vous voyez un slash (/) dans un nom, c'est qu'il y a plusieurs saisons, sauf cas compliqués comme Ikenai Koto où ses ses 3 saisons sont en 3 cartes ou Bible Black en une seule. Si ce n'est pas clair n'hésitez pas à poser des questions sur le discord :)
+                                        Quand une œuvre possède une deuxième saison qui porte le même nom ou un nom très ressemblant, je créé une seule carte pour toutes les saisons donc les informations comme la popularité sont plus générales, les liens de visionnage et de téléchargement sont biens présents, j'ai aussi inclus par exemple pour l'anime Furifure/2, le slash (/) sépare la saison 1 de la saison 2. Donc quand vous voyez un slash (/) dans un nom, c'est qu'il y a plusieurs saisons, sauf cas compliqués comme Ikenai Koto où ses ses 3 saisons sont en 3 cartes ou Bible Black en une seule. Si ce n'est pas clair n'hésitez pas à poser des questions sur le discord :)
                                     </div>
                                 </div>
                             </div>
                         </div>`;
 
-                    anime.downloadLinks.filter(l => l).forEach((l,i) => document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lien ${i+1}</a>`);
-                    anime.streamLinks.filter(l => l).forEach((l,i) => document.getElementById('stream-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lecteur ${i+1} ↗</a>`);
+                    anime.downloadLinks.forEach((l, i) => {
+                        if(l) document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lien ${i+1}</a>`;
+                    });
+                    anime.streamLinks.forEach((l, i) => {
+                        if(l) document.getElementById('stream-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lecteur ${i+1} ↗</a>`;
+                    });
 
                     onAuthStateChanged(auth, async (u) => {
                         currentUser = u;
@@ -163,7 +166,7 @@
                     });
 
                     document.getElementById('btn-post').onclick = async () => {
-                        if(!currentUser) return alert("Connectez-vous !");
+                        if(!currentUser) return alert("Connectez-vous sur l'accueil !");
                         const txt = document.getElementById('comment-input').value;
                         if(txt.trim()) {
                             await addDoc(collection(db, "commentaires"), { anime: animeName, text: txt, userName: currentUser.displayName, date: serverTimestamp() });
