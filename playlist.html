@@ -99,7 +99,7 @@
 
         let allUserAnimes = [];
 
-        // MODIF : Lire le mode sauvegardé
+        // LIRE LE MODE SAUVEGARDÉ
         const savedMode = localStorage.getItem('playlistDisplayMode') || 'grid';
         document.getElementById('display-mode').value = savedMode;
 
@@ -125,7 +125,7 @@
             const playlist = document.getElementById('filter-playlist').value;
             const mode = document.getElementById('display-mode').value;
             
-            // MODIF : Enregistrer le mode
+            // ENREGISTRER LE MODE
             localStorage.setItem('playlistDisplayMode', mode);
 
             const filtered = allUserAnimes.filter(a => {
@@ -139,7 +139,8 @@
             const listBody = document.getElementById('list-body');
 
             if (mode === 'grid') {
-                grid.style.display = "grid"; table.style.display = "none";
+                grid.style.display = "grid";
+                table.style.display = "none";
                 grid.innerHTML = filtered.map(a => `
                     <a href="video.html?name=${encodeURIComponent(a.anime)}" class="card">
                         <span class="status-tag status-${a.status}">${a.status}</span>
@@ -150,7 +151,8 @@
                         </div>
                     </a>`).join('');
             } else {
-                grid.style.display = "none"; table.style.display = "table";
+                grid.style.display = "none";
+                table.style.display = "table";
                 listBody.innerHTML = filtered.map((a, i) => `
                     <tr>
                         <td class="status-bar status-${a.status}-bg"></td>
