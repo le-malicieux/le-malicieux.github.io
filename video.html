@@ -38,7 +38,8 @@
             cursor: pointer; 
             appearance: none;
         }
-        select option { background: #222; color: #fff; }
+        /* Correction du bug visuel des options (le fond blanc) */
+        select option { background-color: #222 !important; color: #fff !important; }
 
         .ep-row { 
             display: flex; 
@@ -63,8 +64,6 @@
         .btn-link:hover { background: var(--primary); border-color: var(--primary); }
         
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
-
-        .user-note { background: #111; padding: 15px; border-radius: 10px; font-size: 0.8em; line-height: 1.5; color: #aaa; margin-top: 20px; border: 1px solid #333; }
 
         @media (max-width: 800px) { .top-info { flex-direction: column; } .bottom-controls { grid-template-columns: 1fr; } }
     </style>
@@ -155,7 +154,7 @@
                             <div class="link-box">
                                 <div class="link-title">📥 Téléchargement</div><div id="dl-area" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px;"></div>
                                 <div class="link-title">🎬 Visionnage</div>
-                                <div style="background:rgba(255,255,255,0.05); border-left:3px solid var(--primary); padding:10px; border-radius:4px; font-size:0.85em; margin-bottom:10px; color:#bbb;">${anime.infoV || "Aucune info."}</div>
+                                <div style="background:rgba(255,255,255,0.05); border-left:3px solid var(--primary); padding:10px; border-radius:4px; font-size:0.85em; margin-bottom:10px; color:#bbb;">${anime.infoV || "Aucune information supplémentaire pour le visionnage."}</div>
                                 <div id="stream-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
                             </div>
                         </div>
