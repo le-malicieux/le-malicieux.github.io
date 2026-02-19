@@ -36,7 +36,7 @@
         .status-waiting { background: #f1c40f; color: black; }
         .status-completed { background: #3498db; color: white; }
         
-        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 10px; overflow: hidden; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 10px; overflow: hidden; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
         th { background: #222; color: var(--primary); font-size: 0.9em; }
         .list-img { width: 40px; height: 60px; object-fit: cover; border-radius: 4px; }
@@ -80,7 +80,7 @@
             <div id="grid-view" class="grid"></div>
             <table id="list-view" style="display:none;">
                 <thead>
-                    <tr><th></th><th>#</th><th>Image</th><th>Titre</th><th>Ma Note</th><th>Épisodes</th><th>Action</th></tr>
+                    <tr><th></th><th>#</th><th>Image</th><th>Titre</th><th>Ma Note</th><th>Épisodes</th><th>Score</th><th>Pop.</th><th>Sortie</th><th>Censure</th><th>Action</th></tr>
                 </thead>
                 <tbody id="list-body"></tbody>
             </table>
@@ -99,7 +99,7 @@
 
         let allUserAnimes = [];
 
-        // --- AJOUT : Mémoire de l'affichage ---
+        // MODIF : Lire le mode sauvegardé
         const savedMode = localStorage.getItem('playlistDisplayMode') || 'grid';
         document.getElementById('display-mode').value = savedMode;
 
@@ -125,7 +125,7 @@
             const playlist = document.getElementById('filter-playlist').value;
             const mode = document.getElementById('display-mode').value;
             
-            // --- AJOUT : Sauvegarde du mode ---
+            // MODIF : Enregistrer le mode
             localStorage.setItem('playlistDisplayMode', mode);
 
             const filtered = allUserAnimes.filter(a => {
@@ -156,15 +156,19 @@
                         <td class="status-bar status-${a.status}-bg"></td>
                         <td>${i+1}</td>
                         <td><img src="img/${a.img.split('.')[0]}.jpg" class="list-img" onerror="this.src='img/${a.img.split('.')[0]}.png'"></td>
-                        <td><a href="video.html?name=${encodeURIComponent(a.anime)}" style="color:white; text-decoration:none; font-weight:bold;">${a.anime}</a></td>
+                        <td style="font-weight:bold;"><a href="video.html?name=${encodeURIComponent(a.anime)}" style="color:white; text-decoration:none;">${a.anime}</a></td>
                         <td style="color:#f1c40f;">⭐ ${a.rating || 0}</td>
                         <td>${a.epSeen} / ${a.epMax || '?'}</td>
-                        <td><button style="border:none; background:none; color:#ff4757; cursor:pointer;" onclick="deleteEntry('${a.id}')">🗑️</button></td>
+                        <td>${a.score || 'N/A'}</td>
+                        <td>${a.pop || 'N/A'}</td>
+                        <td>${a.sortie || '?'}</td>
+                        <td><span style="font-size:0.8em; background:#333; padding:2px 5px; border-radius:3px;">${a.censure || ''}</span></td>
+                        <td><button style="background:none; border:none; color:#ff4757; cursor:pointer;" onclick="deleteEntry('${a.id}')">🗑️</button></td>
                     </tr>`).join('');
             }
         }
 
-        window.deleteEntry = async (id) => { if(confirm("Supprimer cet anime de votre liste ?")) await deleteDoc(doc(db, "playlists", id)); };
+        window.deleteEntry = async (id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, "playlists", id)); };
         document.getElementById('filter-status').onchange = render;
         document.getElementById('filter-playlist').onchange = render;
         document.getElementById('display-mode').onchange = render;
