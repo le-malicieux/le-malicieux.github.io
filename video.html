@@ -28,20 +28,26 @@
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
 
         select { background: #333; color: #fff; border: 1px solid #555; padding: 10px; width: 100%; border-radius: 4px; margin-bottom: 12px; cursor: pointer; }
-        
+        select option { background: #222; color: #fff; }
+
         .ep-row { 
             display: flex; align-items: center; justify-content: center; gap: 10px; 
             background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #444;
         }
-        #user-ep { width: auto; min-width: 80px; margin-bottom: 0; text-align: center; }
+        .ep-row span { font-weight: bold; color: #aaa; white-space: nowrap; }
+        #user-ep { width: auto; min-width: 80px; margin-bottom: 0; text-align: center; padding: 5px; }
 
         .star-rating { font-size: 1.4em; color: #444; cursor: pointer; margin: 10px 0; text-align: center; display: flex; justify-content: center; gap: 2px; }
         .star-rating span.active { color: #f1c40f; }
 
         .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); }
-        .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 10px; border-radius: 5px; margin-bottom: 8px; text-align: center; font-weight: bold; border: 1px solid #444; }
-        .btn-link:hover { background: var(--primary); }
-        .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
+        .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 10px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9em; text-align: center; border: 1px solid #444; font-weight: bold; transition: 0.2s; }
+        .btn-link:hover { background: var(--primary); border-color: var(--primary); }
+        
+        .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
+
+        .user-note { background: #111; padding: 15px; border-radius: 10px; font-size: 0.8em; line-height: 1.5; color: #aaa; margin-top: 20px; border: 1px solid #333; }
 
         @media (max-width: 800px) { .top-info { flex-direction: column; } .bottom-controls { grid-template-columns: 1fr; } }
     </style>
@@ -81,8 +87,8 @@
                 const resp = await fetch('animes.csv');
                 const data = await resp.text();
                 const lines = data.split(/\r?\n/).slice(1);
+                
                 let anime = null;
-
                 for (let line of lines) {
                     const c = line.split(';');
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
@@ -131,20 +137,19 @@
                                 <button class="btn-delete" id="delete-btn">Retirer de ma liste</button>
                             </div>
                             <div class="link-box">
-                                <div style="font-size:0.8em; font-weight:bold; color:var(--primary); margin-bottom:10px;">📥 TÉLÉCHARGEMENT</div><div id="dl-area"></div>
-                                <div style="font-size:0.8em; font-weight:bold; color:var(--primary); margin:15px 0 10px;">🎬 VISIONNAGE</div><div id="stream-area"></div>
+                                <div class="link-title">📥 Téléchargement</div><div id="dl-area"></div>
+                                <div class="link-title">🎬 Visionnage</div><div id="stream-area"></div>
                             </div>
                         </div>
                     </div>`;
 
-                // Liens
                 anime.dl.filter(l => l.trim()).forEach((l, i) => document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lien ${i+1}</a>`);
                 anime.stream.filter(l => l.trim()).forEach((l, i) => document.getElementById('stream-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lecteur ${i+1} ↗</a>`);
 
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
-                        // Retour intelligent
+                        // Gestion bouton retour
                         if (document.referrer.includes('playlist.html')) {
                             const bl = document.getElementById('back-link');
                             bl.innerText = "← Retour"; bl.href = "playlist.html";
@@ -163,7 +168,7 @@
                             savedPlaylist = d.playlistTarget || "";
                         }
 
-                        // Sauvegarde Auto
+                        // --- SAUVEGARDE AUTOMATIQUE ---
                         const autoSave = () => {
                             setDoc(docRef, { 
                                 uid: u.uid, anime: anime.nom, img: anime.img, 
@@ -185,6 +190,7 @@
                             if(savedPlaylist) sel.value = savedPlaylist;
                         });
 
+                        // Déclencheurs de sauvegarde
                         document.getElementById('user-status').onchange = autoSave;
                         document.getElementById('user-ep').onchange = autoSave;
                         document.getElementById('target-playlist').onchange = autoSave;
@@ -203,7 +209,7 @@
                     let docs = [];
                     snap.forEach(d => docs.push(d.data()));
                     docs.sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
-                    cDisp.innerHTML = docs.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid #333;"><b style="color:var(--primary)">${d.userName}</b><p style="font-size:0.9em;">${d.text}</p></div>`).join('');
+                    cDisp.innerHTML = docs.map(d => `<div style="margin-bottom:12px; border-bottom:1px solid #333;"><b style="color:var(--primary)">${d.userName}</b><p style="font-size:0.9em;">${d.text}</p></div>`).join('');
                 });
 
                 document.getElementById('btn-post').onclick = async () => {
