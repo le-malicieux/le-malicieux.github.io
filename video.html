@@ -24,45 +24,18 @@
         .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
         
-        /* Correction visuelle des menus déroulants */
         .playlist-box select { 
-            background: #333; 
-            color: white; 
-            border: 1px solid #555; 
-            padding: 8px; 
-            border-radius: 4px; 
-            margin-bottom: 10px; 
-            width: 100%; 
-            box-sizing: border-box; 
-            appearance: none; /* Pour un look plus propre */
-            cursor: pointer;
+            background: #333; color: white; border: 1px solid #555; padding: 10px; 
+            border-radius: 4px; margin-bottom: 10px; width: 100%; box-sizing: border-box; 
+            cursor: pointer; font-size: 0.9em;
         }
-        /* Force les options à être visibles sur fond sombre */
-        .playlist-box select option {
-            background-color: #333;
-            color: white;
-        }
+        .playlist-box select option { background: #222; color: white; }
 
         .ep-select-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #333;
-            border: 1px solid #555;
-            padding: 5px 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px; background: #333; 
+            border: 1px solid #555; padding: 5px 12px; border-radius: 4px; margin-bottom: 10px;
         }
-        .ep-select-container span { font-size: 0.9em; color: #888; }
-        #user-ep { 
-            background: transparent; 
-            border: none; 
-            color: white; 
-            width: auto; 
-            flex-grow: 1; 
-            margin-bottom: 0; 
-            padding: 5px;
-        }
+        #user-ep { background: transparent; border: none; color: white; flex-grow: 1; padding: 5px; cursor: pointer; }
 
         .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); }
         .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
@@ -131,7 +104,7 @@
                 }).find(x => x);
 
                 if(anime) {
-                    // --- CORRECTION : Extraction du nombre d'épisodes ---
+                    // Calcul du nombre d'épisodes
                     const matches = anime.ep.match(/\d+/g);
                     const totalEpisodes = matches ? parseInt(matches[matches.length - 1]) : 0;
                     
@@ -167,9 +140,9 @@
                                     <select id="target-playlist"><option value="">(Par défaut)</option></select>
                                     
                                     <div class="ep-select-container">
-                                        <span>Vu :</span>
+                                        <span style="color:#aaa; font-size:0.85em;">Vu :</span>
                                         <select id="user-ep">${epOptions}</select>
-                                        <span>/ ${totalEpisodes}</span>
+                                        <span style="color:#aaa; font-size:0.85em;">/ ${totalEpisodes}</span>
                                     </div>
 
                                     <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
@@ -205,21 +178,34 @@
                     onAuthStateChanged(auth, async (u) => {
                         currentUser = u;
                         if(u) {
+                            // Remplissage des playlists
                             onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", u.uid)), (snap) => {
                                 const sel = document.getElementById('target-playlist');
-                                sel.innerHTML = '<option value="">(Par défaut)</option>';
-                                snap.forEach(d => sel.innerHTML += `<option value="${d.data().name}">${d.data().name}</option>`);
+                                if(sel) {
+                                    sel.innerHTML = '<option value="">(Par défaut)</option>';
+                                    snap.forEach(d => {
+                                        sel.innerHTML += `<option value="${d.data().name}">${d.data().name}</option>`;
+                                    });
+                                }
                             });
+
+                            // Chargement des données utilisateur
                             const docRef = doc(db, "playlists", u.uid + "_" + anime.nom);
                             const docSnap = await getDoc(docRef);
                             if(docSnap.exists()) {
                                 const d = docSnap.data();
-                                document.getElementById('user-status').value = d.status;
-                                document.getElementById('user-ep').value = d.epSeen || 0;
+                                if(document.getElementById('user-status')) document.getElementById('user-status').value = d.status || 'watching';
+                                if(document.getElementById('user-ep')) document.getElementById('user-ep').value = d.epSeen || 0;
                                 userRating = d.rating || 0;
                                 updateStars(userRating);
-                                if(d.playlistTarget) setTimeout(() => { document.getElementById('target-playlist').value = d.playlistTarget; }, 500);
+                                if(d.playlistTarget) {
+                                    setTimeout(() => { 
+                                        const pSel = document.getElementById('target-playlist');
+                                        if(pSel) pSel.value = d.playlistTarget; 
+                                    }, 800);
+                                }
                             }
+
                             document.getElementById('save-btn').onclick = () => {
                                 setDoc(docRef, {
                                     uid: u.uid, anime: anime.nom, img: anime.img, status: document.getElementById('user-status').value,
