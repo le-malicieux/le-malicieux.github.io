@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Visionnage - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
@@ -21,7 +20,7 @@
         .stat-item { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; }
         .stat-item small { color: var(--primary); font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 4px; }
         .stat-item span { font-weight: bold; font-size: 0.9em; }
-        .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
+        .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
         .playlist-box select { background: #333; color: white; border: 1px solid #555; padding: 10px; border-radius: 4px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
         .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); display: flex; flex-direction: column; }
@@ -31,7 +30,6 @@
         .star-rating { font-size: 1.5em; color: #444; cursor: pointer; margin: 10px 0; text-align: center; display: flex; justify-content: center; }
         .star-rating span.active { color: #f1c40f; }
         .btn-save { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
-        .comment-input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box; }
         @media (max-width: 800px) { .top-info { flex-direction: column; align-items: center; } .poster { width: 100%; max-width: 300px; } .bottom-controls { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -39,9 +37,9 @@
     <div class="container">
         <a href="index.html" class="back-btn">← Retour au catalogue</a>
         <div id="anime-details">Chargement...</div>
-        <div class="comments-section" style="margin-top:20px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333;">
+        <div id="comments-section" style="margin-top:20px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333;">
             <h3>Commentaires</h3>
-            <textarea id="comment-input" class="comment-input" placeholder="Ajouter un commentaire..." rows="3"></textarea>
+            <textarea id="comment-input" style="width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box;" placeholder="Ajouter un commentaire..." rows="3"></textarea>
             <button id="btn-post" class="btn-save" style="width: auto; padding: 10px 30px;">Publier</button>
             <div id="comments-display" style="margin-top: 20px;"></div>
         </div>
@@ -68,9 +66,10 @@
                 const resp = await fetch('animes.csv');
                 const data = await resp.text();
                 const lines = data.split(/\r?\n/).slice(1);
+                
                 const anime = lines.map(l => {
                     const c = l.split(';'); 
-                    const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : \"\";
+                    const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                     if(cl(c[0]) === animeName) {
                         return { nom: cl(c[0]), pop: cl(c[1]), score: cl(c[2]), year: cl(c[3]), epRaw: cl(c[4]), censure: cl(c[5]), etat: cl(c[6]), desc: cl(c[7]), img: cl(c[8]), streamLinks: c[9] ? c[9].split(',').map(cl) : [], downloadLinks: c[10] ? c[10].split(',').map(cl) : [], visionnageInfo: cl(c[11]) };
                     }
@@ -78,12 +77,11 @@
 
                 if(!anime) { display.innerHTML = "Anime non trouvé."; return; }
 
-                // Extraction du chiffre (ex: "pas fini(12)" -> 12)
-                let match = anime.epRaw.match(/\((\d+)\)/) || anime.epRaw.match(/(\d+)/);
-                let totalEp = match ? parseInt(match[1]) : 0;
-
+                // Extraction pour le menu déroulant : on cherche le chiffre entre parenthèses OU le premier chiffre venu
+                const match = anime.epRaw.match(/\((\d+)\)/) || anime.epRaw.match(/(\d+)/);
+                const maxEp = match ? parseInt(match[1]) : 0;
                 let epOptions = "";
-                for(let i=0; i <= totalEp; i++) { epOptions += `<option value="${i}">${i}</option>`; }
+                for(let i=0; i <= maxEp; i++) { epOptions += `<option value="${i}">${i}</option>`; }
 
                 display.innerHTML = `
                     <div class="anime-header">
@@ -95,7 +93,7 @@
                                     <div class="stat-item"><small>Pop.</small><span>${anime.pop}</span></div>
                                     <div class="stat-item"><small>Score</small><span>⭐ ${anime.score}</span></div>
                                     <div class="stat-item"><small>Année</small><span>${anime.year}</span></div>
-                                    <div class="stat-item"><small>Épisodes</small><span>${totalEp}</span></div>
+                                    <div class="stat-item"><small>Épisodes</small><span>${anime.epRaw}</span></div>
                                     <div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div>
                                     <div class="stat-item"><small>État</small><span>${anime.etat}</span></div>
                                 </div>
@@ -107,10 +105,10 @@
                                 <label style="font-size:0.75em; color:var(--primary); font-weight:bold; text-transform:uppercase; display:block; margin-bottom:10px;">Ma Liste</label>
                                 <select id="user-status"><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
                                 <select id="target-playlist"><option value="">Chargement...</option></select>
-                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; background:#333; padding:2px 10px; border-radius:4px; border:1px solid #555;">
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; background:#333; padding:5px 10px; border-radius:4px; border:1px solid #555;">
                                     <span style="font-size:0.85em; color:#888;">Vu :</span>
-                                    <select id="user-ep" style="background:transparent; border:none; color:white; padding:5px; margin-bottom:0; flex:1;">${epOptions}</select>
-                                    <span style="font-size:0.85em; color:#888;">/ ${totalEp}</span>
+                                    <select id="user-ep" style="background:transparent; border:none; color:white; padding:5px; flex:1;">${epOptions}</select>
+                                    <span style="font-size:0.85em; color:#888;">/ ${maxEp}</span>
                                 </div>
                                 <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
                                 <button class="btn-save" id="save-btn">Mettre à jour</button>
@@ -123,7 +121,7 @@
                                 <div style="background:rgba(255,255,255,0.05); border-left: 3px solid var(--primary); padding:10px; border-radius:4px; font-size:0.85em; margin-bottom:10px; color:#bbb;">${anime.visionnageInfo || "Aucune info."}</div>
                                 <div id="stream-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
                                 <div style="margin-top:auto; padding-top:15px; font-size:0.75em; color:#777; line-height:1.4; font-style: italic; border-top: 1px solid #333;">
-                                    Note: Les saisons regroupées sont indiquées par un slash (/). J'ai inclus par exemple pour l'anime Furifure/2, le slash (/) sépare la saison 1 de la saison 2.
+                                    Note: Quand une œuvre possède plusieurs saisons sous le même nom, une seule carte est créée. Le slash (/) sépare les infos des différentes saisons.
                                 </div>
                             </div>
                         </div>
@@ -153,7 +151,7 @@
                             setTimeout(() => { if(d.playlistTarget) document.getElementById('target-playlist').value = d.playlistTarget; }, 500);
                         }
                         document.getElementById('save-btn').onclick = () => {
-                            setDoc(docRef, { uid: u.uid, anime: anime.nom, img: anime.img, status: document.getElementById('user-status').value, epSeen: parseInt(document.getElementById('user-ep').value), rating: userRating, playlistTarget: document.getElementById('target-playlist').value, epMax: totalEp }).then(() => alert("Sauvegardé !"));
+                            setDoc(docRef, { uid: u.uid, anime: anime.nom, img: anime.img, status: document.getElementById('user-status').value, epSeen: parseInt(document.getElementById('user-ep').value), rating: userRating, playlistTarget: document.getElementById('target-playlist').value, epMax: maxEp }).then(() => alert("Sauvegardé !"));
                         };
                         document.getElementById('delete-btn').onclick = () => { if(confirm("Retirer ?")) deleteDoc(docRef).then(() => location.reload()); };
                     }
@@ -175,7 +173,10 @@
                     const txt = document.getElementById('comment-input').value;
                     if(txt.trim()) { await addDoc(collection(db, "commentaires"), { anime: animeName, text: txt, userName: currentUser.displayName, date: serverTimestamp() }); document.getElementById('comment-input').value = ""; }
                 };
-            } catch (err) { console.error(err); display.innerHTML = "Erreur de chargement."; }
+            } catch (err) { 
+                console.error(err); 
+                display.innerHTML = "Erreur fatale lors du chargement. Vérifiez la console F12."; 
+            }
         }
         load();
     </script>
