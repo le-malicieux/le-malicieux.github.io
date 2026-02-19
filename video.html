@@ -27,7 +27,6 @@
         .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
 
-        /* CORRECTIF DES MENUS (SOMBRE) */
         select { 
             background: #333; 
             color: #fff; 
@@ -37,11 +36,9 @@
             border-radius: 4px; 
             margin-bottom: 12px; 
             cursor: pointer; 
-            appearance: none; /* Nettoie le style par défaut */
         }
         select option { background: #222; color: #fff; }
 
-        /* ALIGNEMENT "VU :" PARFAIT */
         .ep-row { 
             display: flex; 
             align-items: center; 
@@ -54,13 +51,7 @@
             border: 1px solid #444;
         }
         .ep-row span { font-weight: bold; color: #aaa; white-space: nowrap; }
-        #user-ep { 
-            width: auto; 
-            min-width: 80px; 
-            margin-bottom: 0; 
-            text-align: center; 
-            padding: 5px; 
-        }
+        #user-ep { width: auto; min-width: 80px; margin-bottom: 0; text-align: center; padding: 5px; }
 
         .star-rating { font-size: 1.4em; color: #444; cursor: pointer; margin: 10px 0; text-align: center; display: flex; justify-content: center; gap: 2px; }
         .star-rating span.active { color: #f1c40f; }
@@ -81,7 +72,7 @@
 <body>
     <div class="container">
         <a href="index.html" class="back-btn">← Retour au catalogue</a>
-        <div id="anime-details">Chargement des données malicieuses...</div>
+        <div id="anime-details">Chargement...</div>
 
         <div id="comments-section" style="margin-top:20px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333;">
             <h3>Commentaires</h3>
@@ -154,69 +145,57 @@
                                 <p style="font-size:0.95em; color:#ccc; line-height:1.6;">${anime.desc}</p>
                             </div>
                         </div>
-
                         <div class="bottom-controls">
                             <div class="playlist-box">
                                 <label style="font-size:0.7em; color:var(--primary); font-weight:bold; text-transform:uppercase; margin-bottom:10px; display:block;">Ma Progression</label>
-                                <select id="user-status">
-                                    <option value="watching">En cours</option>
-                                    <option value="waiting">En attente</option>
-                                    <option value="completed">Terminé</option>
-                                </select>
+                                <select id="user-status"><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
                                 <select id="target-playlist"><option value="">(Par défaut)</option></select>
-                                
-                                <div class="ep-row">
-                                    <span>Vu :</span>
-                                    <select id="user-ep">${epOptions}</select>
-                                    <span>/ ${maxEp}</span>
-                                </div>
-
+                                <div class="ep-row"><span>Vu :</span><select id="user-ep">${epOptions}</select><span>/ ${maxEp}</span></div>
                                 <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
                                 <button class="btn-save" id="save-btn">Enregistrer</button>
                                 <button class="btn-delete" id="delete-btn">Retirer de ma liste</button>
                             </div>
-
                             <div class="link-box">
-                                <div class="link-title">📥 Téléchargement</div>
-                                <div id="dl-area" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px;"></div>
-                                
+                                <div class="link-title">📥 Téléchargement</div><div id="dl-area" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px;"></div>
                                 <div class="link-title">🎬 Visionnage</div>
                                 <div style="background:rgba(255,255,255,0.05); border-left:3px solid var(--primary); padding:10px; border-radius:4px; font-size:0.85em; margin-bottom:10px; color:#bbb;">${anime.infoV || "Aucune info."}</div>
                                 <div id="stream-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
-                                
-                                <div class="user-note">
-                                    <b style="color:var(--primary)">Attention :</b><br>
-                                    Quand une œuvre possède une deuxième saison qui porte le même nom ou un nom très ressemblant, je créé une seule carte pour toutes les saisons donc les informations comme la popularité sont plus générales, les liens de visionnage et de téléchargement sont biens présents, j'ai aussi inclus par exemple pour l'anime Furifure/2, le slash (/) sépare la saison 1 de la saison 2. Donc quand vous voyez un slash (/) dans un nom, c'est qu'il y a plusieurs saisons, sauf cas compliqués comme Ikenai Koto où ses ses 3 saisons sont en 3 cartes ou Bible Black en une seule. Si ce n'est pas clair n'hésitez pas à poser des questions sur le discord :)
-                                </div>
+                                <div class="user-note"><b>Attention :</b><br>Quand une œuvre possède une deuxième saison qui porte le même nom ou un nom très ressemblant, je créé une seule carte pour toutes les saisons donc les informations comme la popularité sont plus générales...</div>
                             </div>
                         </div>
                     </div>`;
 
-                // Remplissage des liens
                 const dArea = document.getElementById('dl-area');
-                anime.dl.filter(l => l.trim() !== "").forEach((l, i) => dArea.innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">Lien ${i+1}</a>`);
+                anime.dl.filter(l => l.trim()).forEach((l, i) => dArea.innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">Lien ${i+1}</a>`);
                 const sArea = document.getElementById('stream-area');
-                anime.stream.filter(l => l.trim() !== "").forEach((l, i) => sArea.innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lecteur ${i+1} ↗</a>`);
+                anime.stream.filter(l => l.trim()).forEach((l, i) => sArea.innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lecteur ${i+1} ↗</a>`);
 
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
-                        onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", u.uid)), (snap) => {
-                            const sel = document.getElementById('target-playlist');
-                            sel.innerHTML = '<option value="">(Par défaut)</option>';
-                            snap.forEach(d => sel.innerHTML += `<option value="${d.data().name}">${d.data().name}</option>`);
-                        });
-
                         const docRef = doc(db, "playlists", u.uid + "_" + anime.nom);
                         const docSnap = await getDoc(docRef);
+                        let savedPlaylist = "";
+                        
                         if(docSnap.exists()) {
                             const d = docSnap.data();
                             document.getElementById('user-status').value = d.status || 'watching';
                             document.getElementById('user-ep').value = d.epSeen || 0;
                             userRating = d.rating || 0;
                             updateStars(userRating);
-                            setTimeout(() => { if(d.playlistTarget) document.getElementById('target-playlist').value = d.playlistTarget; }, 600);
+                            savedPlaylist = d.playlistTarget || "";
                         }
+
+                        onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", u.uid)), (snap) => {
+                            const sel = document.getElementById('target-playlist');
+                            sel.innerHTML = '<option value="">(Par défaut)</option>';
+                            snap.forEach(d => {
+                                const pName = d.data().name;
+                                const isSelected = pName === savedPlaylist ? "selected" : "";
+                                sel.innerHTML += `<option value="${pName}" ${isSelected}>${pName}</option>`;
+                            });
+                            if(savedPlaylist) sel.value = savedPlaylist;
+                        });
 
                         document.getElementById('save-btn').onclick = () => {
                             setDoc(docRef, { 
@@ -226,7 +205,7 @@
                                 rating: userRating, 
                                 playlistTarget: document.getElementById('target-playlist').value, 
                                 epMax: maxEp 
-                            }).then(() => alert("Profil mis à jour !"));
+                            }).then(() => alert("Sauvegardé !"));
                         };
                         document.getElementById('delete-btn').onclick = () => { if(confirm("Supprimer ?")) deleteDoc(docRef).then(() => location.reload()); };
                     }
@@ -248,8 +227,7 @@
                     const t = document.getElementById('comment-input').value;
                     if(t.trim()) { await addDoc(collection(db, "commentaires"), { anime: animeName, text: t, userName: currentUser.displayName, date: serverTimestamp() }); document.getElementById('comment-input').value = ""; }
                 };
-
-            } catch (err) { console.error(err); display.innerHTML = "Erreur fatale lors du chargement."; }
+            } catch (err) { console.error(err); }
         }
         load();
     </script>
