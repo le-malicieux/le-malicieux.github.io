@@ -124,7 +124,7 @@
                                     <div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div>
                                     <div class="stat-item"><small>État</small><span>${anime.etat}</span></div>
                                 </div>
-                                <p style="font-size:0.95em; color:#ccc;">${anime.desc}</p>
+                                <p style="font-size:0.95em; color:#ccc; line-height:1.6;">${anime.desc}</p>
                             </div>
                         </div>
                         <div class="bottom-controls">
@@ -149,7 +149,7 @@
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
-                        // Gestion bouton retour
+                        // MODIF : Bouton Retour
                         if (document.referrer.includes('playlist.html')) {
                             const bl = document.getElementById('back-link');
                             bl.innerText = "← Retour"; bl.href = "playlist.html";
@@ -168,7 +168,7 @@
                             savedPlaylist = d.playlistTarget || "";
                         }
 
-                        // --- SAUVEGARDE AUTOMATIQUE ---
+                        // MODIF : Fonction Sauvegarde Auto
                         const autoSave = () => {
                             setDoc(docRef, { 
                                 uid: u.uid, anime: anime.nom, img: anime.img, 
@@ -190,7 +190,7 @@
                             if(savedPlaylist) sel.value = savedPlaylist;
                         });
 
-                        // Déclencheurs de sauvegarde
+                        // MODIF : Déclencheurs Auto
                         document.getElementById('user-status').onchange = autoSave;
                         document.getElementById('user-ep').onchange = autoSave;
                         document.getElementById('target-playlist').onchange = autoSave;
@@ -209,7 +209,7 @@
                     let docs = [];
                     snap.forEach(d => docs.push(d.data()));
                     docs.sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
-                    cDisp.innerHTML = docs.map(d => `<div style="margin-bottom:12px; border-bottom:1px solid #333;"><b style="color:var(--primary)">${d.userName}</b><p style="font-size:0.9em;">${d.text}</p></div>`).join('');
+                    cDisp.innerHTML = docs.map(d => `<div style="margin-bottom:12px; border-bottom:1px solid #333; padding-bottom:8px;"><b style="color:var(--primary)">${d.userName}</b><p style="margin:4px 0; font-size:0.9em; color:#ddd;">${d.text}</p></div>`).join('');
                 });
 
                 document.getElementById('btn-post').onclick = async () => {
