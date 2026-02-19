@@ -16,6 +16,7 @@
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
+            background-image: url('img/fond1.webp'); /* Sécurité WebP */
         }
 
         .top-navbar {
@@ -33,6 +34,7 @@
         }
         .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
+        /* Menu Mobile avec Flèche de retour */
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
 
         .hero-section {
@@ -57,7 +59,11 @@
 
         .card-info { padding: 12px; flex-grow: 1; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.05em; }
+        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.9em; }
         
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
+        .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
+
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
 
@@ -74,51 +80,60 @@
             .mobile-overlay.active { display: block; }
             .main-title { font-size: 2.1em; }
             .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
+            .card-info { padding: 8px; }
+            .card-title { font-size: 0.85em; }
         }
     </style>
 </head>
 <body>
+
     <div class="top-navbar">
         <div class="nav-left">
             <div class="burger" onclick="toggleM()">☰</div>
             <img src="img/logo.jpg" class="nav-logo-small">
             <span class="nav-title">LE MALICIEUX</span>
         </div>
+
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
+
         <div class="nav-center" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
             <input type="text" id="search" placeholder="Rechercher un anime...">
             <select id="sort">
                 <option value="">Trier par...</option>
                 <option value="popularite">Popularité</option>
-                <option value="score">Score MAL</option>
+                <option value="score">Score</option>
                 <option value="nom">Nom (A-Z)</option>
                 <option value="sortie">Année</option>
-                <option value="episodes">Épisodes</option>
-                <option value="etat">État</option>
+                <option value="episodes">Épisodes (Nombre)</option>
+                <option value="etat">État (Fini/En cours)</option>
                 <option value="censure">Censure</option>
             </select>
-            <button class="btn-red" onclick="randomAnime()">🎲 Aléatoire</button>
-            <a href="playlist.html" id="nav-playlist" style="display:none; background: #333;">Mes Playlists</a>
-            <div id="auth-section">
-                <button id="btn-login" class="btn-red">Connexion</button>
+            <a href="playlist.html" class="btn-red">📂 Playlist</a>
+            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
+        </div>
+
+        <div style="display:flex; align-items:center;">
+            <div id="auth-ui" style="display:flex; align-items:center;">
+                <button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>
             </div>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" style="margin-left:10px;">Discord</a>
         </div>
     </div>
 
     <div class="hero-section">
         <img src="img/logo.jpg" class="main-logo">
-        <h1 class="main-title">LE MALICIEUX</h1>
-        <div class="main-slogan">Ton sanctuaire anime personnel</div>
+        <h1 class="main-title">le-malicieux.github.io</h1>
+        <p class="main-slogan">Catalogue d'animes malicieux</p>
     </div>
 
     <div class="content-area">
-        <div id="anime-grid" class="grid"></div>
+        <div id="anime-container" class="grid"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig);
@@ -127,55 +142,56 @@
 
         let allAnimes = [];
 
+        onAuthStateChanged(auth, (user) => {
+            const authUi = document.getElementById('auth-ui');
+            if (user) {
+                authUi.innerHTML = `<span class="auth-status">${user.displayName}</span><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
+                document.getElementById('logout-btn').onclick = () => signOut(auth);
+            } else {
+                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;
+                document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
+            }
+        });
+
         async function init() {
-            // FIX FOND NOIR
+            // Fond aléatoire optimisé
             const num = Math.floor(Math.random() * 55) + 1;
-            const img = new Image();
-            const src = `img/fond${num}.webp`;
-            img.onload = () => { document.body.style.backgroundImage = `url('${src}')`; };
-            img.onerror = () => { document.body.style.backgroundImage = `url('img/fond1.webp')`; };
-            img.src = src;
+            document.body.style.backgroundImage = `url('img/fond${num}.webp')`;
 
             try {
                 const response = await fetch('animes.csv');
-                const data = await response.text();
-                allAnimes = data.split(/\r?\n/).slice(1).filter(l => l.trim()).map(line => {
+                const rawData = await response.text();
+                allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
                     const c = line.split(';');
-                    const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    return { nom: cl(c[0]), pop: cl(c[1]), score: cl(c[2]), sortie: cl(c[3]), ep: cl(c[4]), etat: cl(c[5]), censure: cl(c[6]), img: cl(c[7]) };
-                });
+                    if (!c[0] || c.length < 9) return null;
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), img: clean(c[8]) };
+                }).filter(a => a !== null);
                 displayAnimes(allAnimes);
-            } catch (err) { console.error(err); }
+            } catch (err) { console.error("Erreur CSV:", err); }
         }
 
         function displayAnimes(list) {
-            const grid = document.getElementById('anime-grid');
-            grid.innerHTML = list.map(a => `
-                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
-                    <div class="img-container">
-                        <img src="img/${a.img.split('.')[0]}.jpg" onerror="this.src='img/${a.img.split('.')[0]}.png'">
-                    </div>
-                    <div class="card-info">
-                        <div class="card-title">${a.nom}</div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
-                            <span style="color:#f1c40f; font-weight:bold;">⭐ ${a.score}</span>
-                            <span style="color:#888;">${a.sortie}</span>
+            const container = document.getElementById('anime-container');
+            // Construction groupée pour éviter le bug de disparition sur mobile
+            const html = list.map(a => {
+                const baseImg = a.img.split('.')[0];
+                return `
+                    <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
+                        <div class="img-container">
+                            <img src="img/${baseImg}.webp" loading="lazy" onerror="this.onerror=null; this.src='img/${baseImg}.jpg';">
                         </div>
-                    </div>
-                </a>`).join('');
+                        <div class="card-info">
+                            <div class="card-title">${a.nom}</div>
+                            <div class="card-meta">
+                                📅 ${a.sortie} • ⭐ ${a.score}<br>
+                                <span class="tag">${a.censure}</span> • ${a.etat}
+                            </div>
+                        </div>
+                    </a>`;
+            }).join('');
+            container.innerHTML = html;
         }
-
-        onAuthStateChanged(auth, (user) => {
-            const authSec = document.getElementById('auth-section');
-            const navP = document.getElementById('nav-playlist');
-            if (user) {
-                authSec.innerHTML = `<span class="auth-status">Salut, ${user.displayName.split(' ')[0]}</span>`;
-                navP.style.display = "block";
-            } else {
-                authSec.innerHTML = `<button id="btn-login" class="btn-red">Connexion</button>`;
-                document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
-            }
-        });
 
         window.toggleM = () => {
             document.getElementById('menu').classList.toggle('active');
@@ -202,8 +218,8 @@
 
         window.randomAnime = () => {
             if(allAnimes.length > 0) {
-                const rand = allAnimes[Math.floor(Math.random() * allAnimes.length)];
-                window.location.href = `video.html?name=${encodeURIComponent(rand.nom)}`;
+                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
+                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
             }
         };
 
