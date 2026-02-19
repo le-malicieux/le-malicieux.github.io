@@ -89,7 +89,7 @@
         </div>
 
         <div class="playlist-selector">
-            <div class="select-card active" data-status="watching"><h3>En cours</h3></div>
+            <div class="select-card" data-status="watching"><h3>En cours</h3></div>
             <div class="select-card" data-status="completed"><h3>Terminés</h3></div>
             <div class="select-card" data-status="waiting"><h3>En attente</h3></div>
         </div>
@@ -120,8 +120,9 @@
         let currentUser = null;
         let userAnimes = [];
         let csvDataMap = {};
-        let currentStatus = 'watching';
-
+        
+        // MÉMOIRE DE L'ONGLET ET DU MODE
+        let currentStatus = localStorage.getItem('playlistTab') || 'watching';
         const savedMode = localStorage.getItem('playlistDisplayMode') || 'grid';
         document.getElementById('display-mode').value = savedMode;
 
@@ -158,6 +159,13 @@
             if (user) {
                 setRandomBackground();
                 await loadCSV();
+                
+                // Activer visuellement le bon onglet au chargement
+                document.querySelectorAll('.select-card').forEach(card => {
+                    if(card.dataset.status === currentStatus) card.classList.add('active');
+                    else card.classList.remove('active');
+                });
+
                 onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", user.uid)), (snap) => {
                     const selector = document.getElementById('custom-selector');
                     const currentVal = selector.value;
@@ -166,6 +174,7 @@
                     selector.value = currentVal;
                     toggleDeleteBtn();
                 });
+
                 onSnapshot(query(collection(db, "playlists"), where("uid", "==", user.uid)), (snap) => {
                     userAnimes = [];
                     snap.forEach(d => {
@@ -210,6 +219,7 @@
                 document.querySelectorAll('.select-card').forEach(c => c.classList.remove('active'));
                 card.classList.add('active');
                 currentStatus = card.dataset.status;
+                localStorage.setItem('playlistTab', currentStatus); // Sauvegarde l'onglet
                 refreshDisplay();
             };
         });
@@ -222,7 +232,8 @@
             const selectedList = document.getElementById('custom-selector').value;
             const mode = document.getElementById('display-mode').value;
             const sortVal = document.getElementById('sort-selector').value;
-            localStorage.setItem('playlistDisplayMode', mode);
+            
+            localStorage.setItem('playlistDisplayMode', mode); // Sauvegarde le mode d'affichage
 
             let filtered = userAnimes.filter(a => a.status === currentStatus);
             if (selectedList !== 'all') filtered = filtered.filter(a => a.playlistTarget === selectedList);
