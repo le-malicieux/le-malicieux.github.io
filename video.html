@@ -12,68 +12,65 @@
         .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 6px; transition: 0.3s; }
         .back-btn:hover { background: var(--primary); color: white; }
         
-        /* Header & Infos */
         .anime-header { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
         .top-info { display: flex; gap: 25px; margin-bottom: 25px; }
         .poster { width: 280px; flex-shrink: 0; }
         .poster img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .main-details { flex: 1; display: flex; flex-direction: column; gap: 15px; }
         .anime-title { font-size: 2.2em; color: var(--primary); margin: 0; }
+        
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .stat-item { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; }
         .stat-item small { color: var(--primary); font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 4px; }
         .stat-item span { font-weight: bold; font-size: 0.9em; }
 
-        /* Contrôles & Playlists */
         .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-        
-        /* CORRECTIF COULEURS ET LISIBILITÉ */
+
+        /* CORRECTIF DES MENUS (SOMBRE) */
         select { 
-            background: #fdfdfd; 
-            color: #111; /* Texte bien noir pour être lisible */
+            background: #333; 
+            color: #fff; 
             border: 1px solid #555; 
             padding: 10px; 
             width: 100%; 
             border-radius: 4px; 
-            margin-bottom: 10px; 
+            margin-bottom: 12px; 
             cursor: pointer; 
-            font-weight: 500;
+            appearance: none; /* Nettoie le style par défaut */
         }
-        select option { background: #fff; color: #111; }
+        select option { background: #222; color: #fff; }
 
-        /* ALIGNEMENT "VU : X / TOTAL" */
+        /* ALIGNEMENT "VU :" PARFAIT */
         .ep-row { 
             display: flex; 
             align-items: center; 
             justify-content: center;
-            gap: 12px; 
-            background: #333; 
-            border: 1px solid #555; 
-            padding: 8px 15px; 
-            border-radius: 4px; 
-            margin-bottom: 15px; 
+            gap: 10px; 
+            background: rgba(255,255,255,0.05); 
+            padding: 10px; 
+            border-radius: 6px; 
+            margin-bottom: 15px;
+            border: 1px solid #444;
         }
-        .ep-row span { font-size: 0.9em; font-weight: bold; color: #ccc; white-space: nowrap; }
+        .ep-row span { font-weight: bold; color: #aaa; white-space: nowrap; }
         #user-ep { 
+            width: auto; 
+            min-width: 80px; 
             margin-bottom: 0; 
-            width: 80px; /* Taille fixe pour éviter que ça pousse le reste */
-            padding: 5px;
-            text-align: center;
+            text-align: center; 
+            padding: 5px; 
         }
 
-        /* Etoiles */
         .star-rating { font-size: 1.4em; color: #444; cursor: pointer; margin: 10px 0; text-align: center; display: flex; justify-content: center; gap: 2px; }
         .star-rating span.active { color: #f1c40f; }
 
-        /* Liens */
         .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); }
         .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
         .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 10px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9em; text-align: center; border: 1px solid #444; font-weight: bold; transition: 0.2s; }
         .btn-link:hover { background: var(--primary); border-color: var(--primary); }
         
-        /* Boutons Actions */
-        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
+        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
 
         .user-note { background: #111; padding: 15px; border-radius: 10px; font-size: 0.8em; line-height: 1.5; color: #aaa; margin-top: 20px; border: 1px solid #333; }
@@ -84,7 +81,7 @@
 <body>
     <div class="container">
         <a href="index.html" class="back-btn">← Retour au catalogue</a>
-        <div id="anime-details">Chargement complet en cours...</div>
+        <div id="anime-details">Chargement des données malicieuses...</div>
 
         <div id="comments-section" style="margin-top:20px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333;">
             <h3>Commentaires</h3>
@@ -160,9 +157,13 @@
 
                         <div class="bottom-controls">
                             <div class="playlist-box">
-                                <label style="font-size:0.7em; color:var(--primary); font-weight:bold; text-transform:uppercase; margin-bottom:5px; display:block;">Ma Progression</label>
-                                <select id="user-status"><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
-                                <select id="target-playlist"><option value="">Chargement playlists...</option></select>
+                                <label style="font-size:0.7em; color:var(--primary); font-weight:bold; text-transform:uppercase; margin-bottom:10px; display:block;">Ma Progression</label>
+                                <select id="user-status">
+                                    <option value="watching">En cours</option>
+                                    <option value="waiting">En attente</option>
+                                    <option value="completed">Terminé</option>
+                                </select>
+                                <select id="target-playlist"><option value="">(Par défaut)</option></select>
                                 
                                 <div class="ep-row">
                                     <span>Vu :</span>
@@ -193,11 +194,10 @@
 
                 // Remplissage des liens
                 const dArea = document.getElementById('dl-area');
-                anime.dl.filter(l => l).forEach((l, i) => dArea.innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">Lien ${i+1}</a>`);
+                anime.dl.filter(l => l.trim() !== "").forEach((l, i) => dArea.innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">Lien ${i+1}</a>`);
                 const sArea = document.getElementById('stream-area');
-                anime.stream.filter(l => l).forEach((l, i) => sArea.innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lecteur ${i+1} ↗</a>`);
+                anime.stream.filter(l => l.trim() !== "").forEach((l, i) => sArea.innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lecteur ${i+1} ↗</a>`);
 
-                // Firebase
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
@@ -235,7 +235,6 @@
                 const updateStars = (v) => document.querySelectorAll('#stars span').forEach(s => s.classList.toggle('active', s.dataset.v <= v));
                 document.getElementById('stars').onclick = (e) => { if(e.target.dataset.v) { userRating = parseInt(e.target.dataset.v); updateStars(userRating); } };
 
-                // Commentaires
                 onSnapshot(query(collection(db, "commentaires"), where("anime", "==", animeName)), (snap) => {
                     const cDisp = document.getElementById('comments-display');
                     let docs = [];
