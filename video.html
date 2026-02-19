@@ -46,7 +46,6 @@
         .btn-link:hover { background: var(--primary); border-color: var(--primary); }
         
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
-
         .user-note { background: #111; padding: 15px; border-radius: 10px; font-size: 0.8em; line-height: 1.5; color: #aaa; margin-top: 20px; border: 1px solid #333; }
 
         @media (max-width: 800px) { .top-info { flex-direction: column; } .bottom-controls { grid-template-columns: 1fr; } }
@@ -149,7 +148,7 @@
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
-                        // MODIF : Bouton Retour
+                        // GESTION RETOUR
                         if (document.referrer.includes('playlist.html')) {
                             const bl = document.getElementById('back-link');
                             bl.innerText = "← Retour"; bl.href = "playlist.html";
@@ -168,7 +167,7 @@
                             savedPlaylist = d.playlistTarget || "";
                         }
 
-                        // MODIF : Fonction Sauvegarde Auto
+                        // FONCTION SAUVEGARDE AUTO
                         const autoSave = () => {
                             setDoc(docRef, { 
                                 uid: u.uid, anime: anime.nom, img: anime.img, 
@@ -190,7 +189,7 @@
                             if(savedPlaylist) sel.value = savedPlaylist;
                         });
 
-                        // MODIF : Déclencheurs Auto
+                        // DÉCLENCHEURS AUTO
                         document.getElementById('user-status').onchange = autoSave;
                         document.getElementById('user-ep').onchange = autoSave;
                         document.getElementById('target-playlist').onchange = autoSave;
