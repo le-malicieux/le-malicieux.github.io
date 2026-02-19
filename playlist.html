@@ -121,11 +121,25 @@
         let userAnimes = [];
         let csvDataMap = {};
         
-        // RECUPERATION DE L'ETAT SAUVEGARDE
+        // RECUPERATION ETATS SAUVEGARDES
         let currentStatus = localStorage.getItem('playlistTab') || 'watching';
-        // On applique tout de suite la valeur du menu déroulant stockée
         const savedDisplay = localStorage.getItem('playlistDisplayMode') || 'grid';
         document.getElementById('display-mode').value = savedDisplay;
+
+        // --- GESTION DU RETOUR INTELLIGENT (SCROLL) ---
+        // Avant de quitter la page, on sauvegarde la position
+        window.addEventListener('beforeunload', () => {
+            sessionStorage.setItem('playlistScrollPos', window.scrollY);
+        });
+
+        function restoreScroll() {
+            const scrollPos = sessionStorage.getItem('playlistScrollPos');
+            if (scrollPos) {
+                window.scrollTo(0, parseInt(scrollPos));
+                sessionStorage.removeItem('playlistScrollPos'); // On nettoie après
+            }
+        }
+        // ----------------------------------------------
 
         function setRandomBackground() {
             const num = Math.floor(Math.random() * 55) + 1;
@@ -179,6 +193,8 @@
                         userAnimes.push({ id: d.id, ...data, ...csv });
                     });
                     refreshDisplay();
+                    // On restaure le scroll une fois que les données sont chargées et affichées
+                    setTimeout(restoreScroll, 100); 
                 });
             }
         });
@@ -227,7 +243,6 @@
 
         document.getElementById('custom-selector').onchange = () => { toggleDeleteBtn(); refreshDisplay(); };
         
-        // Correction ici : On enregistre bien le changement de style
         document.getElementById('display-mode').onchange = (e) => {
             localStorage.setItem('playlistDisplayMode', e.target.value);
             refreshDisplay();
@@ -237,7 +252,6 @@
 
         function refreshDisplay() {
             const selectedList = document.getElementById('custom-selector').value;
-            // On récupère le mode actuel (soit celui fraîchement cliqué, soit celui déjà dans le select)
             const mode = document.getElementById('display-mode').value;
             const sortVal = document.getElementById('sort-selector').value;
             
