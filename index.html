@@ -18,17 +18,20 @@
         }
         .nav-left { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .nav-logo-small { width: 30px; height: 30px; border-radius: 5px; border: 1px solid var(--primary); }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; white-space: nowrap; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; white-space: nowrap; }
 
         .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
-            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
+        .nav-center input, .nav-center select { 
+            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em;
         }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; text-align: center; }
 
-        /* Conteneur pour aligner Playlist et Random sur mobile */
-        .nav-buttons-container { display: flex; gap: 8px; width: 100%; }
-        .nav-buttons-container a, .nav-buttons-container button { flex: 1; }
+        /* Alignement symétrique des boutons Playlist et Random */
+        .nav-red-group { display: flex; gap: 8px; }
+        .btn-red { 
+            background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; 
+            color: white !important; text-decoration: none; padding: 6px 15px; border-radius: 4px; font-size: 0.85em;
+            display: flex; align-items: center; justify-content: center; min-width: 100px; text-align: center;
+        }
 
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
         .hero-section { height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; }
@@ -45,7 +48,7 @@
         .card-info { padding: 12px; flex-grow: 1; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.05em; }
         
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; flex-shrink: 0; }
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 12px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; flex-shrink: 0; }
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
 
@@ -55,6 +58,8 @@
             .nav-center { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s; z-index: 1100; align-items: stretch; }
             .nav-center.active { left: 0; }
             .mobile-overlay.active { display: block; }
+            .nav-red-group { flex-direction: row; width: 100%; }
+            .nav-red-group a, .nav-red-group button { flex: 1; min-width: 0; }
             .main-title { font-size: 2.1em; }
             .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
             .discord-btn { padding: 6px 8px; font-size: 0.75em; }
@@ -62,29 +67,33 @@
     </style>
 </head>
 <body>
+
     <div class="top-navbar">
         <div class="nav-left">
             <div class="burger" onclick="toggleM()">☰</div>
             <img src="img/logo.jpg" class="nav-logo-small">
             <span class="nav-title">LE MALICIEUX</span>
         </div>
+
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
+
         <div class="nav-center" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
             <input type="text" id="search" placeholder="Chercher...">
             <select id="sort">
-                <option value="">Trier...</option>
+                <option value="">Trier par...</option>
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
                 <option value="nom">Nom</option>
                 <option value="sortie">Année</option>
             </select>
-            <div class="nav-buttons-container">
+            <div class="nav-red-group">
                 <a href="playlist.html" class="btn-red">📂 Playlist</a>
                 <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
             </div>
         </div>
-        <div style="display:flex; align-items:center; gap:5px;">
+
+        <div style="display:flex; align-items:center; gap:8px;">
             <div id="auth-ui"></div>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
@@ -116,10 +125,10 @@
         onAuthStateChanged(auth, (user) => {
             const authUi = document.getElementById('auth-ui');
             if (user) {
-                authUi.innerHTML = `<button id="logout-btn" class="discord-btn" style="background:#333;">Quitter</button>`;
+                authUi.innerHTML = `<button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
                 document.getElementById('logout-btn').onclick = () => signOut(auth);
             } else {
-                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 10px; font-size:0.8em;">Login</button>`;
+                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 12px;">Login</button>`;
                 document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
             }
         });
@@ -138,7 +147,7 @@
                 }).filter(a => a !== null);
                 displayAnimes(allAnimes);
                 const savedPos = sessionStorage.getItem('scrollPos');
-                if (savedPos) { setTimeout(() => window.scrollTo(0, parseInt(savedPos)), 100); }
+                if (savedPos) { setTimeout(() => window.scrollTo({top: parseInt(savedPos), behavior: 'instant'}), 100); }
             } catch (err) { console.error(err); }
         }
 
