@@ -2,11 +2,18 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
         
+        html, body { 
+            overflow-x: hidden; /* Empêche la barre blanche à droite */
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background-color: var(--bg); 
@@ -14,19 +21,19 @@
             background-attachment: fixed;
             background-position: center;
             color: var(--text); 
-            margin: 0; 
             min-height: 100vh;
-            background-image: url('img/fond1.webp'); /* Sécurité WebP */
+            background-image: url('img/fond1.webp');
         }
 
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            padding: 10px 15px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+            width: 100%; box-sizing: border-box;
         }
-        .nav-left { display: flex; align-items: center; gap: 12px; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        .nav-left { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .nav-logo-small { width: 30px; height: 30px; border-radius: 5px; border: 1px solid var(--primary); }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; white-space: nowrap; }
 
         .nav-center { display: flex; gap: 8px; align-items: center; }
         .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
@@ -34,14 +41,13 @@
         }
         .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
-        /* Menu Mobile avec Flèche de retour */
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
 
         .hero-section {
             height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 20px;
+            text-align: center; padding: 20px; box-sizing: border-box;
         }
-        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px rgba(255,71,87,0.3); }
+        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; }
         .main-title { font-size: 3em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
         .main-slogan { font-size: 1.4em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
 
@@ -59,16 +65,14 @@
 
         .card-info { padding: 12px; flex-grow: 1; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.05em; }
-        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.9em; }
         
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
-        .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; flex-shrink: 0; }
 
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
 
         @media (max-width: 1000px) {
-            .burger { display: block; }
+            .burger { display: block; margin-right: 5px; }
             .close-menu { display: block; }
             .nav-center {
                 position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
@@ -76,12 +80,12 @@
                 transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1100; align-items: stretch;
             }
             .nav-center.active { left: 0; }
-            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
             .mobile-overlay.active { display: block; }
             .main-title { font-size: 2.1em; }
             .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
-            .card-info { padding: 8px; }
-            .card-title { font-size: 0.85em; }
+            /* Ajustement pour que rien ne dépasse à droite sur mobile */
+            .auth-status { display: none; } 
+            .discord-btn { padding: 6px 8px; font-size: 0.75em; }
         }
     </style>
 </head>
@@ -91,33 +95,28 @@
         <div class="nav-left">
             <div class="burger" onclick="toggleM()">☰</div>
             <img src="img/logo.jpg" class="nav-logo-small">
-            <span class="nav-title">LE MALICIEUX</span>
+            <span class="nav-title">LE MALICIUX</span>
         </div>
 
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
 
         <div class="nav-center" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
-            <input type="text" id="search" placeholder="Rechercher un anime...">
+            <input type="text" id="search" placeholder="Chercher...">
             <select id="sort">
-                <option value="">Trier par...</option>
+                <option value="">Trier...</option>
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
-                <option value="nom">Nom (A-Z)</option>
+                <option value="nom">Nom</option>
                 <option value="sortie">Année</option>
-                <option value="episodes">Épisodes (Nombre)</option>
-                <option value="etat">État (Fini/En cours)</option>
-                <option value="censure">Censure</option>
             </select>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
 
-        <div style="display:flex; align-items:center;">
-            <div id="auth-ui" style="display:flex; align-items:center;">
-                <button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>
-            </div>
-            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" style="margin-left:10px;">Discord</a>
+        <div style="display:flex; align-items:center; gap:5px;">
+            <div id="auth-ui"></div>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
     </div>
 
@@ -142,7 +141,6 @@
 
         let allAnimes = [];
 
-        // Sauvegarde de la position au scroll
         window.addEventListener('scroll', () => {
             sessionStorage.setItem('scrollPos', window.scrollY);
         });
@@ -150,16 +148,15 @@
         onAuthStateChanged(auth, (user) => {
             const authUi = document.getElementById('auth-ui');
             if (user) {
-                authUi.innerHTML = `<span class="auth-status">${user.displayName}</span><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
+                authUi.innerHTML = `<button id="logout-btn" class="discord-btn" style="background:#333;">Quitter</button>`;
                 document.getElementById('logout-btn').onclick = () => signOut(auth);
             } else {
-                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;
+                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 10px; font-size:0.8em;">Login</button>`;
                 document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
             }
         });
 
         async function init() {
-            // Fond aléatoire optimisé
             const num = Math.floor(Math.random() * 55) + 1;
             document.body.style.backgroundImage = `url('img/fond${num}.webp')`;
 
@@ -175,18 +172,16 @@
                 
                 displayAnimes(allAnimes);
 
-                // Restauration de la position
                 const savedPos = sessionStorage.getItem('scrollPos');
                 if (savedPos) {
-                    window.scrollTo(0, parseInt(savedPos));
+                    setTimeout(() => window.scrollTo(0, parseInt(savedPos)), 100);
                 }
-            } catch (err) { console.error("Erreur CSV:", err); }
+            } catch (err) { console.error(err); }
         }
 
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
-            // Construction groupée pour éviter le bug de disparition sur mobile
-            const html = list.map(a => {
+            container.innerHTML = list.map(a => {
                 const baseImg = a.img.split('.')[0];
                 return `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
@@ -195,32 +190,15 @@
                         </div>
                         <div class="card-info">
                             <div class="card-title">${a.nom}</div>
-                            <div class="card-meta">
-                                📅 ${a.sortie} • ⭐ ${a.score}<br>
-                                <span class="tag">${a.censure}</span> • ${a.etat}
-                            </div>
+                            <div style="font-size:0.9em; color:#aaa;">📅 ${a.sortie} • ⭐ ${a.score}</div>
                         </div>
                     </a>`;
             }).join('');
-            container.innerHTML = html;
         }
 
         window.toggleM = () => {
             document.getElementById('menu').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
-        };
-
-        document.getElementById('sort').onchange = (e) => {
-            const m = e.target.value;
-            let sorted = [...allAnimes];
-            if (m === "nom") sorted.sort((a,b) => a.nom.localeCompare(b.nom));
-            if (m === "score") sorted.sort((a,b) => parseFloat(b.score) - parseFloat(a.score));
-            if (m === "popularite") sorted.sort((a,b) => (parseInt(a.pop.replace('#','')) || 999) - (parseInt(b.pop.replace('#','')) || 999));
-            if (m === "sortie") sorted.sort((a,b) => b.sortie.localeCompare(a.sortie));
-            if (m === "episodes") sorted.sort((a,b) => parseInt(b.ep) - parseInt(a.ep));
-            if (m === "etat") sorted.sort((a,b) => a.etat.localeCompare(b.etat));
-            if (m === "censure") sorted.sort((a,b) => a.censure.localeCompare(b.censure));
-            displayAnimes(sorted);
         };
 
         document.getElementById('search').oninput = (e) => {
