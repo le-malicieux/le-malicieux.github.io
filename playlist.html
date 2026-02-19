@@ -123,6 +123,9 @@
         
         // RECUPERATION DE L'ETAT SAUVEGARDE
         let currentStatus = localStorage.getItem('playlistTab') || 'watching';
+        // On applique tout de suite la valeur du menu déroulant stockée
+        const savedDisplay = localStorage.getItem('playlistDisplayMode') || 'grid';
+        document.getElementById('display-mode').value = savedDisplay;
 
         function setRandomBackground() {
             const num = Math.floor(Math.random() * 55) + 1;
@@ -157,8 +160,6 @@
             if (user) {
                 setRandomBackground();
                 await loadCSV();
-                
-                // Activer visuellement le bon onglet dès le départ
                 updateTabUI();
 
                 onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", user.uid)), (snap) => {
@@ -218,22 +219,28 @@
         document.querySelectorAll('.select-card').forEach(card => {
             card.onclick = () => {
                 currentStatus = card.dataset.status;
-                localStorage.setItem('playlistTab', currentStatus); // Sauvegarde
+                localStorage.setItem('playlistTab', currentStatus);
                 updateTabUI();
                 refreshDisplay();
             };
         });
 
         document.getElementById('custom-selector').onchange = () => { toggleDeleteBtn(); refreshDisplay(); };
-        document.getElementById('display-mode').onchange = refreshDisplay;
+        
+        // Correction ici : On enregistre bien le changement de style
+        document.getElementById('display-mode').onchange = (e) => {
+            localStorage.setItem('playlistDisplayMode', e.target.value);
+            refreshDisplay();
+        };
+
         document.getElementById('sort-selector').onchange = refreshDisplay;
 
         function refreshDisplay() {
             const selectedList = document.getElementById('custom-selector').value;
+            // On récupère le mode actuel (soit celui fraîchement cliqué, soit celui déjà dans le select)
             const mode = document.getElementById('display-mode').value;
             const sortVal = document.getElementById('sort-selector').value;
             
-            // On s'assure d'utiliser le statut stocké pour le filtrage
             let filtered = userAnimes.filter(a => a.status === currentStatus);
             if (selectedList !== 'all') filtered = filtered.filter(a => a.playlistTarget === selectedList);
 
