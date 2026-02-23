@@ -127,7 +127,6 @@
         document.getElementById('display-mode').value = savedDisplay;
 
         // --- GESTION DU RETOUR INTELLIGENT (SCROLL) ---
-        // Avant de quitter la page, on sauvegarde la position
         window.addEventListener('beforeunload', () => {
             sessionStorage.setItem('playlistScrollPos', window.scrollY);
         });
@@ -136,22 +135,15 @@
             const scrollPos = sessionStorage.getItem('playlistScrollPos');
             if (scrollPos) {
                 window.scrollTo(0, parseInt(scrollPos));
-                sessionStorage.removeItem('playlistScrollPos'); // On nettoie après
+                sessionStorage.removeItem('playlistScrollPos');
             }
         }
         // ----------------------------------------------
 
+        // Système de fond corrigé : 46 fonds en webp uniquement
         function setRandomBackground() {
-            const num = Math.floor(Math.random() * 55) + 1;
-            const tryLoad = (exts) => {
-                if (exts.length === 0) return;
-                const ext = exts.shift();
-                const img = new Image();
-                img.src = `img/fond${num}.${ext}`;
-                img.onload = () => document.body.style.backgroundImage = `url('${img.src}')`;
-                img.onerror = () => tryLoad(exts);
-            };
-            tryLoad(['jpg', 'png', 'webp']);
+            const num = Math.floor(Math.random() * 46) + 1;
+            document.body.style.backgroundImage = `url('img/fond${num}.webp')`;
         }
 
         async function loadCSV() {
@@ -193,7 +185,6 @@
                         userAnimes.push({ id: d.id, ...data, ...csv });
                     });
                     refreshDisplay();
-                    // On restaure le scroll une fois que les données sont chargées et affichées
                     setTimeout(restoreScroll, 100); 
                 });
             }
