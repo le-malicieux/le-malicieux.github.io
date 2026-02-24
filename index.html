@@ -16,7 +16,6 @@
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
-            /* Ligne de secours supprimée ici */
         }
 
         .top-navbar {
@@ -34,7 +33,6 @@
         }
         .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
-        /* Menu Mobile avec Flèche de retour */
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
 
         .hero-section {
@@ -154,9 +152,18 @@
         });
 
         async function init() {
-            // Système de fond corrigé : 46 fonds en webp
-            const num = Math.floor(Math.random() * 46) + 1;
-            document.body.style.backgroundImage = `url('img/fond${num}.webp')`;
+            // --- SYSTÈME DE FOND MODIFIÉ (64 Desktop / 13 Mobile) ---
+            const isMobile = window.innerWidth <= 1000;
+            let fileName = "";
+            if (isMobile) {
+                const numMobile = Math.floor(Math.random() * 13) + 1;
+                fileName = `mobile${numMobile}.webp`;
+            } else {
+                const numPC = Math.floor(Math.random() * 64) + 1;
+                fileName = `fond${numPC}.webp`;
+            }
+            document.body.style.backgroundImage = `url('img/${fileName}')`;
+            // --------------------------------------------------------
 
             try {
                 const response = await fetch('animes.csv');
