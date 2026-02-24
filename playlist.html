@@ -121,12 +121,10 @@
         let userAnimes = [];
         let csvDataMap = {};
         
-        // RECUPERATION ETATS SAUVEGARDES
         let currentStatus = localStorage.getItem('playlistTab') || 'watching';
         const savedDisplay = localStorage.getItem('playlistDisplayMode') || 'grid';
         document.getElementById('display-mode').value = savedDisplay;
 
-        // --- GESTION DU RETOUR INTELLIGENT (SCROLL) ---
         window.addEventListener('beforeunload', () => {
             sessionStorage.setItem('playlistScrollPos', window.scrollY);
         });
@@ -138,13 +136,21 @@
                 sessionStorage.removeItem('playlistScrollPos');
             }
         }
-        // ----------------------------------------------
 
-        // Système de fond corrigé : 46 fonds en webp uniquement
+        // --- SYSTÈME DE FOND MODIFIÉ (64 Desktop / 13 Mobile) ---
         function setRandomBackground() {
-            const num = Math.floor(Math.random() * 46) + 1;
-            document.body.style.backgroundImage = `url('img/fond${num}.webp')`;
+            const isMobile = window.innerWidth <= 1000;
+            let fileName = "";
+            if (isMobile) {
+                const numMobile = Math.floor(Math.random() * 13) + 1;
+                fileName = `mobile${numMobile}.webp`;
+            } else {
+                const numPC = Math.floor(Math.random() * 64) + 1;
+                fileName = `fond${numPC}.webp`;
+            }
+            document.body.style.backgroundImage = `url('img/${fileName}')`;
         }
+        // --------------------------------------------------------
 
         async function loadCSV() {
             const resp = await fetch('animes.csv');
