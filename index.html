@@ -157,30 +157,16 @@
             }
         });
 
-        // --- GESTION DES IMAGES SANS CASSER LE DESIGN ---
-        window.handleImgError = function(img, fileNameFromCSV) {
-            if (!img.dataset.attempt) img.dataset.attempt = "1";
-            
-            const base = fileNameFromCSV.substring(0, fileNameFromCSV.lastIndexOf('.'));
-            
-            if (img.dataset.attempt === "1") {
-                img.dataset.attempt = "2";
-                img.src = `img/${base}.webp`;
-            } else if (img.dataset.attempt === "2") {
-                img.dataset.attempt = "3";
-                img.src = `img/${base}.png`;
-            } else if (img.dataset.attempt === "3") {
-                img.dataset.attempt = "4";
-                img.src = `img/${base}.jpg`;
-            } else {
-                img.onerror = null;
-                img.src = 'img/logo.jpg'; // Ton logo en dernier recours
-            }
-        };
-
         async function init() {
             const isMobile = window.innerWidth <= 1000;
-            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
+            let fileName = "";
+            if (isMobile) {
+                const numMobile = Math.floor(Math.random() * 13) + 1;
+                fileName = `mobile${numMobile}.webp`;
+            } else {
+                const numPC = Math.floor(Math.random() * 64) + 1;
+                fileName = `fond${numPC}.webp`;
+            }
             document.body.style.backgroundImage = `url('img/${fileName}')`;
 
             try {
@@ -193,24 +179,29 @@
                     return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), img: clean(c[8]) };
                 }).filter(a => a !== null);
                 displayAnimes(allAnimes);
-            } catch (err) { console.error(\"Erreur CSV:\", err); }
+            } catch (err) { console.error("Erreur CSV:", err); }
         }
 
+        // --- FONCTION MODIFIÉE : CHARGEMENT DIRECT DU .JPG (ZÉRO ESPACE) ---
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
-            const html = list.map(a => `
-                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
-                    <div class="img-container">
-                        <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
-                    </div>
-                    <div class="card-info">
-                        <div class="card-title">${a.nom}</div>
-                        <div class="card-meta">
-                            📅 ${a.sortie} • ⭐ ${a.score}<br>
-                            <span class="tag">${a.censure}</span> • ${a.etat}
+            const html = list.map(a => {
+                // Récupère le nom nettoyé dans le CSV (ex: anime-436)
+                const baseImg = a.img.split('.')[0];
+                return `
+                    <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
+                        <div class="img-container">
+                            <img src="img/${baseImg}.jpg" loading="lazy" onerror="this.onerror=null; this.src='img/${baseImg}.png';">
                         </div>
-                    </div>
-                </a>`).join('');
+                        <div class="card-info">
+                            <div class="card-title">${a.nom}</div>
+                            <div class="card-meta">
+                                📅 ${a.sortie} • ⭐ ${a.score}<br>
+                                <span class="tag">${a.censure}</span> • ${a.etat}
+                            </div>
+                        </div>
+                    </a>`;
+            }).join('');
             container.innerHTML = html;
         }
 
