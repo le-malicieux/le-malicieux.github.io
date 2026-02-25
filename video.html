@@ -135,9 +135,10 @@
         };
 
         function updateIframe() {
+            if(!animeName) return;
             const cleanName = animeName.replace(/'/g, "").replace(/\s+/g, "-").toLowerCase();
-            document.getElementById('video-frame').src = `https://vidsrc.me/embed/anime/${cleanName}/${currentEp}`;
-            document.getElementById('ep-title').innerText = `Épisode ${currentEp}`;
+            document.getElementById('video-frame').src = "https://vidsrc.me/embed/anime/" + cleanName + "/" + currentEp;
+            document.getElementById('ep-title').innerText = "Épisode " + currentEp;
             document.querySelectorAll('.ep-btn').forEach((b, i) => b.classList.toggle('active', (i+1) === currentEp));
         }
 
@@ -151,7 +152,7 @@
                 const cl = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                 
                 totalEp = parseInt(cl(anime[4])) || 12;
-                document.title = `${cl(anime[0])} - Le Malicieux`;
+                document.title = cl(anime[0]) + " - Le Malicieux";
                 document.getElementById('anime-header').innerHTML = `
                     <div class="top-info">
                         <img src="img/${cl(anime[8]).split('.')[0]}.webp" class="poster" onerror="this.src='img/${cl(anime[8]).split('.')[0]}.jpg'">
@@ -182,7 +183,7 @@
                         const pSel = document.getElementById('target-playlist');
                         pSel.innerHTML = '<option value="">Aucune (Défaut)</option>';
                         const pSnap = await getDocs(query(collection(db, "playlists_custom"), where("uid", "==", user.uid)));
-                        pSnap.forEach(d => pSel.innerHTML += `<option value="${d.data().name}">${d.data().name}</option>`);
+                        pSnap.forEach(d => pSel.innerHTML += '<option value="' + d.data().name + '">' + d.data().name + '</option>');
 
                         const q = query(collection(db, "playlists"), where("uid", "==", user.uid), where("anime", "==", animeName));
                         const snap = await getDocs(q);
@@ -224,7 +225,7 @@
                     let docs = [];
                     snap.forEach(d => docs.push(d.data()));
                     docs.sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
-                    cDisp.innerHTML = docs.map(d => `<div style="margin-bottom:12px; border-bottom:1px solid #333; padding-bottom:8px;"><b style="color:var(--primary)">${d.userName}</b><p style="margin:4px 0; font-size:0.9em; color:#ddd;">${d.text}</p></div>`).join('');
+                    cDisp.innerHTML = docs.map(d => '<div style="margin-bottom:12px; border-bottom:1px solid #333; padding-bottom:8px;"><b style="color:var(--primary)">' + d.userName + '</b><p style="margin:4px 0; font-size:0.9em; color:#ddd;">' + d.text + '</p></div>').join('');
                 });
 
                 document.getElementById('btn-post').onclick = async () => {
