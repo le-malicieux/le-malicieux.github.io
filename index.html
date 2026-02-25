@@ -158,7 +158,6 @@
         });
 
         async function init() {
-            // --- SYSTÈME DE FOND MODIFIÉ (64 Desktop / 13 Mobile) ---
             const isMobile = window.innerWidth <= 1000;
             let fileName = "";
             if (isMobile) {
@@ -169,7 +168,6 @@
                 fileName = `fond${numPC}.webp`;
             }
             document.body.style.backgroundImage = `url('img/${fileName}')`;
-            // --------------------------------------------------------
 
             try {
                 const response = await fetch('animes.csv');
@@ -184,6 +182,7 @@
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
+        // --- FONCTION MODIFIÉE ICI POUR CHARGER LE JPG EN PRIORITÉ ---
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
             const html = list.map(a => {
@@ -191,7 +190,7 @@
                 return `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                         <div class="img-container">
-                            <img src="img/${baseImg}.webp" loading="lazy" onerror="this.onerror=null; this.src='img/${baseImg}.jpg';">
+                            <img src="img/${baseImg}.jpg" loading="lazy" onerror="this.onerror=null; this.src='img/${baseImg}.png';">
                         </div>
                         <div class="card-info">
                             <div class="card-title">${a.nom}</div>
