@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-M65SBS3C');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Le Malicieux - Mes Playlists</title>
@@ -56,6 +61,8 @@
     </style>
 </head>
 <body>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <nav class="top-navbar">
         <a href="index.html" class="nav-left">
             <img src="img/logo.jpg" class="nav-logo-small">
@@ -300,8 +307,7 @@
                         <td style="color:#f1c40f;">⭐ ${a.rating || 0}</td>
                         <td>${a.epSeen} / ${a.epMax || '?'}</td>
                         <td>${a.score || 'N/A'}</td>
-                        <td>${a.pop || 'N/A'}</td>
-                        <td>${a.sortie || '?'}</td>
+                        <td>${a.pop || 'N/A'}</td>\n                        <td>${a.sortie || '?'}</td>
                         <td><span style="font-size:0.8em; background:#333; padding:2px 5px; border-radius:3px;">${a.censure || ''}</span></td>
                         <td><button style="background:none; border:none; color:#ff4757; cursor:pointer;" onclick="removeAnime(event, '${a.id}')">🗑️</button></td>
                     </tr>`).join('');
