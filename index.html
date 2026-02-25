@@ -182,16 +182,17 @@
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
-        // --- FONCTION MODIFIÉE : CHARGEMENT DIRECT DU .JPG (ZÉRO ESPACE) ---
+        // --- FONCTION DE CHARGEMENT MULTI-FORMAT (JPG > WEBP > PNG) ---
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
             const html = list.map(a => {
-                // Récupère le nom nettoyé dans le CSV (ex: anime-436)
                 const baseImg = a.img.split('.')[0];
                 return `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                         <div class="img-container">
-                            <img src="img/${baseImg}.jpg" loading="lazy" onerror="this.onerror=null; this.src='img/${baseImg}.png';">
+                            <img src="img/${baseImg}.jpg" 
+                                 loading="lazy" 
+                                 onerror="this.onerror=null; this.src='img/${baseImg}.webp'; this.onerror=function(){this.src='img/${baseImg}.png';};">
                         </div>
                         <div class="card-info">
                             <div class="card-title">${a.nom}</div>
