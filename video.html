@@ -219,6 +219,7 @@
 
                 const updateStars = (v) => document.querySelectorAll('#stars span').forEach(s => s.classList.toggle('active', s.dataset.v <= v));
 
+                // Commentaires
                 onSnapshot(query(collection(db, "commentaires"), where("anime", "==", animeName)), (snap) => {
                     const cDisp = document.getElementById('comments-display');
                     let docs = [];
