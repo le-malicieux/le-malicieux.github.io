@@ -157,6 +157,24 @@
             }
         });
 
+        // --- NOUVELLE FONCTION POUR GERER LES ERREURS D'IMAGES SANS CLIGNOTEMENT ---
+        window.handleImgError = function(img, base) {
+            // On utilise dataset pour savoir quelle extension on a déjà testée
+            if (!img.dataset.attempt) img.dataset.attempt = "1";
+            
+            if (img.dataset.attempt === "1") {
+                img.dataset.attempt = "2";
+                img.src = `img/${base}.webp`;
+            } else if (img.dataset.attempt === "2") {
+                img.dataset.attempt = "3";
+                img.src = `img/${base}.png`;
+            } else {
+                // Si tout a échoué, on arrête la boucle et on met le logo par défaut
+                img.onerror = null;
+                img.src = 'img/logo.jpg';
+            }
+        };
+
         async function init() {
             const isMobile = window.innerWidth <= 1000;
             let fileName = "";
@@ -182,7 +200,6 @@
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
-        // --- FONCTION DE CHARGEMENT MULTI-FORMAT (JPG > WEBP > PNG) ---
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
             const html = list.map(a => {
@@ -190,9 +207,7 @@
                 return `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                         <div class="img-container">
-                            <img src="img/${baseImg}.jpg" 
-                                 loading="lazy" 
-                                 onerror="this.onerror=null; this.src='img/${baseImg}.webp'; this.onerror=function(){this.src='img/${baseImg}.png';};">
+                            <img src="img/${baseImg}.jpg" loading="lazy" onerror="handleImgError(this, '${baseImg}')">
                         </div>
                         <div class="card-info">
                             <div class="card-title">${a.nom}</div>
