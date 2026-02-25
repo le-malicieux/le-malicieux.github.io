@@ -182,10 +182,11 @@
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
-        // --- FONCTION MODIFIÉE ICI POUR CHARGER LE JPG EN PRIORITÉ ---
+        // --- FONCTION MODIFIÉE : CHARGEMENT DIRECT DU .JPG (ZÉRO ESPACE) ---
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
             const html = list.map(a => {
+                // Récupère le nom nettoyé dans le CSV (ex: anime-436)
                 const baseImg = a.img.split('.')[0];
                 return `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
