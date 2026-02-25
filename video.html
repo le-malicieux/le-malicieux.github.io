@@ -181,10 +181,10 @@
 
                         const pSel = document.getElementById('target-playlist');
                         pSel.innerHTML = '<option value="">Aucune (Défaut)</option>';
-                        const pSnap = await getDocs(query(collection(db, \"playlists_custom\"), where(\"uid\", \"==\", user.uid)));
-                        pSnap.forEach(d => pSel.innerHTML += `<option value=\"${d.data().name}\">${d.data().name}</option>`);
+                        const pSnap = await getDocs(query(collection(db, "playlists_custom"), where("uid", "==", user.uid)));
+                        pSnap.forEach(d => pSel.innerHTML += `<option value="${d.data().name}">${d.data().name}</option>`);
 
-                        const q = query(collection(db, \"playlists\"), where(\"uid\", \"==\", user.uid), where(\"anime\", \"==\", animeName));
+                        const q = query(collection(db, "playlists"), where("uid", "==", user.uid), where("anime", "==", animeName));
                         const snap = await getDocs(q);
                         if(!snap.empty) {
                             const d = snap.docs[0];
@@ -213,25 +213,25 @@
                         playlistTarget: document.getElementById('target-playlist').value,
                         updatedAt: serverTimestamp()
                     };
-                    if(existingDocId) { await updateDoc(doc(db, \"playlists\", existingDocId), payload); alert(\"Mis à jour !\"); }
-                    else { await addDoc(collection(db, \"playlists\"), payload).then(() => location.reload()); };
+                    if(existingDocId) { await updateDoc(doc(db, "playlists", existingDocId), payload); alert("Mis à jour !"); }
+                    else { await addDoc(collection(db, "playlists"), payload).then(() => location.reload()); };
                 };
 
                 const updateStars = (v) => document.querySelectorAll('#stars span').forEach(s => s.classList.toggle('active', s.dataset.v <= v));
 
-                onSnapshot(query(collection(db, \"commentaires\"), where(\"anime\", \"==\", animeName)), (snap) => {
+                onSnapshot(query(collection(db, "commentaires"), where("anime", "==", animeName)), (snap) => {
                     const cDisp = document.getElementById('comments-display');
                     let docs = [];
                     snap.forEach(d => docs.push(d.data()));
                     docs.sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
-                    cDisp.innerHTML = docs.map(d => `<div style=\"margin-bottom:12px; border-bottom:1px solid #333; padding-bottom:8px;\"><b style=\"color:var(--primary)\">${d.userName}</b><p style=\"margin:4px 0; font-size:0.9em; color:#ddd;\">${d.text}</p></div>`).join('');
+                    cDisp.innerHTML = docs.map(d => `<div style="margin-bottom:12px; border-bottom:1px solid #333; padding-bottom:8px;"><b style="color:var(--primary)">${d.userName}</b><p style="margin:4px 0; font-size:0.9em; color:#ddd;">${d.text}</p></div>`).join('');
                 });
 
                 document.getElementById('btn-post').onclick = async () => {
                     const t = document.getElementById('comment-input').value;
                     if(t.trim() && currentUser) { 
-                        await addDoc(collection(db, \"commentaires\"), { anime: animeName, text: t, userName: currentUser.displayName, date: serverTimestamp() }); 
-                        document.getElementById('comment-input').value = \"\"; 
+                        await addDoc(collection(db, "commentaires"), { anime: animeName, text: t, userName: currentUser.displayName, date: serverTimestamp() }); 
+                        document.getElementById('comment-input').value = ""; 
                     }
                 };
 
