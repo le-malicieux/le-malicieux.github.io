@@ -157,10 +157,12 @@
             }
         });
 
-        // --- NOUVELLE FONCTION POUR GERER LES ERREURS D'IMAGES SANS CLIGNOTEMENT ---
-        window.handleImgError = function(img, base) {
-            // On utilise dataset pour savoir quelle extension on a déjà testée
+        // --- FONCTION DE SÉCURITÉ POUR LES IMAGES ---
+        window.handleImgError = function(img, fileNameFromCSV) {
             if (!img.dataset.attempt) img.dataset.attempt = "1";
+            
+            // On récupère le nom sans l'extension (ex: anime-403)
+            const base = fileNameFromCSV.split('.')[0];
             
             if (img.dataset.attempt === "1") {
                 img.dataset.attempt = "2";
@@ -168,10 +170,12 @@
             } else if (img.dataset.attempt === "2") {
                 img.dataset.attempt = "3";
                 img.src = `img/${base}.png`;
+            } else if (img.dataset.attempt === "3") {
+                img.dataset.attempt = "4";
+                img.src = `img/${base}.jpg`; // Forcer le jpg si le CSV disait autre chose
             } else {
-                // Si tout a échoué, on arrête la boucle et on met le logo par défaut
-                img.onerror = null;
-                img.src = 'img/logo.jpg';
+                img.onerror = null; 
+                img.src = 'img/logo.jpg'; // Image de secours finale (ton logo)
             }
         };
 
@@ -203,11 +207,13 @@
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
             const html = list.map(a => {
-                const baseImg = a.img.split('.')[0];
+                // On utilise directement a.img qui contient déjà l'extension selon ton CSV
                 return `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                         <div class="img-container">
-                            <img src="img/${baseImg}.jpg" loading="lazy" onerror="handleImgError(this, '${baseImg}')">
+                            <img src="img/${a.img}" 
+                                 loading="lazy" 
+                                 onerror="handleImgError(this, '${a.img}')">
                         </div>
                         <div class="card-info">
                             <div class="card-title">${a.nom}</div>
