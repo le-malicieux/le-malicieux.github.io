@@ -157,12 +157,11 @@
             }
         });
 
-        // --- FONCTION DE SÉCURITÉ POUR LES IMAGES ---
+        // --- GESTION DES IMAGES SANS CASSER LE DESIGN ---
         window.handleImgError = function(img, fileNameFromCSV) {
             if (!img.dataset.attempt) img.dataset.attempt = "1";
             
-            // On récupère le nom sans l'extension (ex: anime-403)
-            const base = fileNameFromCSV.split('.')[0];
+            const base = fileNameFromCSV.substring(0, fileNameFromCSV.lastIndexOf('.'));
             
             if (img.dataset.attempt === "1") {
                 img.dataset.attempt = "2";
@@ -172,23 +171,16 @@
                 img.src = `img/${base}.png`;
             } else if (img.dataset.attempt === "3") {
                 img.dataset.attempt = "4";
-                img.src = `img/${base}.jpg`; // Forcer le jpg si le CSV disait autre chose
+                img.src = `img/${base}.jpg`;
             } else {
-                img.onerror = null; 
-                img.src = 'img/logo.jpg'; // Image de secours finale (ton logo)
+                img.onerror = null;
+                img.src = 'img/logo.jpg'; // Ton logo en dernier recours
             }
         };
 
         async function init() {
             const isMobile = window.innerWidth <= 1000;
-            let fileName = "";
-            if (isMobile) {
-                const numMobile = Math.floor(Math.random() * 13) + 1;
-                fileName = `mobile${numMobile}.webp`;
-            } else {
-                const numPC = Math.floor(Math.random() * 64) + 1;
-                fileName = `fond${numPC}.webp`;
-            }
+            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
             document.body.style.backgroundImage = `url('img/${fileName}')`;
 
             try {
@@ -201,29 +193,24 @@
                     return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), img: clean(c[8]) };
                 }).filter(a => a !== null);
                 displayAnimes(allAnimes);
-            } catch (err) { console.error("Erreur CSV:", err); }
+            } catch (err) { console.error(\"Erreur CSV:\", err); }
         }
 
         function displayAnimes(list) {
             const container = document.getElementById('anime-container');
-            const html = list.map(a => {
-                // On utilise directement a.img qui contient déjà l'extension selon ton CSV
-                return `
-                    <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
-                        <div class="img-container">
-                            <img src="img/${a.img}" 
-                                 loading="lazy" 
-                                 onerror="handleImgError(this, '${a.img}')">
+            const html = list.map(a => `
+                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
+                    <div class="img-container">
+                        <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">${a.nom}</div>
+                        <div class="card-meta">
+                            📅 ${a.sortie} • ⭐ ${a.score}<br>
+                            <span class="tag">${a.censure}</span> • ${a.etat}
                         </div>
-                        <div class="card-info">
-                            <div class="card-title">${a.nom}</div>
-                            <div class="card-meta">
-                                📅 ${a.sortie} • ⭐ ${a.score}<br>
-                                <span class="tag">${a.censure}</span> • ${a.etat}
-                            </div>
-                        </div>
-                    </a>`;
-            }).join('');
+                    </div>
+                </a>`).join('');
             container.innerHTML = html;
         }
 
