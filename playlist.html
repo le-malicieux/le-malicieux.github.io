@@ -137,7 +137,6 @@
             }
         }
 
-        // --- SYSTÈME DE FOND MODIFIÉ (64 Desktop / 13 Mobile) ---
         function setRandomBackground() {
             const isMobile = window.innerWidth <= 1000;
             let fileName = "";
@@ -150,7 +149,6 @@
             }
             document.body.style.backgroundImage = `url('img/${fileName}')`;
         }
-        // --------------------------------------------------------
 
         async function loadCSV() {
             const resp = await fetch('animes.csv');
@@ -282,7 +280,7 @@
                     <div class="card">
                         <button class="delete-btn-overlay" onclick="removeAnime(event, '${a.id}')">🗑️</button>
                         <a href="video.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;">
-                            <img src="img/${a.img.split('.')[0]}.jpg" onerror="this.src='img/${a.img.split('.')[0]}.png'">
+                            <img src="img/anime-${a.img.split('.')[0]}.jpg" onerror="this.src='img/anime-${a.img.split('.')[0]}.png'">
                             <div class="card-info">
                                 <div class="card-title">${a.anime}</div>
                                 <div>⭐ ${a.rating}/10 • Ep: ${a.epSeen}</div>
@@ -295,7 +293,7 @@
                     <tr>
                         <td class="status-bar status-${a.status}-bg"></td>
                         <td>${i+1}</td>
-                        <td><img src="img/${a.img.split('.')[0]}.jpg" class="list-img" onerror="this.src='img/${a.img.split('.')[0]}.png'"></td>
+                        <td><img src="img/anime-${a.img.split('.')[0]}.jpg" class="list-img" onerror="this.src='img/anime-${a.img.split('.')[0]}.png'"></td>
                         <td style="font-weight:bold;"><a href="video.html?name=${encodeURIComponent(a.anime)}" style="color:white; text-decoration:none;">${a.anime}</a></td>
                         <td style="color:#f1c40f;">⭐ ${a.rating || 0}</td>
                         <td>${a.epSeen} / ${a.epMax || '?'}</td>
