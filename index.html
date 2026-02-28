@@ -245,7 +245,7 @@
     <script>
         let allAnimes = [];
 
-        // ENREGISTRER LE SCROLL
+        // --- AJOUT : SAUVEGARDE SCROLL ---
         window.addEventListener('scroll', () => {
             localStorage.setItem('indexScrollPos', window.scrollY);
         });
@@ -283,7 +283,7 @@
 
                 displayAnimes(allAnimes);
 
-                // RESTAURER LE SCROLL
+                // --- AJOUT : RESTAURATION SCROLL ---
                 const savedPos = localStorage.getItem('indexScrollPos');
                 if (savedPos) {
                     setTimeout(() => window.scrollTo(0, parseInt(savedPos)), 100);
