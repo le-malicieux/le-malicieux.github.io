@@ -121,10 +121,8 @@
         let userAnimes = [];
         let csvDataMap = {};
 
-        // FONCTION CRUCIALE : Récupère uniquement le chiffre pour former "anime-403.jpg"
         function getRealImgPath(firebaseImgName) {
             if(!firebaseImgName) return "img/logo.jpg";
-            // Extrait les chiffres (ex: "403" depuis "anime (403).jpg" ou "403.jpg")
             const match = firebaseImgName.match(/\d+/);
             const num = match ? match[0] : "0";
             return `img/anime-${num}.jpg`;
@@ -146,8 +144,13 @@
         const savedDisplay = localStorage.getItem('playlistDisplayMode') || 'grid';
         document.getElementById('display-mode').value = savedDisplay;
 
-        window.addEventListener('beforeunload', () => {
-            sessionStorage.setItem('playlistScrollPos', window.scrollY);
+        // --- GESTION DU RETOUR INTELLIGENT ---
+        const savePos = () => sessionStorage.setItem('playlistScrollPos', window.scrollY);
+        window.addEventListener('beforeunload', savePos);
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.card') || e.target.closest('tr') || e.target.closest('a')) {
+                savePos();
+            }
         });
 
         function restoreScroll() {
@@ -210,7 +213,6 @@
                         userAnimes.push({ id: d.id, ...data, ...csv });
                     });
                     refreshDisplay();
-                    setTimeout(restoreScroll, 100); 
                 });
             }
         });
@@ -324,6 +326,11 @@
                         <td><button style="background:none; border:none; color:#ff4757; cursor:pointer;" onclick="removeAnime(event, '${a.id}')">🗑️</button></td>
                     </tr>`).join('');
             }
+
+            // Restauration de la position après injection du HTML
+            requestAnimationFrame(() => {
+                restoreScroll();
+            });
         }
     </script>
 </body>
