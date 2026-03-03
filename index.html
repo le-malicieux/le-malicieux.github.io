@@ -29,8 +29,8 @@
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         .nav-left { display: flex; align-items: center; gap: 12px; }
-        /* Correction Logo : object-fit cover pour éviter l'étirement */
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        /* Correction Logo : contain pour éviter l'étirement */
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: contain; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
 
         .nav-center { display: flex; gap: 8px; align-items: center; }
@@ -39,12 +39,14 @@
         }
         .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
+
         .hero-section {
             height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 20px;
         }
-        /* Correction Logo principal : object-fit cover */
-        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px rgba(255,71,87,0.3); object-fit: cover; }
+        /* Correction Logo principal : contain */
+        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px rgba(255,71,87,0.3); object-fit: contain; }
         .main-title { font-size: 3em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
         .main-slogan { font-size: 1.4em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
 
@@ -64,18 +66,44 @@
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.05em; }
         .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.9em; }
         
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
+        .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
+
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
+        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+
         @media (max-width: 1000px) {
+            .burger { display: block; }
+            .close-menu { display: block; }
+            .nav-center {
+                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
+                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1100; align-items: stretch;
+            }
+            .nav-center.active { left: 0; }
+            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
+            .mobile-overlay.active { display: block; }
+            .main-title { font-size: 2.1em; }
             .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
+            .card-info { padding: 8px; }
+            .card-title { font-size: 0.85em; }
         }
     </style>
 </head>
 <body>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="top-navbar">
         <div class="nav-left">
+            <div class="burger" onclick="toggleM()">☰</div>
             <img src="img/logo.jpg" class="nav-logo-small">
             <span class="nav-title">LE MALICIEUX</span>
         </div>
-        <div class="nav-center">
+
+        <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
+
+        <div class="nav-center" id="menu">
+            <div class="close-menu" onclick="toggleM()">← Retour</div>
             <input type="text" id="search" placeholder="Rechercher un anime...">
             <select id="sort">
                 <option value="">Trier par...</option>
@@ -83,16 +111,26 @@
                 <option value="score">Score</option>
                 <option value="nom">Nom (A-Z)</option>
                 <option value="sortie">Année</option>
-                <option value="episodes">Épisodes</option>
+                <option value="episodes">Épisodes (Nombre)</option>
+                <option value="etat">État (Fini/En cours)</option>
+                <option value="censure">Censure</option>
             </select>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
+            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
-        <div id="auth-ui"></div>
+
+        <div style="display:flex; align-items:center;">
+            <div id="auth-ui" style="display:flex; align-items:center;">
+                <button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>
+            </div>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" style="margin-left:10px;">Discord</a>
+        </div>
     </div>
 
     <div class="hero-section">
         <img src="img/logo.jpg" class="main-logo">
         <h1 class="main-title">le-malicieux.github.io</h1>
+        <p class="main-slogan">Catalogue d'animes malicieux</p>
     </div>
 
     <div class="content-area">
@@ -101,83 +139,146 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // ... (tes imports firebase habituels)
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
         let allAnimes = [];
 
-        // --- SAUVEGARDE DE L'ÉTAT ---
+        onAuthStateChanged(auth, (user) => {
+            const authUi = document.getElementById('auth-ui');
+            if (user) {
+                authUi.innerHTML = `<span class="auth-status">${user.displayName}</span><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
+                document.getElementById('logout-btn').onclick = () => signOut(auth);
+            } else {
+                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;
+                document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
+            }
+        });
+
+        // --- GESTION DE LA PERSISTANCE ---
         window.saveState = () => {
-            sessionStorage.setItem('searchVal', document.getElementById('search').value);
-            sessionStorage.setItem('sortVal', document.getElementById('sort').value);
-            sessionStorage.setItem('scrollPos', window.scrollY);
+            sessionStorage.setItem('indexScrollPos', window.scrollY);
+            sessionStorage.setItem('indexSearch', document.getElementById('search').value);
+            sessionStorage.setItem('indexSort', document.getElementById('sort').value);
+        };
+
+        window.handleImgError = function(img, fileNameFromCSV) {
+            if (!img.dataset.attempt) img.dataset.attempt = "1";
+            const lastDotIndex = fileNameFromCSV.lastIndexOf('.');
+            const base = lastDotIndex !== -1 ? fileNameFromCSV.substring(0, lastDotIndex) : fileNameFromCSV;
+            
+            if (img.dataset.attempt === "1") {
+                img.dataset.attempt = "2";
+                img.src = `img/${base}.webp`;
+            } else if (img.dataset.attempt === "2") {
+                img.dataset.attempt = "3";
+                img.src = `img/${base}.png`;
+            } else if (img.dataset.attempt === "3") {
+                img.dataset.attempt = "4";
+                img.src = `img/${base}.jpg`;
+            } else {
+                img.onerror = null;
+                img.src = 'img/logo.jpg';
+            }
         };
 
         async function init() {
+            const isMobile = window.innerWidth <= 1000;
+            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
+            document.body.style.backgroundImage = `url('img/${fileName}')`;
+
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
                 allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
                     const c = line.split(';');
-                    if (!c[0]) return null;
+                    if (!c[0] || c.length < 9) return null;
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                     return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), img: clean(c[8]) };
                 }).filter(a => a !== null);
 
                 // Récupération de l'état précédent
-                const prevSearch = sessionStorage.getItem('searchVal') || "";
-                const prevSort = sessionStorage.getItem('sortVal') || "";
-                
-                document.getElementById('search').value = prevSearch;
-                document.getElementById('sort').value = prevSort;
+                const savedSearch = sessionStorage.getItem('indexSearch') || "";
+                const savedSort = sessionStorage.getItem('indexSort') || "";
+                document.getElementById('search').value = savedSearch;
+                document.getElementById('sort').value = savedSort;
 
-                applyFiltersAndDisplay();
-
-                // Restauration du scroll
-                const savedPos = sessionStorage.getItem('scrollPos');
-                if (savedPos) {
-                    window.scrollTo(0, parseInt(savedPos));
-                    // On ne nettoie le scroll que si on est revenu, mais on garde recherche/tri
-                }
-            } catch (err) { console.error(err); }
+                runFilterAndSort();
+            } catch (err) { console.error("Erreur CSV:", err); }
         }
 
-        function applyFiltersAndDisplay() {
+        function runFilterAndSort() {
             const searchVal = document.getElementById('search').value.toLowerCase();
-            const sortVal = document.getElementById('sort').value;
-
+            const sortMode = document.getElementById('sort').value;
+            
             let filtered = allAnimes.filter(a => a.nom.toLowerCase().includes(searchVal));
 
-            if (sortVal) {
+            if (sortMode) {
                 filtered.sort((a, b) => {
-                    let valA = a[sortVal === 'popularite' ? 'pop' : sortVal] || "";
-                    let valB = b[sortVal === 'popularite' ? 'pop' : sortVal] || "";
+                    let valA = a[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
+                    let valB = b[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
 
-                    // Gestion des données vides (toujours en bas)
-                    if (!valA || valA === "N/A") return 1;
-                    if (!valB || valB === "N/A") return -1;
+                    // Gestion des vides (en bas)
+                    const isAEmpty = !valA || valA === "N/A" || valA === "";
+                    const isBEmpty = !valB || valB === "N/A" || valB === "";
+                    if (isAEmpty && isBEmpty) return 0;
+                    if (isAEmpty) return 1;
+                    if (isBEmpty) return -1;
 
-                    if (sortVal === "score" || sortVal === "episodes") {
-                        return parseFloat(valB) - parseFloat(valA);
-                    } else if (sortVal === "popularite") {
-                        return parseInt(valA.replace('#','')) - parseInt(valB.replace('#',''));
+                    if (sortMode === "nom" || sortMode === "etat" || sortMode === "censure" || sortMode === "sortie") {
+                        return valA.localeCompare(valB);
                     }
-                    return valA.localeCompare(valB);
+                    if (sortMode === "score") return parseFloat(valB) - parseFloat(valA);
+                    if (sortMode === "episodes") return parseInt(valB) - parseInt(valA);
+                    if (sortMode === "popularite") return (parseInt(valA.replace('#','')) || 999) - (parseInt(valB.replace('#','')) || 999);
+                    return 0;
                 });
             }
-
-            const container = document.getElementById('anime-container');
-            container.innerHTML = filtered.map(a => `
-                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" onclick="saveState()">
-                    <div class="img-container"><img src="img/${a.img}" loading="lazy"></div>
-                    <div class="card-info">
-                        <div class="card-title">${a.nom}</div>
-                        <div class="card-meta">📅 ${a.sortie} • ⭐ ${a.score}</div>
-                    </div>
-                </a>`).join('');
+            displayAnimes(filtered);
         }
 
-        document.getElementById('search').oninput = applyFiltersAndDisplay;
-        document.getElementById('sort').onchange = applyFiltersAndDisplay;
+        function displayAnimes(list) {
+            const container = document.getElementById('anime-container');
+            const html = list.map(a => `
+                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" onclick="saveState()">
+                    <div class="img-container">
+                        <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">${a.nom}</div>
+                        <div class="card-meta">
+                            📅 ${a.sortie} • ⭐ ${a.score}<br>
+                            <span class="tag">${a.censure}</span> • ${a.etat}
+                        </div>
+                    </div>
+                </a>`).join('');
+            container.innerHTML = html;
+
+            const savedPos = sessionStorage.getItem('indexScrollPos');
+            if (savedPos) {
+                window.scrollTo(0, parseInt(savedPos));
+                sessionStorage.removeItem('indexScrollPos');
+            }
+        }
+
+        window.toggleM = () => {
+            document.getElementById('menu').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        };
+
+        document.getElementById('sort').onchange = runFilterAndSort;
+        document.getElementById('search').oninput = runFilterAndSort;
+
+        window.randomAnime = () => {
+            if(allAnimes.length > 0) {
+                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
+                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+            }
+        };
 
         init();
     </script>
