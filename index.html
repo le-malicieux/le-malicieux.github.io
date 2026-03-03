@@ -30,11 +30,11 @@
         }
         .nav-left { display: flex; flex-direction: column; align-items: flex-start; }
         .nav-brand { display: flex; align-items: center; gap: 12px; }
-        /* Correction Logo : object-fit cover pour s'adapter aux bordures sans s'étirer */
+        /* Logo ajusté : object-fit cover pour remplir le cadre rouge sans déformation */
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
         
-        /* Flèche Retour Accueil */
+        /* Bouton Retour Accueil sous le titre */
         #back-home { font-size: 0.75em; color: #888; text-decoration: none; display: none; cursor: pointer; margin-top: 2px; }
         #back-home:hover { color: var(--primary); }
 
@@ -50,6 +50,7 @@
             height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 20px;
         }
+        /* Logo principal ajusté */
         .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px rgba(255,71,87,0.3); object-fit: cover; }
         .main-title { font-size: 3em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
         .main-slogan { font-size: 1.4em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
@@ -177,7 +178,7 @@
             document.getElementById('search').value = "";
             document.getElementById('sort').value = "";
             sessionStorage.clear();
-            window.scrollTo(0,0);
+            window.scrollTo(0, 0);
             runFilterAndSort();
         };
 
@@ -206,7 +207,7 @@
                     return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), img: clean(c[8]) };
                 }).filter(a => a !== null);
 
-                // Initialisation de l'ordre aléatoire
+                // Initialisation de l'ordre aléatoire pour le démarrage
                 shuffledAnimes = [...allAnimes];
                 for (let i = shuffledAnimes.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -225,9 +226,10 @@
             const sortMode = document.getElementById('sort').value;
             const backBtn = document.getElementById('back-home');
 
-            backBtn.style.display = (searchVal || sortMode) ? "block" : "none";
+            // Affichage de la flèche de retour si on filtre ou trie
+            backBtn.style.display = (searchVal !== "" || sortMode !== "") ? "block" : "none";
 
-            // Utilise l'aléatoire si pas de tri/recherche
+            // Utilise l'ordre aléatoire si aucune recherche ou tri n'est actif
             let base = (searchVal === "" && sortMode === "") ? shuffledAnimes : allAnimes;
             let filtered = base.filter(a => a.nom.toLowerCase().includes(searchVal));
 
@@ -236,16 +238,18 @@
                     let valA = a[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
                     let valB = b[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
 
-                    // Données vides en bas
+                    // Gestion des données manquantes (toujours en bas)
                     const isAEmpty = !valA || valA === "N/A" || valA === "";
                     const isBEmpty = !valB || valB === "N/A" || valB === "";
                     if (isAEmpty && isBEmpty) return 0;
                     if (isAEmpty) return 1;
                     if (isBEmpty) return -1;
 
-                    if (sortMode === "score") return parseFloat(valB) - parseFloat(valA); // Précision totale
+                    // Tri Score ULTRA PRÉCIS (nombres flottants)
+                    if (sortMode === "score") return parseFloat(valB) - parseFloat(valA);
                     if (sortMode === "episodes") return parseInt(valB) - parseInt(valA);
                     if (sortMode === "popularite") return (parseInt(valA.replace('#','')) || 999) - (parseInt(valB.replace('#','')) || 999);
+                    
                     return valA.localeCompare(valB);
                 });
             }
