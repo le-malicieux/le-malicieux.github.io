@@ -64,9 +64,12 @@
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
 
-        .card-info { padding: 12px; flex-grow: 1; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.05em; }
-        .tag { background: rgba(255,71,87,0.2); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.9em; }
+        .card-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
+        
+        /* Conteneur métadonnées */
+        .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
+        .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; order: -1; }
         
         .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
         .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
@@ -87,8 +90,9 @@
             .mobile-overlay.active { display: block; }
             .main-title { font-size: 2.1em; }
             .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
-            .card-info { padding: 8px; }
-            .card-title { font-size: 0.85em; }
+            .card-info { padding: 5px; }
+            .card-title { font-size: 0.85em; height: 2.4em; }
+            .card-meta-row { font-size: 0.65em; gap: 2px; }
         }
     </style>
 </head>
@@ -211,10 +215,8 @@
                     [shuffledAnimes[i], shuffledAnimes[j]] = [shuffledAnimes[j], shuffledAnimes[i]];
                 }
 
-                // RÉCUPÉRATION DE L'ÉTAT SAUVÉ (POUR LE REFRESH)
                 const savedSearch = sessionStorage.getItem('indexSearch');
                 const savedSort = sessionStorage.getItem('indexSort');
-                
                 if (savedSearch !== null) document.getElementById('search').value = savedSearch;
                 if (savedSort !== null) document.getElementById('sort').value = savedSort;
 
@@ -227,9 +229,7 @@
             const sortMode = document.getElementById('sort').value;
             const backBtn = document.getElementById('back-home');
 
-            // Sauvegarde automatique pour le refresh
             saveState();
-
             backBtn.style.display = (searchVal !== "" || sortMode !== "") ? "block" : "none";
 
             let base = (searchVal === "" && sortMode === "") ? shuffledAnimes : allAnimes;
@@ -246,33 +246,39 @@
                     if (isAEmpty) return 1;
                     if (isBEmpty) return -1;
 
-                    // TRI SCORE CORRIGÉ (FLOAT)
-                    if (sortMode === "score") {
-                        const scoreA = parseFloat(valA.replace(',', '.'));
-                        const scoreB = parseFloat(valB.replace(',', '.'));
-                        return scoreB - scoreA;
-                    }
+                    if (sortMode === "score") return parseFloat(valB.replace(',', '.')) - parseFloat(valA.replace(',', '.'));
                     if (sortMode === "episodes") return parseInt(valB) - parseInt(valA);
-                    if (sortMode === "popularite") return (parseInt(valA.replace('#','')) || 999) - (parseInt(valB.replace('#','')) || 999);
-                    
+                    if (sortMode === "popularite") return (parseInt(valA.replace('#','')) || 99999) - (parseInt(valB.replace('#','')) || 99999);
+                    if (sortMode === "sortie") return valB.localeCompare(valA);
                     return valA.localeCompare(valB);
                 });
             }
-            displayAnimes(filtered);
+            displayAnimes(filtered, sortMode);
         }
 
-        function displayAnimes(list) {
+        function displayAnimes(list, sortMode) {
             const container = document.getElementById('anime-container');
-            container.innerHTML = list.map(a => `
+            container.innerHTML = list.map(a => {
+                const hl = (m) => (sortMode === m) ? 'class="highlight"' : '';
+                return `
                 <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" onclick="saveState()">
                     <div class="img-container">
                         <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
                     </div>
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
-                        <div class="card-meta">📅 ${a.sortie} • ⭐ ${a.score}<br><span class="tag">${a.censure}</span> • ${a.etat}</div>
+                        <div class="card-meta-row">
+                            <span ${hl('sortie')}>📅${a.sortie}</span>
+                            <span ${hl('score')}>⭐${a.score}</span>
+                            <span ${hl('popularite')}>📈${a.pop}</span>
+                        </div>
+                        <div class="card-meta-row">
+                            <span ${hl('episodes')}>🎞️${a.ep}</span>
+                            <span ${hl('censure')}>🔞${a.censure}</span>
+                            <span ${hl('etat')}>🛠️${a.etat}</span>
+                        </div>
                     </div>
-                </a>`).join('');
+                </a>`}).join('');
 
             const savedPos = sessionStorage.getItem('indexScrollPos');
             if (savedPos) { 
