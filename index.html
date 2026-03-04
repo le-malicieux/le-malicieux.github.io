@@ -36,13 +36,20 @@
         #back-home { font-size: 0.75em; color: #888; text-decoration: none; display: none; cursor: pointer; margin-top: 2px; }
         #back-home:hover { color: var(--primary); }
 
-        .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
-            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
+        /* MENU LATÉRAL (DRAWER) */
+        .nav-center { 
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh;
+            background: #0d0d0d; display: flex; flex-direction: column; padding: 30px 20px;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1100; align-items: stretch;
+            border-right: 1px solid rgba(255,71,87,0.3); box-shadow: 10px 0 30px rgba(0,0,0,0.5);
         }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
+        .nav-center.active { left: 0; }
+        .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
+            background: #222; border: 1px solid #444; color: white; padding: 12px; border-radius: 4px; font-size: 0.9em; text-decoration: none; margin-bottom: 10px;
+        }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; text-align: center; }
 
-        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
+        .close-menu { display: block; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
 
         .hero-section {
             height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -67,28 +74,17 @@
         .card-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
         
-        /* Conteneur métadonnées */
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
         .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; order: -1; }
         
         .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
         .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
 
-        .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
+        .burger { display: block; font-size: 28px; cursor: pointer; color: white; margin-right: 15px; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+        .mobile-overlay.active { display: block; }
 
         @media (max-width: 1000px) {
-            .burger { display: block; }
-            .close-menu { display: block; }
-            .nav-center {
-                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
-                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
-                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1100; align-items: stretch;
-            }
-            .nav-center.active { left: 0; }
-            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
-            .mobile-overlay.active { display: block; }
-            .main-title { font-size: 2.1em; }
             .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
             .card-info { padding: 5px; }
             .card-title { font-size: 0.85em; height: 2.4em; }
@@ -112,25 +108,26 @@
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
 
         <div class="nav-center" id="menu">
-            <div class="close-menu" onclick="toggleM()">← Retour</div>
-            <input type="text" id="search" placeholder="Rechercher un anime...">
+            <div class="close-menu" onclick="toggleM()">← Fermer</div>
+            <input type="text" id="search" placeholder="Rechercher...">
             <select id="sort">
                 <option value="">Trier par...</option>
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
                 <option value="nom">Nom (A-Z)</option>
                 <option value="sortie">Année</option>
-                <option value="episodes">Épisodes (Nombre)</option>
-                <option value="etat">État (Fini/En cours)</option>
+                <option value="episodes">Épisodes</option>
+                <option value="etat">État</option>
                 <option value="censure">Censure</option>
             </select>
+            <a href="tags.html" class="btn-red">🏷️ Tags</a>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
 
         <div style="display:flex; align-items:center;">
             <div id="auth-ui" style="display:flex; align-items:center;">
-                <button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>
+                <button id="login-btn" class="btn-red" style="padding:7px 15px; margin:0;">Connexion</button>
             </div>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" style="margin-left:10px;">Discord</a>
         </div>
@@ -164,7 +161,7 @@
                 authUi.innerHTML = `<span class="auth-status">${user.displayName}</span><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
                 document.getElementById('logout-btn').onclick = () => signOut(auth);
             } else {
-                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;
+                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px; margin:0;">Connexion</button>`;
                 document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
             }
         });
@@ -175,13 +172,7 @@
         };
 
         window.resetToHome = () => {
-            document.getElementById('search').value = "";
-            document.getElementById('sort').value = "";
-            sessionStorage.removeItem('indexSearch');
-            sessionStorage.removeItem('indexSort');
-            sessionStorage.removeItem('indexScrollPos');
-            window.scrollTo(0, 0);
-            runFilterAndSort();
+            window.location.href = "index.html"; // Nettoie aussi l'URL des tags
         };
 
         window.handleImgError = function(img, fileNameFromCSV) {
@@ -206,7 +197,12 @@
                     const c = line.split(';');
                     if (!c[0] || c.length < 9) return null;
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    return { nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), img: clean(c[8]) };
+                    return { 
+                        nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), 
+                        sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), 
+                        etat: clean(c[6]), img: clean(c[8]),
+                        tags: clean(c[12]) // Colonne M
+                    };
                 }).filter(a => a !== null);
 
                 shuffledAnimes = [...allAnimes];
@@ -228,24 +224,32 @@
             const searchVal = document.getElementById('search').value.toLowerCase();
             const sortMode = document.getElementById('sort').value;
             const backBtn = document.getElementById('back-home');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const tagFilter = urlParams.get('tag');
 
             saveState();
-            backBtn.style.display = (searchVal !== "" || sortMode !== "") ? "block" : "none";
+            backBtn.style.display = (searchVal !== "" || sortMode !== "" || tagFilter) ? "block" : "none";
 
-            let base = (searchVal === "" && sortMode === "") ? shuffledAnimes : allAnimes;
-            let filtered = base.filter(a => a.nom.toLowerCase().includes(searchVal));
+            let base = (searchVal === "" && sortMode === "" && !tagFilter) ? shuffledAnimes : allAnimes;
+            
+            let filtered = base.filter(a => {
+                const matchSearch = a.nom.toLowerCase().includes(searchVal);
+                const matchTag = tagFilter ? (a.tags && a.tags.toLowerCase().includes(tagFilter.toLowerCase())) : true;
+                return matchSearch && matchTag;
+            });
+
+            if (tagFilter) document.getElementById('search').placeholder = "Tag : " + tagFilter;
 
             if (sortMode) {
                 filtered.sort((a, b) => {
                     let valA = a[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
                     let valB = b[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
-
                     const isAEmpty = !valA || valA === "N/A" || valA === "";
                     const isBEmpty = !valB || valB === "N/A" || valB === "";
                     if (isAEmpty && isBEmpty) return 0;
                     if (isAEmpty) return 1;
                     if (isBEmpty) return -1;
-
                     if (sortMode === "score") return parseFloat(valB.replace(',', '.')) - parseFloat(valA.replace(',', '.'));
                     if (sortMode === "episodes") return parseInt(valB) - parseInt(valA);
                     if (sortMode === "popularite") return (parseInt(valA.replace('#','')) || 99999) - (parseInt(valB.replace('#','')) || 99999);
