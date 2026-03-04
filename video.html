@@ -19,10 +19,9 @@
         .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
         .meta-item { background: #222; padding: 10px; border-radius: 8px; font-size: 0.9em; border-left: 3px solid var(--primary); }
         
-        /* AJOUT DESIGN TAGS */
+        /* Ajout uniquement du style pour la case des tags */
         .tags-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
-        .tag-badge { background: rgba(255,255,255,0.05); color: var(--primary); border: 1px solid #333; padding: 5px 12px; border-radius: 20px; text-decoration: none; font-size: 0.85em; transition: 0.3s; }
-        .tag-badge:hover { border-color: var(--primary); background: rgba(255,71,87,0.1); }
+        .tag-badge { background: #222; color: var(--primary); border: 1px solid #444; padding: 5px 12px; border-radius: 5px; text-decoration: none; font-size: 0.85em; }
 
         .video-section { margin-top: 30px; }
         iframe { width: 100%; aspect-ratio: 16/9; border-radius: 10px; border: 1px solid #333; background: #000; }
@@ -115,7 +114,7 @@
                             sortie: cl(c[3]), ep: cl(c[4]), censure: cl(c[5]), 
                             etat: cl(c[6]), desc: cl(c[7]), img: cl(c[8]), 
                             stream: cl(c[9]), download: cl(c[10]),
-                            tags: cl(c[12]) // AJOUT LECTURE COLONNE M
+                            tags: cl(c[12]) // Lecture de la colonne M
                         };
                         break;
                     }
@@ -133,12 +132,12 @@
                 document.getElementById('video-player').src = anime.stream;
                 document.getElementById('link-download').href = anime.download;
 
-                // AJOUT LOGIQUE AFFICHAGE TAGS
+                // Affichage des tags
                 if (anime.tags) {
                     const tagsContainer = document.getElementById('anime-tags');
                     tagsContainer.innerHTML = anime.tags.split(',').map(t => {
                         const clean = t.trim();
-                        return clean ? `<a href="index.html?tag=${encodeURIComponent(clean)}" class="tag-badge">#${clean}</a>` : '';
+                        return clean ? `<span class="tag-badge">#${clean}</span>` : '';
                     }).join('');
                 }
 
