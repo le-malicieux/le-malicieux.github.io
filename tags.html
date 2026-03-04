@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tags - Le Malicieux</title>
+    <style>
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
+        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            min-height: 100vh;
+        }
+
+        /* Navbar identique à index.html */
+        .top-navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-brand { display: flex; align-items: center; gap: 12px; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; text-decoration: none; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        /* Section des Tags */
+        .tags-container { 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 15px; 
+            border: 1px solid #333; 
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .tag-pill {
+            padding: 8px 16px;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 20px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: 0.3s;
+        }
+        .tag-pill:hover, .tag-pill.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Grille d'animes identique à index.html */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+        .card { 
+            background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
+            border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
+            display: flex; flex-direction: column;
+        }
+        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
+        .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
+        .card-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
+        .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
+
+        @media (max-width: 1000px) {
+            .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-navbar">
+        <a href="index.html" class="nav-brand">
+            <img src="img/logo.jpg" class="nav-logo-small">
+            <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Tags</small></span>
+        </a>
+        <a href="index.html" style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 0.9em;">← Catalogue</a>
+    </div>
+
+    <div class="container">
+        <h2 style="text-align: center; color: var(--primary);">Explorer par catégories</h2>
+        <div id="tags-list" class="tags-container">Chargement des tags...</div>
+        
+        <div id="results-title" style="margin-bottom: 20px; font-weight: bold; color: #888;"></div>
+        <div id="anime-container" class="grid"></div>
+    </div>
+
+    <script>
+        let allAnimes = [];
+        let activeTag = new URLSearchParams(window.location.search).get('tag');
+
+        async function init() {
+            try {
+                const response = await fetch('animes.csv');
+                const rawData = await response.text();
+                
+                // Extraction des données
+                allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
+                    const c = line.split(';');
+                    if (!c[0] || c.length < 9) return null;
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    return { 
+                        nom: clean(c[0]), sortie: clean(c[3]), score: clean(c[2]), 
+                        pop: clean(c[1]), ep: clean(c[4]), censure: clean(c[5]), 
+                        etat: clean(c[6]), img: clean(c[8]),
+                        tags: c[12] ? c[12].split(',').map(clean).filter(t => t !== "") : []
+                    };
+                }).filter(a => a !== null);
+
+                generateTagCloud();
+                filterByTag(activeTag);
+            } catch (err) {
+                console.error("Erreur:", err);
+            }
+        }
+
+        function generateTagCloud() {
+            const tagsList = document.getElementById('tags-list');
+            const allTags = new Set();
+            
+            allAnimes.forEach(a => {
+                a.tags.forEach(t => allTags.add(t));
+            });
+
+            const sortedTags = Array.from(allTags).sort();
+            
+            if(sortedTags.length === 0) {
+                tagsList.innerHTML = "Aucun tag trouvé dans le fichier CSV (Colonne M).";
+                return;
+            }
+
+            tagsList.innerHTML = sortedTags.map(t => `
+                <div class="tag-pill ${t === activeTag ? 'active' : ''}" onclick="filterByTag('${t}')">
+                    ${t}
+                </div>
+            `).join('');
+        }
+
+        function filterByTag(tag) {
+            activeTag = tag;
+            
+            // Mise à jour visuelle des boutons
+            document.querySelectorAll('.tag-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.trim() === tag);
+            });
+
+            const container = document.getElementById('anime-container');
+            const title = document.getElementById('results-title');
+
+            if (!tag) {
+                title.innerText = "Sélectionnez un tag pour voir les animes correspondants.";
+                container.innerHTML = "";
+                return;
+            }
+
+            const filtered = allAnimes.filter(a => a.tags.includes(tag));
+            title.innerText = `${filtered.length} anime(s) pour le tag : ${tag}`;
+
+            container.innerHTML = filtered.map(a => `
+                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
+                    <div class="img-container">
+                        <img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">${a.nom}</div>
+                        <div class="card-meta-row">
+                            <span>📅${a.sortie}</span>
+                            <span>⭐${a.score}</span>
+                            <span>📈${a.pop}</span>
+                        </div>
+                    </div>
+                </a>`).join('');
+        }
+
+        init();
+    </script>
+</body>
+</html>
