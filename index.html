@@ -36,20 +36,13 @@
         #back-home { font-size: 0.75em; color: #888; text-decoration: none; display: none; cursor: pointer; margin-top: 2px; }
         #back-home:hover { color: var(--primary); }
 
-        /* MENU LATÉRAL (DRAWER) */
-        .nav-center { 
-            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh;
-            background: #0d0d0d; display: flex; flex-direction: column; padding: 30px 20px;
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1100; align-items: stretch;
-            border-right: 1px solid rgba(255,71,87,0.3); box-shadow: 10px 0 30px rgba(0,0,0,0.5);
-        }
-        .nav-center.active { left: 0; }
+        .nav-center { display: flex; gap: 8px; align-items: center; }
         .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
-            background: #222; border: 1px solid #444; color: white; padding: 12px; border-radius: 4px; font-size: 0.9em; text-decoration: none; margin-bottom: 10px;
+            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
         }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; text-align: center; }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
-        .close-menu { display: block; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
 
         .hero-section {
             height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -80,11 +73,20 @@
         .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
         .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
 
-        .burger { display: block; font-size: 28px; cursor: pointer; color: white; margin-right: 15px; }
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
-        .mobile-overlay.active { display: block; }
 
         @media (max-width: 1000px) {
+            .burger { display: block; }
+            .close-menu { display: block; }
+            .nav-center {
+                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
+                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1100; align-items: stretch;
+            }
+            .nav-center.active { left: 0; }
+            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
+            .mobile-overlay.active { display: block; }
             .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
             .card-info { padding: 5px; }
             .card-title { font-size: 0.85em; height: 2.4em; }
@@ -108,16 +110,16 @@
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
 
         <div class="nav-center" id="menu">
-            <div class="close-menu" onclick="toggleM()">← Fermer</div>
-            <input type="text" id="search" placeholder="Rechercher...">
+            <div class="close-menu" onclick="toggleM()">← Retour</div>
+            <input type="text" id="search" placeholder="Rechercher un anime...">
             <select id="sort">
                 <option value="">Trier par...</option>
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
                 <option value="nom">Nom (A-Z)</option>
                 <option value="sortie">Année</option>
-                <option value="episodes">Épisodes</option>
-                <option value="etat">État</option>
+                <option value="episodes">Épisodes (Nombre)</option>
+                <option value="etat">État (Fini/En cours)</option>
                 <option value="censure">Censure</option>
             </select>
             <a href="tags.html" class="btn-red">🏷️ Tags</a>
@@ -127,7 +129,7 @@
 
         <div style="display:flex; align-items:center;">
             <div id="auth-ui" style="display:flex; align-items:center;">
-                <button id="login-btn" class="btn-red" style="padding:7px 15px; margin:0;">Connexion</button>
+                <button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>
             </div>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" style="margin-left:10px;">Discord</a>
         </div>
@@ -161,7 +163,7 @@
                 authUi.innerHTML = `<span class="auth-status">${user.displayName}</span><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
                 document.getElementById('logout-btn').onclick = () => signOut(auth);
             } else {
-                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px; margin:0;">Connexion</button>`;
+                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;
                 document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
             }
         });
@@ -172,7 +174,7 @@
         };
 
         window.resetToHome = () => {
-            window.location.href = "index.html"; // Nettoie aussi l'URL des tags
+            window.location.href = "index.html";
         };
 
         window.handleImgError = function(img, fileNameFromCSV) {
@@ -245,15 +247,9 @@
                 filtered.sort((a, b) => {
                     let valA = a[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
                     let valB = b[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
-                    const isAEmpty = !valA || valA === "N/A" || valA === "";
-                    const isBEmpty = !valB || valB === "N/A" || valB === "";
-                    if (isAEmpty && isBEmpty) return 0;
-                    if (isAEmpty) return 1;
-                    if (isBEmpty) return -1;
                     if (sortMode === "score") return parseFloat(valB.replace(',', '.')) - parseFloat(valA.replace(',', '.'));
                     if (sortMode === "episodes") return parseInt(valB) - parseInt(valA);
                     if (sortMode === "popularite") return (parseInt(valA.replace('#','')) || 99999) - (parseInt(valB.replace('#','')) || 99999);
-                    if (sortMode === "sortie") return valB.localeCompare(valA);
                     return valA.localeCompare(valB);
                 });
             }
@@ -283,12 +279,6 @@
                         </div>
                     </div>
                 </a>`}).join('');
-
-            const savedPos = sessionStorage.getItem('indexScrollPos');
-            if (savedPos) { 
-                window.scrollTo(0, parseInt(savedPos)); 
-                sessionStorage.removeItem('indexScrollPos'); 
-            }
         }
 
         window.toggleM = () => {
