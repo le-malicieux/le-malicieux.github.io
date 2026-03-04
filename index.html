@@ -1,270 +1,302 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-M65SBS3C');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    <title>Visionnage - Le Malicieux</title>
+    <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: 0 auto; }
-        .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 6px; transition: 0.3s; }
-        .back-btn:hover { background: var(--primary); color: white; }
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
         
-        .anime-header { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
-        .top-info { display: flex; gap: 25px; margin-bottom: 25px; }
-        .poster { width: 280px; flex-shrink: 0; }
-        .poster img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .main-details { flex: 1; display: flex; flex-direction: column; gap: 15px; }
-        .anime-title { font-size: 2.2em; color: var(--primary); margin: 0; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg); 
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: var(--text); 
+            margin: 0; 
+            min-height: 100vh;
+        }
+
+        .top-navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-left { display: flex; flex-direction: column; align-items: flex-start; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .stat-item { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; }
-        .stat-item small { color: var(--primary); font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 4px; }
-        .stat-item span { font-weight: bold; font-size: 0.9em; }
+        #back-home { font-size: 0.75em; color: #888; text-decoration: none; display: none; cursor: pointer; margin-top: 2px; }
+        #back-home:hover { color: var(--primary); }
 
-        .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
-        .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-
-        select { 
-            background: #333; 
-            color: #fff; 
-            border: 1px solid #555; 
-            padding: 10px; 
-            width: 100%; 
-            border-radius: 4px; 
-            margin-bottom: 12px; 
-            cursor: pointer; 
+        .nav-center { display: flex; gap: 8px; align-items: center; }
+        .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
+            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
         }
-        select option { background-color: #222 !important; color: #fff !important; }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
-        .ep-row { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            gap: 10px; 
-            background: rgba(255,255,255,0.05); 
-            padding: 10px; 
-            border-radius: 6px; 
-            margin-bottom: 15px;
-            border: 1px solid #444;
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
+
+        .hero-section {
+            height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
         }
-        .ep-row span { font-weight: bold; color: #aaa; }
-        #user-ep { width: auto; min-width: 80px; margin-bottom: 0; text-align: center; padding: 5px; }
+        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px rgba(255,71,87,0.3); object-fit: cover; }
+        .main-title { font-size: 3em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
+        .main-slogan { font-size: 1.4em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
 
-        .star-rating { font-size: 1.4em; color: #444; cursor: pointer; margin: 10px 0; text-align: center; display: flex; justify-content: center; gap: 2px; }
-        .star-rating span.active { color: #f1c40f; }
-
-        .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); }
-        .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
-        .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 10px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9em; text-align: center; border: 1px solid #444; font-weight: bold; transition: 0.2s; }
-        .btn-link:hover { background: var(--primary); border-color: var(--primary); }
+        .content-area { background: linear-gradient(to top, rgba(0,0,0,1) 80%, transparent); padding: 40px 15px; min-height: 600px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
         
-        .info-visionnage-csv { 
-            background: rgba(255,255,255,0.05); 
-            border-left: 3px solid var(--primary); 
-            padding: 10px; 
-            border-radius: 4px; 
-            font-size: 0.85em; 
-            margin-bottom: 12px; 
-            color: #bbb; 
+        .card { 
+            background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
+            border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
+            display: flex; flex-direction: column;
         }
+        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
+        .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
 
-        .info-generale-fixe { 
-            margin-top: 15px; 
-            padding-top: 12px; 
-            border-top: 1px solid rgba(255,255,255,0.1); 
-            font-size: 0.8em; 
-            color: #888; 
-            line-height: 1.4;
+        .card-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
+        
+        .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
+        .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; order: -1; }
+        
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
+        .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
+
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
+        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+
+        @media (max-width: 1000px) {
+            .burger { display: block; }
+            .close-menu { display: block; }
+            .nav-center {
+                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
+                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1100; align-items: stretch;
+            }
+            .nav-center.active { left: 0; }
+            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
+            .mobile-overlay.active { display: block; }
+            .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
+            .card-info { padding: 5px; }
+            .card-title { font-size: 0.85em; height: 2.4em; }
+            .card-meta-row { font-size: 0.65em; gap: 2px; }
         }
-
-        .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
-
-        @media (max-width: 800px) { .top-info { flex-direction: column; } .bottom-controls { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="index.html" id="back-link" class="back-btn">← Retour au catalogue</a>
-        <div id="anime-details">Chargement des données...</div>
-
-        <div id="comments-section" style="margin-top:20px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333;">
-            <h3>Commentaires</h3>
-            <textarea id="comment-input" style="width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box;" placeholder="Ajouter un commentaire..." rows="3"></textarea>
-            <button id="btn-post" style="background:var(--primary); color:white; border:none; padding:10px 30px; border-radius:5px; cursor:pointer; font-weight:bold;">Publier</button>
-            <div id="comments-display" style="margin-top: 20px;"></div>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <div class="top-navbar">
+        <div class="nav-left">
+            <div class="nav-brand">
+                <div class="burger" onclick="toggleM()">☰</div>
+                <img src="img/logo.jpg" class="nav-logo-small">
+                <span class="nav-title">LE MALICIEUX</span>
+            </div>
+            <a id="back-home" onclick="resetToHome()">← Retour à l'accueil</a>
         </div>
+
+        <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
+
+        <div class="nav-center" id="menu">
+            <div class="close-menu" onclick="toggleM()">← Retour</div>
+            <input type="text" id="search" placeholder="Rechercher un anime...">
+            <select id="sort">
+                <option value="">Trier par...</option>
+                <option value="popularite">Popularité</option>
+                <option value="score">Score</option>
+                <option value="nom">Nom (A-Z)</option>
+                <option value="sortie">Année</option>
+                <option value="episodes">Épisodes (Nombre)</option>
+                <option value="etat">État (Fini/En cours)</option>
+                <option value="censure">Censure</option>
+            </select>
+            <a href="tags.html" class="btn-red">🏷️ Tags</a>
+            <a href="playlist.html" class="btn-red">📂 Playlist</a>
+            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
+        </div>
+
+        <div style="display:flex; align-items:center;">
+            <div id="auth-ui" style="display:flex; align-items:center;">
+                <button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>
+            </div>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" style="margin-left:10px;">Discord</a>
+        </div>
+    </div>
+
+    <div class="hero-section">
+        <img src="img/logo.jpg" class="main-logo">
+        <h1 class="main-title">le-malicieux.github.io</h1>
+        <p class="main-slogan">Catalogue d'animes malicieux</p>
+    </div>
+
+    <div class="content-area">
+        <div id="anime-container" class="grid"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
         const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-        const params = new URLSearchParams(window.location.search);
-        const animeName = params.get('name');
-        let currentUser = null;
-        let userRating = 0;
+        let allAnimes = [];
+        let shuffledAnimes = [];
 
-        async function load() {
-            const display = document.getElementById('anime-details');
+        onAuthStateChanged(auth, (user) => {
+            const authUi = document.getElementById('auth-ui');
+            if (user) {
+                authUi.innerHTML = `<span class="auth-status">${user.displayName}</span><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
+                document.getElementById('logout-btn').onclick = () => signOut(auth);
+            } else {
+                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;
+                document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
+            }
+        });
+
+        window.saveState = () => {
+            sessionStorage.setItem('indexSearch', document.getElementById('search').value);
+            sessionStorage.setItem('indexSort', document.getElementById('sort').value);
+        };
+
+        window.resetToHome = () => {
+            window.location.href = "index.html";
+        };
+
+        window.handleImgError = function(img, fileNameFromCSV) {
+            if (!img.dataset.attempt) img.dataset.attempt = "1";
+            const lastDotIndex = fileNameFromCSV.lastIndexOf('.');
+            const base = lastDotIndex !== -1 ? fileNameFromCSV.substring(0, lastDotIndex) : fileNameFromCSV;
+            if (img.dataset.attempt === "1") { img.dataset.attempt = "2"; img.src = `img/${base}.webp`; } 
+            else if (img.dataset.attempt === "2") { img.dataset.attempt = "3"; img.src = `img/${base}.png`; } 
+            else if (img.dataset.attempt === "3") { img.dataset.attempt = "4"; img.src = `img/${base}.jpg`; } 
+            else { img.onerror = null; img.src = 'img/logo.jpg'; }
+        };
+
+        async function init() {
+            const isMobile = window.innerWidth <= 1000;
+            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
+            document.body.style.backgroundImage = `url('img/${fileName}')`;
+
             try {
-                const resp = await fetch('animes.csv');
-                const data = await resp.text();
-                const lines = data.split(/\r?\n/).slice(1);
-                
-                let anime = null;
-                for (let line of lines) {
+                const response = await fetch('animes.csv');
+                const rawData = await response.text();
+                allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
                     const c = line.split(';');
+                    if (!c[0] || c.length < 9) return null;
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    if (clean(c[0]) === animeName) {
-                        anime = {
-                            nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), year: clean(c[3]),
-                            ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), desc: clean(c[7]),
-                            img: clean(c[8]), stream: c[9] ? c[9].split(',').map(clean) : [],
-                            dl: c[10] ? c[10].split(',').map(clean) : [], infoV: clean(c[11]),
-                            tags: c[12] ? c[12].split(',').filter(t => t.trim() !== "").map(clean) : []
-                        };
-                        break;
-                    }
+                    return { 
+                        nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), 
+                        sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), 
+                        etat: clean(c[6]), img: clean(c[8]),
+                        tags: clean(c[12]) // Colonne M
+                    };
+                }).filter(a => a !== null);
+
+                shuffledAnimes = [...allAnimes];
+                for (let i = shuffledAnimes.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledAnimes[i], shuffledAnimes[j]] = [shuffledAnimes[j], shuffledAnimes[i]];
                 }
 
-                if (!anime) { display.innerHTML = "Anime non trouvé."; return; }
+                const savedSearch = sessionStorage.getItem('indexSearch');
+                const savedSort = sessionStorage.getItem('indexSort');
+                if (savedSearch !== null) document.getElementById('search').value = savedSearch;
+                if (savedSort !== null) document.getElementById('sort').value = savedSort;
 
-                const epMatches = anime.ep.match(/\d+/g);
-                const maxEp = epMatches ? parseInt(epMatches[epMatches.length - 1]) : 0;
-                let epOptions = "";
-                for(let i=0; i <= maxEp; i++) { epOptions += `<option value="${i}">${i}</option>`; }
-
-                // Génération des tags ou message vide
-                const tagsHtml = anime.tags.length > 0 
-                    ? anime.tags.map(t => `
-                        <a href="tags.html?tag=${encodeURIComponent(t)}" style="flex: 1; min-width: 45%; text-align: center; background: rgba(255,255,255,0.05); color: #aaa; text-decoration: none; font-size: 0.75em; padding: 5px; border-radius: 4px; border: 1px solid #333; transition: 0.3s;" onmouseover="this.style.borderColor='var(--primary)';this.style.color='white'" onmouseout="this.style.borderColor='#333';this.style.color='#aaa'">
-                            ${t}
-                        </a>`).join('')
-                    : `<div style="width:100%; text-align:center; color:#555; font-size:0.75em; padding:5px; border:1px dashed #333; border-radius:4px;">Aucun tag répertorié</div>`;
-
-                display.innerHTML = `
-                    <div class="anime-header">
-                        <div class="top-info">
-                            <div class="poster">
-                                <img src="img/${anime.img.split('.')[0]}.jpg" onerror="this.src='img/${anime.img.split('.')[0]}.png'">
-                                <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 5px;">
-                                    ${tagsHtml}
-                                </div>
-                            </div>
-                            <div class="main-details">
-                                <h1 class="anime-title">${anime.nom}</h1>
-                                <div class="stats-grid">
-                                    <div class="stat-item"><small>Pop.</small><span>${anime.pop}</span></div>
-                                    <div class="stat-item"><small>Score</small><span>⭐ ${anime.score}</span></div>
-                                    <div class="stat-item"><small>Année</small><span>${anime.year}</span></div>
-                                    <div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div>
-                                    <div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div>
-                                    <div class="stat-item"><small>État</small><span>${anime.etat}</span></div>
-                                </div>
-                                <p style="font-size:0.95em; color:#ccc; line-height:1.6;">${anime.desc}</p>
-                            </div>
-                        </div>
-                        <div class="bottom-controls">
-                            <div class="playlist-box">
-                                <label style="font-size:0.7em; color:var(--primary); font-weight:bold; text-transform:uppercase; margin-bottom:10px; display:block;">Ma Progression</label>
-                                <select id="user-status"><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
-                                <div class="ep-row"><span>Vu :</span><select id="user-ep">${epOptions}</select><span>/ ${maxEp}</span></div>
-                                <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
-                                <button class="btn-delete" id="delete-btn">Retirer de ma liste</button>
-                            </div>
-                            <div class="link-box">
-                                <div class="link-title">📥 Téléchargement</div>
-                                <div id="dl-area" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px;"></div>
-                                
-                                <div class="link-title">🎬 Visionnage</div>
-                                <div class="info-visionnage-csv">${anime.infoV || "Aucune information supplémentaire pour le visionnage."}</div>
-                                
-                                <div id="stream-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
-
-                                <div class="info-generale-fixe">
-                                    <strong>Attention :</strong> Quand une œuvre possède une deuxième saison qui porte le même nom ou un nom très ressemblant, je créé une seule carte pour toutes les saisons donc les informations comme la popularité sont plus générales, les liens de visionnage et de téléchargement sont biens présents, j'ai aussi inclus par exemple pour l'anime Furifure/2, le slash (/) sépare la saison 1 de la saison 2. Donc quand vous voyez un slash (/) dans un nom, c'est qu'il y a plusieurs saisons, sauf cas compliqués comme Ikenai Koto où ses ses 3 saisons sont en 3 cartes ou Bible Black en une seule. Si ce n'est pas clair n'hésitez pas à poser des questions sur le discord :)
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-
-                // Remplissage des liens
-                anime.dl.filter(l => l.trim()).forEach((l, i) => document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">Lien ${i+1}</a>`);
-                anime.stream.filter(l => l.trim()).forEach((l, i) => document.getElementById('stream-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lecteur ${i+1} ↗</a>`);
-
-                onAuthStateChanged(auth, async (u) => {
-                    currentUser = u;
-                    if(u) {
-                        if (document.referrer.includes('playlist.html')) {
-                            const bl = document.getElementById('back-link');
-                            bl.innerText = "← Retour"; bl.href = "playlist.html";
-                        }
-
-                        const docRef = doc(db, "playlists", u.uid + "_" + anime.nom);
-                        const docSnap = await getDoc(docRef);
-                        
-                        if(docSnap.exists()) {
-                            const d = docSnap.data();
-                            document.getElementById('user-status').value = d.status || 'watching';
-                            document.getElementById('user-ep').value = d.epSeen || 0;
-                            userRating = d.rating || 0;
-                            updateStars(userRating);
-                        }
-
-                        const autoSave = () => {
-                            setDoc(docRef, { 
-                                uid: u.uid, anime: anime.nom, img: anime.img, 
-                                status: document.getElementById('user-status').value, 
-                                epSeen: parseInt(document.getElementById('user-ep').value), 
-                                rating: userRating, 
-                                epMax: maxEp 
-                            }, { merge: true });
-                        };
-
-                        document.getElementById('user-status').onchange = autoSave;
-                        document.getElementById('user-ep').onchange = autoSave;
-                        document.getElementById('stars').onclick = (e) => { 
-                            if(e.target.dataset.v) { 
-                                userRating = parseInt(e.target.dataset.v); 
-                                updateStars(userRating); 
-                                autoSave(); 
-                            } 
-                        };
-                        document.getElementById('delete-btn').onclick = () => { if(confirm("Supprimer de votre liste ?")) deleteDoc(docRef).then(() => location.reload()); };
-                    }
-                });
-
-                const updateStars = (v) => document.querySelectorAll('#stars span').forEach(s => s.classList.toggle('active', s.dataset.v <= v));
-
-                // Commentaires
-                onSnapshot(query(collection(db, "commentaires"), where("anime", "==", animeName)), (snap) => {
-                    const cDisp = document.getElementById('comments-display');
-                    let docs = [];
-                    snap.forEach(d => docs.push(d.data()));
-                    docs.sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
-                    cDisp.innerHTML = docs.map(d => `<div style="margin-bottom:12px; border-bottom:1px solid #333; padding-bottom:8px;"><b style="color:var(--primary)">${d.userName}</b><p style="margin:4px 0; font-size:0.9em; color:#ddd;">${d.text}</p></div>`).join('');
-                });
-
-                document.getElementById('btn-post').onclick = async () => {
-                    const t = document.getElementById('comment-input').value;
-                    if(t.trim() && currentUser) { 
-                        await addDoc(collection(db, "commentaires"), { anime: animeName, text: t, userName: currentUser.displayName, date: serverTimestamp() }); 
-                        document.getElementById('comment-input').value = ""; 
-                    }
-                };
-
-            } catch (err) { console.error(err); }
+                runFilterAndSort();
+            } catch (err) { console.error("Erreur CSV:", err); }
         }
-        load();
+
+        function runFilterAndSort() {
+            const searchVal = document.getElementById('search').value.toLowerCase();
+            const sortMode = document.getElementById('sort').value;
+            const backBtn = document.getElementById('back-home');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const tagFilter = urlParams.get('tag');
+
+            saveState();
+            backBtn.style.display = (searchVal !== "" || sortMode !== "" || tagFilter) ? "block" : "none";
+
+            let base = (searchVal === "" && sortMode === "" && !tagFilter) ? shuffledAnimes : allAnimes;
+            
+            let filtered = base.filter(a => {
+                const matchSearch = a.nom.toLowerCase().includes(searchVal);
+                const matchTag = tagFilter ? (a.tags && a.tags.toLowerCase().includes(tagFilter.toLowerCase())) : true;
+                return matchSearch && matchTag;
+            });
+
+            if (tagFilter) document.getElementById('search').placeholder = "Tag : " + tagFilter;
+
+            if (sortMode) {
+                filtered.sort((a, b) => {
+                    let valA = a[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
+                    let valB = b[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
+                    if (sortMode === "score") return parseFloat(valB.replace(',', '.')) - parseFloat(valA.replace(',', '.'));
+                    if (sortMode === "episodes") return parseInt(valB) - parseInt(valA);
+                    if (sortMode === "popularite") return (parseInt(valA.replace('#','')) || 99999) - (parseInt(valB.replace('#','')) || 99999);
+                    return valA.localeCompare(valB);
+                });
+            }
+            displayAnimes(filtered, sortMode);
+        }
+
+        function displayAnimes(list, sortMode) {
+            const container = document.getElementById('anime-container');
+            container.innerHTML = list.map(a => {
+                const hl = (m) => (sortMode === m) ? 'class="highlight"' : '';
+                return `
+                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" onclick="saveState()">
+                    <div class="img-container">
+                        <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">${a.nom}</div>
+                        <div class="card-meta-row">
+                            <span ${hl('sortie')}>📅${a.sortie}</span>
+                            <span ${hl('score')}>⭐${a.score}</span>
+                            <span ${hl('popularite')}>📈${a.pop}</span>
+                        </div>
+                        <div class="card-meta-row">
+                            <span ${hl('episodes')}>🎞️${a.ep}</span>
+                            <span ${hl('censure')}>🔞${a.censure}</span>
+                            <span ${hl('etat')}>🛠️${a.etat}</span>
+                        </div>
+                    </div>
+                </a>`}).join('');
+        }
+
+        window.toggleM = () => {
+            document.getElementById('menu').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        };
+
+        document.getElementById('sort').onchange = runFilterAndSort;
+        document.getElementById('search').oninput = runFilterAndSort;
+
+        window.randomAnime = () => {
+            if(allAnimes.length > 0) {
+                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
+                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+            }
+        };
+
+        init();
     </script>
 </body>
 </html>
