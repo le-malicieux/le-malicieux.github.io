@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexique des Tags - Le Malicieux</title>
+    <style>
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
+        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            min-height: 100vh;
+        }
+
+        /* Navbar identique */
+        .top-navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .page-header h1 {
+            color: var(--primary);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .page-header p {
+            color: #888;
+            font-size: 1.1em;
+        }
+
+        /* Grille pour le lexique */
+        .lexique-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tag-card {
+            background: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        .tag-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.1);
+        }
+        
+        .tag-name {
+            color: var(--primary);
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+        }
+        
+        .tag-desc {
+            color: #ccc;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .btn-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #444;
+            color: #aaa;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.85em;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .btn-link:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 600px) {
+            .lexique-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-navbar">
+        <a href="index.html" class="nav-brand">
+            <img src="img/logo.jpg" class="nav-logo-small" onerror="this.src=''">
+            <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Lexique</small></span>
+        </a>
+        <a href="tags.html" style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 0.9em;">← Retour aux Tags</a>
+    </div>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Lexique des Tags</h1>
+            <p>Retrouvez ici la signification de chaque catégorie présente sur le site.</p>
+        </div>
+
+        <div id="lexique-container" class="lexique-grid">
+            Chargement des définitions...
+        </div>
+    </div>
+
+    <script>
+        async function loadLexique() {
+            const container = document.getElementById('lexique-container');
+            try {
+                // Assurez-vous que votre fichier CSV est nommé tags_description.csv
+                const response = await fetch('tags_description.csv'); 
+                const data = await response.text();
+                
+                // On sépare par ligne, on ignore la première ligne si c'est l'en-tête (Tag;Description)
+                const lines = data.split(/\r?\n/).slice(1); 
+                
+                let htmlContent = '';
+
+                for (let line of lines) {
+                    // On sépare par point-virgule (ou virgule selon votre format d'export excel)
+                    // J'utilise le point-virgule car c'est le standard de vos autres fichiers
+                    const columns = line.split(';'); 
+                    
+                    if (columns.length >= 2) {
+                        const tagName = columns[0] ? columns[0].trim().replace(/^"|"$/g, '') : "";
+                        const tagDesc = columns[1] ? columns[1].trim().replace(/^"|"$/g, '') : "";
+
+                        if (tagName !== "") {
+                            htmlContent += `
+                                <div class="tag-card">
+                                    <div class="tag-name">${tagName}</div>
+                                    <div class="tag-desc">${tagDesc || "Aucune description disponible."}</div>
+                                    <a href="tags.html?tag=${encodeURIComponent(tagName)}" class="btn-link">Voir les animes</a>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+
+                if(htmlContent === '') {
+                    container.innerHTML = "<p style='text-align:center; width:100%; color:#888;'>Aucune donnée trouvée dans le fichier CSV.</p>";
+                } else {
+                    container.innerHTML = htmlContent;
+                }
+
+            } catch (error) {
+                console.error("Erreur de chargement:", error);
+                container.innerHTML = "<p style='color:var(--primary); text-align:center; width:100%;'>Erreur lors du chargement du fichier tags_description.csv. Vérifiez qu'il est bien présent dans le dossier.</p>";
+            }
+        }
+
+        loadLexique();
+    </script>
+</body>
+</html>
