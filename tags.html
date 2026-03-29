@@ -10,6 +10,7 @@
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background-color: var(--bg); 
+            /* AJOUT FONCTION FOND */
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
@@ -18,7 +19,7 @@
             min-height: 100vh;
         }
 
-        /* Overlay transparent pour ne pas assombrir */
+        /* AJOUT OVERLAY TRANSPARENT */
         .bg-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -32,17 +33,16 @@
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         
         .tag-list { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; justify-content: center; }
         .tag-pill { 
             background: rgba(255,255,255,0.1); border: 1px solid #444; color: #fff; 
             padding: 8px 15px; border-radius: 20px; cursor: pointer; transition: 0.3s; 
-            backdrop-filter: blur(5px);
         }
         .tag-pill:hover, .tag-pill.active { background: var(--primary); border-color: var(--primary); }
 
@@ -52,7 +52,6 @@
         .card { 
             background: var(--card-bg); border-radius: 10px; overflow: hidden; 
             text-decoration: none; color: inherit; transition: 0.3s; border: 1px solid #333;
-            backdrop-filter: blur(10px);
         }
         .card:hover { transform: translateY(-5px); border-color: var(--primary); }
         .img-container { width: 100%; aspect-ratio: 2/3; overflow: hidden; }
@@ -68,6 +67,7 @@
 </head>
 <body>
 
+    <div class="bg-overlay"></div>
     <script>
         (function() {
             const isMobile = window.innerWidth <= 768;
@@ -78,20 +78,20 @@
         })();
     </script>
 
-    <div class="bg-overlay"></div>
-
     <div class="top-navbar">
-        <a href="index.html" class="nav-brand">
+        <div class="nav-brand">
             <img src="img/logo.jpg" class="nav-logo-small">
             <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Tags</small></span>
-        </a>
-        <a href="lexique.html" style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 0.9em;">Consulter le Lexique</a>
+        </div>
     </div>
 
     <div class="container">
-        <div class="tag-list" id="tag-list"></div>
+        <div class="tag-list" id="tag-list">
+            </div>
+
         <h2 class="results-title" id="results-title">Sélectionnez un tag pour voir les animes correspondants.</h2>
-        <div class="grid" id="anime-container"></div>
+        <div class="grid" id="anime-container">
+            </div>
     </div>
 
     <script>
@@ -103,17 +103,26 @@
                 allAnimes = await resp.json();
                 
                 const tagsSet = new Set();
-                allAnimes.forEach(a => a.tags.forEach(t => tagsSet.add(t.trim())));
-                const sortedTags = Array.from(tagsSet).sort();
+                allAnimes.forEach(a => {
+                    a.tags.forEach(t => tagsSet.add(t.trim()));
+                });
 
+                const sortedTags = Array.from(tagsSet).sort();
                 const list = document.getElementById('tag-list');
-                list.innerHTML = sortedTags.map(t => `<div class="tag-pill" onclick="filterByTag('${t}')">${t}</div>`).join('');
+                
+                list.innerHTML = sortedTags.map(t => 
+                    `<div class="tag-pill" onclick="filterByTag('${t}')">${t}</div>`
+                ).join('');
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const tagParam = urlParams.get('tag');
-                if (tagParam) filterByTag(tagParam);
+                if (tagParam) {
+                    filterByTag(tagParam);
+                }
 
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error("Erreur lors du chargement des animes:", e);
+            }
         }
 
         function filterByTag(tag) {
