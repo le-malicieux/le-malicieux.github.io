@@ -18,6 +18,7 @@
             min-height: 100vh;
         }
 
+        /* Overlay transparent pour ne pas assombrir */
         .bg-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -25,6 +26,7 @@
             z-index: -1;
         }
 
+        /* Navbar identique à index.html */
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
@@ -34,32 +36,34 @@
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; }
         
         .tag-list { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; justify-content: center; }
         .tag-pill { 
-            background: rgba(0,0,0,0.6); border: 1px solid #444; color: #fff; 
+            background: rgba(255,255,255,0.1); border: 1px solid #444; color: #fff; 
             padding: 8px 15px; border-radius: 20px; cursor: pointer; transition: 0.3s; 
             backdrop-filter: blur(5px);
         }
-        .tag-pill:hover, .tag-pill.active { background: var(--primary); border-color: var(--primary); transform: scale(1.05); }
+        .tag-pill:hover, .tag-pill.active { background: var(--primary); border-color: var(--primary); }
 
-        .results-title { margin-bottom: 25px; font-size: 1.5em; text-align: center; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px; display: inline-block; width: 100%; box-sizing: border-box;}
+        .results-title { margin-bottom: 20px; font-size: 1.4em; text-align: center; }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
         .card { 
             background: var(--card-bg); border-radius: 10px; overflow: hidden; 
             text-decoration: none; color: inherit; transition: 0.3s; border: 1px solid #333;
-            backdrop-filter: blur(10px); display: block;
+            backdrop-filter: blur(10px);
         }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
-        .img-container { width: 100%; aspect-ratio: 2/3; overflow: hidden; background: #222; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .img-container { width: 100%; aspect-ratio: 2/3; overflow: hidden; }
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
         .card-info { padding: 12px; }
-        .card-title { font-weight: bold; margin-bottom: 8px; font-size: 0.95em; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-title { font-weight: bold; margin-bottom: 8px; font-size: 0.95em; color: var(--primary); }
         .card-meta-row { display: flex; justify-content: space-between; font-size: 0.8em; color: #bbb; }
 
-        @media (max-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -85,10 +89,8 @@
     </div>
 
     <div class="container">
-        <div class="tag-list" id="tag-list">
-            </div>
-
-        <h2 class="results-title" id="results-title">Sélectionnez un tag pour voir les animes</h2>
+        <div class="tag-list" id="tag-list"></div>
+        <h2 class="results-title" id="results-title">Sélectionnez un tag pour voir les animes correspondants.</h2>
         <div class="grid" id="anime-container"></div>
     </div>
 
@@ -97,41 +99,24 @@
 
         async function init() {
             try {
-                // Chargement du JSON
                 const resp = await fetch('animes.json');
-                if (!resp.ok) throw new Error("Fichier JSON introuvable");
                 allAnimes = await resp.json();
                 
-                // Extraction et tri des tags
                 const tagsSet = new Set();
-                allAnimes.forEach(a => {
-                    if (a.tags && Array.isArray(a.tags)) {
-                        a.tags.forEach(t => tagsSet.add(t.trim()));
-                    }
-                });
-                
+                allAnimes.forEach(a => a.tags.forEach(t => tagsSet.add(t.trim())));
                 const sortedTags = Array.from(tagsSet).sort();
-                const list = document.getElementById('tag-list');
-                
-                list.innerHTML = sortedTags.map(t => 
-                    `<div class="tag-pill" onclick="filterByTag('${t.replace(/'/g, "\\'")}')">${t}</div>`
-                ).join('');
 
-                // Gestion du paramètre URL (clic depuis le lexique)
+                const list = document.getElementById('tag-list');
+                list.innerHTML = sortedTags.map(t => `<div class="tag-pill" onclick="filterByTag('${t}')">${t}</div>`).join('');
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const tagParam = urlParams.get('tag');
-                if (tagParam) {
-                    filterByTag(decodeURIComponent(tagParam));
-                }
+                if (tagParam) filterByTag(tagParam);
 
-            } catch (e) {
-                console.error("Erreur d'initialisation:", e);
-                document.getElementById('tag-list').innerHTML = "Erreur lors du chargement des données.";
-            }
+            } catch (e) { console.error(e); }
         }
 
-        window.filterByTag = function(tag) {
-            // Mise à jour visuelle des pilules
+        function filterByTag(tag) {
             document.querySelectorAll('.tag-pill').forEach(btn => {
                 btn.classList.toggle('active', btn.innerText.trim() === tag);
             });
@@ -139,11 +124,15 @@
             const container = document.getElementById('anime-container');
             const title = document.getElementById('results-title');
 
-            // Filtrage
-            const filtered = allAnimes.filter(a => a.tags && a.tags.includes(tag));
-            title.innerText = `${filtered.length} anime(s) pour : ${tag}`;
+            if (!tag) {
+                title.innerText = "Sélectionnez un tag pour voir les animes correspondants.";
+                container.innerHTML = "";
+                return;
+            }
 
-            // Génération de la grille
+            const filtered = allAnimes.filter(a => a.tags.includes(tag));
+            title.innerText = `${filtered.length} anime(s) pour le tag : ${tag}`;
+
             container.innerHTML = filtered.map(a => `
                 <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                     <div class="img-container">
@@ -152,17 +141,12 @@
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
                         <div class="card-meta-row">
-                            <span>📅 ${a.sortie}</span>
-                            <span>⭐ ${a.score}</span>
-                            <span>📈 ${a.pop}</span>
+                            <span>📅${a.sortie}</span>
+                            <span>⭐${a.score}</span>
+                            <span>📈${a.pop}</span>
                         </div>
                     </div>
                 </a>`).join('');
-            
-            // Remonter en haut de la grille sur mobile
-            if(window.innerWidth < 768) {
-                title.scrollIntoView({ behavior: 'smooth' });
-            }
         }
 
         init();
