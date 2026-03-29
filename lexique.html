@@ -39,7 +39,6 @@
     </div>
 
     <script>
-        // Mapping basé strictement sur les numéros de lignes du tableau Excel
         const mapping = {
             "Spécifications de pratiques": [2, 6, 7, 14, 15, 19, 21, 29, 31, 35, 37, 38, 41, 44, 47],
             "Spécifications personnages": [3, 4, 8, 9, 10, 11, 12, 16, 17, 18, 26, 28, 30, 32, 33, 34, 36, 42, 43, 45, 48],
@@ -49,23 +48,26 @@
         async function load() {
             const container = document.getElementById('lexique-content');
             try {
-                // Chargement du fichier CSV exporté
                 const resp = await fetch('tags.xlsx - Feuil1.csv');
                 const data = await resp.text();
+                // On sépare par ligne mais on nettoie les retours à la ligne Windows éventuels (\r)
                 const lines = data.split(/\r?\n/);
                 
                 let groups = { "Spécifications de pratiques": "", "Spécifications personnages": "", "Spécifications du Cadre général": "", "Autres": "" };
 
                 lines.forEach((line, index) => {
-                    const lineNum = index + 1; // Correspond au numéro de ligne Excel
-                    if (lineNum === 1 || !line.trim()) return; // On ignore l'en-tête et les vides
+                    const lineNum = index + 1;
+                    if (lineNum === 1 || !line.trim()) return;
 
-                    // Séparation par POINT-VIRGULE (;)
+                    // Découpage strict par le point-virgule
                     const cols = line.split(';');
                     if (cols.length < 2) return;
 
-                    const name = cols[0].trim().replace(/^"|"$/g, '');
-                    const desc = cols[1].trim().replace(/^"|"$/g, '');
+                    // Nettoyage des espaces et des guillemets Excel (doublement des guillemets ou début/fin)
+                    const clean = (str) => str.trim().replace(/^"|"$/g, '').replace(/""/g, '"');
+                    
+                    const name = clean(cols[0]);
+                    const desc = clean(cols[1]);
 
                     let cat = "Autres";
                     for (const [cName, lNums] of Object.entries(mapping)) {
@@ -84,7 +86,13 @@
 
                 let html = "";
                 ["Spécifications de pratiques", "Spécifications personnages", "Spécifications du Cadre général", "Autres"].forEach(t => {
-                    if (groups[t]) html += `<div class="category-section"><h2 class="category-title">${t}</h2><div class="lexique-grid">${groups[t]}</div></div>`;
+                    if (groups[t]) {
+                        html += `
+                        <div class="category-section">
+                            <h2 class="category-title">${t}</h2>
+                            <div class="lexique-grid">${groups[t]}</div>
+                        </div>`;
+                    }
                 });
 
                 container.innerHTML = html || "Aucune donnée trouvée.";
