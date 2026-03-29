@@ -85,7 +85,13 @@
     </div>
 
     <div class="container">
-        <h2 style="text-align: center; color: var(--primary);">Explorer par catégories</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <h2 style="color: var(--primary); margin: 0;">Explorer par catégories</h2>
+            <a href="lexique.html" style="background: #222; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--primary); font-weight: bold; font-size: 0.9em; transition: 0.3s;" onmouseover="this.style.background='var(--primary)'" onmouseout="this.style.background='#222'">
+                📖 Consulter le lexique des tags
+            </a>
+        </div>
+        
         <div id="tags-list" class="tags-container">Chargement des tags...</div>
         
         <div id="results-title" style="margin-bottom: 20px; font-weight: bold; color: #888;"></div>
