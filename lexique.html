@@ -18,10 +18,11 @@
             min-height: 100vh;
         }
 
+        /* Overlay transparent (pas de changement sur les fonds) */
         .bg-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: transparent; 
             z-index: -1;
         }
 
@@ -39,8 +40,8 @@
         .category-section { margin-bottom: 50px; }
         .category-title { 
             color: var(--primary); font-size: 1.6em; border-left: 4px solid var(--primary); 
-            padding: 8px 15px; margin-bottom: 25px; background: rgba(255, 71, 87, 0.1);
-            border-radius: 0 8px 8px 0;
+            padding: 8px 15px; margin-bottom: 25px; background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px); border-radius: 0 8px 8px 0;
         }
 
         .lexique-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
@@ -55,8 +56,8 @@
         .tag-desc { color: #ccc; font-size: 0.9em; line-height: 1.5; margin-bottom: 15px; }
         
         .btn-link { 
-            display: inline-block; padding: 8px 12px; background: rgba(255,255,255,0.05); 
-            border: 1px solid #444; color: #aaa; text-decoration: none; border-radius: 5px; 
+            display: inline-block; padding: 8px 12px; background: rgba(0,0,0,0.5); 
+            border: 1px solid #444; color: #fff; text-decoration: none; border-radius: 5px; 
             font-size: 0.8em; text-align: center; transition: 0.3s; 
         }
         .btn-link:hover { background: var(--primary); color: white; border-color: var(--primary); }
@@ -68,7 +69,7 @@
         (function() {
             const isMobile = window.innerWidth <= 768;
             const prefix = isMobile ? 'mobile' : 'fond';
-            const count = isMobile ? 14 : 64; // Tes valeurs exactes
+            const count = isMobile ? 14 : 64; 
             const randomId = Math.floor(Math.random() * count) + 1;
             document.body.style.backgroundImage = `url('img/${prefix}${randomId}.webp')`;
         })();
@@ -99,23 +100,15 @@
             try {
                 const resp = await fetch('tags_description.csv');
                 const text = await resp.text();
-                
                 const rows = [];
-                let curr = [];
-                let field = '';
-                let quotes = false;
-
+                let curr = []; let field = ''; let quotes = false;
                 for (let i = 0; i < text.length; i++) {
                     const c = text[i];
                     if (c === '"') quotes = !quotes;
                     else if (c === ';' && !quotes) { curr.push(field); field = ''; }
                     else if ((c === '\n' || c === '\r') && !quotes) { 
-                        if (curr.length > 0 || field !== '') {
-                            curr.push(field); rows.push(curr); 
-                            curr = []; field = ''; 
-                        }
-                    }
-                    else field += c;
+                        if (curr.length > 0 || field !== '') { curr.push(field); rows.push(curr); curr = []; field = ''; }
+                    } else field += c;
                 }
                 if (field || curr.length) { curr.push(field); rows.push(curr); }
 
@@ -128,9 +121,7 @@
                     const desc = cols[1].trim().replace(/^"|"$/g, '');
                     if (!name) return;
                     let cat = "Autres";
-                    for (const [cName, nums] of Object.entries(mapping)) {
-                        if (nums.includes(line)) { cat = cName; break; }
-                    }
+                    for (const [cName, nums] of Object.entries(mapping)) { if (nums.includes(line)) { cat = cName; break; } }
                     groups[cat] += `
                         <div class="tag-card">
                             <div>
@@ -146,9 +137,7 @@
                     if (groups[t]) html += `<div class="category-section"><h2 class="category-title">${t}</h2><div class="lexique-grid">${groups[t]}</div></div>`;
                 });
                 document.getElementById('lexique-content').innerHTML = html;
-            } catch (e) {
-                document.getElementById('lexique-content').innerHTML = "Erreur.";
-            }
+            } catch (e) { document.getElementById('lexique-content').innerHTML = "Erreur."; }
         }
         load();
     </script>
