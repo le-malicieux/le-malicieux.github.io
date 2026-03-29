@@ -6,24 +6,84 @@
     <title>Lexique des Tags - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; }
-        .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg); 
+            /* Configuration pour le fond d'écran */
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: var(--text); 
+            margin: 0; 
+            min-height: 100vh;
+            transition: background-image 0.5s ease-in-out;
+        }
+
+        /* Overlay pour assombrir le fond et lire le texte facilement */
+        .bg-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        .top-navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
         .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
-        .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 1; }
+
         .category-section { margin-bottom: 50px; }
-        .category-title { color: var(--primary); font-size: 1.6em; border-left: 4px solid var(--primary); padding: 8px 15px; margin-bottom: 25px; background: rgba(255, 71, 87, 0.05); }
+        .category-title { 
+            color: var(--primary); 
+            font-size: 1.6em; 
+            border-left: 4px solid var(--primary); 
+            padding: 8px 15px; 
+            margin-bottom: 25px; 
+            background: rgba(255, 71, 87, 0.15);
+            backdrop-filter: blur(5px);
+            border-radius: 0 10px 10px 0;
+        }
+
         .lexique-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .tag-card { background: var(--card-bg); border: 1px solid #333; border-radius: 10px; padding: 20px; transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between; }
-        .tag-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.1); }
+        
+        .tag-card { 
+            background: var(--card-bg); 
+            border: 1px solid #333; 
+            border-radius: 10px; 
+            padding: 20px; 
+            transition: 0.3s; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+        }
+        .tag-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.2); }
+        
         .tag-name { color: var(--primary); font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
         .tag-desc { color: #ccc; font-size: 0.9em; line-height: 1.5; margin-bottom: 15px; }
-        .btn-link { display: inline-block; padding: 8px 12px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: #aaa; text-decoration: none; border-radius: 5px; font-size: 0.8em; text-align: center; transition: 0.3s; }
+        
+        .btn-link { 
+            display: inline-block; padding: 8px 12px; 
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid #444; color: #aaa; 
+            text-decoration: none; border-radius: 5px; 
+            font-size: 0.8em; text-align: center; transition: 0.3s; 
+        }
         .btn-link:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        @media (max-width: 600px) { .lexique-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
+
+    <div class="bg-overlay"></div>
 
     <div class="top-navbar">
         <a href="index.html" class="nav-brand">
@@ -38,6 +98,15 @@
     </div>
 
     <script>
+        // --- FONCTION FOND D'ÉCRAN (Identique à l'index) ---
+        function setRandomBG() {
+            const bgCount = 10; // Ajustez selon le nombre d'images dans votre dossier bg/
+            const randomId = Math.floor(Math.random() * bgCount) + 1;
+            document.body.style.backgroundImage = `url('bg/${randomId}.jpg')`;
+        }
+        setRandomBG();
+
+        // --- GESTION DU LEXIQUE ---
         const mapping = {
             "Spécifications de pratiques": [2, 6, 7, 14, 15, 19, 21, 29, 31, 35, 37, 38, 41, 44, 47],
             "Spécifications personnages": [3, 4, 8, 9, 10, 11, 12, 16, 17, 18, 26, 28, 30, 32, 33, 34, 36, 42, 43, 45, 48],
@@ -50,8 +119,6 @@
                 const resp = await fetch('tags_description.csv');
                 const text = await resp.text();
                 
-                // Regex magique pour découper par ";" en ignorant ceux entre guillemets
-                // et gérer les retours à la ligne complexes
                 const rows = [];
                 let currentRow = [];
                 let currentField = '';
@@ -60,7 +127,6 @@
                 for (let i = 0; i < text.length; i++) {
                     const char = text[i];
                     const nextChar = text[i+1];
-
                     if (char === '"' && inQuotes && nextChar === '"') { currentField += '"'; i++; }
                     else if (char === '"') { inQuotes = !inQuotes; }
                     else if (char === ';' && !inQuotes) { currentRow.push(currentField); currentField = ''; }
@@ -111,7 +177,7 @@
 
                 container.innerHTML = html || "Fichier vide ou mal formaté.";
             } catch (e) {
-                container.innerHTML = "Erreur fatale : " + e.message;
+                container.innerHTML = "Erreur de chargement : " + e.message;
             }
         }
         load();
