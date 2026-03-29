@@ -6,88 +6,21 @@
     <title>Lexique des Tags - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
-        
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: var(--bg); 
-            color: var(--text); 
-            margin: 0; 
-            min-height: 100vh;
-        }
-
-        .top-navbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; }
+        .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
-
         .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
-
         .category-section { margin-bottom: 50px; }
-        .category-title { 
-            color: var(--primary); 
-            font-size: 1.8em; 
-            border-left: 4px solid var(--primary); 
-            padding-left: 15px; 
-            margin-bottom: 25px;
-            background: rgba(255, 71, 87, 0.05);
-            padding-top: 8px;
-            padding-bottom: 8px;
-        }
-
-        .lexique-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .tag-card {
-            background: var(--card-bg);
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 20px;
-            transition: 0.3s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .tag-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.1);
-        }
-        
-        .tag-name {
-            color: var(--primary);
-            font-size: 1.25em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .tag-desc {
-            color: #ccc;
-            font-size: 0.9em;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-
-        .btn-link {
-            display: inline-block;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid #444;
-            color: #aaa;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 0.8em;
-            text-align: center;
-            transition: 0.3s;
-        }
+        .category-title { color: var(--primary); font-size: 1.6em; border-left: 4px solid var(--primary); padding: 8px 15px; margin-bottom: 25px; background: rgba(255, 71, 87, 0.05); }
+        .lexique-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .tag-card { background: var(--card-bg); border: 1px solid #333; border-radius: 10px; padding: 20px; transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between; }
+        .tag-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.1); }
+        .tag-name { color: var(--primary); font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
+        .tag-desc { color: #ccc; font-size: 0.9em; line-height: 1.5; margin-bottom: 15px; }
+        .btn-link { display: inline-block; padding: 8px 12px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: #aaa; text-decoration: none; border-radius: 5px; font-size: 0.8em; text-align: center; transition: 0.3s; }
         .btn-link:hover { background: var(--primary); color: white; border-color: var(--primary); }
-
         @media (max-width: 600px) { .lexique-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -106,86 +39,60 @@
     </div>
 
     <script>
-        // Listes des numéros de lignes du tableau Excel (La ligne 1 est l'en-tête)
-        const categoriesMapping = {
+        // Mapping basé strictement sur les numéros de lignes du tableau Excel
+        const mapping = {
             "Spécifications de pratiques": [2, 6, 7, 14, 15, 19, 21, 29, 31, 35, 37, 38, 41, 44, 47],
             "Spécifications personnages": [3, 4, 8, 9, 10, 11, 12, 16, 17, 18, 26, 28, 30, 32, 33, 34, 36, 42, 43, 45, 48],
             "Spécifications du Cadre général": [5, 13, 20, 22, 23, 24, 25, 27, 39, 40, 46]
         };
 
-        async function loadLexique() {
-            const mainContainer = document.getElementById('lexique-content');
+        async function load() {
+            const container = document.getElementById('lexique-content');
             try {
-                // Remplacez par le nom exact de votre fichier sur GitHub
-                const response = await fetch('tags.xlsx - Feuil1.csv'); 
-                const data = await response.text();
-                
-                // On utilise une expression régulière pour mieux gérer les virgules à l'intérieur des guillemets
+                // Chargement du fichier CSV exporté
+                const resp = await fetch('tags.xlsx - Feuil1.csv');
+                const data = await resp.text();
                 const lines = data.split(/\r?\n/);
                 
-                let groups = {
-                    "Spécifications de pratiques": "",
-                    "Spécifications personnages": "",
-                    "Spécifications du Cadre général": "",
-                    "Autres": ""
-                };
+                let groups = { "Spécifications de pratiques": "", "Spécifications personnages": "", "Spécifications du Cadre général": "", "Autres": "" };
 
-                // On traite chaque ligne (i=0 est la ligne 1 d'Excel)
                 lines.forEach((line, index) => {
-                    if (!line.trim() || index === 0) return; // Saute l'en-tête
+                    const lineNum = index + 1; // Correspond au numéro de ligne Excel
+                    if (lineNum === 1 || !line.trim()) return; // On ignore l'en-tête et les vides
 
-                    // Découpage intelligent du CSV (gère les descriptions avec des virgules entre guillemets)
-                    const parts = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if (parts.length < 2) return;
+                    // Séparation par POINT-VIRGULE (;)
+                    const cols = line.split(';');
+                    if (cols.length < 2) return;
 
-                    const tagName = parts[0].trim().replace(/^"|"$/g, '');
-                    const tagDesc = parts[1].trim().replace(/^"|"$/g, '');
-                    const currentLineExcel = index + 1;
+                    const name = cols[0].trim().replace(/^"|"$/g, '');
+                    const desc = cols[1].trim().replace(/^"|"$/g, '');
 
-                    let assignedCat = "Autres";
-                    for (const [catName, lineNumbers] of Object.entries(categoriesMapping)) {
-                        if (lineNumbers.includes(currentLineExcel)) {
-                            assignedCat = catName;
-                            break;
-                        }
+                    let cat = "Autres";
+                    for (const [cName, lNums] of Object.entries(mapping)) {
+                        if (lNums.includes(lineNum)) { cat = cName; break; }
                     }
 
-                    const cardHtml = `
+                    groups[cat] += `
                         <div class="tag-card">
                             <div>
-                                <div class="tag-name">${tagName}</div>
-                                <div class="tag-desc">${tagDesc || "Aucune description."}</div>
+                                <div class="tag-name">${name}</div>
+                                <div class="tag-desc">${desc}</div>
                             </div>
-                            <a href="tags.html?tag=${encodeURIComponent(tagName)}" class="btn-link">Voir les animes</a>
-                        </div>
-                    `;
-                    groups[assignedCat] += cardHtml;
+                            <a href="tags.html?tag=${encodeURIComponent(name)}" class="btn-link">Voir les animes</a>
+                        </div>`;
                 });
 
-                let finalHtml = "";
-                // On affiche les catégories dans l'ordre souhaité
-                const order = ["Spécifications de pratiques", "Spécifications personnages", "Spécifications du Cadre général", "Autres"];
-                
-                order.forEach(title => {
-                    if (groups[title] !== "") {
-                        finalHtml += `
-                            <div class="category-section">
-                                <h2 class="category-title">${title}</h2>
-                                <div class="lexique-grid">${groups[title]}</div>
-                            </div>
-                        `;
-                    }
+                let html = "";
+                ["Spécifications de pratiques", "Spécifications personnages", "Spécifications du Cadre général", "Autres"].forEach(t => {
+                    if (groups[t]) html += `<div class="category-section"><h2 class="category-title">${t}</h2><div class="lexique-grid">${groups[t]}</div></div>`;
                 });
 
-                mainContainer.innerHTML = finalHtml || "Aucune donnée trouvée.";
-
-            } catch (error) {
-                console.error(error);
-                mainContainer.innerHTML = "<div style='text-align:center; padding:50px;'>Erreur lors du chargement du fichier CSV.</div>";
+                container.innerHTML = html || "Aucune donnée trouvée.";
+            } catch (e) {
+                container.innerHTML = "Erreur de chargement du fichier CSV.";
             }
         }
-
-        loadLexique();
+        load();
     </script>
 </body>
 </html>
