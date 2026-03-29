@@ -34,8 +34,8 @@
             padding-left: 15px; 
             margin-bottom: 25px;
             background: rgba(255, 71, 87, 0.05);
-            padding-top: 5px;
-            padding-bottom: 5px;
+            padding-top: 8px;
+            padding-bottom: 8px;
         }
 
         .lexique-grid {
@@ -57,14 +57,14 @@
         .tag-card:hover {
             border-color: var(--primary);
             transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.1);
         }
         
         .tag-name {
             color: var(--primary);
-            font-size: 1.2em;
+            font-size: 1.25em;
             font-weight: bold;
             margin-bottom: 10px;
-            text-transform: capitalize;
         }
         
         .tag-desc {
@@ -76,7 +76,7 @@
 
         .btn-link {
             display: inline-block;
-            padding: 6px 12px;
+            padding: 8px 12px;
             background: rgba(255,255,255,0.05);
             border: 1px solid #444;
             color: #aaa;
@@ -102,11 +102,12 @@
     </div>
 
     <div class="container">
-        <div id="lexique-content">Chargement et tri des catégories...</div>
+        <div id="lexique-content">Chargement des catégories...</div>
     </div>
 
     <script>
-        const categories = {
+        // Listes des numéros de lignes du tableau Excel (La ligne 1 est l'en-tête)
+        const categoriesMapping = {
             "Spécifications de pratiques": [2, 6, 7, 14, 15, 19, 21, 29, 31, 35, 37, 38, 41, 44, 47],
             "Spécifications personnages": [3, 4, 8, 9, 10, 11, 12, 16, 17, 18, 26, 28, 30, 32, 33, 34, 36, 42, 43, 45, 48],
             "Spécifications du Cadre général": [5, 13, 20, 22, 23, 24, 25, 27, 39, 40, 46]
@@ -115,11 +116,13 @@
         async function loadLexique() {
             const mainContainer = document.getElementById('lexique-content');
             try {
-                const response = await fetch('tags_description.csv'); 
+                // Remplacez par le nom exact de votre fichier sur GitHub
+                const response = await fetch('tags.xlsx - Feuil1.csv'); 
                 const data = await response.text();
+                
+                // On utilise une expression régulière pour mieux gérer les virgules à l'intérieur des guillemets
                 const lines = data.split(/\r?\n/);
                 
-                // Groupes pour stocker le HTML
                 let groups = {
                     "Spécifications de pratiques": "",
                     "Spécifications personnages": "",
@@ -127,21 +130,21 @@
                     "Autres": ""
                 };
 
-                // On commence à i=1 pour sauter l'en-tête (Ligne 1 du CSV)
-                for (let i = 1; i < lines.length; i++) {
-                    const columns = lines[i].split(','); 
-                    if (columns.length < 2) continue;
+                // On traite chaque ligne (i=0 est la ligne 1 d'Excel)
+                lines.forEach((line, index) => {
+                    if (!line.trim() || index === 0) return; // Saute l'en-tête
 
-                    const tagName = columns[0].trim().replace(/^"|"$/g, '');
-                    const tagDesc = columns[1].trim().replace(/^"|"$/g, '');
-                    if (!tagName) continue;
+                    // Découpage intelligent du CSV (gère les descriptions avec des virgules entre guillemets)
+                    const parts = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if (parts.length < 2) return;
 
-                    // On détermine la catégorie en fonction du numéro de ligne (i+1 car i commence à 0)
-                    const lineNum = i + 1;
+                    const tagName = parts[0].trim().replace(/^"|"$/g, '');
+                    const tagDesc = parts[1].trim().replace(/^"|"$/g, '');
+                    const currentLineExcel = index + 1;
+
                     let assignedCat = "Autres";
-                    
-                    for (const [catName, lineList] of Object.entries(categories)) {
-                        if (lineList.includes(lineNum)) {
+                    for (const [catName, lineNumbers] of Object.entries(categoriesMapping)) {
+                        if (lineNumbers.includes(currentLineExcel)) {
                             assignedCat = catName;
                             break;
                         }
@@ -157,26 +160,28 @@
                         </div>
                     `;
                     groups[assignedCat] += cardHtml;
-                }
+                });
 
-                // Génération du HTML final
                 let finalHtml = "";
-                for (const [title, html] of Object.entries(groups)) {
-                    if (html !== "") {
+                // On affiche les catégories dans l'ordre souhaité
+                const order = ["Spécifications de pratiques", "Spécifications personnages", "Spécifications du Cadre général", "Autres"];
+                
+                order.forEach(title => {
+                    if (groups[title] !== "") {
                         finalHtml += `
                             <div class="category-section">
                                 <h2 class="category-title">${title}</h2>
-                                <div class="lexique-grid">${html}</div>
+                                <div class="lexique-grid">${groups[title]}</div>
                             </div>
                         `;
                     }
-                }
+                });
 
                 mainContainer.innerHTML = finalHtml || "Aucune donnée trouvée.";
 
             } catch (error) {
                 console.error(error);
-                mainContainer.innerHTML = "Erreur lors du chargement du lexique.";
+                mainContainer.innerHTML = "<div style='text-align:center; padding:50px;'>Erreur lors du chargement du fichier CSV.</div>";
             }
         }
 
