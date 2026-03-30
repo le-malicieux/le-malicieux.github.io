@@ -13,7 +13,7 @@
             --nav-bg: rgba(15, 15, 15, 0.85);
             --surface: rgba(25, 25, 25, 0.95);
             --border: rgba(255,255,255,0.08);
-            --muted: #777;
+            --muted: #a0a0a0;
             --accent2: #ff6b81;
         }
 
@@ -50,7 +50,7 @@
         }
         .page-header h1 { margin: 0 0 6px; font-size: 1.6em; }
         .page-header h1 span { color: var(--primary); }
-        .page-header p { color: var(--muted); margin: 0; font-size: 0.9em; }
+        .page-header p { color: #bbb; margin: 0; font-size: 0.9em; }
 
         /* ── TABS ── */
         .tabs-bar {
@@ -84,8 +84,8 @@
         /* ── STEP ── */
         .step { margin-bottom: 26px; }
         .step-label {
-            font-size: 0.75em; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;
+            font-size: 0.8em; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: #ccc; margin-bottom: 12px;
             display: flex; align-items: center; gap: 8px;
         }
         .step-num {
@@ -102,7 +102,7 @@
             gap: 10px;
         }
         .pl-card {
-            background: var(--card-bg); border: 1px solid var(--border);
+            background: rgba(30, 30, 30, 0.92); border: 1px solid rgba(255,255,255,0.13);
             border-radius: 8px; padding: 14px 14px;
             cursor: pointer; transition: 0.2s;
             display: flex; align-items: center; gap: 11px;
@@ -112,8 +112,8 @@
         .pl-card.selected { border-color: var(--primary); background: rgba(255,71,87,0.12); }
         .pl-card-icon { font-size: 20px; opacity: 0.55; flex-shrink: 0; }
         .pl-card-info { flex: 1; min-width: 0; }
-        .pl-card-name { font-weight: 600; font-size: 0.88em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .pl-card-count { font-size: 0.72em; color: var(--muted); margin-top: 3px; }
+        .pl-card-name { font-weight: 600; font-size: 0.88em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; }
+        .pl-card-count { font-size: 0.72em; color: #a0a0a0; margin-top: 3px; }
         .pl-check {
             position: absolute; top: 8px; right: 8px;
             width: 16px; height: 16px; border-radius: 50%;
@@ -163,7 +163,7 @@
         .user-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
         .user-item {
             display: flex; align-items: center; gap: 12px;
-            background: #1a1a1a; border: 1px solid var(--border);
+            background: rgba(30, 30, 30, 0.92); border: 1px solid rgba(255,255,255,0.13);
             border-radius: 8px; padding: 11px 14px;
             cursor: pointer; transition: 0.2s;
         }
@@ -383,7 +383,7 @@
             <div class="step" id="step-recipient">
                 <div class="step-label"><span class="step-num">3</span> Destinataire</div>
                 <div class="search-wrap">
-                    <input class="sp-input" id="user-search" placeholder="Rechercher par email..." oninput="handleUserSearch(this.value)">
+                    <input class="sp-input" id="user-search" placeholder="Filtrer par nom ou email..." oninput="handleUserSearch(this.value)">
                     <span class="search-spinner" id="search-spinner">⟳</span>
                 </div>
                 <ul class="user-list" id="user-results"></ul>
@@ -510,6 +510,7 @@ onAuthStateChanged(auth, user => {
 
     if (user) {
         loadMyPlaylists();
+        loadAllUsers();
         loadInbox();
     } else {
         document.getElementById('send-not-logged').style.display = 'block';
@@ -560,7 +561,21 @@ function renderMyPlaylists() {
         return;
     }
 
-    grid.innerHTML = Object.entries(groups).map(([key, pl]) => `
+    // Ajouter "Toutes mes playlists" en premier
+    const allCount = myAnimes.length;
+    const allCard = `
+        <button class="pl-card ${selectedPlaylist?.key === '__all__' ? 'selected' : ''}"
+                onclick="selectPlaylist('__all__')">
+            <div class="pl-card-icon">🎬</div>
+            <div class="pl-card-info">
+                <div class="pl-card-name">Toutes mes playlists</div>
+                <div class="pl-card-count">${allCount} anime${allCount > 1 ? 's' : ''}</div>
+            </div>
+            ${selectedPlaylist?.key === '__all__' ? '<span class="pl-check">✓</span>' : ''}
+        </button>
+    `;
+
+    grid.innerHTML = allCard + Object.entries(groups).map(([key, pl]) => `
         <button class="pl-card ${selectedPlaylist?.key === key ? 'selected' : ''}"
                 onclick="selectPlaylist('${key}')">
             <div class="pl-card-icon">♫</div>
@@ -576,7 +591,11 @@ function renderMyPlaylists() {
 }
 
 window.selectPlaylist = function(key) {
-    selectedPlaylist = { key, ...window._playlistGroups[key] };
+    if (key === '__all__') {
+        selectedPlaylist = { key: '__all__', name: 'Toutes mes playlists', animes: myAnimes, status: 'all', isStatus: false };
+    } else {
+        selectedPlaylist = { key, ...window._playlistGroups[key] };
+    }
     renderMyPlaylists();
 };
 
@@ -589,40 +608,44 @@ window.setVisibility = function(pub) {
     document.getElementById('send-btn').textContent = pub ? '🌍 Publier la playlist' : '↑ Envoyer la playlist';
 };
 
-// ── Recherche utilisateur ─────────────────────────────────────────────────────
+// ── Chargement de tous les utilisateurs ──────────────────────────────────────
+let allUsers = [];
+
+async function loadAllUsers() {
+    try {
+        const snap = await getDocs(collection(db, "users"));
+        allUsers = [];
+        snap.forEach(d => { if (d.id !== currentUser.uid) allUsers.push({ uid: d.id, ...d.data() }); });
+        renderUserList('');
+    } catch(e) { console.error(e); }
+}
+
+function renderUserList(filter) {
+    const results = document.getElementById('user-results');
+    const filtered = filter.length < 1
+        ? allUsers
+        : allUsers.filter(u =>
+            (u.email || '').toLowerCase().includes(filter.toLowerCase()) ||
+            (u.displayName || '').toLowerCase().includes(filter.toLowerCase())
+        );
+
+    if (filtered.length === 0) {
+        results.innerHTML = '<li style="padding:10px 0; color:var(--muted); font-size:0.85em;">Aucun utilisateur trouvé.</li>';
+        return;
+    }
+    results.innerHTML = filtered.map(u => `
+        <li class="user-item" onclick="pickUser('${u.uid}', '${u.email}', '${(u.displayName||'').replace(/'/g,"\\'")}')">
+            <div class="user-avatar sm">${(u.displayName||u.email||'?')[0].toUpperCase()}</div>
+            <div>
+                <div class="user-name">${u.displayName || '—'}</div>
+                <div class="user-email">${u.email}</div>
+            </div>
+        </li>`).join('');
+}
+
 window.handleUserSearch = function(value) {
     clearSelectedUser();
-    clearTimeout(searchTimeout);
-    const spinner = document.getElementById('search-spinner');
-    const results = document.getElementById('user-results');
-
-    if (value.length < 2) { results.innerHTML = ''; spinner.classList.remove('active'); return; }
-
-    spinner.classList.add('active');
-    searchTimeout = setTimeout(async () => {
-        try {
-            const q = query(
-                collection(db, "users"),
-                where("email", ">=", value),
-                where("email", "<=", value + "\uf8ff")
-            );
-            const snap = await getDocs(q);
-            const found = [];
-            snap.forEach(d => { if (d.id !== currentUser.uid) found.push({ uid: d.id, ...d.data() }); });
-
-            results.innerHTML = found.length === 0
-                ? '<li style="padding:10px 0; color:var(--muted); font-size:0.85em;">Aucun utilisateur trouvé.</li>'
-                : found.map(u => `
-                    <li class="user-item" onclick="pickUser('${u.uid}', '${u.email}', '${(u.displayName||'').replace(/'/g,"\\'")}')">
-                        <div class="user-avatar sm">${(u.displayName||u.email||'?')[0].toUpperCase()}</div>
-                        <div>
-                            <div class="user-name">${u.displayName || '—'}</div>
-                            <div class="user-email">${u.email}</div>
-                        </div>
-                    </li>`).join('');
-        } catch(e) { console.error(e); }
-        spinner.classList.remove('active');
-    }, 400);
+    renderUserList(value);
 };
 
 window.pickUser = function(uid, email, displayName) {
