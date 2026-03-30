@@ -29,6 +29,15 @@
             margin: 0;
             min-height: 100vh;
         }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.72);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .top-navbar, .container, .page-header, .tabs-bar { position: relative; z-index: 1; }
 
         /* ── NAVBAR ── */
         .top-navbar {
@@ -614,10 +623,15 @@ let allUsers = [];
 async function loadAllUsers() {
     try {
         const snap = await getDocs(collection(db, "users"));
+        console.log("📦 Collection 'users' — nombre de docs :", snap.size);
+        snap.forEach(d => console.log("  👤", d.id, d.data()));
         allUsers = [];
         snap.forEach(d => { if (d.id !== currentUser.uid) allUsers.push({ uid: d.id, ...d.data() }); });
+        console.log("✅ allUsers (hors moi) :", allUsers.length, allUsers);
         renderUserList('');
-    } catch(e) { console.error(e); }
+    } catch(e) {
+        console.error("❌ Erreur loadAllUsers :", e);
+    }
 }
 
 function renderUserList(filter) {
