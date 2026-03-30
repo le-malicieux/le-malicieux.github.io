@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Malicieux — Partager</title>
+    <style>
+        :root {
+            --primary: #ff4757;
+            --bg: #0f0f0f;
+            --card-bg: rgba(20, 20, 20, 0.9);
+            --text: #eee;
+            --nav-bg: rgba(15, 15, 15, 0.85);
+            --surface: rgba(25, 25, 25, 0.95);
+            --border: rgba(255,255,255,0.08);
+            --muted: #777;
+            --accent2: #ff6b81;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        /* ── NAVBAR ── */
+        .top-navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-left { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); }
+        .nav-title { color: var(--primary); font-weight: bold; }
+        .nav-back { color: white; text-decoration: none; font-size: 0.9em; }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            padding: 30px 20px 10px;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+        }
+        .page-header h1 { margin: 0 0 6px; font-size: 1.6em; }
+        .page-header h1 span { color: var(--primary); }
+        .page-header p { color: var(--muted); margin: 0; font-size: 0.9em; }
+
+        /* ── TABS ── */
+        .tabs-bar {
+            display: flex; justify-content: center; gap: 8px;
+            padding: 20px 20px 0; flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: var(--card-bg); border: 1px solid var(--border);
+            color: var(--muted); padding: 10px 22px; border-radius: 8px;
+            cursor: pointer; font-size: 0.9em; font-weight: 600;
+            transition: 0.2s; white-space: nowrap;
+        }
+        .tab-btn:hover { border-color: var(--primary); color: var(--text); }
+        .tab-btn.active { border-color: var(--primary); background: rgba(255,71,87,0.15); color: var(--primary); }
+        .tab-btn .tab-icon { margin-right: 6px; }
+
+        /* ── CONTAINER ── */
+        .container { max-width: 800px; margin: 0 auto; padding: 28px 20px 60px; }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── SECTION TITLE ── */
+        .section-title {
+            font-size: 1.15em; font-weight: bold; margin: 0 0 20px;
+            padding-bottom: 10px; border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+        .section-title span { color: var(--primary); }
+
+        /* ── STEP ── */
+        .step { margin-bottom: 26px; }
+        .step-label {
+            font-size: 0.75em; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .step-num {
+            width: 20px; height: 20px; border-radius: 50%;
+            background: var(--primary); display: inline-flex;
+            align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 800; color: #fff; flex-shrink: 0;
+        }
+
+        /* ── PLAYLIST CARDS ── */
+        .playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+        }
+        .pl-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px 14px;
+            cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 11px;
+            text-align: left; color: var(--text); position: relative;
+        }
+        .pl-card:hover { border-color: var(--primary); background: rgba(255,71,87,0.07); }
+        .pl-card.selected { border-color: var(--primary); background: rgba(255,71,87,0.12); }
+        .pl-card-icon { font-size: 20px; opacity: 0.55; flex-shrink: 0; }
+        .pl-card-info { flex: 1; min-width: 0; }
+        .pl-card-name { font-weight: 600; font-size: 0.88em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pl-card-count { font-size: 0.72em; color: var(--muted); margin-top: 3px; }
+        .pl-check {
+            position: absolute; top: 8px; right: 8px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--primary); display: flex;
+            align-items: center; justify-content: center;
+            font-size: 9px; color: #fff; font-weight: 800;
+        }
+
+        /* ── VISIBILITÉ TOGGLE ── */
+        .toggle-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .toggle-btn {
+            flex: 1; min-width: 180px;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 13px 16px;
+            cursor: pointer; color: var(--muted);
+            font-size: 0.88em; font-weight: 600;
+            transition: 0.2s; text-align: left;
+        }
+        .toggle-btn:hover { border-color: var(--primary); color: var(--text); }
+        .toggle-btn.active {
+            border-color: var(--primary); color: var(--text);
+            background: rgba(255,71,87,0.12);
+        }
+
+        /* ── INPUTS ── */
+        .sp-input {
+            width: 100%;
+            background: #1a1a1a; border: 1px solid var(--border);
+            border-radius: 6px; padding: 11px 14px;
+            font-size: 0.9em; color: var(--text); outline: none;
+            transition: border-color 0.2s;
+        }
+        .sp-input:focus { border-color: var(--primary); }
+        .sp-input::placeholder { color: var(--muted); }
+        .search-wrap { position: relative; }
+        .search-spinner {
+            position: absolute; right: 12px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary); font-size: 16px;
+            animation: spin 0.8s linear infinite; pointer-events: none;
+            display: none;
+        }
+        .search-spinner.active { display: block; }
+        @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+        /* ── USER LIST ── */
+        .user-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+        .user-item {
+            display: flex; align-items: center; gap: 12px;
+            background: #1a1a1a; border: 1px solid var(--border);
+            border-radius: 8px; padding: 11px 14px;
+            cursor: pointer; transition: 0.2s;
+        }
+        .user-item:hover { border-color: var(--primary); }
+        .user-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--primary); display: flex; align-items: center;
+            justify-content: center; font-weight: 700; font-size: 13px;
+            color: #fff; flex-shrink: 0;
+        }
+        .user-avatar.sm { width: 26px; height: 26px; font-size: 11px; }
+        .user-name { font-weight: 600; font-size: 0.88em; }
+        .user-email { font-size: 0.75em; color: var(--muted); }
+        .selected-user {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255,71,87,0.08); border: 1px solid var(--primary);
+            border-radius: 8px; padding: 11px 14px; margin-top: 8px;
+        }
+        .clear-btn {
+            margin-left: auto; background: none; border: none;
+            cursor: pointer; color: var(--muted); font-size: 15px;
+            padding: 4px; transition: color 0.2s;
+        }
+        .clear-btn:hover { color: var(--primary); }
+
+        /* ── BOUTON ENVOYER ── */
+        .send-btn {
+            display: block; width: 100%; margin-top: 28px;
+            padding: 14px; border-radius: 8px;
+            background: var(--primary); border: none;
+            font-size: 0.95em; font-weight: 700;
+            color: #fff; cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            box-shadow: 0 4px 20px rgba(255,71,87,0.3);
+        }
+        .send-btn:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
+        .send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+        /* ── MESSAGES ── */
+        .msg-error {
+            background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.35);
+            border-radius: 8px; padding: 11px 14px;
+            font-size: 0.85em; color: #ff8090; margin-top: 14px;
+        }
+        .msg-success {
+            background: rgba(46,213,115,0.1); border: 1px solid rgba(46,213,115,0.35);
+            border-radius: 8px; padding: 11px 14px;
+            font-size: 0.85em; color: #2ed573; margin-top: 14px;
+        }
+
+        /* ── CARTES PARTAGÉES ── */
+        .cards-list { display: flex; flex-direction: column; gap: 10px; }
+        .shared-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 10px; overflow: hidden; transition: border-color 0.2s;
+        }
+        .shared-card:hover { border-color: rgba(255,71,87,0.3); }
+        .shared-card.open { border-color: rgba(255,71,87,0.5); }
+        .shared-card-header {
+            display: flex; align-items: center; gap: 14px; padding: 16px 18px;
+        }
+        .shared-card-icon { font-size: 26px; opacity: 0.45; flex-shrink: 0; }
+        .shared-card-meta { flex: 1; min-width: 0; }
+        .shared-card-name { font-weight: 700; font-size: 0.95em; margin-bottom: 5px; }
+        .shared-card-sub { font-size: 0.75em; color: var(--muted); }
+        .shared-card-sub strong { color: var(--text); }
+        .shared-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+        .expand-btn {
+            background: #222; border: 1px solid var(--border);
+            border-radius: 6px; padding: 7px 11px;
+            cursor: pointer; color: var(--muted); font-size: 11px;
+            transition: 0.2s;
+        }
+        .expand-btn:hover { color: var(--text); border-color: var(--primary); }
+
+        .import-btn {
+            background: var(--primary); border: none;
+            border-radius: 8px; padding: 9px 16px;
+            font-size: 0.8em; font-weight: 700; color: #fff;
+            cursor: pointer; white-space: nowrap;
+            transition: opacity 0.2s;
+            box-shadow: 0 2px 10px rgba(255,71,87,0.25);
+        }
+        .import-btn:hover:not(:disabled) { opacity: 0.8; }
+        .import-btn.imported {
+            background: #222; border: 1px solid var(--border);
+            box-shadow: none; color: var(--muted); cursor: default;
+        }
+        .import-btn:disabled { cursor: not-allowed; opacity: 0.6; }
+
+        /* ── TRACK LIST ── */
+        .track-list {
+            list-style: none; margin: 0; padding: 0 18px 14px;
+            border-top: 1px solid var(--border);
+        }
+        .track-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+            font-size: 0.82em;
+        }
+        .track-item:last-child { border-bottom: none; }
+        .track-num { color: var(--muted); font-size: 0.75em; min-width: 22px; text-align: right; font-variant-numeric: tabular-nums; }
+        .track-thumb { width: 32px; height: 44px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+        .track-title { flex: 1; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-rating { color: #f1c40f; font-size: 0.75em; white-space: nowrap; }
+        .track-ep { color: var(--muted); font-size: 0.75em; white-space: nowrap; }
+
+        /* ── STATUS BADGE ── */
+        .status-badge {
+            font-size: 0.7em; padding: 2px 7px; border-radius: 4px;
+            font-weight: 600; flex-shrink: 0;
+        }
+        .status-watching  { background: rgba(46,204,113,0.2);  color: #2ecc71; }
+        .status-completed { background: rgba(52,152,219,0.2);  color: #3498db; }
+        .status-waiting   { background: rgba(241,196,15,0.2);  color: #f1c40f; }
+
+        /* ── IMPORT COUNT ── */
+        .import-count { color: var(--primary); font-size: 0.78em; }
+
+        /* ── VIDE ── */
+        .empty-msg {
+            text-align: center; color: var(--muted);
+            font-size: 0.95em; padding: 50px 0;
+        }
+        .empty-msg .empty-icon { font-size: 2.5em; margin-bottom: 12px; }
+
+        /* ── SEARCH BAR PUBLIC ── */
+        .search-bar-wrap { margin-bottom: 22px; }
+
+        /* ── BADGE PRIVÉ/PUBLIC ── */
+        .visibility-badge {
+            font-size: 0.7em; padding: 2px 8px; border-radius: 4px;
+            font-weight: 600; flex-shrink: 0;
+        }
+        .vis-public  { background: rgba(255,71,87,0.15); color: var(--primary); }
+        .vis-private { background: rgba(255,255,255,0.06); color: var(--muted); }
+
+        /* ── NOT CONNECTED ── */
+        .login-wall {
+            text-align: center; padding: 50px 20px;
+            color: var(--muted); font-size: 0.95em;
+        }
+        .login-wall a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+        /* ── LOADING ── */
+        .loading { text-align: center; color: var(--muted); padding: 40px; font-size: 0.9em; animation: pulse 1.4s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="top-navbar">
+    <a href="index.html" class="nav-left">
+        <img src="img/logo.jpg" class="nav-logo-small" onerror="this.style.display='none'">
+        <span class="nav-title">Le Malicieux</span>
+    </a>
+    <a href="playlist.html" class="nav-back">← Mes playlists</a>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <h1>Partager <span>une playlist</span></h1>
+    <p>Envoie ta liste à un ami, ou rends-la visible par toute la communauté</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+    <button class="tab-btn active" data-tab="send">
+        <span class="tab-icon">↑</span> Envoyer
+    </button>
+    <button class="tab-btn" data-tab="inbox">
+        <span class="tab-icon">↓</span> Reçues <span id="inbox-badge" style="display:none; background:var(--primary); color:#fff; font-size:0.7em; padding:1px 6px; border-radius:10px; margin-left:4px;"></span>
+    </button>
+    <button class="tab-btn" data-tab="public">
+        <span class="tab-icon">◎</span> Communauté
+    </button>
+</div>
+
+<!-- CONTAINER -->
+<div class="container">
+
+    <!-- ══ ONGLET ENVOYER ══ -->
+    <div id="tab-send" class="tab-panel active">
+        <div class="section-title">Partager <span>une de mes playlists</span></div>
+
+        <div id="send-not-logged" class="login-wall" style="display:none;">
+            <div style="font-size:2em; margin-bottom:12px;">🔒</div>
+            Tu dois être connecté pour partager une playlist.<br>
+            <a href="index.html">Se connecter</a>
+        </div>
+
+        <div id="send-form">
+            <!-- Étape 1 : choisir une playlist -->
+            <div class="step">
+                <div class="step-label"><span class="step-num">1</span> Choisir une playlist</div>
+                <div id="my-playlists-grid" class="playlist-grid">
+                    <div class="loading">Chargement...</div>
+                </div>
+            </div>
+
+            <!-- Étape 2 : visibilité -->
+            <div class="step">
+                <div class="step-label"><span class="step-num">2</span> Visibilité</div>
+                <div class="toggle-row">
+                    <button class="toggle-btn active" id="btn-private" onclick="setVisibility(false)">
+                        🔒 Privée — envoyer à un ami
+                    </button>
+                    <button class="toggle-btn" id="btn-public" onclick="setVisibility(true)">
+                        🌍 Publique — visible par tous
+                    </button>
+                </div>
+            </div>
+
+            <!-- Étape 3 : destinataire -->
+            <div class="step" id="step-recipient">
+                <div class="step-label"><span class="step-num">3</span> Destinataire</div>
+                <div class="search-wrap">
+                    <input class="sp-input" id="user-search" placeholder="Rechercher par email..." oninput="handleUserSearch(this.value)">
+                    <span class="search-spinner" id="search-spinner">⟳</span>
+                </div>
+                <ul class="user-list" id="user-results"></ul>
+                <div id="selected-user" style="display:none;" class="selected-user">
+                    <div class="user-avatar sm" id="sel-avatar"></div>
+                    <div>
+                        <div class="user-name" id="sel-name"></div>
+                        <div class="user-email" id="sel-email"></div>
+                    </div>
+                    <button class="clear-btn" onclick="clearSelectedUser()">✕</button>
+                </div>
+            </div>
+
+            <div id="send-error" class="msg-error" style="display:none;"></div>
+            <div id="send-success" class="msg-success" style="display:none;">✓ Playlist partagée avec succès !</div>
+
+            <button class="send-btn" id="send-btn" onclick="handleSend()">
+                ↑ Partager la playlist
+            </button>
+        </div>
+    </div>
+
+    <!-- ══ ONGLET REÇUES ══ -->
+    <div id="tab-inbox" class="tab-panel">
+        <div class="section-title">Playlists <span>reçues</span></div>
+        <div id="inbox-not-logged" class="login-wall" style="display:none;">
+            <div style="font-size:2em; margin-bottom:12px;">🔒</div>
+            Tu dois être connecté pour voir tes playlists reçues.<br>
+            <a href="index.html">Se connecter</a>
+        </div>
+        <div id="inbox-list" class="cards-list">
+            <div class="loading">Chargement...</div>
+        </div>
+    </div>
+
+    <!-- ══ ONGLET COMMUNAUTÉ ══ -->
+    <div id="tab-public" class="tab-panel">
+        <div class="section-title">Playlists <span>publiques</span></div>
+        <div class="search-bar-wrap">
+            <input class="sp-input" id="public-search" placeholder="Rechercher par nom de playlist ou auteur..." oninput="filterPublic(this.value)">
+        </div>
+        <div id="public-list" class="cards-list">
+            <div class="loading">Chargement...</div>
+        </div>
+    </div>
+
+</div>
+
+<script type="module">
+import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+    getFirestore, collection, query, where, orderBy,
+    onSnapshot, addDoc, doc, updateDoc, arrayUnion,
+    increment, serverTimestamp, getDocs, getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+// ── Config Firebase (identique à ton projet) ──────────────────────────────────
+const firebaseConfig = {
+    apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",
+    authDomain: "le-malicieux-v2.firebaseapp.com",
+    projectId: "le-malicieux-v2",
+    storageBucket: "le-malicieux-v2.firebasestorage.app",
+    messagingSenderId: "938147445933",
+    appId: "1:938147445933:web:86f9c65ee0737e66a9da24"
+};
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+// ── État ──────────────────────────────────────────────────────────────────────
+let currentUser      = null;
+let selectedPlaylist = null;    // { name, status, animes[] }
+let isPublic         = false;
+let selectedTarget   = null;    // { uid, email, displayName }
+let searchTimeout    = null;
+let publicItems      = [];      // cache pour le filtre
+let myAnimes         = [];      // tous mes animes
+
+// ── Utilitaires image ─────────────────────────────────────────────────────────
+function getRealImgPath(name) {
+    if (!name) return "img/logo.jpg";
+    const match = name.match(/\d+/);
+    const num = match ? match[0] : "0";
+    return `img/anime-${num}.jpg`;
+}
+
+function formatDate(ts) {
+    if (!ts) return "";
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function statusLabel(s) {
+    if (s === "watching")  return '<span class="status-badge status-watching">En cours</span>';
+    if (s === "completed") return '<span class="status-badge status-completed">Terminé</span>';
+    if (s === "waiting")   return '<span class="status-badge status-waiting">En attente</span>';
+    return "";
+}
+
+function setRandomBackground() {
+    const isMobile = window.innerWidth <= 1000;
+    const num = isMobile
+        ? Math.floor(Math.random() * 13) + 1
+        : Math.floor(Math.random() * 64) + 1;
+    const file = isMobile ? `mobile${num}.webp` : `fond${num}.webp`;
+    document.body.style.backgroundImage = `url('img/${file}')`;
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+});
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+onAuthStateChanged(auth, user => {
+    currentUser = user;
+    setRandomBackground();
+
+    if (user) {
+        loadMyPlaylists();
+        loadInbox();
+    } else {
+        document.getElementById('send-not-logged').style.display = 'block';
+        document.getElementById('send-form').style.display = 'none';
+        document.getElementById('inbox-not-logged').style.display = 'block';
+        document.getElementById('inbox-list').style.display = 'none';
+    }
+    loadPublic();
+});
+
+// ── Charger mes playlists (groupées par nom + status "Toutes") ────────────────
+function loadMyPlaylists() {
+    const q = query(collection(db, "playlists"), where("uid", "==", currentUser.uid));
+    onSnapshot(q, snap => {
+        myAnimes = [];
+        snap.forEach(d => myAnimes.push({ id: d.id, ...d.data() }));
+        renderMyPlaylists();
+    });
+}
+
+function renderMyPlaylists() {
+    const grid = document.getElementById('my-playlists-grid');
+
+    // Groupes : statuts standards + playlists custom (playlistTarget)
+    const groups = {};
+
+    // Statuts standards
+    ["watching", "completed", "waiting"].forEach(s => {
+        const animes = myAnimes.filter(a => a.status === s);
+        if (animes.length > 0) {
+            const labels = { watching: "En cours", completed: "Terminés", waiting: "En attente" };
+            groups[`__status__${s}`] = { name: labels[s], animes, status: s, isStatus: true };
+        }
+    });
+
+    // Playlists custom (playlistTarget défini)
+    myAnimes.forEach(a => {
+        if (a.playlistTarget && a.playlistTarget !== "all") {
+            if (!groups[a.playlistTarget]) {
+                groups[a.playlistTarget] = { name: a.playlistTarget, animes: [], status: "custom", isStatus: false };
+            }
+            groups[a.playlistTarget].animes.push(a);
+        }
+    });
+
+    if (Object.keys(groups).length === 0) {
+        grid.innerHTML = '<div style="color:var(--muted); font-size:0.88em; padding:10px 0;">Aucune playlist dans ta bibliothèque.</div>';
+        return;
+    }
+
+    grid.innerHTML = Object.entries(groups).map(([key, pl]) => `
+        <button class="pl-card ${selectedPlaylist?.key === key ? 'selected' : ''}"
+                onclick="selectPlaylist('${key}')">
+            <div class="pl-card-icon">♫</div>
+            <div class="pl-card-info">
+                <div class="pl-card-name">${pl.name}</div>
+                <div class="pl-card-count">${pl.animes.length} anime${pl.animes.length > 1 ? 's' : ''}</div>
+            </div>
+            ${selectedPlaylist?.key === key ? '<span class="pl-check">✓</span>' : ''}
+        </button>
+    `).join('');
+
+    window._playlistGroups = groups;
+}
+
+window.selectPlaylist = function(key) {
+    selectedPlaylist = { key, ...window._playlistGroups[key] };
+    renderMyPlaylists();
+};
+
+// ── Visibilité ────────────────────────────────────────────────────────────────
+window.setVisibility = function(pub) {
+    isPublic = pub;
+    document.getElementById('btn-private').classList.toggle('active', !pub);
+    document.getElementById('btn-public').classList.toggle('active', pub);
+    document.getElementById('step-recipient').style.display = pub ? 'none' : 'block';
+    document.getElementById('send-btn').textContent = pub ? '🌍 Publier la playlist' : '↑ Envoyer la playlist';
+};
+
+// ── Recherche utilisateur ─────────────────────────────────────────────────────
+window.handleUserSearch = function(value) {
+    clearSelectedUser();
+    clearTimeout(searchTimeout);
+    const spinner = document.getElementById('search-spinner');
+    const results = document.getElementById('user-results');
+
+    if (value.length < 2) { results.innerHTML = ''; spinner.classList.remove('active'); return; }
+
+    spinner.classList.add('active');
+    searchTimeout = setTimeout(async () => {
+        try {
+            const q = query(
+                collection(db, "users"),
+                where("email", ">=", value),
+                where("email", "<=", value + "\uf8ff")
+            );
+            const snap = await getDocs(q);
+            const found = [];
+            snap.forEach(d => { if (d.id !== currentUser.uid) found.push({ uid: d.id, ...d.data() }); });
+
+            results.innerHTML = found.length === 0
+                ? '<li style="padding:10px 0; color:var(--muted); font-size:0.85em;">Aucun utilisateur trouvé.</li>'
+                : found.map(u => `
+                    <li class="user-item" onclick="pickUser('${u.uid}', '${u.email}', '${(u.displayName||'').replace(/'/g,"\\'")}')">
+                        <div class="user-avatar sm">${(u.displayName||u.email||'?')[0].toUpperCase()}</div>
+                        <div>
+                            <div class="user-name">${u.displayName || '—'}</div>
+                            <div class="user-email">${u.email}</div>
+                        </div>
+                    </li>`).join('');
+        } catch(e) { console.error(e); }
+        spinner.classList.remove('active');
+    }, 400);
+};
+
+window.pickUser = function(uid, email, displayName) {
+    selectedTarget = { uid, email, displayName };
+    document.getElementById('user-results').innerHTML = '';
+    document.getElementById('user-search').value = email;
+    const su = document.getElementById('selected-user');
+    document.getElementById('sel-avatar').textContent = (displayName || email || '?')[0].toUpperCase();
+    document.getElementById('sel-name').textContent = displayName || '—';
+    document.getElementById('sel-email').textContent = email;
+    su.style.display = 'flex';
+};
+
+window.clearSelectedUser = function() {
+    selectedTarget = null;
+    document.getElementById('selected-user').style.display = 'none';
+    document.getElementById('user-results').innerHTML = '';
+};
+
+// ── Envoyer ───────────────────────────────────────────────────────────────────
+window.handleSend = async function() {
+    const errEl = document.getElementById('send-error');
+    const sucEl = document.getElementById('send-success');
+    errEl.style.display = 'none'; sucEl.style.display = 'none';
+
+    if (!selectedPlaylist) { errEl.textContent = "Sélectionne une playlist."; errEl.style.display = 'block'; return; }
+    if (!isPublic && !selectedTarget) { errEl.textContent = "Choisis un destinataire ou rends la playlist publique."; errEl.style.display = 'block'; return; }
+
+    const btn = document.getElementById('send-btn');
+    btn.disabled = true;
+    btn.textContent = 'Envoi...';
+
+    try {
+        // Sérialisation légère des animes (sans données perso sensibles)
+        const animesData = selectedPlaylist.animes.map(a => ({
+            anime:  a.anime  || '',
+            status: a.status || '',
+            rating: a.rating || 0,
+            epSeen: a.epSeen || 0,
+            epMax:  a.epMax  || '?',
+            img:    a.img    || '',
+        }));
+
+        await addDoc(collection(db, "shared_playlists"), {
+            fromUid:     currentUser.uid,
+            fromName:    currentUser.displayName || currentUser.email,
+            fromEmail:   currentUser.email,
+            toUid:       isPublic ? null : selectedTarget.uid,
+            toEmail:     isPublic ? null : selectedTarget.email,
+            isPublic:    isPublic,
+            playlist: {
+                name:   selectedPlaylist.name,
+                status: selectedPlaylist.status,
+                animes: animesData,
+            },
+            createdAt:   serverTimestamp(),
+            importCount: 0,
+            importedBy:  [],
+        });
+
+        sucEl.style.display = 'block';
+        selectedPlaylist = null;
+        renderMyPlaylists();
+        setTimeout(() => sucEl.style.display = 'none', 4000);
+    } catch(e) {
+        errEl.textContent = 'Erreur : ' + e.message;
+        errEl.style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.textContent = isPublic ? '🌍 Publier la playlist' : '↑ Envoyer la playlist';
+};
+
+// ── INBOX ─────────────────────────────────────────────────────────────────────
+function loadInbox() {
+    const q = query(
+        collection(db, "shared_playlists"),
+        where("toUid", "==", currentUser.uid),
+        orderBy("createdAt", "desc")
+    );
+    onSnapshot(q, snap => {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const badge = document.getElementById('inbox-badge');
+        if (items.length > 0) {
+            badge.textContent = items.length;
+            badge.style.display = 'inline';
+        } else {
+            badge.style.display = 'none';
+        }
+        renderCardList('inbox-list', items, true);
+    });
+}
+
+// ── PUBLIC ────────────────────────────────────────────────────────────────────
+function loadPublic() {
+    const q = query(
+        collection(db, "shared_playlists"),
+        where("isPublic", "==", true),
+        orderBy("createdAt", "desc")
+    );
+    onSnapshot(q, snap => {
+        publicItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        filterPublic(document.getElementById('public-search').value);
+    });
+}
+
+window.filterPublic = function(val) {
+    const filtered = val.length < 2
+        ? publicItems
+        : publicItems.filter(i =>
+            i.playlist?.name?.toLowerCase().includes(val.toLowerCase()) ||
+            i.fromName?.toLowerCase().includes(val.toLowerCase())
+        );
+    renderCardList('public-list', filtered, false);
+};
+
+// ── Rendu des cartes ──────────────────────────────────────────────────────────
+function renderCardList(containerId, items, showFrom) {
+    const el = document.getElementById(containerId);
+    if (items.length === 0) {
+        el.innerHTML = `<div class="empty-msg"><div class="empty-icon">📭</div>Aucune playlist ici pour l'instant.</div>`;
+        return;
+    }
+    el.innerHTML = items.map(item => buildCard(item, showFrom)).join('');
+}
+
+function buildCard(item, showFrom) {
+    const animes  = item.playlist?.animes || [];
+    const alreadyImported = item.importedBy?.includes(currentUser?.uid);
+    const importBtn = currentUser
+        ? `<button class="import-btn ${alreadyImported ? 'imported' : ''}"
+                   id="ibtn-${item.id}"
+                   onclick="handleImport('${item.id}')"
+                   ${alreadyImported ? 'disabled' : ''}>
+               ${alreadyImported ? '✓ Importé' : '↓ Importer'}
+           </button>`
+        : `<button class="import-btn" onclick="alert('Connecte-toi pour importer.')">↓ Importer</button>`;
+
+    return `
+    <div class="shared-card" id="card-${item.id}">
+        <div class="shared-card-header">
+            <div class="shared-card-icon">♫</div>
+            <div class="shared-card-meta">
+                <div class="shared-card-name">${item.playlist?.name || 'Playlist sans nom'}</div>
+                <div class="shared-card-sub">
+                    ${showFrom ? `De <strong>${item.fromName || item.fromEmail}</strong> · ` : ''}
+                    ${animes.length} anime${animes.length > 1 ? 's' : ''}
+                    ${item.importCount > 0 ? `<span class="import-count"> · ↓ ${item.importCount}</span>` : ''}
+                    · ${formatDate(item.createdAt)}
+                </div>
+            </div>
+            <div class="shared-card-actions">
+                ${animes.length > 0 ? `<button class="expand-btn" onclick="toggleExpand('${item.id}')">▼</button>` : ''}
+                ${importBtn}
+            </div>
+        </div>
+        <ul class="track-list" id="tracks-${item.id}" style="display:none;">
+            ${animes.map((a, i) => `
+                <li class="track-item">
+                    <span class="track-num">${String(i+1).padStart(2,'0')}</span>
+                    <img src="${getRealImgPath(a.img)}" class="track-thumb"
+                         onerror="this.src='img/logo.jpg'">
+                    <span class="track-title">${a.anime}</span>
+                    ${statusLabel(a.status)}
+                    <span class="track-rating">⭐ ${a.rating || 0}</span>
+                    <span class="track-ep">Ep ${a.epSeen}/${a.epMax || '?'}</span>
+                </li>`).join('')}
+        </ul>
+    </div>`;
+}
+
+window.toggleExpand = function(id) {
+    const card   = document.getElementById('card-' + id);
+    const tracks = document.getElementById('tracks-' + id);
+    const btn    = card.querySelector('.expand-btn');
+    const open   = tracks.style.display === 'none';
+    tracks.style.display = open ? 'block' : 'none';
+    btn.textContent = open ? '▲' : '▼';
+    card.classList.toggle('open', open);
+};
+
+// ── Import ────────────────────────────────────────────────────────────────────
+window.handleImport = async function(docId) {
+    if (!currentUser) { alert('Connecte-toi pour importer.'); return; }
+    const btn = document.getElementById('ibtn-' + docId);
+    btn.disabled = true; btn.textContent = '...';
+
+    try {
+        // Récupérer les données de la playlist partagée
+        const sharedSnap = await getDoc(doc(db, "shared_playlists", docId));
+        if (!sharedSnap.exists()) throw new Error("Playlist introuvable.");
+        const shared = sharedSnap.data();
+        const animes = shared.playlist?.animes || [];
+
+        // Créer une playlist custom avec le nom + suffixe
+        const playlistName = `${shared.playlist?.name || 'Partagée'} (de ${shared.fromName || shared.fromEmail})`;
+        await addDoc(collection(db, "playlists_custom"), {
+            uid:  currentUser.uid,
+            name: playlistName,
+        });
+
+        // Ajouter chaque anime dans la collection playlists de l'utilisateur
+        const batch = animes.map(a =>
+            addDoc(collection(db, "playlists"), {
+                uid:            currentUser.uid,
+                anime:          a.anime,
+                status:         a.status || 'waiting',
+                rating:         a.rating || 0,
+                epSeen:         0,          // on remet à 0 pour l'importeur
+                img:            a.img || '',
+                playlistTarget: playlistName,
+            })
+        );
+        await Promise.all(batch);
+
+        // Incrémenter le compteur
+        await updateDoc(doc(db, "shared_playlists", docId), {
+            importCount: increment(1),
+            importedBy:  arrayUnion(currentUser.uid),
+        });
+
+        btn.textContent = '✓ Importé';
+        btn.classList.add('imported');
+    } catch(e) {
+        alert('Erreur import : ' + e.message);
+        btn.disabled = false;
+        btn.textContent = '↓ Importer';
+    }
+};
+</script>
+</body>
+</html>
