@@ -18,11 +18,10 @@
             min-height: 100vh;
         }
 
-        /* Overlay transparent (pas de changement sur les fonds) */
         .bg-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: transparent; 
+            background: transparent;
             z-index: -1;
         }
 
@@ -35,17 +34,36 @@
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
 
+        .controls { display: flex; align-items: center; gap: 10px; }
+        select { 
+            background: #222; color: white; border: 1px solid var(--primary); 
+            padding: 5px 10px; border-radius: 5px; outline: none; cursor: pointer;
+        }
+
         .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; position: relative; }
 
+        /* Styles Mode Grille / Catégories */
         .category-section { margin-bottom: 50px; }
         .category-title { 
             color: var(--primary); font-size: 1.6em; border-left: 4px solid var(--primary); 
             padding: 8px 15px; margin-bottom: 25px; background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(5px); border-radius: 0 8px 8px 0;
         }
-
         .lexique-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         
+        /* Styles Mode Liste Alphabétique */
+        .lexique-list { background: var(--card-bg); border-radius: 10px; border: 1px solid #333; padding: 10px; }
+        .list-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px; border-bottom: 1px solid #333; transition: 0.2s;
+        }
+        .list-item:last-child { border-bottom: none; }
+        .list-item:hover { background: rgba(255, 71, 87, 0.1); }
+        .list-info { flex: 1; padding-right: 20px; }
+        .list-name { color: var(--primary); font-weight: bold; font-size: 1.1em; margin-bottom: 5px; }
+        .list-desc { color: #ccc; font-size: 0.9em; }
+
+        /* Éléments communs */
         .tag-card { 
             background: var(--card-bg); border: 1px solid #333; border-radius: 10px; padding: 20px; 
             transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between;
@@ -58,7 +76,7 @@
         .btn-link { 
             display: inline-block; padding: 8px 12px; background: rgba(0,0,0,0.5); 
             border: 1px solid #444; color: #fff; text-decoration: none; border-radius: 5px; 
-            font-size: 0.8em; text-align: center; transition: 0.3s; 
+            font-size: 0.8em; text-align: center; transition: 0.3s; white-space: nowrap;
         }
         .btn-link:hover { background: var(--primary); color: white; border-color: var(--primary); }
     </style>
@@ -82,7 +100,13 @@
             <img src="img/logo.jpg" class="nav-logo-small">
             <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Lexique</small></span>
         </a>
-        <a href="tags.html" style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 0.9em;">← Retour</a>
+        <div class="controls">
+            <select id="view-mode" onchange="changeView(this.value)">
+                <option value="categories">Vue : Catégories</option>
+                <option value="alpha">Vue : Liste A-Z</option>
+            </select>
+            <a href="tags.html" style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 0.9em;">← Retour</a>
+        </div>
     </div>
 
     <div class="container">
@@ -90,11 +114,14 @@
     </div>
 
     <script>
+        // Correction : Ligne 49 -> Personnages, Ligne 50 -> Cadre général
         const mapping = {
             "Spécifications de pratiques": [2, 6, 7, 14, 15, 19, 21, 29, 31, 35, 37, 38, 41, 44, 47],
-            "Spécifications personnages": [3, 4, 8, 9, 10, 11, 12, 16, 17, 18, 26, 28, 30, 32, 33, 34, 36, 42, 43, 45, 48],
-            "Spécifications du Cadre général": [5, 13, 20, 22, 23, 24, 25, 27, 39, 40, 46]
+            "Spécifications personnages": [3, 4, 8, 9, 10, 11, 12, 16, 17, 18, 26, 28, 30, 32, 33, 34, 36, 42, 43, 45, 48, 49],
+            "Spécifications du Cadre général": [5, 13, 20, 22, 23, 24, 25, 27, 39, 40, 46, 50]
         };
+
+        let parsedRows = [];
 
         async function load() {
             try {
@@ -111,23 +138,34 @@
                     } else field += c;
                 }
                 if (field || curr.length) { curr.push(field); rows.push(curr); }
+                
+                parsedRows = rows.filter((r, idx) => idx > 0 && r[0]); // Ignorer header et lignes vides
 
+                // Récupérer le mode sauvegardé
+                const savedMode = localStorage.getItem('lexiqueViewMode') || 'categories';
+                document.getElementById('view-mode').value = savedMode;
+                render(savedMode);
+
+            } catch (e) { document.getElementById('lexique-content').innerHTML = "Erreur."; }
+        }
+
+        function render(mode) {
+            const container = document.getElementById('lexique-content');
+            
+            if (mode === 'categories') {
                 let groups = { "Spécifications de pratiques": "", "Spécifications personnages": "", "Spécifications du Cadre général": "", "Autres": "" };
 
-                rows.forEach((cols, idx) => {
-                    const line = idx + 1;
-                    if (line === 1 || cols.length < 2) return;
+                parsedRows.forEach((cols, idx) => {
+                    const line = idx + 2; // +2 car idx 0 est la ligne 2 du fichier
                     const name = cols[0].trim().replace(/^"|"$/g, '');
-                    const desc = cols[1].trim().replace(/^"|"$/g, '');
-                    if (!name) return;
+                    const desc = (cols[1] || "").trim().replace(/^"|"$/g, '');
+                    
                     let cat = "Autres";
                     for (const [cName, nums] of Object.entries(mapping)) { if (nums.includes(line)) { cat = cName; break; } }
+                    
                     groups[cat] += `
                         <div class="tag-card">
-                            <div>
-                                <div class="tag-name">${name}</div>
-                                <div class="tag-desc">${desc}</div>
-                            </div>
+                            <div><div class="tag-name">${name}</div><div class="tag-desc">${desc}</div></div>
                             <a href="tags.html?tag=${encodeURIComponent(name)}" class="btn-link">Voir les animes</a>
                         </div>`;
                 });
@@ -136,9 +174,34 @@
                 ["Spécifications de pratiques", "Spécifications personnages", "Spécifications du Cadre général", "Autres"].forEach(t => {
                     if (groups[t]) html += `<div class="category-section"><h2 class="category-title">${t}</h2><div class="lexique-grid">${groups[t]}</div></div>`;
                 });
-                document.getElementById('lexique-content').innerHTML = html;
-            } catch (e) { document.getElementById('lexique-content').innerHTML = "Erreur."; }
+                container.innerHTML = html;
+
+            } else {
+                // Mode Alphabétique (Liste)
+                const sorted = [...parsedRows].sort((a, b) => a[0].localeCompare(b[0]));
+                let html = '<div class="lexique-list">';
+                sorted.forEach(cols => {
+                    const name = cols[0].trim().replace(/^"|"$/g, '');
+                    const desc = (cols[1] || "").trim().replace(/^"|"$/g, '');
+                    html += `
+                        <div class="list-item">
+                            <div class="list-info">
+                                <div class="list-name">${name}</div>
+                                <div class="list-desc">${desc}</div>
+                            </div>
+                            <a href="tags.html?tag=${encodeURIComponent(name)}" class="btn-link">Voir les animes</a>
+                        </div>`;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
         }
+
+        function changeView(mode) {
+            localStorage.setItem('lexiqueViewMode', mode);
+            render(mode);
+        }
+
         load();
     </script>
 </body>
