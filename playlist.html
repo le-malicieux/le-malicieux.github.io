@@ -19,6 +19,8 @@
         .nav-left { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); }
         .nav-title { color: var(--primary); font-weight: bold; }
+        .btn-share-playlist { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 7px 13px; border-radius: 5px; font-weight: bold; font-size: 0.85em; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s; white-space: nowrap; }
+        .btn-share-playlist:hover { background: var(--primary); color: white; }
 
         .playlist-header { padding: 30px 20px; text-align: center; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
         .controls-row { display: flex; justify-content: center; gap: 10px; align-items: center; margin-bottom: 25px; flex-wrap: wrap; }
@@ -61,7 +63,10 @@
             <img src="img/logo.jpg" class="nav-logo-small">
             <span class="nav-title">Le Malicieux</span>
         </a>
-        <a href="index.html" style="color:white; text-decoration:none; font-size:0.9em;">← Catalogue</a>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <a href="share.html" class="btn-share-playlist">🔗 Partage de playlist</a>
+            <a href="index.html" style="color:white; text-decoration:none; font-size:0.9em;">← Catalogue</a>
+        </div>
     </nav>
 
     <div class="playlist-header">
