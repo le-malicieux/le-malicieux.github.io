@@ -48,8 +48,18 @@
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
 
         /* Page content */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 0;
+            pointer-events: none;
+        }
+
         .content-area {
-            background: linear-gradient(to top, rgba(0,0,0,1) 80%, transparent);
+            position: relative;
+            z-index: 1;
             padding: 30px 15px;
             min-height: 100vh;
             max-width: 1400px;
@@ -153,11 +163,41 @@
 
         #no-result {
             text-align: center;
-            color: #555;
+            color: #ccc;
             padding: 40px;
             font-size: 1.1em;
             display: none;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
         }
+
+        /* Mode liste */
+        .anime-list.list-mode {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .anime-list.list-mode .card {
+            flex-direction: row;
+            align-items: center;
+            border-radius: 6px;
+            gap: 0;
+        }
+        .anime-list.list-mode .card .img-container { display: none; }
+        .anime-list.list-mode .card-info {
+            padding: 8px 12px;
+            flex-direction: row;
+            align-items: center;
+            gap: 14px;
+        }
+        .anime-list.list-mode .card-title {
+            height: auto;
+            overflow: visible;
+            white-space: nowrap;
+            min-width: 180px;
+            margin-bottom: 0;
+            font-size: 0.95em;
+        }
+        .anime-list.list-mode .card-meta-row { margin-top: 0; flex-wrap: nowrap; }
 
         @media (max-width: 1000px) {
             .burger { display: block; }
@@ -197,6 +237,10 @@
             <a href="index.html" class="btn-red">🏠 Accueil</a>
             <a href="tags.html" class="btn-red">🏷️ Tags</a>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
+            <select id="view-mode">
+                <option value="cards">🖼️ Photos</option>
+                <option value="list">📋 Liste</option>
+            </select>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
 
@@ -301,6 +345,8 @@
 
             container.innerHTML = orderedKeys.map(key => {
                 const label = key === '★' ? '★ Spéciaux' : key === '#' ? '# Chiffres' : key;
+                const viewMode = document.getElementById('view-mode').value;
+                const listClass = viewMode === 'list' ? ' list-mode' : '';
                 const cards = groups[key].map(a => `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                         <div class="img-container">
@@ -326,7 +372,7 @@
                         <div class="letter-badge">${label}</div>
                         <div class="letter-line"></div>
                     </div>
-                    <div class="anime-list">${cards}</div>`;
+                    <div class="anime-list${listClass}">${cards}</div>`;
             }).join('');
 
             // Mettre à jour la nav (griser les lettres sans résultat dans la recherche)
@@ -367,6 +413,7 @@
         }
 
         document.getElementById('search').oninput = (e) => render(e.target.value);
+        document.getElementById('view-mode').onchange = () => render(document.getElementById('search').value);
 
         window.toggleM = () => {
             document.getElementById('menu').classList.toggle('active');
