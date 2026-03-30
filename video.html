@@ -156,9 +156,6 @@
                         <div class="top-info">
                             <div class="poster">
                                 <img src="img/${anime.img.split('.')[0]}.jpg" onerror="this.src='img/${anime.img.split('.')[0]}.png'">
-                                <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 5px;">
-                                    ${tagsHtml}
-                                </div>
                             </div>
                             <div class="main-details">
                                 <h1 class="anime-title">${anime.nom}</h1>
@@ -172,6 +169,9 @@
                                 </div>
                                 <p style="font-size:0.95em; color:#ccc; line-height:1.6;">${anime.desc}</p>
                             </div>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px;">
+                            ${tagsHtml}
                         </div>
                         <div class="bottom-controls">
                             <div class="playlist-box">
