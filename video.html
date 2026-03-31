@@ -230,8 +230,9 @@
                         </div>
                     </div>`;
 
-                anime.dl.filter(l => l.trim()).forEach((l, i) => document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">Lien ${i+1}</a>`);
-                anime.stream.filter(l => l.trim()).forEach((l, i) => document.getElementById('stream-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lecteur ${i+1} ↗</a>`);
+                const dlLabels = ['⬇️ Terabox', '⬇️ Mega', '⬇️ Lien 3', '⬇️ Lien 4'];
+                anime.dl.filter(l => l.trim()).forEach((l, i) => document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">${dlLabels[i] || '⬇️ Lien ' + (i+1)}</a>`);
+                anime.stream.filter(l => l.trim()).forEach((l, i) => document.getElementById('stream-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lien ${i+1} ↗</a>`);
 
                 // ── Récupération MAL en arrière-plan ──────────────────────────────
                 fetchMALData(anime.nom, anime.malId).then(malData => {
