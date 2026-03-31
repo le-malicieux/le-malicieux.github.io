@@ -64,6 +64,10 @@
             <span class="nav-title">Le Malicieux</span>
         </a>
         <div style="display:flex; align-items:center; gap:15px;">
+            <a href="profil.html" id="nav-profil-link" style="display:flex; align-items:center; gap:7px; text-decoration:none; color:#ccc; font-size:0.85em;">
+                <img id="nav-avatar" src="img/logo.jpg" style="width:28px; height:28px; border-radius:50%; border:2px solid var(--primary); object-fit:cover; display:none;" onerror="this.src='img/logo.jpg'">
+                <span id="nav-pseudo" style="display:none;"></span>
+            </a>
             <a href="share.html" class="btn-share-playlist">🔗 Partage de playlist</a>
             <a href="index.html" style="color:white; text-decoration:none; font-size:0.9em;">← Catalogue</a>
         </div>
@@ -200,6 +204,29 @@
                 setRandomBackground();
                 await loadCSV();
                 updateTabUI();
+                // Charger pseudo + avatar
+                const cachedPseudo = sessionStorage.getItem('userPseudo');
+                const cachedAvatar = sessionStorage.getItem('userAvatar');
+                if (cachedPseudo) {
+                    document.getElementById('nav-pseudo').textContent = cachedPseudo;
+                    document.getElementById('nav-pseudo').style.display = 'inline';
+                }
+                if (cachedAvatar || user.photoURL) {
+                    const av = document.getElementById('nav-avatar');
+                    av.src = cachedAvatar || user.photoURL;
+                    av.style.display = 'inline-block';
+                }
+                if (!cachedPseudo || !cachedAvatar) {
+                    try {
+                        const { getFirestore: gfs, doc: d, getDoc: gd } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                        const snap = await gd(d(db, "users", user.uid));
+                        if (snap.exists()) {
+                            const data = snap.data();
+                            if (data.pseudo) { sessionStorage.setItem('userPseudo', data.pseudo); document.getElementById('nav-pseudo').textContent = data.pseudo; document.getElementById('nav-pseudo').style.display = 'inline'; }
+                            if (data.photoURL) { sessionStorage.setItem('userAvatar', data.photoURL); document.getElementById('nav-avatar').src = data.photoURL; document.getElementById('nav-avatar').style.display = 'inline-block'; }
+                        }
+                    } catch(e) {}
+                }
 
                 onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", user.uid)), (snap) => {
                     const selector = document.getElementById('custom-selector');

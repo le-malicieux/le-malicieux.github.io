@@ -261,8 +261,34 @@
                             userRating = d.rating || 0;
                             updateStars(userRating);
                         }
+                        // Vérifier si c'est la première fois qu'on ajoute l'anime
+                        const isNew = !docSnap.exists();
+
                         const autoSave = () => {
-                            setDoc(docRef, { uid: u.uid, anime: anime.nom, img: anime.img, status: document.getElementById('user-status').value, epSeen: parseInt(document.getElementById('user-ep').value), rating: userRating, epMax: maxEp }, { merge: true });
+                            const statusVal = document.getElementById('user-status').value;
+                            const epVal     = parseInt(document.getElementById('user-ep').value);
+                            const prevData  = docSnap.exists() ? docSnap.data() : {};
+                            const now       = new Date();
+
+                            const updates = {
+                                uid: u.uid, anime: anime.nom, img: anime.img,
+                                status: statusVal, epSeen: epVal,
+                                rating: userRating, epMax: maxEp
+                            };
+
+                            // Timestamp premier ajout
+                            if (isNew || !prevData.addedAt) updates.addedAt = now;
+
+                            // Timestamp épisode mis à jour
+                            if (epVal !== (prevData.epSeen || 0)) updates.epUpdatedAt = now;
+
+                            // Timestamp note changée
+                            if (userRating !== (prevData.rating || 0) && userRating > 0) updates.ratedAt = now;
+
+                            // Timestamp terminé
+                            if (statusVal === 'completed' && prevData.status !== 'completed') updates.completedAt = now;
+
+                            setDoc(docRef, updates, { merge: true });
                         };
                         document.getElementById('user-status').onchange = autoSave;
                         document.getElementById('user-ep').onchange = autoSave;
@@ -284,7 +310,7 @@
                 document.getElementById('btn-post').onclick = async () => {
                     const t = document.getElementById('comment-input').value;
                     if(t.trim() && currentUser) { 
-                        await addDoc(collection(db, "commentaires"), { anime: animeName, text: t, userName: currentUser.displayName, date: serverTimestamp() }); 
+                        await addDoc(collection(db, "commentaires"), { anime: animeName, text: t, userName: sessionStorage.getItem("userPseudo") || currentUser.displayName, date: serverTimestamp() }); 
                         document.getElementById('comment-input').value = ""; 
                     }
                 };

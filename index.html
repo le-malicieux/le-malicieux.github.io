@@ -152,7 +152,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig);
@@ -275,7 +275,27 @@
                     lastSeen: new Date().toISOString(),
                 }, { merge: true });
 
-                authUi.innerHTML = `<span class="auth-status">${user.displayName}</span><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
+                // Récupérer le pseudo depuis Firestore ou sessionStorage
+                const cachedPseudo = sessionStorage.getItem('userPseudo');
+                let displayName = cachedPseudo || user.displayName;
+                if (!cachedPseudo) {
+                    const uSnap = await getDoc(doc(db, "users", user.uid));
+                    if (uSnap.exists() && uSnap.data().pseudo) {
+                        displayName = uSnap.data().pseudo;
+                        sessionStorage.setItem('userPseudo', displayName);
+                    }
+                    // Stocker l'avatar aussi
+                    if (uSnap.exists() && uSnap.data().photoURL) {
+                        sessionStorage.setItem('userAvatar', uSnap.data().photoURL);
+                    }
+                }
+                const avatarUrl = sessionStorage.getItem('userAvatar') || user.photoURL || 'img/logo.jpg';
+                authUi.innerHTML = `
+                    <a href="profil.html" style="display:flex; align-items:center; gap:8px; text-decoration:none; margin-right:8px;">
+                        <img src="${avatarUrl}" style="width:30px; height:30px; border-radius:50%; border:2px solid var(--primary); object-fit:cover;" onerror="this.src='img/logo.jpg'">
+                        <span class="auth-status" style="color:white;">${displayName}</span>
+                    </a>
+                    <button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
                 document.getElementById('logout-btn').onclick = () => signOut(auth);
             } else {
                 authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;

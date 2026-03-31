@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil - Le Malicieux</title>
+    <style>
+        :root {
+            --primary: #ff4757;
+            --bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --text: #eee;
+            --nav-bg: rgba(15,15,15,0.9);
+            --border: #2a2a2a;
+            --accent-blue: #2e86de;
+            --accent-green: #2ecc71;
+            --accent-yellow: #f1c40f;
+            --accent-orange: #e67e22;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        /* ── NAVBAR ── */
+        .top-navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .nav-logo { width: 34px; height: 34px; border-radius: 5px; border: 1px solid var(--primary); }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.05em; }
+        .nav-back { color: #aaa; text-decoration: none; font-size: 0.85em; transition: color 0.2s; }
+        .nav-back:hover { color: var(--primary); }
+
+        /* ── HERO BANNER ── */
+        .profile-banner {
+            height: 180px;
+            background: linear-gradient(135deg, #1a0a0a 0%, #2d0a14 40%, #0a0a1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-banner::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: repeating-linear-gradient(
+                45deg, transparent, transparent 40px,
+                rgba(255,71,87,0.03) 40px, rgba(255,71,87,0.03) 80px
+            );
+        }
+
+        /* ── LAYOUT PRINCIPAL ── */
+        .profile-layout {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 24px;
+            position: relative;
+            top: -60px;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {}
+
+        .avatar-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 14px;
+        }
+
+        .avatar-img {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            object-fit: cover;
+            background: #222;
+            display: block;
+        }
+
+        .avatar-upload-btn {
+            position: absolute;
+            bottom: 4px; right: 4px;
+            width: 30px; height: 30px;
+            background: var(--primary);
+            border: 2px solid var(--bg);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: transform 0.2s;
+        }
+        .avatar-upload-btn:hover { transform: scale(1.15); }
+        #avatar-file-input { display: none; }
+
+        .profile-username {
+            font-size: 1.3em;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .profile-google-name {
+            font-size: 0.75em;
+            color: #555;
+            margin-bottom: 12px;
+        }
+
+        .edit-pseudo-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .edit-pseudo-row input {
+            flex: 1;
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            padding: 7px 10px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .edit-pseudo-row input:focus { border-color: var(--primary); }
+        .edit-pseudo-row button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        .edit-pseudo-row button:hover { opacity: 0.85; }
+
+        .profile-meta {
+            font-size: 0.78em;
+            color: #666;
+            line-height: 1.8;
+        }
+        .profile-meta span { color: #999; }
+
+        /* Stats sidebar */
+        .stats-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .stats-card h3 {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            color: var(--primary);
+            letter-spacing: 1px;
+            margin: 0 0 14px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+            border-bottom: 1px solid #222;
+            font-size: 0.85em;
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-row .label { color: #888; }
+        .stat-row .value { font-weight: bold; color: white; }
+
+        /* Barre de progression des statuts */
+        .status-bars { margin-top: 14px; }
+        .status-bar-item { margin-bottom: 10px; }
+        .status-bar-item .bar-label {
+            display: flex; justify-content: space-between;
+            font-size: 0.78em; color: #888; margin-bottom: 4px;
+        }
+        .bar-track {
+            height: 6px; background: #222; border-radius: 3px; overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%; border-radius: 3px; transition: width 0.6s ease;
+        }
+        .bar-watching  { background: var(--accent-green); }
+        .bar-completed { background: var(--accent-blue); }
+        .bar-waiting   { background: var(--accent-yellow); }
+
+        /* Score moyen */
+        .score-avg-display {
+            text-align: center;
+            padding: 12px 0 4px;
+        }
+        .score-avg-number {
+            font-size: 2.8em;
+            font-weight: 900;
+            color: var(--accent-yellow);
+            line-height: 1;
+        }
+        .score-avg-label {
+            font-size: 0.72em;
+            color: #666;
+            margin-top: 4px;
+        }
+        .score-stars {
+            font-size: 1.1em;
+            color: var(--accent-yellow);
+            margin-top: 6px;
+            letter-spacing: 2px;
+        }
+
+        /* ── CONTENU PRINCIPAL ── */
+        .main-content {}
+
+        .section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            color: var(--primary);
+            letter-spacing: 1px;
+            margin: 0 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Activity feed */
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #1f1f1f;
+        }
+        .activity-item:last-child { border-bottom: none; }
+
+        .activity-img {
+            width: 36px; height: 50px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #222;
+            flex-shrink: 0;
+        }
+
+        .activity-body { flex: 1; min-width: 0; }
+        .activity-title {
+            font-size: 0.88em;
+            font-weight: bold;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-decoration: none;
+        }
+        .activity-title:hover { color: var(--primary); }
+        .activity-detail {
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 2px;
+        }
+        .activity-detail .tag {
+            display: inline-block;
+            padding: 1px 7px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .tag-added    { background: rgba(46,134,222,0.2);  color: #2e86de; }
+        .tag-ep       { background: rgba(46,204,113,0.2);  color: #2ecc71; }
+        .tag-rated    { background: rgba(241,196,15,0.2);  color: #f1c40f; }
+        .tag-finished { background: rgba(255,71,87,0.2);   color: #ff4757; }
+
+        .activity-time {
+            font-size: 0.7em;
+            color: #555;
+            flex-shrink: 0;
+        }
+
+        /* Score distribution */
+        .score-dist { display: flex; align-items: flex-end; gap: 4px; height: 70px; margin-top: 8px; }
+        .score-dist-bar {
+            flex: 1;
+            background: rgba(241,196,15,0.15);
+            border-radius: 3px 3px 0 0;
+            position: relative;
+            transition: background 0.2s;
+            cursor: default;
+        }
+        .score-dist-bar:hover { background: rgba(241,196,15,0.4); }
+        .score-dist-bar .bar-val {
+            position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+            font-size: 0.65em; color: #666;
+        }
+        .score-dist-bar .bar-count {
+            position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+            font-size: 0.65em; color: #888; white-space: nowrap;
+        }
+
+        /* Animes récents (mini grille) */
+        .recent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+        }
+        .recent-card {
+            text-decoration: none;
+            color: inherit;
+        }
+        .recent-card img {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #333;
+            transition: border-color 0.2s;
+        }
+        .recent-card:hover img { border-color: var(--primary); }
+        .recent-card .rc-title {
+            font-size: 0.7em;
+            color: #aaa;
+            margin-top: 4px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-height: 1.3;
+        }
+
+        /* Non connecté */
+        .not-logged {
+            text-align: center;
+            padding: 80px 20px;
+            color: #666;
+        }
+        .not-logged h2 { color: var(--primary); margin-bottom: 10px; }
+        .btn-login {
+            display: inline-block;
+            margin-top: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-login:hover { opacity: 0.85; }
+
+        /* Upload spinner */
+        .upload-spinner {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+        .upload-spinner.active { display: flex; }
+
+        /* Toast */
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(60px);
+            background: #222; color: white; padding: 10px 22px; border-radius: 8px;
+            font-size: 0.88em; border: 1px solid #444; transition: transform 0.3s, opacity 0.3s;
+            opacity: 0; z-index: 9999; pointer-events: none;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        @media (max-width: 800px) {
+            .profile-layout { grid-template-columns: 1fr; top: -40px; }
+            .profile-banner { height: 120px; }
+            .score-dist { height: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-navbar">
+        <a href="index.html" class="nav-brand">
+            <img src="img/logo.jpg" class="nav-logo">
+            <span class="nav-title">LE MALICIEUX</span>
+        </a>
+        <div style="display:flex; gap:16px; align-items:center;">
+            <a href="playlist.html" class="nav-back">📂 Playlist</a>
+            <a href="index.html" class="nav-back">← Catalogue</a>
+        </div>
+    </nav>
+
+    <div class="profile-banner" id="profile-banner"></div>
+
+    <div id="root">
+        <div class="not-logged">
+            <h2>Connexion requise</h2>
+            <p>Connecte-toi pour accéder à ton profil.</p>
+            <button class="btn-login" id="btn-login-page">Se connecter avec Google</button>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+    <input type="file" id="avatar-file-input" accept="image/*">
+
+    <script type="module">
+        import { initializeApp }           from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, orderBy, limit }
+                                           from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider }
+                                           from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL }
+                                           from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",
+            authDomain: "le-malicieux-v2.firebaseapp.com",
+            projectId: "le-malicieux-v2",
+            storageBucket: "le-malicieux-v2.firebasestorage.app",
+            messagingSenderId: "938147445933",
+            appId: "1:938147445933:web:86f9c65ee0737e66a9da24"
+        };
+
+        const app     = initializeApp(firebaseConfig);
+        const db      = getFirestore(app);
+        const auth    = getAuth(app);
+        const storage = getStorage(app);
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+
+        // ── Helpers ─────────────────────────────────────────────────────────────
+        function toast(msg, duration = 2500) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), duration);
+        }
+
+        function timeAgo(ts) {
+            if (!ts) return '';
+            const diff = Date.now() - (ts.seconds ? ts.seconds * 1000 : ts);
+            const m = Math.floor(diff / 60000);
+            if (m < 1)  return "à l'instant";
+            if (m < 60) return `il y a ${m} min`;
+            const h = Math.floor(m / 60);
+            if (h < 24) return `il y a ${h}h`;
+            const d = Math.floor(h / 24);
+            if (d < 30) return `il y a ${d}j`;
+            return `il y a ${Math.floor(d/30)} mois`;
+        }
+
+        function getRealImgPath(firebaseImgName) {
+            if (!firebaseImgName) return "img/logo.jpg";
+            const match = firebaseImgName.match(/\d+/);
+            return match ? `img/anime-${match[0]}.jpg` : "img/logo.jpg";
+        }
+
+        function starsHtml(score) {
+            const full  = Math.floor(score / 2);
+            const half  = (score % 2) >= 1 ? 1 : 0;
+            const empty = 5 - full - half;
+            return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+        }
+
+        function formatDate(isoOrTs) {
+            if (!isoOrTs) return '—';
+            const d = typeof isoOrTs === 'string' ? new Date(isoOrTs) : new Date(isoOrTs.seconds * 1000);
+            return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+        // ── Auth ─────────────────────────────────────────────────────────────────
+        document.getElementById('btn-login-page').onclick = () => signInWithPopup(auth, provider);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return;
+            await buildProfile(user);
+        });
+
+        // ── Construction du profil ───────────────────────────────────────────────
+        async function buildProfile(user) {
+            // 1. Récupérer ou créer le doc utilisateur
+            const userRef  = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            let userData   = userSnap.exists() ? userSnap.data() : {};
+
+            // Créer le doc si absent
+            if (!userSnap.exists()) {
+                userData = {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || '',
+                    pseudo: '',
+                    photoURL: user.photoURL || '',
+                    createdAt: new Date().toISOString(),
+                    lastSeen: new Date().toISOString(),
+                };
+                await setDoc(userRef, userData);
+            }
+
+            const pseudo      = userData.pseudo || userData.displayName || user.displayName || 'Utilisateur';
+            const avatarUrl   = userData.photoURL || user.photoURL || 'img/logo.jpg';
+            const createdAt   = userData.createdAt || user.metadata?.creationTime || null;
+
+            // 2. Render
+            renderProfileShell(user, pseudo, avatarUrl, createdAt, userData.displayName || user.displayName);
+
+            // 3. Charger les animes en temps réel
+            onSnapshot(
+                query(collection(db, "playlists"), where("uid", "==", user.uid)),
+                (snap) => {
+                    const animes = [];
+                    snap.forEach(d => animes.push({ id: d.id, ...d.data() }));
+                    renderStats(animes);
+                    renderActivity(animes);
+                    renderRecentAnimes(animes);
+                    renderScoreDist(animes);
+                }
+            );
+
+            // 4. Avatar upload
+            document.getElementById('avatar-upload-btn').onclick = () =>
+                document.getElementById('avatar-file-input').click();
+
+            document.getElementById('avatar-file-input').onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const spinner = document.getElementById('avatar-spinner');
+                spinner.classList.add('active');
+                try {
+                    const storageRef = ref(storage, `avatars/${user.uid}`);
+                    await uploadBytes(storageRef, file);
+                    const url = await getDownloadURL(storageRef);
+                    await setDoc(userRef, { photoURL: url }, { merge: true });
+                    document.getElementById('profile-avatar').src = url;
+                    // Mettre à jour partout dans sessionStorage pour les autres pages
+                    sessionStorage.setItem('userAvatar', url);
+                    toast('✅ Photo de profil mise à jour !');
+                } catch(err) {
+                    console.error(err);
+                    toast('❌ Erreur lors de l\'upload.');
+                } finally {
+                    spinner.classList.remove('active');
+                }
+            };
+
+            // 5. Sauvegarde pseudo
+            document.getElementById('btn-save-pseudo').onclick = async () => {
+                const val = document.getElementById('input-pseudo').value.trim();
+                if (!val) { toast('⚠️ Le pseudo ne peut pas être vide.'); return; }
+                if (val.length > 30) { toast('⚠️ 30 caractères max.'); return; }
+                await setDoc(userRef, { pseudo: val }, { merge: true });
+                document.getElementById('display-pseudo').textContent = val;
+                // Propager dans sessionStorage pour les autres pages
+                sessionStorage.setItem('userPseudo', val);
+                toast('✅ Pseudo mis à jour !');
+            };
+        }
+
+        // ── Render shell (structure fixe) ───────────────────────────────────────
+        function renderProfileShell(user, pseudo, avatarUrl, createdAt, googleName) {
+            document.getElementById('root').innerHTML = `
+                <div class="profile-layout">
+                    <!-- SIDEBAR -->
+                    <div class="sidebar">
+                        <div class="avatar-card">
+                            <div class="avatar-wrapper">
+                                <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='img/logo.jpg'">
+                                <div id="avatar-upload-btn" class="avatar-upload-btn" title="Changer la photo">📷</div>
+                                <div id="avatar-spinner" class="upload-spinner">⏳</div>
+                            </div>
+
+                            <div class="profile-username" id="display-pseudo">${pseudo}</div>
+                            <div class="profile-google-name">Compte Google : ${googleName}</div>
+
+                            <div class="edit-pseudo-row">
+                                <input id="input-pseudo" type="text" placeholder="Changer le pseudo…" maxlength="30">
+                                <button id="btn-save-pseudo">OK</button>
+                            </div>
+
+                            <div class="profile-meta">
+                                Membre depuis<br>
+                                <span>${formatDate(createdAt)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Stats rapides -->
+                        <div class="stats-card">
+                            <h3>📊 Statistiques</h3>
+                            <div id="stat-rows">
+                                <div class="stat-row"><span class="label">Chargement…</span></div>
+                            </div>
+                            <div class="status-bars" id="status-bars"></div>
+                        </div>
+
+                        <!-- Score moyen -->
+                        <div class="stats-card">
+                            <h3>⭐ Score moyen</h3>
+                            <div class="score-avg-display">
+                                <div class="score-avg-number" id="avg-score">—</div>
+                                <div class="score-stars" id="avg-stars"></div>
+                                <div class="score-avg-label" id="avg-label">Aucune note pour l'instant</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CONTENU PRINCIPAL -->
+                    <div class="main-content">
+                        <!-- Activité récente -->
+                        <div class="section">
+                            <h2>🕐 Activité récente</h2>
+                            <div id="activity-feed">
+                                <div style="color:#555; font-size:0.85em;">Chargement…</div>
+                            </div>
+                        </div>
+
+                        <!-- Animes récents -->
+                        <div class="section">
+                            <h2>🎬 Derniers animes ajoutés</h2>
+                            <div id="recent-grid" class="recent-grid"></div>
+                        </div>
+
+                        <!-- Distribution des scores -->
+                        <div class="section">
+                            <h2>📈 Distribution des scores</h2>
+                            <div class="score-dist" id="score-dist"></div>
+                            <div style="display:flex; gap:4px; margin-top:24px;">
+                                ${Array.from({length:10},(_,i)=>`<div style="flex:1; text-align:center; font-size:0.65em; color:#555;">${i+1}</div>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        // ── Render stats ─────────────────────────────────────────────────────────
+        function renderStats(animes) {
+            const watching   = animes.filter(a => a.status === 'watching').length;
+            const completed  = animes.filter(a => a.status === 'completed').length;
+            const waiting    = animes.filter(a => a.status === 'waiting').length;
+            const total      = animes.length;
+            const totalEp    = animes.reduce((s, a) => s + (parseInt(a.epSeen) || 0), 0);
+            const rated      = animes.filter(a => a.rating && a.rating > 0);
+            const avgScore   = rated.length > 0
+                ? (rated.reduce((s, a) => s + a.rating, 0) / rated.length).toFixed(1)
+                : null;
+
+            document.getElementById('stat-rows').innerHTML = `
+                <div class="stat-row"><span class="label">Total animes</span><span class="value">${total}</span></div>
+                <div class="stat-row"><span class="label" style="color:#2ecc71;">En cours</span><span class="value">${watching}</span></div>
+                <div class="stat-row"><span class="label" style="color:#2e86de;">Terminés</span><span class="value">${completed}</span></div>
+                <div class="stat-row"><span class="label" style="color:#f1c40f;">En attente</span><span class="value">${waiting}</span></div>
+                <div class="stat-row"><span class="label">Épisodes vus</span><span class="value">${totalEp.toLocaleString('fr-FR')}</span></div>
+                <div class="stat-row"><span class="label">Notés</span><span class="value">${rated.length}</span></div>`;
+
+            // Barres de statut
+            const pct = (n) => total > 0 ? Math.round((n / total) * 100) : 0;
+            document.getElementById('status-bars').innerHTML = `
+                <div class="status-bar-item">
+                    <div class="bar-label"><span style="color:#2ecc71;">En cours</span><span>${watching}</span></div>
+                    <div class="bar-track"><div class="bar-fill bar-watching" style="width:${pct(watching)}%"></div></div>
+                </div>
+                <div class="status-bar-item">
+                    <div class="bar-label"><span style="color:#2e86de;">Terminés</span><span>${completed}</span></div>
+                    <div class="bar-track"><div class="bar-fill bar-completed" style="width:${pct(completed)}%"></div></div>
+                </div>
+                <div class="status-bar-item">
+                    <div class="bar-label"><span style="color:#f1c40f;">En attente</span><span>${waiting}</span></div>
+                    <div class="bar-track"><div class="bar-fill bar-waiting" style="width:${pct(waiting)}%"></div></div>
+                </div>`;
+
+            // Score moyen
+            if (avgScore) {
+                document.getElementById('avg-score').textContent = avgScore + '/10';
+                document.getElementById('avg-stars').textContent = starsHtml(parseFloat(avgScore));
+                document.getElementById('avg-label').textContent = `Basé sur ${rated.length} note${rated.length > 1 ? 's' : ''}`;
+            }
+        }
+
+        // ── Render activité ──────────────────────────────────────────────────────
+        function renderActivity(animes) {
+            // On génère des événements à partir des données dispo
+            const events = [];
+
+            animes.forEach(a => {
+                // Ajouté à la liste
+                if (a.addedAt) events.push({ type: 'added', anime: a, ts: a.addedAt });
+                // Terminé
+                if (a.status === 'completed' && a.completedAt) events.push({ type: 'finished', anime: a, ts: a.completedAt });
+                // Noté
+                if (a.ratedAt && a.rating) events.push({ type: 'rated', anime: a, ts: a.ratedAt });
+                // Épisode vu
+                if (a.epUpdatedAt && a.epSeen > 0) events.push({ type: 'ep', anime: a, ts: a.epUpdatedAt });
+            });
+
+            // Trier par date décroissante, prendre les 15 derniers
+            events.sort((a, b) => {
+                const ta = a.ts?.seconds ? a.ts.seconds : (a.ts ? new Date(a.ts).getTime() / 1000 : 0);
+                const tb = b.ts?.seconds ? b.ts.seconds : (b.ts ? new Date(b.ts).getTime() / 1000 : 0);
+                return tb - ta;
+            });
+            const recent = events.slice(0, 15);
+
+            if (recent.length === 0) {
+                document.getElementById('activity-feed').innerHTML =
+                    `<div style="color:#555; font-size:0.85em; text-align:center; padding:20px 0;">Aucune activité récente.<br><span style="font-size:0.9em;">Ajoute des animes à ta liste pour commencer !</span></div>`;
+                return;
+            }
+
+            const tagMap = {
+                added:    { cls: 'tag-added',    label: 'Ajouté' },
+                finished: { cls: 'tag-finished',  label: 'Terminé' },
+                rated:    { cls: 'tag-rated',     label: 'Noté' },
+                ep:       { cls: 'tag-ep',        label: 'Épisode vu' },
+            };
+
+            document.getElementById('activity-feed').innerHTML = recent.map(ev => {
+                const a   = ev.anime;
+                const tag = tagMap[ev.type];
+                let detail = '';
+                if (ev.type === 'rated')    detail = `Note : ⭐ ${a.rating}/10`;
+                if (ev.type === 'ep')       detail = `Épisode ${a.epSeen} / ${a.epMax || '?'}`;
+                if (ev.type === 'added')    detail = `Statut : ${a.status === 'watching' ? 'En cours' : a.status === 'completed' ? 'Terminé' : 'En attente'}`;
+                if (ev.type === 'finished') detail = `Terminé avec ${a.epSeen} épisode${a.epSeen > 1 ? 's' : ''}`;
+
+                return `
+                <div class="activity-item">
+                    <img class="activity-img" src="${getRealImgPath(a.img)}" onerror="this.src='img/logo.jpg'">
+                    <div class="activity-body">
+                        <a href="video.html?name=${encodeURIComponent(a.anime)}" class="activity-title">${a.anime}</a>
+                        <div class="activity-detail">
+                            <span class="tag ${tag.cls}">${tag.label}</span>${detail}
+                        </div>
+                    </div>
+                    <div class="activity-time">${timeAgo(ev.ts)}</div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── Render animes récents ────────────────────────────────────────────────
+        function renderRecentAnimes(animes) {
+            const sorted = [...animes]
+                .filter(a => a.addedAt)
+                .sort((a, b) => {
+                    const ta = a.addedAt?.seconds || 0;
+                    const tb = b.addedAt?.seconds || 0;
+                    return tb - ta;
+                })
+                .slice(0, 12);
+
+            if (sorted.length === 0) {
+                document.getElementById('recent-grid').innerHTML =
+                    `<div style="color:#555; font-size:0.85em;">Aucun anime ajouté pour l'instant.</div>`;
+                return;
+            }
+
+            document.getElementById('recent-grid').innerHTML = sorted.map(a => `
+                <a href="video.html?name=${encodeURIComponent(a.anime)}" class="recent-card">
+                    <img src="${getRealImgPath(a.img)}" onerror="this.src='img/logo.jpg'">
+                    <div class="rc-title">${a.anime}</div>
+                </a>`).join('');
+        }
+
+        // ── Render distribution scores ───────────────────────────────────────────
+        function renderScoreDist(animes) {
+            const counts = Array(10).fill(0);
+            animes.forEach(a => { if (a.rating >= 1 && a.rating <= 10) counts[a.rating - 1]++; });
+            const maxCount = Math.max(...counts, 1);
+
+            document.getElementById('score-dist').innerHTML = counts.map((c, i) => {
+                const h = Math.round((c / maxCount) * 100);
+                return `<div class="score-dist-bar" style="height:${Math.max(h, c > 0 ? 8 : 0)}%" title="${c} anime${c > 1 ? 's' : ''} noté${c > 1 ? 's' : ''} ${i+1}/10">
+                    ${c > 0 ? `<div class="bar-count">${c}</div>` : ''}
+                    <div class="bar-val">${i+1}</div>
+                </div>`;
+            }).join('');
+        }
+
+    </script>
+</body>
+</html>
