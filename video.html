@@ -51,7 +51,7 @@
 </head>
 <body>
     <div class="container">
-        <a href="index.html" id="back-link" class="back-btn">← Retour au catalogue</a>
+        <a href="index.html" id="back-link" class="back-btn" onclick="handleBack(event)">← Retour au catalogue</a>
         <div id="anime-details">Chargement des données...</div>
         <div id="comments-section" style="margin-top:20px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333;">
             <h3>Commentaires</h3>
@@ -75,6 +75,20 @@
         const animeName = params.get('name');
         let currentUser = null;
         let userRating = 0;
+
+        // ─── RETOUR INTELLIGENT ──────────────────────────────────────────────────
+        // Si on vient du site (index, playlist…) → history.back() pour restaurer
+        // le scroll et l'état exact. Sinon → fallback vers index.html.
+        window.handleBack = (e) => {
+            e.preventDefault();
+            const from = document.referrer;
+            if (from && from.startsWith(window.location.origin)) {
+                history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        };
+        // ────────────────────────────────────────────────────────────────────────
 
         // ─── JIKAN / MAL ────────────────────────────────────────────────────────────
         function traduitStatutMAL(status) {
@@ -228,13 +242,15 @@
                     }
                 });
 
+                // Adapter le label du bouton retour selon la page d'origine
+                const _ref = document.referrer;
+                const _bl = document.getElementById('back-link');
+                if (_ref.includes('playlist.html'))  _bl.innerText = '← Retour à la playlist';
+                else if (_ref.includes('tags.html')) _bl.innerText = '← Retour aux tags';
+
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
-                        if (document.referrer.includes('playlist.html')) {
-                            const bl = document.getElementById('back-link');
-                            bl.innerText = "← Retour"; bl.href = "playlist.html";
-                        }
                         const docRef = doc(db, "playlists", u.uid + "_" + anime.nom);
                         const docSnap = await getDoc(docRef);
                         if(docSnap.exists()) {

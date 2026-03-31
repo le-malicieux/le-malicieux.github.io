@@ -286,10 +286,21 @@
         window.saveState = () => {
             sessionStorage.setItem('indexSearch', document.getElementById('search').value);
             sessionStorage.setItem('indexSort', document.getElementById('sort').value);
+            sessionStorage.setItem('indexScroll', window.scrollY);
         };
 
+        // Retour à l'accueil SANS rechargement : vide search/sort et ré-affiche
         window.resetToHome = () => {
-            window.location.href = "index.html";
+            document.getElementById('search').value = '';
+            document.getElementById('sort').value = '';
+            document.getElementById('search').placeholder = 'Rechercher un anime...';
+            sessionStorage.removeItem('indexSearch');
+            sessionStorage.removeItem('indexSort');
+            sessionStorage.removeItem('indexScroll');
+            // Supprimer le paramètre ?tag= de l'URL sans recharger
+            history.replaceState(null, '', window.location.pathname);
+            runFilterAndSort();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         window.handleImgError = function(img, fileNameFromCSV) {
@@ -330,11 +341,19 @@
                 }
 
                 const savedSearch = sessionStorage.getItem('indexSearch');
-                const savedSort = sessionStorage.getItem('indexSort');
+                const savedSort   = sessionStorage.getItem('indexSort');
+                const savedScroll = sessionStorage.getItem('indexScroll');
                 if (savedSearch !== null) document.getElementById('search').value = savedSearch;
-                if (savedSort !== null) document.getElementById('sort').value = savedSort;
+                if (savedSort   !== null) document.getElementById('sort').value   = savedSort;
 
                 runFilterAndSort();
+
+                // Restaurer la position de scroll si on revient de video.html
+                if (savedScroll && parseInt(savedScroll) > 0) {
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        window.scrollTo({ top: parseInt(savedScroll), behavior: 'instant' });
+                    }));
+                }
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
