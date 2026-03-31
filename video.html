@@ -11,120 +11,41 @@
         .container { max-width: 1100px; margin: 0 auto; }
         .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 6px; transition: 0.3s; }
         .back-btn:hover { background: var(--primary); color: white; }
-        
         .anime-header { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
         .top-info { display: flex; gap: 25px; margin-bottom: 25px; }
         .poster { width: 280px; flex-shrink: 0; }
         .poster img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .main-details { flex: 1; display: flex; flex-direction: column; gap: 15px; }
         .anime-title { font-size: 2.2em; color: var(--primary); margin: 0; }
-        
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .stat-item { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; position: relative; }
         .stat-item small { color: var(--primary); font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 4px; }
         .stat-item span { font-weight: bold; font-size: 0.9em; }
-        /* Badge MAL sur les stats mises à jour */
         .stat-item.mal-live { border-color: #2e86de; }
-        .stat-item.mal-live::after {
-            content: 'MAL';
-            position: absolute;
-            top: 4px; right: 5px;
-            font-size: 0.55em;
-            color: #2e86de;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-        /* Indicateur de chargement MAL */
-        .mal-loading {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.75em;
-            color: #888;
-            margin-top: 6px;
-        }
-        .mal-loading .dot {
-            width: 6px; height: 6px;
-            background: #2e86de;
-            border-radius: 50%;
-            animation: pulse 1s infinite;
-        }
+        .stat-item.mal-live::after { content: 'MAL'; position: absolute; top: 4px; right: 5px; font-size: 0.55em; color: #2e86de; font-weight: bold; letter-spacing: 0.5px; }
+        .mal-loading { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75em; color: #888; margin-top: 6px; }
+        .mal-loading .dot { width: 6px; height: 6px; background: #2e86de; border-radius: 50%; animation: pulse 1s infinite; }
         .mal-loading .dot:nth-child(2) { animation-delay: 0.2s; }
         .mal-loading .dot:nth-child(3) { animation-delay: 0.4s; }
         @keyframes pulse { 0%,100% { opacity:0.2; } 50% { opacity:1; } }
-
         .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-
-        select { 
-            background: #333; 
-            color: #fff; 
-            border: 1px solid #555; 
-            padding: 10px; 
-            width: 100%; 
-            border-radius: 4px; 
-            margin-bottom: 12px; 
-            cursor: pointer; 
-        }
+        select { background: #333; color: #fff; border: 1px solid #555; padding: 10px; width: 100%; border-radius: 4px; margin-bottom: 12px; cursor: pointer; }
         select option { background-color: #222 !important; color: #fff !important; }
-
-        .ep-row { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            gap: 10px; 
-            background: rgba(255,255,255,0.05); 
-            padding: 10px; 
-            border-radius: 6px; 
-            margin-bottom: 15px;
-            border: 1px solid #444;
-        }
+        .ep-row { display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #444; }
         .ep-row span { font-weight: bold; color: #aaa; }
         #user-ep { width: auto; min-width: 80px; margin-bottom: 0; text-align: center; padding: 5px; }
-
         .star-rating { font-size: 1.4em; color: #444; cursor: pointer; margin: 10px 0; text-align: center; display: flex; justify-content: center; gap: 2px; }
         .star-rating span.active { color: #f1c40f; }
-
         .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); }
         .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
         .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 10px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9em; text-align: center; border: 1px solid #444; font-weight: bold; transition: 0.2s; }
         .btn-link:hover { background: var(--primary); border-color: var(--primary); }
-        
-        .info-visionnage-csv { 
-            background: rgba(255,255,255,0.05); 
-            border-left: 3px solid var(--primary); 
-            padding: 10px; 
-            border-radius: 4px; 
-            font-size: 0.85em; 
-            margin-bottom: 12px; 
-            color: #bbb; 
-        }
-
-        .info-generale-fixe { 
-            margin-top: 15px; 
-            padding-top: 12px; 
-            border-top: 1px solid rgba(255,255,255,0.1); 
-            font-size: 0.8em; 
-            color: #888; 
-            line-height: 1.4;
-        }
-
+        .info-visionnage-csv { background: rgba(255,255,255,0.05); border-left: 3px solid var(--primary); padding: 10px; border-radius: 4px; font-size: 0.85em; margin-bottom: 12px; color: #bbb; }
+        .info-generale-fixe { margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8em; color: #888; line-height: 1.4; }
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
-
-        /* Lien MAL discret */
-        .mal-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.75em;
-            color: #2e86de;
-            text-decoration: none;
-            margin-top: 4px;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
+        .mal-link { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75em; color: #2e86de; text-decoration: none; margin-top: 4px; opacity: 0.8; transition: opacity 0.2s; }
         .mal-link:hover { opacity: 1; text-decoration: underline; }
-
         @media (max-width: 800px) { .top-info { flex-direction: column; } .bottom-controls { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -132,7 +53,6 @@
     <div class="container">
         <a href="index.html" id="back-link" class="back-btn">← Retour au catalogue</a>
         <div id="anime-details">Chargement des données...</div>
-
         <div id="comments-section" style="margin-top:20px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333;">
             <h3>Commentaires</h3>
             <textarea id="comment-input" style="width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box;" placeholder="Ajouter un commentaire..." rows="3"></textarea>
@@ -157,82 +77,57 @@
         let userRating = 0;
 
         // ─── JIKAN / MAL ────────────────────────────────────────────────────────────
-        // Traduit le statut MAL en français
         function traduitStatutMAL(status) {
-            const map = {
-                'Finished Airing': 'Terminé',
-                'Currently Airing': 'En cours',
-                'Not yet aired': 'À venir',
-                'Airing': 'En cours',
-            };
+            const map = { 'Finished Airing': 'Terminé', 'Currently Airing': 'En cours', 'Not yet aired': 'À venir', 'Airing': 'En cours' };
             return map[status] || status || '—';
         }
+        function formatPop(n) { return (!n && n !== 0) ? '—' : '#' + n.toLocaleString('fr-FR'); }
+        function formatScore(s) { return (!s && s !== 0) ? '—' : parseFloat(s).toFixed(2); }
 
-        // Formate la popularité : 12345 → "#12 345"
-        function formatPop(n) {
-            if (!n && n !== 0) return '—';
-            return '#' + n.toLocaleString('fr-FR');
-        }
-
-        // Formate le score : 7.89 → "7.89"
-        function formatScore(s) {
-            if (!s && s !== 0) return '—';
-            return parseFloat(s).toFixed(2);
-        }
-
-        // Recherche sur Jikan et met à jour les 3 stats à la volée
-        async function fetchMALData(nomAnime) {
-            // On prend le premier segment si le nom contient "/" (ex: "Furifure/2")
-            const searchQuery = nomAnime.split('/')[0].trim();
+        /**
+         * Récupère les données MAL via Jikan.
+         * Si malId est renseigné dans le CSV → appel direct par ID (fiable à 100%).
+         * Sinon → recherche par nom (peut se tromper sur des titres ambigus).
+         */
+        async function fetchMALData(nomAnime, malId) {
             try {
-                const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(searchQuery)}&limit=1&sfw=false`;
-                const resp = await fetch(url);
-                if (!resp.ok) return null;
-                const json = await resp.json();
-                if (!json.data || json.data.length === 0) return null;
-                const item = json.data[0];
-                return {
-                    score:      item.score,
-                    popularity: item.popularity,
-                    status:     item.status,
-                    malUrl:     item.url,
-                    malId:      item.mal_id
-                };
+                if (malId && malId.trim() !== '') {
+                    // ID forcé → appel direct
+                    const resp = await fetch(`https://api.jikan.moe/v4/anime/${malId.trim()}`);
+                    if (!resp.ok) return null;
+                    const json = await resp.json();
+                    if (!json.data) return null;
+                    const item = json.data;
+                    return { score: item.score, popularity: item.popularity, status: item.status, malUrl: item.url };
+                } else {
+                    // Recherche par nom (premier segment avant le slash)
+                    const searchQuery = nomAnime.split('/')[0].trim();
+                    const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(searchQuery)}&limit=1&sfw=false`);
+                    if (!resp.ok) return null;
+                    const json = await resp.json();
+                    if (!json.data || json.data.length === 0) return null;
+                    const item = json.data[0];
+                    return { score: item.score, popularity: item.popularity, status: item.status, malUrl: item.url };
+                }
             } catch(e) {
                 console.warn('Erreur Jikan:', e);
                 return null;
             }
         }
 
-        // Met à jour les cellules stats déjà dans le DOM
         function applyMALStats(malData) {
             if (!malData) return;
-
             const popEl    = document.getElementById('stat-pop');
             const scoreEl  = document.getElementById('stat-score');
             const etatEl   = document.getElementById('stat-etat');
             const malBadge = document.getElementById('mal-badge');
-
-            if (popEl && malData.popularity != null) {
-                popEl.textContent = formatPop(malData.popularity);
-                popEl.closest('.stat-item').classList.add('mal-live');
-            }
-            if (scoreEl && malData.score != null) {
-                scoreEl.textContent = '⭐ ' + formatScore(malData.score);
-                scoreEl.closest('.stat-item').classList.add('mal-live');
-            }
-            if (etatEl && malData.status) {
-                etatEl.textContent = traduitStatutMAL(malData.status);
-                etatEl.closest('.stat-item').classList.add('mal-live');
-            }
-
-            // Remplace l'indicateur de chargement par un lien MAL
+            if (popEl && malData.popularity != null)  { popEl.textContent = formatPop(malData.popularity);          popEl.closest('.stat-item').classList.add('mal-live'); }
+            if (scoreEl && malData.score != null)      { scoreEl.textContent = '⭐ ' + formatScore(malData.score);  scoreEl.closest('.stat-item').classList.add('mal-live'); }
+            if (etatEl && malData.status)              { etatEl.textContent = traduitStatutMAL(malData.status);     etatEl.closest('.stat-item').classList.add('mal-live'); }
             if (malBadge) {
-                if (malData.malUrl) {
-                    malBadge.innerHTML = `<a href="${malData.malUrl}" target="_blank" class="mal-link">🔗 Voir sur MyAnimeList</a>`;
-                } else {
-                    malBadge.innerHTML = '';
-                }
+                malBadge.innerHTML = malData.malUrl
+                    ? `<a href="${malData.malUrl}" target="_blank" class="mal-link">🔗 Voir sur MyAnimeList</a>`
+                    : '';
             }
         }
         // ────────────────────────────────────────────────────────────────────────────
@@ -250,11 +145,14 @@
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                     if (clean(c[0]) === animeName) {
                         anime = {
-                            nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), year: clean(c[3]),
-                            ep: clean(c[4]), censure: clean(c[5]), etat: clean(c[6]), desc: clean(c[7]),
-                            img: clean(c[8]), stream: c[9] ? c[9].split(',').map(clean) : [],
-                            dl: c[10] ? c[10].split(',').map(clean) : [], infoV: clean(c[11]),
-                            tags: c[12] ? c[12].split(',').filter(t => t.trim() !== "").map(clean) : []
+                            nom:    clean(c[0]),  pop:   clean(c[1]),  score: clean(c[2]),
+                            year:   clean(c[3]),  ep:    clean(c[4]),  censure: clean(c[5]),
+                            etat:   clean(c[6]),  desc:  clean(c[7]),  img:   clean(c[8]),
+                            stream: c[9]  ? c[9].split(',').map(clean)  : [],
+                            dl:     c[10] ? c[10].split(',').map(clean) : [],
+                            infoV:  clean(c[11]),
+                            tags:   c[12] ? c[12].split(',').filter(t => t.trim() !== "").map(clean) : [],
+                            malId:  clean(c[13]) // ← Colonne N : ID MAL forcé (laisser vide pour auto)
                         };
                         break;
                     }
@@ -265,14 +163,10 @@
                 const epMatches = anime.ep.match(/\d+/g);
                 const maxEp = epMatches ? parseInt(epMatches[epMatches.length - 1]) : 0;
                 let epOptions = "";
-                for(let i=0; i <= maxEp; i++) { epOptions += `<option value="${i}">${i}</option>`; }
+                for(let i = 0; i <= maxEp; i++) { epOptions += `<option value="${i}">${i}</option>`; }
 
-                // Génération des tags ou message vide
                 const tagsHtml = anime.tags.length > 0 
-                    ? anime.tags.map(t => `
-                        <a href="tags.html?tag=${encodeURIComponent(t)}" style="text-align: center; background: rgba(255,255,255,0.05); color: #aaa; text-decoration: none; font-size: 0.75em; padding: 5px 8px; border-radius: 4px; border: 1px solid #333; transition: 0.3s; white-space: nowrap;" onmouseover="this.style.borderColor='var(--primary)';this.style.color='white'" onmouseout="this.style.borderColor='#333';this.style.color='#aaa'">
-                            ${t}
-                        </a>`).join('')
+                    ? anime.tags.map(t => `<a href="tags.html?tag=${encodeURIComponent(t)}" style="text-align:center; background:rgba(255,255,255,0.05); color:#aaa; text-decoration:none; font-size:0.75em; padding:5px 8px; border-radius:4px; border:1px solid #333; transition:0.3s; white-space:nowrap;" onmouseover="this.style.borderColor='var(--primary)';this.style.color='white'" onmouseout="this.style.borderColor='#333';this.style.color='#aaa'">${t}</a>`).join('')
                     : `<div style="width:100%; text-align:center; color:#555; font-size:0.75em; padding:5px; border:1px dashed #333; border-radius:4px;">Aucun tag répertorié</div>`;
 
                 display.innerHTML = `
@@ -291,19 +185,16 @@
                                     <div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div>
                                     <div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div>
                                 </div>
-                                <!-- Indicateur de chargement MAL (remplacé après la réponse) -->
                                 <div id="mal-badge">
                                     <span class="mal-loading">
                                         <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                                        Récupération des données MAL…
+                                        ${anime.malId ? 'Chargement MAL (ID forcé)…' : 'Récupération des données MAL…'}
                                     </span>
                                 </div>
                                 <p style="font-size:0.95em; color:#ccc; line-height:1.6;">${anime.desc}</p>
                             </div>
                         </div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px;">
-                            ${tagsHtml}
-                        </div>
+                        <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:20px;">${tagsHtml}</div>
                         <div class="bottom-controls">
                             <div class="playlist-box">
                                 <label style="font-size:0.7em; color:var(--primary); font-weight:bold; text-transform:uppercase; margin-bottom:10px; display:block;">Ma Progression</label>
@@ -315,12 +206,9 @@
                             <div class="link-box">
                                 <div class="link-title">📥 Téléchargement</div>
                                 <div id="dl-area" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px;"></div>
-                                
                                 <div class="link-title">🎬 Visionnage</div>
                                 <div class="info-visionnage-csv">${anime.infoV || "Aucune information supplémentaire pour le visionnage."}</div>
-                                
-                                <div id="stream-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
-
+                                <div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
                                 <div class="info-generale-fixe">
                                     <strong>Attention :</strong> Quand une œuvre possède une deuxième saison qui porte le même nom ou un nom très ressemblant, je créé une seule carte pour toutes les saisons donc les informations comme la popularité sont plus générales, les liens de visionnage et de téléchargement sont biens présents, j'ai aussi inclus par exemple pour l'anime Furifure/2, le slash (/) sépare la saison 1 de la saison 2. Donc quand vous voyez un slash (/) dans un nom, c'est qu'il y a plusieurs saisons, sauf cas compliqués comme Ikenai Koto où ses ses 3 saisons sont en 3 cartes ou Bible Black en une seule. Si ce n'est pas clair n'hésitez pas à poser des questions sur le discord :)
                                 </div>
@@ -328,19 +216,17 @@
                         </div>
                     </div>`;
 
-                // Remplissage des liens
                 anime.dl.filter(l => l.trim()).forEach((l, i) => document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">Lien ${i+1}</a>`);
                 anime.stream.filter(l => l.trim()).forEach((l, i) => document.getElementById('stream-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lecteur ${i+1} ↗</a>`);
 
                 // ── Récupération MAL en arrière-plan ──────────────────────────────
-                fetchMALData(anime.nom).then(malData => {
+                fetchMALData(anime.nom, anime.malId).then(malData => {
                     applyMALStats(malData);
                     if (!malData) {
                         const badge = document.getElementById('mal-badge');
                         if (badge) badge.innerHTML = `<span style="font-size:0.72em; color:#555;">Données MAL indisponibles</span>`;
                     }
                 });
-                // ─────────────────────────────────────────────────────────────────
 
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
@@ -349,10 +235,8 @@
                             const bl = document.getElementById('back-link');
                             bl.innerText = "← Retour"; bl.href = "playlist.html";
                         }
-
                         const docRef = doc(db, "playlists", u.uid + "_" + anime.nom);
                         const docSnap = await getDoc(docRef);
-                        
                         if(docSnap.exists()) {
                             const d = docSnap.data();
                             document.getElementById('user-status').value = d.status || 'watching';
@@ -360,33 +244,18 @@
                             userRating = d.rating || 0;
                             updateStars(userRating);
                         }
-
                         const autoSave = () => {
-                            setDoc(docRef, { 
-                                uid: u.uid, anime: anime.nom, img: anime.img, 
-                                status: document.getElementById('user-status').value, 
-                                epSeen: parseInt(document.getElementById('user-ep').value), 
-                                rating: userRating, 
-                                epMax: maxEp 
-                            }, { merge: true });
+                            setDoc(docRef, { uid: u.uid, anime: anime.nom, img: anime.img, status: document.getElementById('user-status').value, epSeen: parseInt(document.getElementById('user-ep').value), rating: userRating, epMax: maxEp }, { merge: true });
                         };
-
                         document.getElementById('user-status').onchange = autoSave;
                         document.getElementById('user-ep').onchange = autoSave;
-                        document.getElementById('stars').onclick = (e) => { 
-                            if(e.target.dataset.v) { 
-                                userRating = parseInt(e.target.dataset.v); 
-                                updateStars(userRating); 
-                                autoSave(); 
-                            } 
-                        };
+                        document.getElementById('stars').onclick = (e) => { if(e.target.dataset.v) { userRating = parseInt(e.target.dataset.v); updateStars(userRating); autoSave(); } };
                         document.getElementById('delete-btn').onclick = () => { if(confirm("Supprimer de votre liste ?")) deleteDoc(docRef).then(() => location.reload()); };
                     }
                 });
 
                 const updateStars = (v) => document.querySelectorAll('#stars span').forEach(s => s.classList.toggle('active', s.dataset.v <= v));
 
-                // Commentaires
                 onSnapshot(query(collection(db, "commentaires"), where("anime", "==", animeName)), (snap) => {
                     const cDisp = document.getElementById('comments-display');
                     let docs = [];

@@ -69,6 +69,9 @@
         
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
         .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; order: -1; }
+
+        /* Stat MAL mise à jour sur la carte */
+        .mal-updated { color: #5dade2; }
         
         .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
         .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
@@ -161,6 +164,105 @@
         let allAnimes = [];
         let shuffledAnimes = [];
 
+        // ─── Cache MAL (sessionStorage) ─────────────────────────────────────────────
+        // Clé : "mal_cache_<nomAnime>", valeur JSON : { score, popularity, ts }
+        // Durée de vie : 1h (évite de re-requêter à chaque tri/filtre)
+        const MAL_TTL = 60 * 60 * 1000; // 1 heure en ms
+
+        function malCacheGet(nom) {
+            try {
+                const raw = sessionStorage.getItem('mal_cache_' + nom);
+                if (!raw) return null;
+                const obj = JSON.parse(raw);
+                if (Date.now() - obj.ts > MAL_TTL) { sessionStorage.removeItem('mal_cache_' + nom); return null; }
+                return obj;
+            } catch { return null; }
+        }
+
+        function malCacheSet(nom, data) {
+            try { sessionStorage.setItem('mal_cache_' + nom, JSON.stringify({ ...data, ts: Date.now() })); } catch {}
+        }
+
+        // File d'attente pour éviter le rate-limit Jikan (max ~3 req/s)
+        let jikanQueue = [];
+        let jikanRunning = false;
+
+        function jikanEnqueue(task) {
+            jikanQueue.push(task);
+            if (!jikanRunning) jikanDrain();
+        }
+
+        async function jikanDrain() {
+            jikanRunning = true;
+            while (jikanQueue.length > 0) {
+                const task = jikanQueue.shift();
+                await task();
+                await new Promise(r => setTimeout(r, 400)); // ~2.5 req/s
+            }
+            jikanRunning = false;
+        }
+
+        /**
+         * Récupère score+popularité MAL pour une carte.
+         * Utilise le cache sessionStorage si dispo, sinon appelle Jikan.
+         * malId = ID forcé depuis le CSV (colonne N), peut être vide.
+         */
+        function fetchMALForCard(nom, malId, scoreEl, popEl) {
+            const cached = malCacheGet(nom);
+            if (cached) {
+                applyCardMAL(scoreEl, popEl, cached);
+                return;
+            }
+            jikanEnqueue(async () => {
+                try {
+                    let item = null;
+                    if (malId && malId.trim() !== '') {
+                        const resp = await fetch(`https://api.jikan.moe/v4/anime/${malId.trim()}`);
+                        if (resp.ok) { const j = await resp.json(); item = j.data || null; }
+                    } else {
+                        const q = nom.split('/')[0].trim();
+                        const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`);
+                        if (resp.ok) { const j = await resp.json(); item = j.data?.[0] || null; }
+                    }
+                    if (item) {
+                        const data = { score: item.score, popularity: item.popularity };
+                        malCacheSet(nom, data);
+                        applyCardMAL(scoreEl, popEl, data);
+                    }
+                } catch(e) { /* silencieux */ }
+            });
+        }
+
+        function applyCardMAL(scoreEl, popEl, data) {
+            if (!scoreEl || !popEl) return;
+            if (data.score != null) {
+                scoreEl.textContent = '⭐' + parseFloat(data.score).toFixed(2);
+                scoreEl.classList.add('mal-updated');
+            }
+            if (data.popularity != null) {
+                popEl.textContent = '📈#' + data.popularity.toLocaleString('fr-FR');
+                popEl.classList.add('mal-updated');
+            }
+        }
+
+        // Intersection Observer : ne charge MAL que quand la carte est visible
+        const cardObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const card = entry.target;
+                    const nom   = card.dataset.nom;
+                    const malId = card.dataset.malid || '';
+                    const scoreEl = card.querySelector('.mal-score');
+                    const popEl   = card.querySelector('.mal-pop');
+                    if (nom && scoreEl && popEl) {
+                        fetchMALForCard(nom, malId, scoreEl, popEl);
+                    }
+                    cardObserver.unobserve(card); // On ne charge qu'une fois
+                }
+            });
+        }, { rootMargin: '200px' }); // Précharge 200px avant l'entrée dans le viewport
+        // ────────────────────────────────────────────────────────────────────────────
+
         onAuthStateChanged(auth, async (user) => {
             const authUi = document.getElementById('auth-ui');
             if (user) {
@@ -216,7 +318,8 @@
                         nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), 
                         sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), 
                         etat: clean(c[6]), img: clean(c[8]),
-                        tags: clean(c[12]) // Colonne M
+                        tags: clean(c[12]),
+                        malId: clean(c[13]) // ← Colonne N : ID MAL forcé (optionnel)
                     };
                 }).filter(a => a !== null);
 
@@ -271,10 +374,13 @@
 
         function displayAnimes(list, sortMode) {
             const container = document.getElementById('anime-container');
-            container.innerHTML = list.map(a => {
-                const hl = (m) => (sortMode === m) ? 'class="highlight"' : '';
-                return `
-                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" onclick="saveState()">
+
+            // Désobserver les anciennes cartes avant de vider le conteneur
+            container.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.unobserve(c));
+
+            const hl = (m) => (sortMode === m) ? 'class="highlight"' : '';
+            container.innerHTML = list.map(a => `
+                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" data-nom="${a.nom.replace(/"/g,'&quot;')}" data-malid="${a.malId || ''}" onclick="saveState()">
                     <div class="img-container">
                         <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
                     </div>
@@ -282,8 +388,8 @@
                         <div class="card-title">${a.nom}</div>
                         <div class="card-meta-row">
                             <span ${hl('sortie')}>📅${a.sortie}</span>
-                            <span ${hl('score')}>⭐${a.score}</span>
-                            <span ${hl('popularite')}>📈${a.pop}</span>
+                            <span ${hl('score')} class="mal-score">⭐${a.score}</span>
+                            <span ${hl('popularite')} class="mal-pop">📈${a.pop}</span>
                         </div>
                         <div class="card-meta-row">
                             <span ${hl('episodes')}>🎞️${a.ep}</span>
@@ -291,7 +397,10 @@
                             <span ${hl('etat')}>🛠️${a.etat}</span>
                         </div>
                     </div>
-                </a>`}).join('');
+                </a>`).join('');
+
+            // Observer chaque nouvelle carte
+            container.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
         }
 
         window.toggleM = () => {
