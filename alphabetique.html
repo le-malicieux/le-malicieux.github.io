@@ -278,7 +278,7 @@
 
         let allAnimes = [];
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             const authUi = document.getElementById('auth-ui');
             if (user) {
                 // Pseudo + avatar
