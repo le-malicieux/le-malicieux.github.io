@@ -17,7 +17,7 @@
         .poster img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .main-details { flex: 1; display: flex; flex-direction: column; gap: 15px; }
         .anime-title { font-size: 2.2em; color: var(--primary); margin: 0; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .stat-item { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; position: relative; }
         .stat-item small { color: var(--primary); font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 4px; }
         .stat-item span { font-weight: bold; font-size: 0.9em; }
@@ -166,7 +166,8 @@
                             dl:     c[10] ? c[10].split(',').map(clean) : [],
                             infoV:  clean(c[11]),
                             tags:   c[12] ? c[12].split(',').filter(t => t.trim() !== "").map(clean) : [],
-                            malId:  clean(c[13]) // ← Colonne N : ID MAL forcé (laisser vide pour auto)
+                            malId:  clean(c[13]),
+                            editeur: clean(c[14]) // ← Colonne O : Éditeur
                         };
                         break;
                     }
@@ -198,6 +199,7 @@
                                     <div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div>
                                     <div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div>
                                     <div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div>
+                                    <div class="stat-item" style="grid-column: span 2;"><small>Éditeur</small><span style="font-size:0.85em;">${anime.editeur || '—'}</span></div>
                                 </div>
                                 <div id="mal-badge">
                                     <span class="mal-loading">

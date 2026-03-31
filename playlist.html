@@ -94,6 +94,7 @@
                 <option value="sortie">Année</option>
                 <option value="episodes">Épisodes</option>
                 <option value="note_perso">Ma Note (⭐)</option>
+                <option value="editeur">Éditeur</option>
             </select>
         </div>
 
@@ -109,7 +110,7 @@
         <table id="playlist-table" class="list-table">
             <thead>
                 <tr>
-                    <th class="status-bar"></th><th>#</th><th>Image</th><th>Titre</th><th>Ma Note</th><th>Progrès</th><th>Score MAL</th><th>Pop.</th><th>Année</th><th>Censure</th><th>Action</th>
+                    <th class="status-bar"></th><th>#</th><th>Image</th><th>Titre</th><th>Ma Note</th><th>Progrès</th><th>Score MAL</th><th>Pop.</th><th>Année</th><th>Censure</th><th>Éditeur</th><th>Action</th>
                 </tr>
             </thead>
             <tbody id="list-body"></tbody>
@@ -192,7 +193,7 @@
                 if(c[0]) {
                     csvDataMap[cl(c[0])] = {
                         pop: cl(c[1]), score: cl(c[2]), sortie: cl(c[3]), 
-                        epMax: cl(c[4]), censure: cl(c[5])
+                        epMax: cl(c[4]), censure: cl(c[5]), editeur: cl(c[14])
                     };
                 }
             });
@@ -315,6 +316,7 @@
                 if (sortVal === "sortie") return b.sortie?.localeCompare(a.sortie);
                 if (sortVal === "episodes") return (parseInt(b.epMax) || 0) - (parseInt(a.epMax) || 0);
                 if (sortVal === "note_perso") return (b.rating || 0) - (a.rating || 0);
+                if (sortVal === "editeur") return (a.editeur || '').localeCompare(b.editeur || '');
                 return 0;
             });
 
@@ -338,6 +340,7 @@
                             <div class="card-info">
                                 <div class="card-title">${a.anime}</div>
                                 <div>⭐ ${a.rating}/10 • Ep: ${a.epSeen}</div>
+                                ${a.editeur ? `<div style="font-size:0.75em; color:#888; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🏢${a.editeur}</div>` : ''}
                             </div>
                         </a>
                     </div>`).join('');
@@ -355,6 +358,7 @@
                         <td>${a.pop || 'N/A'}</td>
                         <td>${a.sortie || '?'}</td>
                         <td><span style="font-size:0.8em; background:#333; padding:2px 5px; border-radius:3px;">${a.censure || ''}</span></td>
+                        <td style="font-size:0.8em; color:#aaa; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.editeur || '—'}</td>
                         <td><button style="background:none; border:none; color:#ff4757; cursor:pointer;" onclick="removeAnime(event, '${a.id}')">🗑️</button></td>
                     </tr>`).join('');
             }

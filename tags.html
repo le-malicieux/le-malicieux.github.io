@@ -116,7 +116,8 @@
                         nom: clean(c[0]), sortie: clean(c[3]), score: clean(c[2]), 
                         pop: clean(c[1]), ep: clean(c[4]), censure: clean(c[5]), 
                         etat: clean(c[6]), img: clean(c[8]),
-                        tags: c[12] ? c[12].split(',').map(clean).filter(t => t !== "") : []
+                        tags: c[12] ? c[12].split(',').map(clean).filter(t => t !== "") : [],
+                        editeur: clean(c[14])
                     };
                 }).filter(a => a !== null);
 
@@ -181,6 +182,7 @@
                             <span>⭐${a.score}</span>
                             <span>📈${a.pop}</span>
                         </div>
+                        ${a.editeur ? `<div class="card-meta-row"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;">🏢${a.editeur}</span></div>` : ''}
                     </div>
                 </a>`).join('');
         }
