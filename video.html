@@ -20,9 +20,38 @@
         .anime-title { font-size: 2.2em; color: var(--primary); margin: 0; }
         
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .stat-item { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; }
+        .stat-item { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; position: relative; }
         .stat-item small { color: var(--primary); font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 4px; }
         .stat-item span { font-weight: bold; font-size: 0.9em; }
+        /* Badge MAL sur les stats mises à jour */
+        .stat-item.mal-live { border-color: #2e86de; }
+        .stat-item.mal-live::after {
+            content: 'MAL';
+            position: absolute;
+            top: 4px; right: 5px;
+            font-size: 0.55em;
+            color: #2e86de;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        /* Indicateur de chargement MAL */
+        .mal-loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 6px;
+        }
+        .mal-loading .dot {
+            width: 6px; height: 6px;
+            background: #2e86de;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+        .mal-loading .dot:nth-child(2) { animation-delay: 0.2s; }
+        .mal-loading .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pulse { 0%,100% { opacity:0.2; } 50% { opacity:1; } }
 
         .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
@@ -82,6 +111,20 @@
 
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
 
+        /* Lien MAL discret */
+        .mal-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75em;
+            color: #2e86de;
+            text-decoration: none;
+            margin-top: 4px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .mal-link:hover { opacity: 1; text-decoration: underline; }
+
         @media (max-width: 800px) { .top-info { flex-direction: column; } .bottom-controls { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -112,6 +155,87 @@
         const animeName = params.get('name');
         let currentUser = null;
         let userRating = 0;
+
+        // ─── JIKAN / MAL ────────────────────────────────────────────────────────────
+        // Traduit le statut MAL en français
+        function traduitStatutMAL(status) {
+            const map = {
+                'Finished Airing': 'Terminé',
+                'Currently Airing': 'En cours',
+                'Not yet aired': 'À venir',
+                'Airing': 'En cours',
+            };
+            return map[status] || status || '—';
+        }
+
+        // Formate la popularité : 12345 → "#12 345"
+        function formatPop(n) {
+            if (!n && n !== 0) return '—';
+            return '#' + n.toLocaleString('fr-FR');
+        }
+
+        // Formate le score : 7.89 → "7.89"
+        function formatScore(s) {
+            if (!s && s !== 0) return '—';
+            return parseFloat(s).toFixed(2);
+        }
+
+        // Recherche sur Jikan et met à jour les 3 stats à la volée
+        async function fetchMALData(nomAnime) {
+            // On prend le premier segment si le nom contient "/" (ex: "Furifure/2")
+            const searchQuery = nomAnime.split('/')[0].trim();
+            try {
+                const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(searchQuery)}&limit=1&sfw=false`;
+                const resp = await fetch(url);
+                if (!resp.ok) return null;
+                const json = await resp.json();
+                if (!json.data || json.data.length === 0) return null;
+                const item = json.data[0];
+                return {
+                    score:      item.score,
+                    popularity: item.popularity,
+                    status:     item.status,
+                    malUrl:     item.url,
+                    malId:      item.mal_id
+                };
+            } catch(e) {
+                console.warn('Erreur Jikan:', e);
+                return null;
+            }
+        }
+
+        // Met à jour les cellules stats déjà dans le DOM
+        function applyMALStats(malData) {
+            if (!malData) return;
+
+            const popEl    = document.getElementById('stat-pop');
+            const scoreEl  = document.getElementById('stat-score');
+            const etatEl   = document.getElementById('stat-etat');
+            const malBadge = document.getElementById('mal-badge');
+
+            if (popEl && malData.popularity != null) {
+                popEl.textContent = formatPop(malData.popularity);
+                popEl.closest('.stat-item').classList.add('mal-live');
+            }
+            if (scoreEl && malData.score != null) {
+                scoreEl.textContent = '⭐ ' + formatScore(malData.score);
+                scoreEl.closest('.stat-item').classList.add('mal-live');
+            }
+            if (etatEl && malData.status) {
+                etatEl.textContent = traduitStatutMAL(malData.status);
+                etatEl.closest('.stat-item').classList.add('mal-live');
+            }
+
+            // Remplace l'indicateur de chargement par un lien MAL
+            if (malBadge) {
+                if (malData.malUrl) {
+                    malBadge.innerHTML = `<a href="${malData.malUrl}" target="_blank" class="mal-link">🔗 Voir sur MyAnimeList</a>`;
+                } else {
+                    malBadge.innerHTML = '';
+                }
+            }
+        }
+        // ────────────────────────────────────────────────────────────────────────────
 
         async function load() {
             const display = document.getElementById('anime-details');
@@ -160,12 +284,19 @@
                             <div class="main-details">
                                 <h1 class="anime-title">${anime.nom}</h1>
                                 <div class="stats-grid">
-                                    <div class="stat-item"><small>Pop.</small><span>${anime.pop}</span></div>
-                                    <div class="stat-item"><small>Score</small><span>⭐ ${anime.score}</span></div>
+                                    <div class="stat-item"><small>Pop.</small><span id="stat-pop">${anime.pop}</span></div>
+                                    <div class="stat-item"><small>Score</small><span id="stat-score">⭐ ${anime.score}</span></div>
                                     <div class="stat-item"><small>Année</small><span>${anime.year}</span></div>
                                     <div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div>
                                     <div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div>
-                                    <div class="stat-item"><small>État</small><span>${anime.etat}</span></div>
+                                    <div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div>
+                                </div>
+                                <!-- Indicateur de chargement MAL (remplacé après la réponse) -->
+                                <div id="mal-badge">
+                                    <span class="mal-loading">
+                                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                                        Récupération des données MAL…
+                                    </span>
                                 </div>
                                 <p style="font-size:0.95em; color:#ccc; line-height:1.6;">${anime.desc}</p>
                             </div>
@@ -200,6 +331,16 @@
                 // Remplissage des liens
                 anime.dl.filter(l => l.trim()).forEach((l, i) => document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">Lien ${i+1}</a>`);
                 anime.stream.filter(l => l.trim()).forEach((l, i) => document.getElementById('stream-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lecteur ${i+1} ↗</a>`);
+
+                // ── Récupération MAL en arrière-plan ──────────────────────────────
+                fetchMALData(anime.nom).then(malData => {
+                    applyMALStats(malData);
+                    if (!malData) {
+                        const badge = document.getElementById('mal-badge');
+                        if (badge) badge.innerHTML = `<span style="font-size:0.72em; color:#555;">Données MAL indisponibles</span>`;
+                    }
+                });
+                // ─────────────────────────────────────────────────────────────────
 
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
