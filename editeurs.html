@@ -61,12 +61,21 @@
         .list-header h1 {
             font-size: 1.7em; font-weight: 900; color: var(--primary); margin: 0;
         }
+        .list-controls {
+            display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+        }
         .search-input {
             background: #1a1a1a; border: 1px solid #444; color: white;
-            padding: 8px 14px; border-radius: 6px; font-size: 0.9em; width: 260px;
+            padding: 8px 14px; border-radius: 6px; font-size: 0.9em; width: 220px;
             outline: none; transition: border-color 0.2s;
         }
         .search-input:focus { border-color: var(--primary); }
+        .sort-select {
+            background: #1a1a1a; border: 1px solid #444; color: white;
+            padding: 8px 12px; border-radius: 6px; font-size: 0.85em;
+            outline: none; cursor: pointer; transition: border-color 0.2s;
+        }
+        .sort-select:focus { border-color: var(--primary); }
 
         /* Grille de studios */
         .studios-grid {
@@ -79,15 +88,29 @@
             background: var(--card-bg);
             border: 1px solid #2a2a2a;
             border-radius: 12px;
-            padding: 16px 18px;
+            padding: 14px 16px;
             cursor: pointer;
             transition: border-color 0.25s, transform 0.2s, box-shadow 0.2s;
-            display: flex; flex-direction: column; gap: 6px;
+            display: flex; flex-direction: row; gap: 14px; align-items: flex-start;
+        }
+        .studio-logo-wrap {
+            flex-shrink: 0;
+            width: 72px; height: 72px;
+            border-radius: 10px; overflow: hidden;
+            background: #111; border: 1px solid #2a2a2a;
+            display: flex; align-items: center; justify-content: center;
         }
         .studio-logo {
-            width: 48px; height: 48px; border-radius: 8px;
-            object-fit: contain; background: #111;
-            border: 1px solid #333; margin-bottom: 4px;
+            width: 100%; height: 100%;
+            object-fit: contain;
+        }
+        .studio-logo-fallback {
+            font-size: 1.6em; font-weight: 900; color: var(--primary);
+            text-transform: uppercase; letter-spacing: -1px;
+        }
+        .studio-card-body {
+            flex: 1; min-width: 0;
+            display: flex; flex-direction: column; gap: 5px;
         }
         .studio-card:hover {
             border-color: var(--primary);
@@ -291,7 +314,15 @@
         <div id="view-list">
             <div class="list-header">
                 <h1>🏢 Éditeurs & Studios</h1>
-                <input type="text" class="search-input" id="studio-search" placeholder="Rechercher un studio…">
+                <div class="list-controls">
+                    <select class="sort-select" id="studio-sort">
+                        <option value="count">Trier : Nb titres ↓</option>
+                        <option value="nom">Trier : A → Z</option>
+                        <option value="nom-desc">Trier : Z → A</option>
+                        <option value="score">Trier : Score ↓</option>
+                    </select>
+                    <input type="text" class="search-input" id="studio-search" placeholder="Rechercher un studio…">
+                </div>
             </div>
             <div class="studios-grid" id="studios-grid">
                 <div class="empty-state">Chargement…</div>
@@ -413,10 +444,24 @@
             const map = buildStudioMap();
             const grid = document.getElementById('studios-grid');
             const q = filter.toLowerCase();
+            const sortMode = document.getElementById('studio-sort')?.value || 'count';
 
-            const studios = Object.keys(map)
-                .filter(s => !q || s.toLowerCase().includes(q))
-                .sort((a,b) => map[b].length - map[a].length); // tri par nb d'animes desc
+            let studios = Object.keys(map).filter(s => !q || s.toLowerCase().includes(q));
+
+            // Tri
+            studios.sort((a, b) => {
+                if (sortMode === 'nom')       return a.localeCompare(b, 'fr');
+                if (sortMode === 'nom-desc')  return b.localeCompare(a, 'fr');
+                if (sortMode === 'score') {
+                    const avgScore = arr => {
+                        const sc = arr.map(x => parseFloat(x.score.replace(',','.'))).filter(Boolean);
+                        return sc.length ? sc.reduce((s,v) => s+v, 0) / sc.length : 0;
+                    };
+                    return avgScore(map[b]) - avgScore(map[a]);
+                }
+                // count (default)
+                return map[b].length - map[a].length;
+            });
 
             if (studios.length === 0) {
                 grid.innerHTML = '<div class="empty-state">Aucun éditeur trouvé.</div>';
@@ -426,21 +471,33 @@
             grid.innerHTML = studios.map(studio => {
                 const animes = map[studio];
                 const slug = studio.replace(/\s+/g, '-');
-                const logoTag = `<img class="studio-logo" src="img/${slug}.jpg" onerror="this.style.display='none'">`;
+                const avgSc = (() => {
+                    const sc = animes.map(x => parseFloat(x.score.replace(',','.'))).filter(Boolean);
+                    return sc.length ? (sc.reduce((s,v)=>s+v,0)/sc.length).toFixed(1) : null;
+                })();
                 const previews = animes.slice(0, 4).map(a =>
                     `<img src="img/${a.img}" onerror="this.src='img/logo.jpg'" title="${a.nom}">`
                 ).join('');
                 return `
                 <div class="studio-card" onclick="showProducer('${studio.replace(/'/g,"\\'")}')">
-                    ${logoTag}
-                    <div class="studio-name">${studio}</div>
-                    <div class="studio-count"><span>${animes.length}</span> titre${animes.length > 1 ? 's' : ''}</div>
-                    <div class="studio-preview">${previews}</div>
+                    <div class="studio-logo-wrap">
+                        <img class="studio-logo" src="img/${slug}.jpg"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                        <div class="studio-logo-fallback" style="display:none;">
+                            ${studio.split(/[\s\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase()}
+                        </div>
+                    </div>
+                    <div class="studio-card-body">
+                        <div class="studio-name">${studio}</div>
+                        <div class="studio-count"><span>${animes.length}</span> titre${animes.length > 1 ? 's' : ''}${avgSc ? ` · ⭐ ${avgSc}` : ''}</div>
+                        <div class="studio-preview">${previews}</div>
+                    </div>
                 </div>`;
             }).join('');
         }
 
         document.getElementById('studio-search').oninput = e => renderList(e.target.value);
+        document.getElementById('studio-sort').onchange   = () => renderList(document.getElementById('studio-search').value);
 
         // ═══════════════════════════════
         // VUE PRODUCER
