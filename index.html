@@ -124,9 +124,9 @@
                 <option value="episodes">Épisodes (Nombre)</option>
                 <option value="etat">État (Fini/En cours)</option>
                 <option value="censure">Censure</option>
-                            <option value="editeur">Éditeur</option>
             </select>
             <a href="tags.html" class="btn-red">🏷️ Tags</a>
+            <a href="editeurs.html" class="btn-red">🏢 Éditeurs</a>
             <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
@@ -351,8 +351,7 @@
                         sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), 
                         etat: clean(c[6]), img: clean(c[8]),
                         tags: clean(c[12]),
-                        malId: clean(c[13]),
-                        editeur: clean(c[14]) // ← Colonne O : Éditeur
+                        malId: clean(c[13]) // ← Colonne N : ID MAL forcé (optionnel)
                     };
                 }).filter(a => a !== null);
 
@@ -407,7 +406,6 @@
                     if (sortMode === "score") return parseFloat(valB.replace(',', '.')) - parseFloat(valA.replace(',', '.'));
                     if (sortMode === "episodes") return parseInt(valB) - parseInt(valA);
                     if (sortMode === "popularite") return (parseInt(valA.replace('#','')) || 99999) - (parseInt(valB.replace('#','')) || 99999);
-                    if (sortMode === "editeur") return (valA || '').localeCompare(valB || '');
                     return valA.localeCompare(valB);
                 });
             }
@@ -438,7 +436,6 @@
                             <span ${hl('censure')}>🔞${a.censure}</span>
                             <span ${hl('etat')}>🛠️${a.etat}</span>
                         </div>
-                        ${a.editeur ? `<div class="card-meta-row"><span ${hl('editeur')} style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;">🏢${a.editeur}</span></div>` : ''}
                     </div>
                 </a>`).join('');
 

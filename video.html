@@ -167,7 +167,7 @@
                             infoV:  clean(c[11]),
                             tags:   c[12] ? c[12].split(',').filter(t => t.trim() !== "").map(clean) : [],
                             malId:  clean(c[13]),
-                            editeur: clean(c[14]) // ← Colonne O : Éditeur
+                            editeur: clean(c[14])
                         };
                         break;
                     }
@@ -199,7 +199,12 @@
                                     <div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div>
                                     <div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div>
                                     <div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div>
-                                    <div class="stat-item" style="grid-column: span 2;"><small>Éditeur</small><span style="font-size:0.85em;">${anime.editeur || '—'}</span></div>
+                                    <div class="stat-item" style="grid-column: span 2; cursor:${anime.editeur ? 'pointer' : 'default'};" ${anime.editeur ? `onclick="window.location='editeurs.html?studio='+encodeURIComponent('${anime.editeur.split(',')[0].trim()}')"` : ''}>
+                                        <small>Éditeur${anime.editeur && anime.editeur.includes(',') ? 's' : ''}</small>
+                                        <span style="font-size:0.85em; ${anime.editeur ? 'color:#ff4757;' : ''}">
+                                            ${anime.editeur ? anime.editeur.split(',').map(e => e.trim()).map((e,i,arr) => arr.length > 1 ? `<a href="editeurs.html?studio=${encodeURIComponent(e)}" style="color:var(--primary); text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${e}</a>` : e).join(' / ') : '—'}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div id="mal-badge">
                                     <span class="mal-loading">
