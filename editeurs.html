@@ -5,270 +5,148 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Éditeurs & Studios - Le Malicieux</title>
     <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.9); --text: #eee; --nav-bg: rgba(15,15,15,0.85); --blue: #2e86de; }
-
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.92); --text: #eee; --nav-bg: rgba(15,15,15,0.88); }
         * { box-sizing: border-box; }
-
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg);
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            color: var(--text);
-            margin: 0;
-            min-height: 100vh;
+            background-color: var(--bg); background-size: cover;
+            background-attachment: fixed; background-position: center;
+            color: var(--text); margin: 0; min-height: 100vh;
         }
+        body::before { content:''; position:fixed; inset:0; background:rgba(0,0,0,0.48); z-index:0; pointer-events:none; }
 
-        /* ── OVERLAY sombre constant ── */
-        body::before {
-            content: '';
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 0; pointer-events: none;
-        }
-
-        /* ── NAVBAR ── */
         .top-navbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display:flex; align-items:center; justify-content:space-between;
+            padding:10px 20px; background:var(--nav-bg); backdrop-filter:blur(10px);
+            position:sticky; top:0; z-index:1000; border-bottom:1px solid rgba(255,255,255,0.1);
         }
-        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
-        .nav-back { color: #aaa; text-decoration: none; font-size: 0.88em; transition: color 0.2s; }
-        .nav-back:hover { color: var(--primary); }
+        .nav-brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
+        .nav-logo-small { width:35px; height:35px; border-radius:5px; border:1px solid var(--primary); object-fit:cover; }
+        .nav-title { color:var(--primary); font-weight:bold; font-size:1.1em; }
+        .nav-back { color:#aaa; text-decoration:none; font-size:0.88em; transition:color 0.2s; }
+        .nav-back:hover { color:var(--primary); }
 
-        /* ── CONTENU ── */
-        .page-wrap {
-            position: relative; z-index: 1;
-            max-width: 1300px; margin: 0 auto;
-            padding: 30px 20px 60px;
-        }
+        .page-wrap { position:relative; z-index:1; max-width:1300px; margin:0 auto; padding:30px 20px 60px; }
 
-        /* ════════════════════════════════════════
-           VUE LISTE DES ÉDITEURS
-        ════════════════════════════════════════ */
-        #view-list { display: block; }
-        #view-producer { display: none; }
+        /* ════════════ VUE LISTE ════════════ */
+        #view-producer { display:none; }
 
-        .list-header {
-            display: flex; align-items: center; justify-content: space-between;
-            flex-wrap: wrap; gap: 14px; margin-bottom: 28px;
-        }
-        .list-header h1 {
-            font-size: 1.7em; font-weight: 900; color: var(--primary); margin: 0;
-        }
-        .search-input {
-            background: #1a1a1a; border: 1px solid #444; color: white;
-            padding: 8px 14px; border-radius: 6px; font-size: 0.9em; width: 260px;
-            outline: none; transition: border-color 0.2s;
-        }
-        .search-input:focus { border-color: var(--primary); }
+        .list-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:24px; }
+        .list-header h1 { font-size:1.7em; font-weight:900; color:var(--primary); margin:0; }
+        .list-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 
-        /* Grille de studios */
-        .studios-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 14px;
+        .ctrl-input {
+            background:rgba(20,20,20,0.95); border:1px solid #444; color:white;
+            padding:8px 14px; border-radius:6px; font-size:0.9em; width:210px;
+            outline:none; transition:border-color 0.2s;
         }
+        .ctrl-input:focus { border-color:var(--primary); }
+        .ctrl-select {
+            background:rgba(20,20,20,0.95); border:1px solid #444; color:white;
+            padding:8px 12px; border-radius:6px; font-size:0.88em; cursor:pointer; outline:none;
+        }
+        .ctrl-select:focus { border-color:var(--primary); }
+
+        .studios-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:18px; }
 
         .studio-card {
-            background: var(--card-bg);
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 16px 18px;
-            cursor: pointer;
-            transition: border-color 0.25s, transform 0.2s, box-shadow 0.2s;
-            display: flex; flex-direction: column; gap: 6px;
+            background:var(--card-bg); border:1px solid #2a2a2a; border-radius:14px;
+            overflow:hidden; cursor:pointer;
+            transition:border-color 0.25s, transform 0.2s, box-shadow 0.2s;
+            display:flex; flex-direction:column;
         }
-        .studio-logo {
-            width: 48px; height: 48px; border-radius: 8px;
-            object-fit: contain; background: #111;
-            border: 1px solid #333; margin-bottom: 4px;
-        }
-        .studio-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(255,71,87,0.15);
-        }
-        .studio-name {
-            font-weight: 800; font-size: 1em; color: white;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .studio-count {
-            font-size: 0.78em; color: #888;
-        }
-        .studio-count span { color: var(--primary); font-weight: bold; }
-        .studio-preview {
-            display: flex; gap: 4px; margin-top: 6px;
-        }
-        .studio-preview img {
-            width: 36px; height: 52px; object-fit: cover;
-            border-radius: 4px; border: 1px solid #333;
-            flex-shrink: 0;
-        }
+        .studio-card:hover { border-color:var(--primary); transform:translateY(-5px); box-shadow:0 10px 28px rgba(255,71,87,0.18); }
 
-        /* ════════════════════════════════════════
-           VUE PRODUCER (style MAL)
-        ════════════════════════════════════════ */
-
-        /* Header producer */
-        .producer-header {
-            background: var(--card-bg);
-            border: 1px solid #2a2a2a;
-            border-radius: 14px;
-            overflow: hidden;
-            margin-bottom: 24px;
+        /* Mosaïque d'images */
+        .studio-mosaic {
+            width:100%; height:165px; flex-shrink:0;
+            overflow:hidden; background:#111;
+            display:grid; gap:2px;
         }
+        .studio-mosaic.n1 { grid-template-columns:1fr; }
+        .studio-mosaic.n2 { grid-template-columns:1fr 1fr; }
+        .studio-mosaic.n3 { grid-template-columns:2fr 1fr; grid-template-rows:1fr 1fr; }
+        .studio-mosaic.n3 img:first-child { grid-row:span 2; }
+        .studio-mosaic.n4 { grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; }
+        .studio-mosaic img { width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.35s; }
+        .studio-card:hover .studio-mosaic img { transform:scale(1.05); }
+
+        .studio-body { padding:13px 15px 15px; display:flex; flex-direction:column; gap:6px; }
+        .studio-top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+        .studio-name { font-weight:800; font-size:1.05em; color:white; line-height:1.3; }
+        .studio-badge {
+            font-size:0.72em; white-space:nowrap; padding:3px 10px;
+            background:rgba(255,71,87,0.13); border-radius:20px;
+            color:var(--primary); font-weight:bold; flex-shrink:0;
+        }
+        .studio-stats { font-size:0.74em; color:#666; }
+        .studio-stats b { color:#aaa; font-weight:600; }
+
+        .empty-state { text-align:center; color:#555; padding:60px 20px; grid-column:1/-1; }
+
+        /* ════════════ VUE PRODUCER ════════════ */
+        .producer-header { background:var(--card-bg); border:1px solid #2a2a2a; border-radius:14px; overflow:hidden; margin-bottom:22px; }
         .producer-banner {
-            height: 140px;
-            background: linear-gradient(135deg, #1a0008 0%, #2d0014 40%, #0a000f 100%);
-            position: relative;
-            display: flex; align-items: flex-end;
-            padding: 0 28px 0;
+            height:130px;
+            background:linear-gradient(135deg,#1a0008 0%,#2d0014 40%,#0a000f 100%);
+            position:relative;
         }
         .producer-banner::after {
-            content: '';
-            position: absolute; inset: 0;
-            background: repeating-linear-gradient(
-                45deg, transparent, transparent 40px,
-                rgba(255,71,87,0.04) 40px, rgba(255,71,87,0.04) 80px
-            );
+            content:''; position:absolute; inset:0;
+            background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,71,87,0.04) 40px,rgba(255,71,87,0.04) 80px);
         }
         .producer-avatar {
-            width: 90px; height: 90px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #ff4757, #c0392b);
-            border: 3px solid var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2.2em; font-weight: 900;
-            color: white;
-            position: relative; z-index: 1;
-            transform: translateY(45px);
-            flex-shrink: 0;
-            text-transform: uppercase;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-            user-select: none;
-            overflow: hidden;
-        }
-        .producer-avatar img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .producer-avatar .avatar-initials {
-            display: flex; align-items: center; justify-content: center;
-            width: 100%; height: 100%;
+            position:absolute; bottom:-40px; left:28px;
+            width:80px; height:80px; border-radius:12px;
+            background:linear-gradient(135deg,#ff4757,#c0392b);
+            border:3px solid var(--bg);
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.8em; font-weight:900; color:white;
+            z-index:1; box-shadow:0 4px 16px rgba(0,0,0,0.5); user-select:none;
         }
         .producer-info-wrap {
-            padding: 56px 28px 20px;
-            display: flex; align-items: flex-start;
-            justify-content: space-between; flex-wrap: wrap; gap: 16px;
+            padding:50px 28px 20px;
+            display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px;
         }
-        .producer-name {
-            font-size: 1.9em; font-weight: 900; color: white; margin: 0 0 4px;
-        }
-        .producer-sub {
-            font-size: 0.82em; color: #666;
-        }
-        .producer-stats-row {
-            display: flex; gap: 20px; flex-wrap: wrap;
-        }
-        .pstat {
-            background: #111;
-            border: 1px solid #2a2a2a;
-            border-radius: 10px;
-            padding: 10px 18px;
-            text-align: center;
-            min-width: 80px;
-        }
-        .pstat-val { font-size: 1.4em; font-weight: 800; color: var(--primary); display: block; }
-        .pstat-lbl { font-size: 0.7em; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .producer-name { font-size:1.7em; font-weight:900; color:white; margin:0 0 3px; }
+        .producer-sub { font-size:0.8em; color:#555; }
+        .producer-stats-row { display:flex; gap:14px; flex-wrap:wrap; }
+        .pstat { background:#111; border:1px solid #2a2a2a; border-radius:10px; padding:10px 18px; text-align:center; min-width:75px; }
+        .pstat-val { font-size:1.3em; font-weight:800; color:var(--primary); display:block; }
+        .pstat-lbl { font-size:0.68em; color:#555; text-transform:uppercase; letter-spacing:0.5px; }
 
-        /* Bouton retour à la liste */
         .btn-back-list {
-            display: inline-flex; align-items: center; gap: 6px;
-            color: #aaa; font-size: 0.85em; cursor: pointer;
-            border: 1px solid #333; background: #1a1a1a;
-            padding: 7px 14px; border-radius: 6px;
-            transition: color 0.2s, border-color 0.2s;
-            text-decoration: none; margin-bottom: 20px;
+            display:inline-flex; align-items:center; gap:6px; color:#aaa; font-size:0.85em; cursor:pointer;
+            border:1px solid #333; background:rgba(20,20,20,0.9); padding:7px 14px; border-radius:6px;
+            transition:color 0.2s,border-color 0.2s; text-decoration:none; margin-bottom:20px;
         }
-        .btn-back-list:hover { color: var(--primary); border-color: var(--primary); }
+        .btn-back-list:hover { color:var(--primary); border-color:var(--primary); }
 
-        /* Tri & filtre */
-        .producer-controls {
-            display: flex; gap: 10px; align-items: center;
-            flex-wrap: wrap; margin-bottom: 20px;
-        }
-        .ctrl-select {
-            background: #1a1a1a; border: 1px solid #333; color: white;
-            padding: 7px 12px; border-radius: 6px; font-size: 0.85em;
-            cursor: pointer; outline: none;
-        }
-        .ctrl-select:focus { border-color: var(--primary); }
-        .result-count { font-size: 0.82em; color: #666; margin-left: auto; }
+        .producer-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
+        .result-count { font-size:0.82em; color:#555; margin-left:auto; }
 
-        /* Grille animes du producer */
-        .producer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 16px;
-        }
-
+        .producer-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:14px; }
         .anime-card {
-            background: var(--card-bg);
-            border: 1px solid #2a2a2a;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: border-color 0.2s, transform 0.2s;
-            text-decoration: none; color: inherit;
-            display: flex; flex-direction: column;
-            font-size: 0.8em;
+            background:var(--card-bg); border:1px solid #2a2a2a; border-radius:10px; overflow:hidden;
+            transition:border-color 0.2s,transform 0.2s; text-decoration:none; color:inherit;
+            display:flex; flex-direction:column; font-size:0.8em;
         }
-        .anime-card:hover { border-color: var(--primary); transform: translateY(-6px); }
-        .anime-card .img-wrap { width: 100%; aspect-ratio: 2/3; background: #111; }
-        .anime-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .anime-card .ac-info { padding: 8px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
-        .ac-title {
-            font-weight: 700; color: var(--primary);
-            overflow: hidden; display: -webkit-box;
-            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            line-height: 1.25; font-size: 1.05em;
-        }
-        .ac-studio-label {
-            font-size: 0.7em; color: #666;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            margin-top: -2px;
-        }
-        .ac-meta { font-size: 0.72em; color: #888; display: flex; flex-wrap: wrap; gap: 4px; }
-        .ac-score { color: #f1c40f; font-weight: bold; }
-
-        /* Score badge flottant */
+        .anime-card:hover { border-color:var(--primary); transform:translateY(-6px); }
+        .anime-card .img-wrap { width:100%; aspect-ratio:2/3; background:#111; position:relative; }
+        .anime-card img { width:100%; height:100%; object-fit:cover; display:block; }
         .score-badge {
-            position: absolute; top: 6px; left: 6px;
-            background: rgba(0,0,0,0.75);
-            color: #f1c40f; font-size: 0.72em; font-weight: bold;
-            padding: 2px 6px; border-radius: 4px;
-            backdrop-filter: blur(4px);
+            position:absolute; top:6px; left:6px; background:rgba(0,0,0,0.75); color:#f1c40f;
+            font-size:0.72em; font-weight:bold; padding:2px 6px; border-radius:4px; backdrop-filter:blur(4px);
         }
-        .anime-card .img-wrap { position: relative; }
+        .ac-info { padding:8px; flex:1; display:flex; flex-direction:column; gap:4px; }
+        .ac-title { font-weight:700; color:var(--primary); overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; line-height:1.25; font-size:1.05em; }
+        .ac-meta { font-size:0.72em; color:#888; display:flex; flex-wrap:wrap; gap:4px; }
 
-        /* Empty state */
-        .empty-state {
-            text-align: center; color: #555; padding: 60px 20px;
-            font-size: 1em; grid-column: 1/-1;
-        }
-
-        @media (max-width: 700px) {
-            .studios-grid { grid-template-columns: 1fr 1fr; }
-            .producer-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .producer-name { font-size: 1.3em; }
-            .producer-stats-row { gap: 10px; }
-            .pstat { padding: 8px 12px; min-width: 60px; }
+        @media (max-width:700px) {
+            .studios-grid { grid-template-columns:1fr; }
+            .producer-grid { grid-template-columns:repeat(3,1fr); gap:8px; }
+            .producer-name { font-size:1.3em; }
+            .ctrl-input { width:100%; }
         }
     </style>
 </head>
@@ -279,7 +157,7 @@
             <img src="img/logo.jpg" class="nav-logo-small">
             <span class="nav-title">LE MALICIEUX</span>
         </a>
-        <div style="display:flex; gap:16px; align-items:center;">
+        <div style="display:flex;gap:16px;align-items:center;">
             <a href="tags.html" class="nav-back">🏷️ Tags</a>
             <a href="index.html" class="nav-back">← Catalogue</a>
         </div>
@@ -287,22 +165,27 @@
 
     <div class="page-wrap">
 
-        <!-- ═══ VUE LISTE ═══ -->
+        <!-- VUE LISTE -->
         <div id="view-list">
             <div class="list-header">
                 <h1>🏢 Éditeurs & Studios</h1>
-                <input type="text" class="search-input" id="studio-search" placeholder="Rechercher un studio…">
+                <div class="list-controls">
+                    <input type="text" class="ctrl-input" id="studio-search" placeholder="Rechercher un studio…">
+                    <select class="ctrl-select" id="studio-sort">
+                        <option value="titres">Nb de titres ↓</option>
+                        <option value="nom">Nom (A-Z)</option>
+                        <option value="score">Score moyen ↓</option>
+                    </select>
+                </div>
             </div>
             <div class="studios-grid" id="studios-grid">
                 <div class="empty-state">Chargement…</div>
             </div>
         </div>
 
-        <!-- ═══ VUE PRODUCER ═══ -->
+        <!-- VUE PRODUCER -->
         <div id="view-producer">
             <a class="btn-back-list" onclick="showList()">← Tous les éditeurs</a>
-
-            <!-- Header -->
             <div class="producer-header">
                 <div class="producer-banner">
                     <div class="producer-avatar" id="prod-avatar">?</div>
@@ -310,61 +193,46 @@
                 <div class="producer-info-wrap">
                     <div>
                         <div class="producer-name" id="prod-name">—</div>
-                        <div class="producer-sub" id="prod-sub">Éditeur / Label</div>
+                        <div class="producer-sub">Éditeur / Label / Studio</div>
                     </div>
                     <div class="producer-stats-row">
-                        <div class="pstat">
-                            <span class="pstat-val" id="prod-total">—</span>
-                            <span class="pstat-lbl">Titres</span>
-                        </div>
-                        <div class="pstat">
-                            <span class="pstat-val" id="prod-avg">—</span>
-                            <span class="pstat-lbl">Score moy.</span>
-                        </div>
-                        <div class="pstat">
-                            <span class="pstat-val" id="prod-best">—</span>
-                            <span class="pstat-lbl">Meilleur</span>
-                        </div>
+                        <div class="pstat"><span class="pstat-val" id="prod-total">—</span><span class="pstat-lbl">Titres</span></div>
+                        <div class="pstat"><span class="pstat-val" id="prod-avg">—</span><span class="pstat-lbl">Score moy.</span></div>
+                        <div class="pstat"><span class="pstat-val" id="prod-best">—</span><span class="pstat-lbl">Meilleur ⭐</span></div>
                     </div>
                 </div>
             </div>
-
-            <!-- Contrôles -->
             <div class="producer-controls">
                 <select class="ctrl-select" id="prod-sort">
-                    <option value="score">Trier : Score</option>
-                    <option value="pop">Trier : Popularité</option>
-                    <option value="année">Trier : Année</option>
-                    <option value="nom">Trier : Nom (A-Z)</option>
+                    <option value="score">Score ↓</option>
+                    <option value="pop">Popularité</option>
+                    <option value="annee">Année ↓</option>
+                    <option value="nom">Nom (A-Z)</option>
                 </select>
                 <select class="ctrl-select" id="prod-filter">
                     <option value="">Tout afficher</option>
                     <option value="en cours">🟢 En cours</option>
-                    <option value="terminé">✅ Terminés</option>
-                    <option value="oui">🔞 Censuré</option>
-                    <option value="non">✔️ Non censuré</option>
+                    <option value="fini">✅ Terminés</option>
+                    <option value="censure-oui">🔞 Censuré</option>
+                    <option value="censure-non">✔️ Non censuré</option>
                 </select>
                 <span class="result-count" id="prod-count"></span>
             </div>
-
-            <!-- Grille animes -->
             <div class="producer-grid" id="producer-grid"></div>
         </div>
 
     </div>
 
     <script>
-        // ── Fond aléatoire ──
         (function() {
-            const isMobile = window.innerWidth <= 1000;
-            const n = isMobile ? Math.floor(Math.random()*13)+1 : Math.floor(Math.random()*64)+1;
-            document.body.style.backgroundImage = `url('img/${isMobile ? 'mobile'+n : 'fond'+n}.webp')`;
+            const m = window.innerWidth <= 1000;
+            const n = Math.floor(Math.random() * (m ? 13 : 64)) + 1;
+            document.body.style.backgroundImage = `url('img/${m ? 'mobile' : 'fond'}${n}.webp')`;
         })();
 
         let allAnimes = [];
         let currentStudio = null;
 
-        // ── Chargement CSV ──
         async function init() {
             const resp = await fetch('animes.csv');
             const text = await resp.text();
@@ -373,23 +241,17 @@
                 if (!c[0] || c.length < 9) return null;
                 const cl = s => s ? s.trim().replace(/^"|"$/g, '') : '';
                 return {
-                    nom:     cl(c[0]), pop:    cl(c[1]), score:  cl(c[2]),
-                    sortie:  cl(c[3]), ep:     cl(c[4]), censure:cl(c[5]),
-                    etat:    cl(c[6]), img:    cl(c[8]),
-                    editeur: cl(c[14])
+                    nom: cl(c[0]), pop: cl(c[1]), score: cl(c[2]),
+                    sortie: cl(c[3]), ep: cl(c[4]), censure: cl(c[5]),
+                    etat: cl(c[6]), img: cl(c[8]), editeur: cl(c[14])
                 };
             }).filter(a => a && a.editeur);
 
-            // Vérifier si on arrive avec ?studio= dans l'URL
             const param = new URLSearchParams(window.location.search).get('studio');
-            if (param) {
-                showProducer(decodeURIComponent(param));
-            } else {
-                renderList();
-            }
+            if (param) showProducer(decodeURIComponent(param));
+            else renderList();
         }
 
-        // ── Grouper par studio (un anime peut avoir plusieurs éditeurs) ──
         function buildStudioMap() {
             const map = {};
             allAnimes.forEach(a => {
@@ -401,9 +263,13 @@
             return map;
         }
 
-        // ═══════════════════════════════
-        // VUE LISTE
-        // ═══════════════════════════════
+        function avgScore(animes) {
+            const scored = animes.filter(a => parseFloat(a.score.replace(',', '.')));
+            if (!scored.length) return 0;
+            return scored.reduce((s, a) => s + parseFloat(a.score.replace(',', '.')), 0) / scored.length;
+        }
+
+        // ══ VUE LISTE ══
         function renderList(filter = '') {
             document.getElementById('view-list').style.display = 'block';
             document.getElementById('view-producer').style.display = 'none';
@@ -411,180 +277,114 @@
             history.replaceState(null, '', 'editeurs.html');
 
             const map = buildStudioMap();
-            const grid = document.getElementById('studios-grid');
+            const sortVal = document.getElementById('studio-sort').value;
             const q = filter.toLowerCase();
+            let studios = Object.keys(map).filter(s => !q || s.toLowerCase().includes(q));
 
-            const studios = Object.keys(map)
-                .filter(s => !q || s.toLowerCase().includes(q))
-                .sort((a,b) => map[b].length - map[a].length); // tri par nb d'animes desc
+            studios.sort((a, b) => {
+                if (sortVal === 'nom')   return a.localeCompare(b, 'fr');
+                if (sortVal === 'score') return avgScore(map[b]) - avgScore(map[a]);
+                return map[b].length - map[a].length;
+            });
 
-            if (studios.length === 0) {
-                grid.innerHTML = '<div class="empty-state">Aucun éditeur trouvé.</div>';
-                return;
-            }
+            const grid = document.getElementById('studios-grid');
+            if (!studios.length) { grid.innerHTML = '<div class="empty-state">Aucun éditeur trouvé.</div>'; return; }
 
             grid.innerHTML = studios.map(studio => {
                 const animes = map[studio];
-                const slug = studio.replace(/\s+/g, '-');
-                const logoTag = `<img class="studio-logo" src="img/${slug}.jpg" onerror="this.style.display='none'">`;
-                const previews = animes.slice(0, 4).map(a =>
-                    `<img src="img/${a.img}" onerror="this.src='img/logo.jpg'" title="${a.nom}">`
+                const imgs = animes.slice(0, 4);
+                const cls = ['', 'n1', 'n2', 'n3', 'n4'][Math.min(imgs.length, 4)];
+                const mosaicImgs = imgs.map(a =>
+                    `<img src="img/${a.img}" onerror="this.src='img/logo.jpg'" loading="lazy" title="${a.nom.replace(/"/g, '&quot;')}">`
                 ).join('');
+                const avg = avgScore(animes);
+                const safeStudio = studio.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                 return `
-                <div class="studio-card" onclick="showProducer('${studio.replace(/'/g,"\\'")}')">
-                    ${logoTag}
-                    <div class="studio-name">${studio}</div>
-                    <div class="studio-count"><span>${animes.length}</span> titre${animes.length > 1 ? 's' : ''}</div>
-                    <div class="studio-preview">${previews}</div>
+                <div class="studio-card" onclick="showProducer('${safeStudio}')">
+                    <div class="studio-mosaic ${cls}">${mosaicImgs}</div>
+                    <div class="studio-body">
+                        <div class="studio-top">
+                            <div class="studio-name">${studio}</div>
+                            <div class="studio-badge">${animes.length} titre${animes.length > 1 ? 's' : ''}</div>
+                        </div>
+                        ${avg ? `<div class="studio-stats">⭐ Score moyen : <b>${avg.toFixed(2)}</b></div>` : ''}
+                    </div>
                 </div>`;
             }).join('');
         }
 
         document.getElementById('studio-search').oninput = e => renderList(e.target.value);
+        document.getElementById('studio-sort').onchange  = () => renderList(document.getElementById('studio-search').value);
 
-        // ═══════════════════════════════
-        // VUE PRODUCER
-        // ═══════════════════════════════
+        // ══ VUE PRODUCER ══
         function showProducer(studio) {
             currentStudio = studio;
             document.getElementById('view-list').style.display = 'none';
             document.getElementById('view-producer').style.display = 'block';
             document.title = studio + ' - Le Malicieux';
-            history.pushState({ studio }, '', `editeurs.html?studio=${encodeURIComponent(studio)}`);
+            history.replaceState(null, '', `editeurs.html?studio=${encodeURIComponent(studio)}`);
 
-            // Avatar = logo ou initiales en fallback
-            const slug = studio.replace(/\s+/g, '-');
-            const avatarEl = document.getElementById('prod-avatar');
-            avatarEl.innerHTML = `
-                <img src="img/${slug}.jpg"
-                     onerror="this.parentElement.innerHTML='<span class=\'avatar-initials\'>' + studio.split(/[\\s\\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase() + '</span>'"
-                >`;
+            const initiales = studio.split(/[\s\-_&,]+/).map(w => w[0] || '').filter(Boolean).slice(0, 2).join('').toUpperCase() || '?';
+            document.getElementById('prod-avatar').textContent = initiales;
             document.getElementById('prod-name').textContent = studio;
-
             renderProducerGrid();
         }
 
         function renderProducerGrid() {
             const map = buildStudioMap();
-            let animes = map[currentStudio] || [];
+            const allForStudio = map[currentStudio] || [];
+            let animes = [...allForStudio];
 
-            // Filtrage
-            const filterVal = document.getElementById('prod-filter').value;
-            if (filterVal === 'oui' || filterVal === 'non') {
-                animes = animes.filter(a => a.censure.toLowerCase() === filterVal);
-            } else if (filterVal === 'terminé') {
-                // accepte "Terminé", "Fini", "Finished", "terminé" peu importe la casse/orthographe
-                animes = animes.filter(a => {
-                    const e = a.etat.toLowerCase();
-                    return e.includes('termin') || e.includes('fini') || e.includes('finish');
-                });
-            } else if (filterVal === 'en cours') {
-                animes = animes.filter(a => {
-                    const e = a.etat.toLowerCase();
-                    return e.includes('cours') || e.includes('airing') || e.includes('diffus');
-                });
-            } else if (filterVal) {
-                animes = animes.filter(a => a.etat.toLowerCase().includes(filterVal.toLowerCase()));
-            }
+            const f = document.getElementById('prod-filter').value;
+            if      (f === 'censure-oui') animes = animes.filter(a => a.censure.toLowerCase() === 'oui');
+            else if (f === 'censure-non') animes = animes.filter(a => a.censure.toLowerCase() === 'non');
+            else if (f === 'fini')        animes = animes.filter(a => /fini|terminé/i.test(a.etat));
+            else if (f === 'en cours')    animes = animes.filter(a => /cours/i.test(a.etat));
 
-            // Tri
-            const sortVal = document.getElementById('prod-sort').value;
-            animes = [...animes].sort((a, b) => {
-                if (sortVal === 'score')  return parseFloat(b.score.replace(',','.') || 0) - parseFloat(a.score.replace(',','.') || 0);
-                if (sortVal === 'pop')    return (parseInt(a.pop.replace('#','')) || 99999) - (parseInt(b.pop.replace('#','')) || 99999);
-                if (sortVal === 'année')  return (b.sortie || '').localeCompare(a.sortie || '');
-                if (sortVal === 'nom')    return a.nom.localeCompare(b.nom);
-                return 0;
+            const s = document.getElementById('prod-sort').value;
+            animes.sort((a, b) => {
+                if (s === 'score') return parseFloat(b.score.replace(',', '.') || 0) - parseFloat(a.score.replace(',', '.') || 0);
+                if (s === 'pop')   return (parseInt(a.pop.replace('#', '')) || 99999) - (parseInt(b.pop.replace('#', '')) || 99999);
+                if (s === 'annee') return (b.sortie || '').localeCompare(a.sortie || '');
+                return a.nom.localeCompare(b.nom, 'fr');
             });
 
-            // Stats header (scores CSV en attendant, puis MAL en async)
-            const allForStudio = map[currentStudio] || [];
-            document.getElementById('prod-total').textContent = allForStudio.length;
-            document.getElementById('prod-avg').textContent   = '…';
-            document.getElementById('prod-best').textContent  = '…';
-            fetchStudioScoresFromMAL(allForStudio);
-            document.getElementById('prod-count').textContent = `${animes.length} titre${animes.length > 1 ? 's' : ''} affiché${animes.length > 1 ? 's' : ''}`;
+            const avg  = avgScore(allForStudio);
+            const best = allForStudio.length
+                ? Math.max(...allForStudio.map(a => parseFloat(a.score.replace(',', '.')) || 0))
+                : 0;
 
-            // Grille
+            document.getElementById('prod-total').textContent = allForStudio.length;
+            document.getElementById('prod-avg').textContent   = avg  ? '⭐ ' + avg.toFixed(2)  : '—';
+            document.getElementById('prod-best').textContent  = best ? best.toFixed(2) : '—';
+            document.getElementById('prod-count').textContent = `${animes.length} titre${animes.length !== 1 ? 's' : ''} affiché${animes.length !== 1 ? 's' : ''}`;
+
             const grid = document.getElementById('producer-grid');
-            if (animes.length === 0) {
-                grid.innerHTML = '<div class="empty-state">Aucun anime pour ces critères.</div>';
-                return;
-            }
+            if (!animes.length) { grid.innerHTML = '<div class="empty-state">Aucun anime pour ces critères.</div>'; return; }
+
             grid.innerHTML = animes.map(a => {
-                const scoreNum = parseFloat(a.score.replace(',','.'));
-                const scoreBadge = scoreNum ? `<div class="score-badge">⭐ ${a.score}</div>` : '';
+                const sn = parseFloat(a.score.replace(',', '.'));
+                const badge = sn ? `<div class="score-badge">⭐ ${a.score}</div>` : '';
                 return `
                 <a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card">
                     <div class="img-wrap">
                         <img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">
-                        ${scoreBadge}
+                        ${badge}
                     </div>
                     <div class="ac-info">
                         <div class="ac-title">${a.nom}</div>
-                        <div class="ac-studio-label">🏢 ${currentStudio}</div>
-                        <div class="ac-meta">
-                            <span>📅 ${a.sortie}</span>
-                            <span>🎞️ ${a.ep}</span>
-                        </div>
-                        <div class="ac-meta">
-                            <span>🔞 ${a.censure}</span>
-                            <span>🛠️ ${a.etat}</span>
-                        </div>
+                        <div class="ac-meta"><span>📅 ${a.sortie}</span><span>🎞️ ${a.ep}</span></div>
+                        <div class="ac-meta"><span>🔞 ${a.censure}</span><span>🛠️ ${a.etat}</span></div>
                     </div>
                 </a>`;
             }).join('');
         }
 
-        // Récupère les scores via Jikan pour les stats du studio
-        async function fetchStudioScoresFromMAL(animes) {
-            const scores = [];
-            // Limite à 8 animes max pour éviter le rate-limit
-            const sample = animes.slice(0, 8);
-            for (const a of sample) {
-                try {
-                    await new Promise(r => setTimeout(r, 400));
-                    const q = a.nom.split('/')[0].trim();
-                    const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`);
-                    if (!resp.ok) continue;
-                    const json = await resp.json();
-                    const s = json.data?.[0]?.score;
-                    if (s) scores.push(parseFloat(s));
-                } catch { /* silencieux */ }
-            }
-            if (scores.length === 0) {
-                document.getElementById('prod-avg').textContent  = '—';
-                document.getElementById('prod-best').textContent = '—';
-                return;
-            }
-            const avg  = (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(2);
-            const best = Math.max(...scores).toFixed(2);
-            document.getElementById('prod-avg').textContent  = '⭐ ' + avg;
-            document.getElementById('prod-best').textContent = '⭐ ' + best;
-        }
-
-        function showList() {
-            currentStudio = null;
-            renderList(document.getElementById('studio-search').value);
-        }
-
+        function showList() { currentStudio = null; renderList(document.getElementById('studio-search').value); }
         document.getElementById('prod-sort').onchange   = renderProducerGrid;
         document.getElementById('prod-filter').onchange = renderProducerGrid;
 
         init();
-
-        // Retour navigateur → revenir à la liste des studios
-        window.addEventListener('popstate', (e) => {
-            if (e.state && e.state.studio) {
-                showProducer(e.state.studio);
-            } else {
-                currentStudio = null;
-                renderList(document.getElementById('studio-search').value);
-                document.getElementById('view-list').style.display = 'block';
-                document.getElementById('view-producer').style.display = 'none';
-                document.title = 'Éditeurs & Studios - Le Malicieux';
-            }
-        });
     </script>
 </body>
 </html>
