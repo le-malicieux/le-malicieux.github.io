@@ -84,6 +84,11 @@
             transition: border-color 0.25s, transform 0.2s, box-shadow 0.2s;
             display: flex; flex-direction: column; gap: 6px;
         }
+        .studio-logo {
+            width: 48px; height: 48px; border-radius: 8px;
+            object-fit: contain; background: #111;
+            border: 1px solid #333; margin-bottom: 4px;
+        }
         .studio-card:hover {
             border-color: var(--primary);
             transform: translateY(-4px);
@@ -147,6 +152,16 @@
             text-transform: uppercase;
             box-shadow: 0 4px 16px rgba(0,0,0,0.5);
             user-select: none;
+            overflow: hidden;
+        }
+        .producer-avatar img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .producer-avatar .avatar-initials {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 100%;
         }
         .producer-info-wrap {
             padding: 56px 28px 20px;
@@ -223,6 +238,11 @@
             overflow: hidden; display: -webkit-box;
             -webkit-line-clamp: 2; -webkit-box-orient: vertical;
             line-height: 1.25; font-size: 1.05em;
+        }
+        .ac-studio-label {
+            font-size: 0.7em; color: #666;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-top: -2px;
         }
         .ac-meta { font-size: 0.72em; color: #888; display: flex; flex-wrap: wrap; gap: 4px; }
         .ac-score { color: #f1c40f; font-weight: bold; }
@@ -405,11 +425,14 @@
 
             grid.innerHTML = studios.map(studio => {
                 const animes = map[studio];
+                const slug = studio.replace(/\s+/g, '-');
+                const logoTag = `<img class="studio-logo" src="img/${slug}.jpg" onerror="this.style.display='none'">`;
                 const previews = animes.slice(0, 4).map(a =>
                     `<img src="img/${a.img}" onerror="this.src='img/logo.jpg'" title="${a.nom}">`
                 ).join('');
                 return `
                 <div class="studio-card" onclick="showProducer('${studio.replace(/'/g,"\\'")}')">
+                    ${logoTag}
                     <div class="studio-name">${studio}</div>
                     <div class="studio-count"><span>${animes.length}</span> titre${animes.length > 1 ? 's' : ''}</div>
                     <div class="studio-preview">${previews}</div>
@@ -427,11 +450,15 @@
             document.getElementById('view-list').style.display = 'none';
             document.getElementById('view-producer').style.display = 'block';
             document.title = studio + ' - Le Malicieux';
-            history.replaceState(null, '', `editeurs.html?studio=${encodeURIComponent(studio)}`);
+            history.pushState({ studio }, '', `editeurs.html?studio=${encodeURIComponent(studio)}`);
 
-            // Avatar = initiales
-            const initiales = studio.split(/[\s\-_]+/).map(w => w[0] || '').slice(0,2).join('').toUpperCase() || '?';
-            document.getElementById('prod-avatar').textContent = initiales;
+            // Avatar = logo ou initiales en fallback
+            const slug = studio.replace(/\s+/g, '-');
+            const avatarEl = document.getElementById('prod-avatar');
+            avatarEl.innerHTML = `
+                <img src="img/${slug}.jpg"
+                     onerror="this.parentElement.innerHTML='<span class=\'avatar-initials\'>' + studio.split(/[\\s\\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase() + '</span>'"
+                >`;
             document.getElementById('prod-name').textContent = studio;
 
             renderProducerGrid();
@@ -442,11 +469,22 @@
             let animes = map[currentStudio] || [];
 
             // Filtrage
-            const filterVal = document.getElementById('prod-filter').value.toLowerCase();
+            const filterVal = document.getElementById('prod-filter').value;
             if (filterVal === 'oui' || filterVal === 'non') {
                 animes = animes.filter(a => a.censure.toLowerCase() === filterVal);
+            } else if (filterVal === 'terminé') {
+                // accepte "Terminé", "Fini", "Finished", "terminé" peu importe la casse/orthographe
+                animes = animes.filter(a => {
+                    const e = a.etat.toLowerCase();
+                    return e.includes('termin') || e.includes('fini') || e.includes('finish');
+                });
+            } else if (filterVal === 'en cours') {
+                animes = animes.filter(a => {
+                    const e = a.etat.toLowerCase();
+                    return e.includes('cours') || e.includes('airing') || e.includes('diffus');
+                });
             } else if (filterVal) {
-                animes = animes.filter(a => a.etat.toLowerCase().includes(filterVal));
+                animes = animes.filter(a => a.etat.toLowerCase().includes(filterVal.toLowerCase()));
             }
 
             // Tri
@@ -459,19 +497,12 @@
                 return 0;
             });
 
-            // Stats header
+            // Stats header (scores CSV en attendant, puis MAL en async)
             const allForStudio = map[currentStudio] || [];
-            const scored = allForStudio.filter(a => parseFloat(a.score.replace(',','.')));
-            const avg = scored.length
-                ? (scored.reduce((s,a) => s + parseFloat(a.score.replace(',','.')), 0) / scored.length).toFixed(2)
-                : '—';
-            const best = scored.length
-                ? Math.max(...scored.map(a => parseFloat(a.score.replace(',','.'))))
-                : '—';
-
             document.getElementById('prod-total').textContent = allForStudio.length;
-            document.getElementById('prod-avg').textContent   = avg !== '—' ? '⭐ ' + avg : '—';
-            document.getElementById('prod-best').textContent  = best !== '—' ? '⭐ ' + best : '—';
+            document.getElementById('prod-avg').textContent   = '…';
+            document.getElementById('prod-best').textContent  = '…';
+            fetchStudioScoresFromMAL(allForStudio);
             document.getElementById('prod-count').textContent = `${animes.length} titre${animes.length > 1 ? 's' : ''} affiché${animes.length > 1 ? 's' : ''}`;
 
             // Grille
@@ -491,6 +522,7 @@
                     </div>
                     <div class="ac-info">
                         <div class="ac-title">${a.nom}</div>
+                        <div class="ac-studio-label">🏢 ${currentStudio}</div>
                         <div class="ac-meta">
                             <span>📅 ${a.sortie}</span>
                             <span>🎞️ ${a.ep}</span>
@@ -504,6 +536,33 @@
             }).join('');
         }
 
+        // Récupère les scores via Jikan pour les stats du studio
+        async function fetchStudioScoresFromMAL(animes) {
+            const scores = [];
+            // Limite à 8 animes max pour éviter le rate-limit
+            const sample = animes.slice(0, 8);
+            for (const a of sample) {
+                try {
+                    await new Promise(r => setTimeout(r, 400));
+                    const q = a.nom.split('/')[0].trim();
+                    const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`);
+                    if (!resp.ok) continue;
+                    const json = await resp.json();
+                    const s = json.data?.[0]?.score;
+                    if (s) scores.push(parseFloat(s));
+                } catch { /* silencieux */ }
+            }
+            if (scores.length === 0) {
+                document.getElementById('prod-avg').textContent  = '—';
+                document.getElementById('prod-best').textContent = '—';
+                return;
+            }
+            const avg  = (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(2);
+            const best = Math.max(...scores).toFixed(2);
+            document.getElementById('prod-avg').textContent  = '⭐ ' + avg;
+            document.getElementById('prod-best').textContent = '⭐ ' + best;
+        }
+
         function showList() {
             currentStudio = null;
             renderList(document.getElementById('studio-search').value);
@@ -513,6 +572,19 @@
         document.getElementById('prod-filter').onchange = renderProducerGrid;
 
         init();
+
+        // Retour navigateur → revenir à la liste des studios
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.studio) {
+                showProducer(e.state.studio);
+            } else {
+                currentStudio = null;
+                renderList(document.getElementById('studio-search').value);
+                document.getElementById('view-list').style.display = 'block';
+                document.getElementById('view-producer').style.display = 'none';
+                document.title = 'Éditeurs & Studios - Le Malicieux';
+            }
+        });
     </script>
 </body>
 </html>
