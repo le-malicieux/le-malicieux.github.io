@@ -118,8 +118,10 @@
             box-shadow: 0 8px 24px rgba(255,71,87,0.15);
         }
         .studio-name {
-            font-weight: 800; font-size: 1em; color: white;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-weight: 800; font-size: 0.95em; color: white;
+            overflow-wrap: break-word; word-break: break-word;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; line-height: 1.25;
         }
         .studio-count {
             font-size: 0.78em; color: #888;
@@ -475,7 +477,7 @@
                     const sc = animes.map(x => parseFloat(x.score.replace(',','.'))).filter(Boolean);
                     return sc.length ? (sc.reduce((s,v)=>s+v,0)/sc.length).toFixed(1) : null;
                 })();
-                const previews = animes.slice(0, 4).map(a =>
+                const previews = animes.slice(0, 3).map(a =>
                     `<img src="img/${a.img}" onerror="this.src='img/logo.jpg'" title="${a.nom}">`
                 ).join('');
                 return `
