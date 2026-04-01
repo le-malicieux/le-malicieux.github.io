@@ -66,18 +66,8 @@
 
         .card-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
+        
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
-        /* Éditeur ancré en bas de la carte */
-        .card-editeur {
-            margin-top: auto;
-            padding-top: 5px;
-            font-size: 0.68em; color: #666;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            border-top: 1px solid #1e1e1e;
-        }
-        .card-editeur a { color: #777; text-decoration: none; transition: color 0.2s; }
-        .card-editeur a:hover { color: var(--primary); }
-        .card-editeur.hl a { color: var(--primary); font-weight: bold; }
         .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; order: -1; }
 
         /* Stat MAL mise à jour sur la carte */
@@ -134,10 +124,9 @@
                 <option value="episodes">Épisodes (Nombre)</option>
                 <option value="etat">État (Fini/En cours)</option>
                 <option value="censure">Censure</option>
-                <option value="editeur">Éditeur (A-Z)</option>
+                            <option value="editeur">Éditeur</option>
             </select>
             <a href="tags.html" class="btn-red">🏷️ Tags</a>
-            <a href="editeurs.html" class="btn-red">🏢 Éditeurs</a>
             <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
@@ -363,7 +352,7 @@
                         etat: clean(c[6]), img: clean(c[8]),
                         tags: clean(c[12]),
                         malId: clean(c[13]),
-                        editeur: clean(c[14]) // ← Colonne O : Studio/Label
+                        editeur: clean(c[14]) // ← Colonne O : Éditeur
                     };
                 }).filter(a => a !== null);
 
@@ -418,7 +407,7 @@
                     if (sortMode === "score") return parseFloat(valB.replace(',', '.')) - parseFloat(valA.replace(',', '.'));
                     if (sortMode === "episodes") return parseInt(valB) - parseInt(valA);
                     if (sortMode === "popularite") return (parseInt(valA.replace('#','')) || 99999) - (parseInt(valB.replace('#','')) || 99999);
-                    if (sortMode === "editeur") return (a.editeur || '').localeCompare(b.editeur || '');
+                    if (sortMode === "editeur") return (valA || '').localeCompare(valB || '');
                     return valA.localeCompare(valB);
                 });
             }
@@ -449,7 +438,7 @@
                             <span ${hl('censure')}>🔞${a.censure}</span>
                             <span ${hl('etat')}>🛠️${a.etat}</span>
                         </div>
-                        ${a.editeur ? '<div class="card-editeur' + (sortMode === 'editeur' ? ' hl' : '') + '">🏢 ' + a.editeur.split(',').map(e => '<a href="editeurs.html?studio=' + encodeURIComponent(e.trim()) + '">' + e.trim() + '</a>').join(' / ') + '</div>' : '<div class="card-editeur" style="border:none;"></div>'}
+                        ${a.editeur ? `<div class="card-meta-row"><span ${hl('editeur')} style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;">🏢${a.editeur}</span></div>` : ''}
                     </div>
                 </a>`).join('');
 
