@@ -2,17 +2,29 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="mobile.css">
     <title>Tags - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
         
         body { 
             font-family: 'Segoe UI', sans-serif; 
-            background-color: var(--bg); 
+            background-color: var(--bg);
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+        body::before { content:''; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:0; pointer-events:none; }
+        .top-navbar, .container { position: relative; z-index: 1; }
+
+        @media (max-width: 600px) {
+            .container { padding: 12px; }
+            .grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
         }
 
         /* Navbar identique à index.html */
@@ -103,6 +115,12 @@
         let activeTag = new URLSearchParams(window.location.search).get('tag');
 
         async function init() {
+            // Fond aléatoire
+            const isMobile = window.innerWidth <= 1000;
+            const n = Math.floor(Math.random() * (isMobile ? 13 : 64)) + 1;
+            document.body.style.backgroundImage = `url('img/${isMobile ? 'mobile' : 'fond'}${n}.webp')`;
+            if (isMobile) document.body.style.backgroundAttachment = 'scroll';
+
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();

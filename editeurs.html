@@ -2,7 +2,8 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="mobile.css">
     <title>Éditeurs & Studios - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.9); --text: #eee; --nav-bg: rgba(15,15,15,0.85); --blue: #2e86de; }
@@ -289,11 +290,34 @@
         }
 
         @media (max-width: 700px) {
-            .studios-grid { grid-template-columns: 1fr 1fr; }
+            /* Vue liste : 2 colonnes avec mosaïque réduite */
+            .studios-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .studio-mosaic { height: 110px; }
+            .studio-body { padding: 9px 10px 11px; }
+            .studio-name { font-size: 0.9em; }
+            .studio-badge { font-size: 0.68em; padding: 2px 7px; }
+            .studio-stats { font-size: 0.68em; }
+
+            /* Vue producer */
             .producer-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .producer-name { font-size: 1.3em; }
-            .producer-stats-row { gap: 10px; }
-            .pstat { padding: 8px 12px; min-width: 60px; }
+            .producer-name { font-size: 1.2em; }
+            .producer-stats-row { gap: 8px; }
+            .pstat { padding: 7px 10px; min-width: 55px; }
+            .pstat-val { font-size: 1.05em; }
+            .pstat-lbl { font-size: 0.62em; }
+            .producer-banner { height: 80px; }
+            .producer-avatar {
+                bottom: -28px; left: 16px;
+                width: 58px; height: 58px;
+                font-size: 1.3em; border-radius: 10px;
+            }
+            .producer-info-wrap { padding: 40px 16px 16px; }
+            .producer-controls { gap: 7px; }
+        }
+        @media (max-width: 400px) {
+            /* Très petit écran : 1 colonne, mosaïque seule bien visible */
+            .studios-grid { grid-template-columns: 1fr; }
+            .studio-mosaic { height: 140px; }
         }
     </style>
 </head>
@@ -392,6 +416,7 @@
             const isMobile = window.innerWidth <= 1000;
             const n = isMobile ? Math.floor(Math.random()*13)+1 : Math.floor(Math.random()*64)+1;
             document.body.style.backgroundImage = `url('img/${isMobile ? 'mobile'+n : 'fond'+n}.webp')`;
+            if (isMobile) document.body.style.backgroundAttachment = 'scroll';
         })();
 
         let allAnimes = [];

@@ -2,7 +2,8 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="mobile.css">
     <title>Mon Profil - Le Malicieux</title>
     <style>
         :root {
@@ -389,8 +390,20 @@
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
         @media (max-width: 800px) {
-            .profile-layout { grid-template-columns: 1fr; }
+            .profile-layout { grid-template-columns: 1fr; padding: 16px 10px 30px; }
             .score-dist { height: 50px; }
+            .section { padding: 14px; }
+            .avatar-card { padding: 16px; }
+            .stats-card { padding: 14px; }
+            .avatar-img { width: 85px; height: 85px; }
+            .profile-username { font-size: 1.1em; }
+            .recent-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+            .activity-img { width: 28px; height: 40px; }
+            .section h2 { font-size: 0.78em; }
+        }
+        @media (max-width: 480px) {
+            .profile-layout { top: 0; }
+            .nav-pseudo { display: none !important; }
         }
     </style>
 </head>
@@ -428,6 +441,7 @@
                 ? `mobile${Math.floor(Math.random() * 13) + 1}.webp`
                 : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
             document.body.style.backgroundImage = `url('img/${fileName}')`;
+            if (isMobile) document.body.style.backgroundAttachment = 'scroll';
         })();
     </script>
 

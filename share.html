@@ -2,7 +2,8 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="mobile.css">
     <title>Le Malicieux — Partager</title>
     <style>
         :root {
@@ -321,6 +322,14 @@
         /* ── LOADING ── */
         .loading { text-align: center; color: var(--muted); padding: 40px; font-size: 0.9em; animation: pulse 1.4s ease-in-out infinite; }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        @media (max-width: 600px) {
+            .page-header { padding: 18px 12px 8px; }
+            .page-header h1 { font-size: 1.2em; }
+            .tabs-bar { gap: 6px; padding: 12px 10px 0; }
+            .tab-btn { padding: 7px 12px; font-size: 0.78em; }
+            .container { padding: 16px 12px 40px; }
+        }
     </style>
 </head>
 <body>
@@ -500,6 +509,7 @@ function setRandomBackground() {
         : Math.floor(Math.random() * 64) + 1;
     const file = isMobile ? `mobile${num}.webp` : `fond${num}.webp`;
     document.body.style.backgroundImage = `url('img/${file}')`;
+    if (isMobile) document.body.style.backgroundAttachment = 'scroll';
 }
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────

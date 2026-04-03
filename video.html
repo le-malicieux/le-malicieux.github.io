@@ -2,7 +2,8 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="mobile.css">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Visionnage - Le Malicieux</title>
     <style>
@@ -46,7 +47,19 @@
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
         .mal-link { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75em; color: #2e86de; text-decoration: none; margin-top: 4px; opacity: 0.8; transition: opacity 0.2s; }
         .mal-link:hover { opacity: 1; text-decoration: underline; }
-        @media (max-width: 800px) { .top-info { flex-direction: column; } .bottom-controls { grid-template-columns: 1fr; } }
+        @media (max-width: 800px) {
+            body { padding: 10px; }
+            .top-info { flex-direction: column; gap: 15px; }
+            .poster { width: 100%; max-width: 220px; margin: 0 auto; }
+            .anime-title { font-size: 1.5em; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+            .stat-item { padding: 8px 6px; }
+            .stat-item small { font-size: 0.6em; }
+            .stat-item span { font-size: 0.8em; }
+            .bottom-controls { grid-template-columns: 1fr; gap: 12px; }
+            .anime-header { padding: 14px; }
+            .info-generale-fixe { font-size: 0.72em; }
+        }
     </style>
 </head>
 <body>

@@ -7,7 +7,8 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M65SBS3C');</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="mobile.css">
     <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
@@ -339,6 +340,7 @@
             const isMobile = window.innerWidth <= 1000;
             let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
             document.body.style.backgroundImage = `url('img/${fileName}')`;
+            if (isMobile) document.body.style.backgroundAttachment = 'scroll';
 
             try {
                 const response = await fetch('animes.csv');
@@ -448,9 +450,25 @@
         }
 
         window.toggleM = () => {
-            document.getElementById('menu').classList.toggle('active');
-            document.getElementById('overlay').classList.toggle('active');
+            const menu = document.getElementById('menu');
+            const overlay = document.getElementById('overlay');
+            const isOpen = menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            // Bloquer le scroll du body quand le menu est ouvert
+            document.body.style.overflow = isOpen ? 'hidden' : '';
         };
+
+        // Fermer le menu burger sur Entrée dans le champ de recherche
+        document.getElementById('search').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const menu = document.getElementById('menu');
+                if (menu.classList.contains('active')) {
+                    menu.classList.remove('active');
+                    document.getElementById('overlay').classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
 
         document.getElementById('sort').onchange = runFilterAndSort;
         document.getElementById('search').oninput = runFilterAndSort;

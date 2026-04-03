@@ -7,7 +7,8 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M65SBS3C');</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="mobile.css">
     <title>Le Malicieux - Index Alphabétique</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
@@ -404,6 +405,7 @@
             const isMobile = window.innerWidth <= 1000;
             let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
             document.body.style.backgroundImage = `url('img/${fileName}')`;
+            if (isMobile) document.body.style.backgroundAttachment = 'scroll';
 
             try {
                 const response = await fetch('animes.csv');
@@ -438,8 +440,11 @@
         document.getElementById('view-mode').onchange = () => render(document.getElementById('search').value);
 
         window.toggleM = () => {
-            document.getElementById('menu').classList.toggle('active');
-            document.getElementById('overlay').classList.toggle('active');
+            const menu = document.getElementById('menu');
+            const overlay = document.getElementById('overlay');
+            const isOpen = menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = isOpen ? 'hidden' : '';
         };
 
         window.randomAnime = () => {

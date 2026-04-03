@@ -2,7 +2,8 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="mobile.css">
     <title>Le Malicieux - Mes Playlists</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
@@ -55,6 +56,24 @@
         .list-img { width: 40px; height: 55px; object-fit: cover; border-radius: 3px; vertical-align: middle; margin-right: 10px; }
 
         .empty-msg { text-align: center; font-size: 1.2em; color: #888; margin-top: 50px; grid-column: 1 / -1; }
+
+        @media (max-width: 700px) {
+            .playlist-header { padding: 16px 12px; }
+            .controls-row { gap: 7px; }
+            .playlist-select { min-width: 0; flex: 1; font-size: 0.8em; padding: 8px 6px; }
+            .btn-create { padding: 8px 10px; font-size: 0.85em; }
+            .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .card img { height: 160px; }
+            .card-title { font-size: 0.85em; height: 2.2em; }
+            /* Table scrollable horizontalement */
+            .list-table { font-size: 0.75em; }
+            .list-table td, .list-table th { padding: 6px 7px; white-space: nowrap; }
+            .list-img { width: 28px; height: 40px; margin-right: 5px; }
+        }
+        @media (max-width: 420px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+            .card img { height: 130px; }
+        }
     </style>
 </head>
 <body>
@@ -182,6 +201,7 @@
                 fileName = `fond${numPC}.webp`;
             }
             document.body.style.backgroundImage = `url('img/${fileName}')`;
+            if (isMobile) document.body.style.backgroundAttachment = 'scroll';
         }
 
         async function loadCSV() {

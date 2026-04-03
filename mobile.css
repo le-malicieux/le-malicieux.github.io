@@ -1,0 +1,271 @@
+/* ═══════════════════════════════════════════════════
+   mobile.css — Correctifs globaux Le Malicieux
+   Inclus dans tous les fichiers HTML du site
+═══════════════════════════════════════════════════ */
+
+/* ── 1. Empêcher zoom & débordement horizontal ── */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overflow-x: hidden;
+}
+body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+* {
+    -webkit-tap-highlight-color: transparent;
+    min-width: 0; /* empêche flex/grid items de forcer un overflow */
+}
+
+/* ── 2. Fond fixe : désactivé sur mobile (bugué sur iOS/Android) ── */
+@media (max-width: 1000px) {
+    body {
+        background-attachment: scroll !important;
+    }
+    /* Remplacement par pseudo-élément fixe pour l'effet visuel */
+    body.has-bg::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image: inherit;
+        background-size: cover;
+        background-position: center;
+        z-index: -2;
+        pointer-events: none;
+    }
+}
+
+/* ── 3. Images : chargement différé optimisé ── */
+img {
+    content-visibility: auto;
+}
+@media (max-width: 1000px) {
+    img[loading="lazy"] {
+        decoding: async;
+    }
+}
+
+/* ── 4. Navbar mobile compacte ── */
+@media (max-width: 1000px) {
+    .top-navbar {
+        padding: 8px 12px !important;
+    }
+    .nav-logo-small {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    .nav-title {
+        font-size: 0.95em !important;
+    }
+    /* Boutons de la navbar trop larges */
+    .discord-btn {
+        padding: 5px 10px !important;
+        font-size: 0.78em !important;
+    }
+    .btn-red {
+        padding: 5px 10px !important;
+        font-size: 0.8em !important;
+    }
+}
+
+/* ── 5. Cartes anime compactes ── */
+@media (max-width: 1000px) {
+    .card-info {
+        padding: 5px !important;
+    }
+    .card-title {
+        font-size: 0.78em !important;
+        height: 2.2em !important;
+        line-height: 1.1 !important;
+    }
+    .card-meta-row {
+        font-size: 0.6em !important;
+        gap: 2px !important;
+        margin-top: 1px !important;
+    }
+    .card-editeur {
+        font-size: 0.58em !important;
+    }
+}
+
+/* ── 6. Tables horizontalement scrollables ── */
+@media (max-width: 1000px) {
+    .list-table {
+        display: block !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+    .list-table td,
+    .list-table th {
+        padding: 7px 8px !important;
+        font-size: 0.78em !important;
+    }
+}
+
+/* ── 7. Selects & inputs mobiles ── */
+@media (max-width: 1000px) {
+    select, input[type="text"], textarea {
+        font-size: 16px !important; /* évite le zoom iOS sur focus */
+    }
+    .playlist-select {
+        min-width: 0 !important;
+        max-width: 100%;
+        font-size: 0.82em !important;
+    }
+}
+
+/* ── 8. controls-row : empilage vertical sur très petit écran ── */
+@media (max-width: 480px) {
+    .controls-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+    .controls-row > * {
+        width: 100% !important;
+    }
+    .playlist-selector {
+        gap: 6px !important;
+    }
+    .select-card {
+        padding: 8px 12px !important;
+    }
+    .select-card h3 {
+        font-size: 0.8em !important;
+    }
+}
+
+/* ── 9. Stats grid video.html ── */
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .stat-item {
+        padding: 8px 6px !important;
+    }
+    .stat-item small {
+        font-size: 0.6em !important;
+    }
+    .stat-item span {
+        font-size: 0.78em !important;
+    }
+    .anime-title {
+        font-size: 1.4em !important;
+    }
+}
+
+/* ── 10. profil.html ── */
+@media (max-width: 800px) {
+    .profile-layout {
+        grid-template-columns: 1fr !important;
+        padding: 16px 12px 30px !important;
+    }
+    .stats-card, .section, .avatar-card {
+        padding: 14px !important;
+    }
+}
+
+/* ── 11. editeurs.html - studios sur mobile ── */
+@media (max-width: 600px) {
+    .studios-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .studio-mosaic {
+        height: 120px !important;
+    }
+    /* Vue producer : logo/initiales seul, pas de banner imposant */
+    .producer-banner {
+        height: 80px !important;
+    }
+    .producer-avatar {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 1.4em !important;
+        bottom: -30px !important;
+    }
+    .producer-info-wrap {
+        padding: 42px 16px 16px !important;
+    }
+    .producer-name {
+        font-size: 1.2em !important;
+    }
+    .pstat {
+        padding: 7px 12px !important;
+        min-width: 60px !important;
+    }
+    .pstat-val {
+        font-size: 1.1em !important;
+    }
+    .producer-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+    }
+}
+
+/* ── 12. alphabetique.html ── */
+@media (max-width: 600px) {
+    .anime-list {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+    }
+    .alpha-nav {
+        padding: 8px !important;
+        gap: 4px !important;
+    }
+    .alpha-nav a {
+        font-size: 0.75em !important;
+        padding: 3px 5px !important;
+    }
+    .letter-badge {
+        min-width: 36px !important;
+        height: 36px !important;
+        font-size: 0.9em !important;
+    }
+}
+
+/* ── 13. tags.html ── */
+@media (max-width: 600px) {
+    .tags-container {
+        padding: 12px !important;
+        gap: 7px !important;
+    }
+    .tag-pill {
+        padding: 5px 11px !important;
+        font-size: 0.8em !important;
+    }
+}
+
+/* ── 14. hero section index ── */
+@media (max-width: 600px) {
+    .hero-section {
+        height: 38vh !important;
+        padding: 12px !important;
+    }
+    .main-logo {
+        width: 80px !important;
+        height: 80px !important;
+        border-radius: 14px !important;
+        margin-bottom: 10px !important;
+    }
+    .main-title {
+        font-size: 1.6em !important;
+    }
+    .main-slogan {
+        font-size: 0.95em !important;
+        margin-top: 6px !important;
+    }
+}
+
+/* ── 15. share.html ── */
+@media (max-width: 600px) {
+    .tabs-bar {
+        gap: 6px !important;
+        padding: 12px 12px 0 !important;
+    }
+    .tab-btn {
+        padding: 8px 14px !important;
+        font-size: 0.8em !important;
+    }
+}
