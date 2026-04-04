@@ -201,7 +201,12 @@
                 fileName = `fond${numPC}.webp`;
             }
             document.body.style.backgroundImage = `url('img/${fileName}')`;
-            if (isMobile) document.body.style.backgroundAttachment = 'scroll';
+            if (isMobile) {
+            document.body.style.backgroundAttachment = 'scroll';
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center top';
+            document.body.style.backgroundRepeat = 'no-repeat';
+        }
         }
 
         async function loadCSV() {

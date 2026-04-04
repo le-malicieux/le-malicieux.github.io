@@ -88,10 +88,15 @@
         (function() {
             const isMobile = window.innerWidth <= 768;
             const prefix = isMobile ? 'mobile' : 'fond';
-            const count = isMobile ? 14 : 64; 
+            const count = isMobile ? 13 : 64; 
             const randomId = Math.floor(Math.random() * count) + 1;
             document.body.style.backgroundImage = `url('img/${prefix}${randomId}.webp')`;
-            if (isMobile) document.body.style.backgroundAttachment = 'scroll';
+            if (isMobile) {
+            document.body.style.backgroundAttachment = 'scroll';
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center top';
+            document.body.style.backgroundRepeat = 'no-repeat';
+        }
         })();
     </script>
 

@@ -416,7 +416,12 @@
             const isMobile = window.innerWidth <= 1000;
             const n = isMobile ? Math.floor(Math.random()*13)+1 : Math.floor(Math.random()*64)+1;
             document.body.style.backgroundImage = `url('img/${isMobile ? 'mobile'+n : 'fond'+n}.webp')`;
-            if (isMobile) document.body.style.backgroundAttachment = 'scroll';
+            if (isMobile) {
+            document.body.style.backgroundAttachment = 'scroll';
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center top';
+            document.body.style.backgroundRepeat = 'no-repeat';
+        }
         })();
 
         let allAnimes = [];

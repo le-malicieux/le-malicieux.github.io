@@ -18,21 +18,13 @@ body {
     min-width: 0; /* empêche flex/grid items de forcer un overflow */
 }
 
-/* ── 2. Fond fixe : désactivé sur mobile (bugué sur iOS/Android) ── */
+/* ── 2. Fond mobile : scroll, cover, centré haut pour portraits ── */
 @media (max-width: 1000px) {
     body {
         background-attachment: scroll !important;
-    }
-    /* Remplacement par pseudo-élément fixe pour l'effet visuel */
-    body.has-bg::before {
-        content: '';
-        position: fixed;
-        inset: 0;
-        background-image: inherit;
-        background-size: cover;
-        background-position: center;
-        z-index: -2;
-        pointer-events: none;
+        background-size: cover !important;
+        background-position: center top !important;
+        background-repeat: no-repeat !important;
     }
 }
 
