@@ -2,8 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="mobile.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Éditeurs & Studios - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.9); --text: #eee; --nav-bg: rgba(15,15,15,0.85); --blue: #2e86de; }
@@ -271,6 +270,7 @@
             margin-top: -2px;
         }
         .ac-meta { font-size: 0.72em; color: #888; display: flex; flex-wrap: wrap; gap: 4px; }
+        .ac-meta .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; }
         .ac-score { color: #f1c40f; font-weight: bold; }
 
         /* Score badge flottant */
@@ -290,34 +290,11 @@
         }
 
         @media (max-width: 700px) {
-            /* Vue liste : 2 colonnes avec mosaïque réduite */
-            .studios-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .studio-mosaic { height: 110px; }
-            .studio-body { padding: 9px 10px 11px; }
-            .studio-name { font-size: 0.9em; }
-            .studio-badge { font-size: 0.68em; padding: 2px 7px; }
-            .studio-stats { font-size: 0.68em; }
-
-            /* Vue producer */
+            .studios-grid { grid-template-columns: 1fr 1fr; }
             .producer-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .producer-name { font-size: 1.2em; }
-            .producer-stats-row { gap: 8px; }
-            .pstat { padding: 7px 10px; min-width: 55px; }
-            .pstat-val { font-size: 1.05em; }
-            .pstat-lbl { font-size: 0.62em; }
-            .producer-banner { height: 80px; }
-            .producer-avatar {
-                bottom: -28px; left: 16px;
-                width: 58px; height: 58px;
-                font-size: 1.3em; border-radius: 10px;
-            }
-            .producer-info-wrap { padding: 40px 16px 16px; }
-            .producer-controls { gap: 7px; }
-        }
-        @media (max-width: 400px) {
-            /* Très petit écran : 1 colonne, mosaïque seule bien visible */
-            .studios-grid { grid-template-columns: 1fr; }
-            .studio-mosaic { height: 140px; }
+            .producer-name { font-size: 1.3em; }
+            .producer-stats-row { gap: 10px; }
+            .pstat { padding: 8px 12px; min-width: 60px; }
         }
     </style>
 </head>
@@ -414,15 +391,8 @@
         // ── Fond aléatoire ──
         (function() {
             const isMobile = window.innerWidth <= 1000;
-            const n = isMobile ? Math.floor(Math.random()*14)+1 : Math.floor(Math.random()*64)+1;
-            if (isMobile) {
-                let _mbg = document.getElementById('mobile-bg-layer');
-                if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
-                _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
-                _mbg.style.backgroundImage = `url('img/mobile${n}.webp')`;
-            } else {
-                document.body.style.backgroundImage = `url('img/fond${n}.webp')`;
-            }
+            const n = isMobile ? Math.floor(Math.random()*13)+1 : Math.floor(Math.random()*64)+1;
+            document.body.style.backgroundImage = `url('img/${isMobile ? 'mobile'+n : 'fond'+n}.webp')`;
         })();
 
         let allAnimes = [];
@@ -595,12 +565,13 @@
             fetchStudioScoresFromMAL(allForStudio);
             document.getElementById('prod-count').textContent = `${animes.length} titre${animes.length > 1 ? 's' : ''} affiché${animes.length > 1 ? 's' : ''}`;
 
-            // Grille
+            // Grille avec mise en valeur du critère actif
             const grid = document.getElementById('producer-grid');
             if (animes.length === 0) {
                 grid.innerHTML = '<div class="empty-state">Aucun anime pour ces critères.</div>';
                 return;
             }
+            const hl = (field) => sortVal === field ? 'class="highlight"' : '';
             grid.innerHTML = animes.map(a => {
                 const scoreNum = parseFloat(a.score.replace(',','.'));
                 const scoreBadge = scoreNum ? `<div class="score-badge">⭐ ${a.score}</div>` : '';
@@ -612,9 +583,8 @@
                     </div>
                     <div class="ac-info">
                         <div class="ac-title">${a.nom}</div>
-                        <div class="ac-studio-label">🏢 ${currentStudio}</div>
                         <div class="ac-meta">
-                            <span>📅 ${a.sortie}</span>
+                            <span ${hl('année')}>📅 ${a.sortie}</span>
                             <span>🎞️ ${a.ep}</span>
                         </div>
                         <div class="ac-meta">

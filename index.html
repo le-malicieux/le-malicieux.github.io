@@ -7,8 +7,7 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M65SBS3C');</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="mobile.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
@@ -28,6 +27,8 @@
             display: flex; align-items: center; justify-content: space-between;
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+            /* Forcer le sticky même avec les transformations de scroll */
+            will-change: transform;
         }
         .nav-left { display: flex; flex-direction: column; align-items: flex-start; }
         .nav-brand { display: flex; align-items: center; gap: 12px; }
@@ -117,7 +118,7 @@
             <div class="close-menu" onclick="toggleM()">← Retour</div>
             <input type="text" id="search" placeholder="Rechercher un anime...">
             <select id="sort">
-                <option value="">Trier par...</option>
+                <option value="">🔀 Aléatoire</option>
                 <option value="popularite">Popularité</option>
                 <option value="score">Score</option>
                 <option value="nom">Nom (A-Z)</option>
@@ -338,15 +339,8 @@
 
         async function init() {
             const isMobile = window.innerWidth <= 1000;
-            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 14) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
-            if (isMobile) {
-                let _mbg = document.getElementById('mobile-bg-layer');
-                if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
-                _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
-                _mbg.style.backgroundImage = `url('img/${fileName}')`;
-            } else {
-                document.body.style.backgroundImage = `url('img/${fileName}')`;
-            }
+            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
+            document.body.style.backgroundImage = `url('img/${fileName}')`;
 
             try {
                 const response = await fetch('animes.csv');
@@ -413,11 +407,16 @@
                 filtered.sort((a, b) => {
                     let valA = a[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
                     let valB = b[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
-                    if (sortMode === "score") return parseFloat(valB.replace(',', '.')) - parseFloat(valA.replace(',', '.'));
-                    if (sortMode === "episodes") return parseInt(valB) - parseInt(valA);
-                    if (sortMode === "popularite") return (parseInt(valA.replace('#','')) || 99999) - (parseInt(valB.replace('#','')) || 99999);
+                    if (sortMode === "score") return parseFloat((valB||'0').replace(',', '.')) - parseFloat((valA||'0').replace(',', '.'));
+                    if (sortMode === "episodes") {
+                        // Extraire le dernier nombre trouvé (ex: "pas fini(4)" → 4, "12" → 12)
+                        const numA = parseInt((valA||'').match(/\d+/g)?.pop() || '0');
+                        const numB = parseInt((valB||'').match(/\d+/g)?.pop() || '0');
+                        return numB - numA;
+                    }
+                    if (sortMode === "popularite") return (parseInt((valA||'').replace('#','')) || 99999) - (parseInt((valB||'').replace('#','')) || 99999);
                     if (sortMode === "editeur") return (valA || '').localeCompare(valB || '');
-                    return valA.localeCompare(valB);
+                    return (valA||'').localeCompare(valB||'');
                 });
             }
             displayAnimes(filtered, sortMode);
@@ -456,25 +455,9 @@
         }
 
         window.toggleM = () => {
-            const menu = document.getElementById('menu');
-            const overlay = document.getElementById('overlay');
-            const isOpen = menu.classList.toggle('active');
-            overlay.classList.toggle('active');
-            // Bloquer le scroll du body quand le menu est ouvert
-            document.body.style.overflow = isOpen ? 'hidden' : '';
+            document.getElementById('menu').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
         };
-
-        // Fermer le menu burger sur Entrée dans le champ de recherche
-        document.getElementById('search').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const menu = document.getElementById('menu');
-                if (menu.classList.contains('active')) {
-                    menu.classList.remove('active');
-                    document.getElementById('overlay').classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            }
-        });
 
         document.getElementById('sort').onchange = runFilterAndSort;
         document.getElementById('search').oninput = runFilterAndSort;

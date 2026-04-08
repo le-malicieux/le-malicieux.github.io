@@ -2,8 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="mobile.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Le Malicieux - Mes Playlists</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
@@ -56,24 +55,6 @@
         .list-img { width: 40px; height: 55px; object-fit: cover; border-radius: 3px; vertical-align: middle; margin-right: 10px; }
 
         .empty-msg { text-align: center; font-size: 1.2em; color: #888; margin-top: 50px; grid-column: 1 / -1; }
-
-        @media (max-width: 700px) {
-            .playlist-header { padding: 16px 12px; }
-            .controls-row { gap: 7px; }
-            .playlist-select { min-width: 0; flex: 1; font-size: 0.8em; padding: 8px 6px; }
-            .btn-create { padding: 8px 10px; font-size: 0.85em; }
-            .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .card img { height: 160px; }
-            .card-title { font-size: 0.85em; height: 2.2em; }
-            /* Table scrollable horizontalement */
-            .list-table { font-size: 0.75em; }
-            .list-table td, .list-table th { padding: 6px 7px; white-space: nowrap; }
-            .list-img { width: 28px; height: 40px; margin-right: 5px; }
-        }
-        @media (max-width: 420px) {
-            .grid { grid-template-columns: repeat(2, 1fr); }
-            .card img { height: 130px; }
-        }
     </style>
 </head>
 <body>
@@ -194,20 +175,13 @@
             const isMobile = window.innerWidth <= 1000;
             let fileName = "";
             if (isMobile) {
-                const numMobile = Math.floor(Math.random() * 14) + 1;
+                const numMobile = Math.floor(Math.random() * 13) + 1;
                 fileName = `mobile${numMobile}.webp`;
             } else {
                 const numPC = Math.floor(Math.random() * 64) + 1;
                 fileName = `fond${numPC}.webp`;
             }
-            if (isMobile) {
-                let _mbg = document.getElementById('mobile-bg-layer');
-                if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
-                _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
-                _mbg.style.backgroundImage = `url('img/${fileName}')`;
-            } else {
-                document.body.style.backgroundImage = `url('img/${fileName}')`;
-            }
+            document.body.style.backgroundImage = `url('img/${fileName}')`;
         }
 
         async function loadCSV() {
@@ -337,10 +311,20 @@
 
             filtered.sort((a, b) => {
                 if (sortVal === "nom") return a.anime.localeCompare(b.anime);
-                if (sortVal === "score_mal") return parseFloat(b.score || 0) - parseFloat(a.score || 0);
-                if (sortVal === "popularite") return (parseInt(a.pop?.replace('#','')) || 9999) - (parseInt(b.pop?.replace('#','')) || 9999);
-                if (sortVal === "sortie") return b.sortie?.localeCompare(a.sortie);
-                if (sortVal === "episodes") return (parseInt(b.epMax) || 0) - (parseInt(a.epMax) || 0);
+                if (sortVal === "score_mal") return parseFloat((b.score||'0').replace(',','.')) - parseFloat((a.score||'0').replace(',','.'));
+                if (sortVal === "popularite") return (parseInt((a.pop||'').replace('#','')) || 99999) - (parseInt((b.pop||'').replace('#','')) || 99999);
+                if (sortVal === "sortie") {
+                    // Extraire l'année (4 chiffres) depuis la valeur
+                    const ya = parseInt((a.sortie||'').match(/\d{4}/)?.[0] || '0');
+                    const yb = parseInt((b.sortie||'').match(/\d{4}/)?.[0] || '0');
+                    return yb - ya;
+                }
+                if (sortVal === "episodes") {
+                    // Extraire le dernier nombre depuis "pas fini(4)", "12", etc.
+                    const ea = parseInt((a.epMax||'').toString().match(/\d+/g)?.pop() || '0');
+                    const eb = parseInt((b.epMax||'').toString().match(/\d+/g)?.pop() || '0');
+                    return eb - ea;
+                }
                 if (sortVal === "note_perso") return (b.rating || 0) - (a.rating || 0);
                 if (sortVal === "editeur") return (a.editeur || '').localeCompare(b.editeur || '');
                 return 0;
@@ -356,9 +340,21 @@
                 return;
             }
 
+            // Mise en valeur du critère de tri
+            const hl = (val) => sortVal === val ? 'style="color:var(--primary);font-weight:bold;"' : '';
+
             if (mode === "grid") {
                 grid.style.display = "grid"; table.style.display = "none";
-                grid.innerHTML = filtered.map(a => `
+                grid.innerHTML = filtered.map(a => {
+                    // Ligne de critère mis en valeur
+                    let hlLine = '';
+                    if (sortVal === 'score_mal')  hlLine = `<div style="font-size:0.75em;color:var(--primary);font-weight:bold;margin-top:2px;">⭐ ${a.score||'N/A'}</div>`;
+                    else if (sortVal === 'popularite') hlLine = `<div style="font-size:0.75em;color:var(--primary);font-weight:bold;margin-top:2px;">📈 ${a.pop||'N/A'}</div>`;
+                    else if (sortVal === 'sortie')   hlLine = `<div style="font-size:0.75em;color:var(--primary);font-weight:bold;margin-top:2px;">📅 ${a.sortie||'?'}</div>`;
+                    else if (sortVal === 'episodes') hlLine = `<div style="font-size:0.75em;color:var(--primary);font-weight:bold;margin-top:2px;">🎞️ ${a.epMax||'?'} ep</div>`;
+                    else if (sortVal === 'note_perso') hlLine = '';
+                    else if (sortVal === 'editeur')  hlLine = `<div style="font-size:0.75em;color:var(--primary);font-weight:bold;margin-top:2px;">🏢 ${a.editeur||'—'}</div>`;
+                    return `
                     <div class="card">
                         <button class="delete-btn-overlay" onclick="removeAnime(event, '${a.id}')">🗑️</button>
                         <a href="video.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;">
@@ -366,10 +362,12 @@
                             <div class="card-info">
                                 <div class="card-title">${a.anime}</div>
                                 <div>⭐ ${a.rating}/10 • Ep: ${a.epSeen}</div>
-                                ${a.editeur ? `<div style="font-size:0.75em; color:#888; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🏢${a.editeur}</div>` : ''}
+                                ${hlLine}
+                                ${a.editeur && sortVal !== 'editeur' ? `<div style="font-size:0.72em; color:#888; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🏢${a.editeur}</div>` : ''}
                             </div>
                         </a>
-                    </div>`).join('');
+                    </div>`;
+                }).join('');
             } else {
                 grid.style.display = "none"; table.style.display = "table";
                 listBody.innerHTML = filtered.map((a, i) => `
@@ -379,12 +377,12 @@
                         <td><img src="${getRealImgPath(a.img)}" class="list-img" onerror="handleImgErr(this, '${a.img}')"></td>
                         <td style="font-weight:bold;"><a href="video.html?name=${encodeURIComponent(a.anime)}" style="color:white; text-decoration:none;">${a.anime}</a></td>
                         <td style="color:#f1c40f;">⭐ ${a.rating || 0}</td>
-                        <td>${a.epSeen} / ${a.epMax || '?'}</td>
-                        <td>${a.score || 'N/A'}</td>
-                        <td>${a.pop || 'N/A'}</td>
-                        <td>${a.sortie || '?'}</td>
+                        <td ${hl('episodes')}>${a.epSeen} / ${a.epMax || '?'}</td>
+                        <td ${hl('score_mal')}>${a.score || 'N/A'}</td>
+                        <td ${hl('popularite')}>${a.pop || 'N/A'}</td>
+                        <td ${hl('sortie')}>${a.sortie || '?'}</td>
                         <td><span style="font-size:0.8em; background:#333; padding:2px 5px; border-radius:3px;">${a.censure || ''}</span></td>
-                        <td style="font-size:0.8em; color:#aaa; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.editeur || '—'}</td>
+                        <td ${hl('editeur')} style="font-size:0.8em; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.editeur || '—'}</td>
                         <td><button style="background:none; border:none; color:#ff4757; cursor:pointer;" onclick="removeAnime(event, '${a.id}')">🗑️</button></td>
                     </tr>`).join('');
             }
