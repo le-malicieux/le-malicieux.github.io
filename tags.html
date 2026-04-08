@@ -18,10 +18,24 @@
             color: var(--text);
             margin: 0; min-height: 100vh; overflow-x: hidden;
         }
-        /* Overlay sombre pour lisibilité */
-        body::before { content:''; position:fixed; inset:0; background:rgba(0,0,0,0.52); z-index:0; pointer-events:none; }
 
-        .top-navbar, .container { position: relative; z-index: 1; }
+        /* Overlay sombre — z-index négatif pour ne jamais bloquer les clics */
+        #bg-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.52);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Fond mobile injecté par JS — également z-index négatif */
+        #bg-layer {
+            position: fixed; inset: 0;
+            z-index: -2;
+            pointer-events: none;
+            background-size: cover;
+            background-position: center top;
+            background-repeat: no-repeat;
+        }
 
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
@@ -32,7 +46,7 @@
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
 
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
 
         /* Tags pills */
         .tags-container {
@@ -44,19 +58,21 @@
         .tag-pill {
             padding: 7px 15px; background: #222; border: 1px solid #444;
             border-radius: 20px; color: #ccc; cursor: pointer; font-size: 0.88em; transition: 0.25s;
+            /* isolation explicite pour garantir la cliquabilité */
+            position: relative; z-index: 2;
+            user-select: none;
         }
         .tag-pill:hover, .tag-pill.active { background: var(--primary); border-color: var(--primary); color: white; }
 
-        /* Définition du tag — fond solide pour lisibilité garantie */
+        /* Définition du tag — fond opaque solide, pas de backdrop-filter */
         .tag-def-box {
-            background: rgba(10,10,10,0.92);
+            background: #0a0a0a;
             border: 1px solid rgba(255,71,87,0.4);
             border-left: 4px solid var(--primary);
             border-radius: 10px;
             padding: 16px 20px;
             margin-bottom: 16px;
             display: none;
-            backdrop-filter: blur(8px);
         }
         .tag-def-box.visible { display: block; }
         .tag-def-name { font-weight: 800; color: var(--primary); font-size: 1.08em; margin-bottom: 7px; }
@@ -104,6 +120,11 @@
 </head>
 <body>
 
+    <!-- Overlay sombre séparé du fond, z-index négatif -->
+    <div id="bg-overlay"></div>
+    <!-- Fond image pour mobile, également z-index négatif -->
+    <div id="bg-layer"></div>
+
     <div class="top-navbar">
         <a href="index.html" class="nav-brand">
             <img src="img/logo.jpg" class="nav-logo-small">
@@ -148,16 +169,13 @@
     </div>
 
     <script>
-        // ── Fond unique via div fixe (pas de doublon) ──
+        // ── Fond unique via éléments dédiés (z-index négatifs, pas de doublon) ──
         (function() {
             const isMobile = window.innerWidth <= 1000;
             const n = Math.floor(Math.random() * (isMobile ? 14 : 64)) + 1;
             const url = `url('img/${isMobile ? 'mobile' : 'fond'}${n}.webp')`;
             if (isMobile) {
-                let bg = document.createElement('div');
-                bg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
-                bg.style.backgroundImage = url;
-                document.body.insertBefore(bg, document.body.firstChild);
+                document.getElementById('bg-layer').style.backgroundImage = url;
             } else {
                 document.body.style.backgroundImage = url;
             }
@@ -189,7 +207,6 @@
                     };
                 }).filter(a => a);
 
-                // Parser tags_description.csv
                 if (tagResp && tagResp.ok) {
                     const txt = await tagResp.text();
                     txt.split(/\r?\n/).slice(1).forEach(line => {
@@ -236,7 +253,6 @@
                 return;
             }
 
-            // Définition
             if (tagDescriptions[tag]) {
                 document.getElementById('tag-def-name').textContent = tag;
                 document.getElementById('tag-def-text').textContent = tagDescriptions[tag];
