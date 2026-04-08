@@ -37,11 +37,17 @@
         .container { padding: 20px; max-width: 1300px; margin: 0 auto; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; }
-        .card { position: relative; background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em; }
+        .card { position: relative; background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
-        .card img { width: 100%; height: 230px; object-fit: cover; }
-        .card-info { padding: 8px; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; height: 2.4em; overflow: hidden; font-size: 1.1em; }
+        .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
+        .card-info { padding: 7px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 3px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
+        .card-meta-row { display: flex; flex-wrap: wrap; gap: 3px; font-size: 0.7em; color: #bbb; margin-top: 2px; }
+        .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; order: -1; }
+        .card-editeur { margin-top: auto; padding-top: 4px; font-size: 0.66em; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-top: 1px solid rgba(255,255,255,0.05); }
+        .card-editeur.highlight { color: white; background: var(--primary); padding: 0 3px; border-radius: 3px; border-top: none; }
+        /* Barre ma progression */
+        .card-progress { font-size: 0.7em; color: #f1c40f; margin-top: 2px; }
         .delete-btn-overlay { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #ff4757; border: none; border-radius: 4px; padding: 5px; cursor: pointer; z-index: 10; opacity: 0; transition: 0.3s; }
         .card:hover .delete-btn-overlay { opacity: 1; }
 
@@ -305,92 +311,85 @@
             const selectedList = document.getElementById('custom-selector').value;
             const mode = document.getElementById('display-mode').value;
             const sortVal = document.getElementById('sort-selector').value;
-            
+
             let filtered = userAnimes.filter(a => a.status === currentStatus);
             if (selectedList !== 'all') filtered = filtered.filter(a => a.playlistTarget === selectedList);
 
             filtered.sort((a, b) => {
-                if (sortVal === "nom") return a.anime.localeCompare(b.anime);
+                if (sortVal === "nom")       return a.anime.localeCompare(b.anime);
                 if (sortVal === "score_mal") return parseFloat((b.score||'0').replace(',','.')) - parseFloat((a.score||'0').replace(',','.'));
-                if (sortVal === "popularite") return (parseInt((a.pop||'').replace('#','')) || 99999) - (parseInt((b.pop||'').replace('#','')) || 99999);
+                if (sortVal === "popularite") return (parseInt((a.pop||'').replace('#',''))||99999) - (parseInt((b.pop||'').replace('#',''))||99999);
                 if (sortVal === "sortie") {
-                    // Extraire l'année (4 chiffres) depuis la valeur
-                    const ya = parseInt((a.sortie||'').match(/\d{4}/)?.[0] || '0');
-                    const yb = parseInt((b.sortie||'').match(/\d{4}/)?.[0] || '0');
+                    const ya = parseInt((a.sortie||'').match(/\d{4}/)?.[0]||0);
+                    const yb = parseInt((b.sortie||'').match(/\d{4}/)?.[0]||0);
                     return yb - ya;
                 }
                 if (sortVal === "episodes") {
-                    // Extraire le dernier nombre depuis "pas fini(4)", "12", etc.
-                    const ea = parseInt((a.epMax||'').toString().match(/\d+/g)?.pop() || '0');
-                    const eb = parseInt((b.epMax||'').toString().match(/\d+/g)?.pop() || '0');
+                    const ea = parseInt((String(a.epMax||'')).match(/\d+/g)?.pop()||0);
+                    const eb = parseInt((String(b.epMax||'')).match(/\d+/g)?.pop()||0);
                     return eb - ea;
                 }
-                if (sortVal === "note_perso") return (b.rating || 0) - (a.rating || 0);
-                if (sortVal === "editeur") return (a.editeur || '').localeCompare(b.editeur || '');
+                if (sortVal === "note_perso") return (b.rating||0) - (a.rating||0);
+                if (sortVal === "editeur")   return (a.editeur||'').localeCompare(b.editeur||'');
                 return 0;
             });
 
-            const grid = document.getElementById('playlist-grid');
+            const grid  = document.getElementById('playlist-grid');
             const table = document.getElementById('playlist-table');
             const listBody = document.getElementById('list-body');
 
-            if(filtered.length === 0) {
+            if (filtered.length === 0) {
                 grid.innerHTML = '<div class="empty-msg">Aucun anime trouvé.</div>';
                 grid.style.display = "grid"; table.style.display = "none";
                 return;
             }
 
-            // Mise en valeur du critère de tri
-            const hl = (val) => sortVal === val ? 'style="color:var(--primary);font-weight:bold;"' : '';
+            const hl = f => sortVal === f ? 'class="highlight"' : '';
 
             if (mode === "grid") {
                 grid.style.display = "grid"; table.style.display = "none";
-                grid.innerHTML = filtered.map(a => {
-                    // Ligne de critère mis en valeur
-                    let hlLine = '';
-                    if (sortVal === 'score_mal')  hlLine = `<div style="font-size:0.75em;color:var(--primary);font-weight:bold;margin-top:2px;">⭐ ${a.score||'N/A'}</div>`;
-                    else if (sortVal === 'popularite') hlLine = `<div style="font-size:0.75em;color:var(--primary);font-weight:bold;margin-top:2px;">📈 ${a.pop||'N/A'}</div>`;
-                    else if (sortVal === 'sortie')   hlLine = `<div style="font-size:0.75em;color:var(--primary);font-weight:bold;margin-top:2px;">📅 ${a.sortie||'?'}</div>`;
-                    else if (sortVal === 'episodes') hlLine = `<div style="font-size:0.75em;color:var(--primary);font-weight:bold;margin-top:2px;">🎞️ ${a.epMax||'?'} ep</div>`;
-                    else if (sortVal === 'note_perso') hlLine = '';
-                    else if (sortVal === 'editeur')  hlLine = `<div style="font-size:0.75em;color:var(--primary);font-weight:bold;margin-top:2px;">🏢 ${a.editeur||'—'}</div>`;
-                    return `
+                grid.innerHTML = filtered.map(a => `
                     <div class="card">
-                        <button class="delete-btn-overlay" onclick="removeAnime(event, '${a.id}')">🗑️</button>
-                        <a href="video.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;">
-                            <img src="${getRealImgPath(a.img)}" onerror="handleImgErr(this, '${a.img}')">
+                        <button class="delete-btn-overlay" onclick="removeAnime(event,'${a.id}')">🗑️</button>
+                        <a href="video.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;height:100%;">
+                            <img src="${getRealImgPath(a.img)}" loading="lazy" onerror="handleImgErr(this,'${a.img}')">
                             <div class="card-info">
                                 <div class="card-title">${a.anime}</div>
-                                <div>⭐ ${a.rating}/10 • Ep: ${a.epSeen}</div>
-                                ${hlLine}
-                                ${a.editeur && sortVal !== 'editeur' ? `<div style="font-size:0.72em; color:#888; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🏢${a.editeur}</div>` : ''}
+                                <div class="card-progress">⭐ ${a.rating||0}/10 &nbsp;•&nbsp; Ep: ${a.epSeen||0}/${a.epMax||'?'}</div>
+                                <div class="card-meta-row">
+                                    <span ${hl('sortie')}>📅${a.sortie||'?'}</span>
+                                    <span ${hl('score_mal')}>⭐${a.score||'N/A'}</span>
+                                    <span ${hl('popularite')}>📈${a.pop||'N/A'}</span>
+                                </div>
+                                <div class="card-meta-row">
+                                    <span ${hl('episodes')}>🎞️${a.epMax||'?'}</span>
+                                    <span>🔞${a.censure||'?'}</span>
+                                    <span ${hl('note_perso')}>🌟${a.rating||0}/10</span>
+                                </div>
+                                ${a.editeur ? `<div class="card-editeur${sortVal==='editeur'?' highlight':''}">🏢 ${a.editeur}</div>` : '<div class="card-editeur" style="visibility:hidden">·</div>'}
                             </div>
                         </a>
-                    </div>`;
-                }).join('');
+                    </div>`).join('');
             } else {
                 grid.style.display = "none"; table.style.display = "table";
                 listBody.innerHTML = filtered.map((a, i) => `
                     <tr>
                         <td class="status-bar status-${a.status}-bg"></td>
                         <td>${i+1}</td>
-                        <td><img src="${getRealImgPath(a.img)}" class="list-img" onerror="handleImgErr(this, '${a.img}')"></td>
-                        <td style="font-weight:bold;"><a href="video.html?name=${encodeURIComponent(a.anime)}" style="color:white; text-decoration:none;">${a.anime}</a></td>
-                        <td style="color:#f1c40f;">⭐ ${a.rating || 0}</td>
-                        <td ${hl('episodes')}>${a.epSeen} / ${a.epMax || '?'}</td>
-                        <td ${hl('score_mal')}>${a.score || 'N/A'}</td>
-                        <td ${hl('popularite')}>${a.pop || 'N/A'}</td>
-                        <td ${hl('sortie')}>${a.sortie || '?'}</td>
-                        <td><span style="font-size:0.8em; background:#333; padding:2px 5px; border-radius:3px;">${a.censure || ''}</span></td>
-                        <td ${hl('editeur')} style="font-size:0.8em; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.editeur || '—'}</td>
-                        <td><button style="background:none; border:none; color:#ff4757; cursor:pointer;" onclick="removeAnime(event, '${a.id}')">🗑️</button></td>
+                        <td><img src="${getRealImgPath(a.img)}" class="list-img" onerror="handleImgErr(this,'${a.img}')"></td>
+                        <td style="font-weight:bold;"><a href="video.html?name=${encodeURIComponent(a.anime)}" style="color:white;text-decoration:none;">${a.anime}</a></td>
+                        <td style="color:#f1c40f;" ${hl('note_perso')}>⭐ ${a.rating||0}</td>
+                        <td ${hl('episodes')}>${a.epSeen||0} / ${a.epMax||'?'}</td>
+                        <td ${hl('score_mal')}>${a.score||'N/A'}</td>
+                        <td ${hl('popularite')}>${a.pop||'N/A'}</td>
+                        <td ${hl('sortie')}>${a.sortie||'?'}</td>
+                        <td><span style="font-size:0.8em;background:#333;padding:2px 5px;border-radius:3px;">${a.censure||''}</span></td>
+                        <td ${hl('editeur')} style="font-size:0.8em;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.editeur||'—'}</td>
+                        <td><button style="background:none;border:none;color:#ff4757;cursor:pointer;" onclick="removeAnime(event,'${a.id}')">🗑️</button></td>
                     </tr>`).join('');
             }
 
-            // Restauration de la position après injection du HTML
-            requestAnimationFrame(() => {
-                restoreScroll();
-            });
+            requestAnimationFrame(() => restoreScroll());
         }
     </script>
 </body>
