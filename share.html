@@ -873,8 +873,9 @@ window.handleImport = async function(docId) {
         // Créer une playlist custom avec le nom + suffixe
         const playlistName = `${shared.playlist?.name || 'Partagée'} (de ${shared.fromName || shared.fromEmail})`;
         await addDoc(collection(db, "playlists_custom"), {
-            uid:  currentUser.uid,
-            name: playlistName,
+            uid:    currentUser.uid,
+            name:   playlistName,
+            shared: true,  // playlist importée → exclue des filtres personnels
         });
 
         // Ajouter chaque anime dans la collection playlists de l'utilisateur
