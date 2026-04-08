@@ -167,9 +167,11 @@
                 return;
             }
 
-            tagsList.innerHTML = sortedTags.map(t =>
-                `<div class="tag-pill${t === activeTag ? ' active' : ''}" onclick="filterByTag(${JSON.stringify(t)})">${t}</div>`
-            ).join('');
+            tagsList.innerHTML = sortedTags.map(t => `
+                <div class="tag-pill ${t === activeTag ? 'active' : ''}" onclick="filterByTag('${t}')">
+                    ${t}
+                </div>
+            `).join('');
         }
 
         function filterByTag(tag) {
