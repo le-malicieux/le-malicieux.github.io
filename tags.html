@@ -7,19 +7,38 @@
     <title>Tags - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
-        
+
+        html {
+            background-color: var(--bg);
+        }
+
         body { 
             font-family: 'Segoe UI', sans-serif; 
-            background-color: var(--bg);
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
+            background-color: transparent;
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
         }
-        body::before { content:''; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:0; pointer-events:none; }
+
+        /* Fond fixe géré par un pseudo-élément sur html, pas body */
+        #bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* overlay sombre intégré via after, pas de doublon */
+        }
+        #bg-layer::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+        }
+
         .top-navbar, .container { position: relative; z-index: 1; }
 
         @media (max-width: 600px) {
@@ -27,7 +46,7 @@
             .grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
         }
 
-        /* Navbar identique à index.html */
+        /* Navbar */
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
@@ -67,7 +86,40 @@
             color: white;
         }
 
-        /* Grille d'animes identique à index.html */
+        /* Bloc définition du tag — fond opaque pour lisibilité garantie */
+        #tag-definition {
+            display: none;
+            background: rgba(10, 10, 10, 0.97);
+            border: 1px solid var(--primary);
+            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 22px;
+            color: #eee;
+            font-size: 0.95em;
+            line-height: 1.6;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.7);
+            backdrop-filter: none; /* on veut du plein opaque, pas de blur */
+        }
+        #tag-definition strong {
+            color: var(--primary);
+            font-size: 1.05em;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        /* Titre résultats */
+        #results-title {
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #aaa;
+            background: rgba(10,10,10,0.75);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+
+        /* Grille */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
         .card { 
             background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
@@ -88,6 +140,9 @@
 </head>
 <body>
 
+    <!-- Couche fond découplée du body pour éviter le doublon -->
+    <div id="bg-layer"></div>
+
     <div class="top-navbar">
         <a href="index.html" class="nav-brand">
             <img src="img/logo.jpg" class="nav-logo-small">
@@ -105,8 +160,14 @@
         </div>
         
         <div id="tags-list" class="tags-container">Chargement des tags...</div>
+
+        <!-- Définition du tag sélectionné — fond plein pour lisibilité -->
+        <div id="tag-definition">
+            <strong id="tag-def-title"></strong>
+            <span id="tag-def-text"></span>
+        </div>
         
-        <div id="results-title" style="margin-bottom: 20px; font-weight: bold; color: #888;"></div>
+        <div id="results-title"></div>
         <div id="anime-container" class="grid"></div>
     </div>
 
@@ -114,24 +175,42 @@
         let allAnimes = [];
         let activeTag = new URLSearchParams(window.location.search).get('tag');
 
+        // Dictionnaire de définitions (à enrichir selon votre lexique)
+        const tagDefinitions = {
+            // Exemples — remplacez/complétez avec vos vraies définitions du lexique
+            "Action": "Anime centré sur des scènes de combat, de poursuite ou d'aventure à rythme soutenu.",
+            "Romance": "Histoire mettant l'accent sur les relations amoureuses entre les personnages.",
+            "Comédie": "Anime à visée humoristique, conçu pour faire rire le spectateur.",
+            "Drame": "Récit émotionnellement chargé, souvent axé sur des conflits intérieurs ou relationnels.",
+            "Fantasy": "Univers imaginaire peuplé de magie, de créatures fantastiques ou de mondes alternatifs.",
+            "Ecchi": "Contenu à caractère légèrement suggestif, sans être explicitement pornographique.",
+            "Hentai": "Contenu animé à caractère explicitement sexuel, réservé aux adultes.",
+            "Isekai": "Le personnage principal est transporté dans un autre monde, souvent un univers de jeu ou fantaisiste.",
+            "Slice of Life": "Récit du quotidien ordinaire des personnages, sans intrigue spectaculaire.",
+            "Seinen": "Ciblé pour un public masculin adulte, avec des thèmes souvent plus sombres ou complexes.",
+            "Shonen": "Ciblé pour un jeune public masculin, axé sur l'amitié, le dépassement de soi et l'action.",
+            "Shoujo": "Ciblé pour un jeune public féminin, souvent centré sur les émotions et la romance.",
+            "Harem": "Un personnage central entouré de plusieurs personnages amoureux ou attirés par lui.",
+            "Mahou Shoujo": "Jeunes filles dotées de pouvoirs magiques, souvent pour combattre le mal.",
+            "Mecha": "Anime mettant en scène des robots géants ou des armures mécaniques pilotées par des humains.",
+            "Supernatural": "Présence d'éléments surnaturels : esprits, démons, pouvoirs paranormaux.",
+            "Horreur": "Anime visant à provoquer peur, angoisse ou malaise chez le spectateur.",
+            "Psychologique": "Exploration des méandres de la psyché, souvent avec des retournements de situation.",
+        };
+
         async function init() {
-            // Fond aléatoire
+            // Fond aléatoire — appliqué sur le div dédié, pas sur body
+            const bgLayer = document.getElementById('bg-layer');
             const isMobile = window.innerWidth <= 1000;
-            const n = Math.floor(Math.random() * (isMobile ? 14 : 64)) + 1;
-            if (isMobile) {
-                let _mbg = document.getElementById('mobile-bg-layer');
-                if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
-                _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
-                _mbg.style.backgroundImage = `url('img/mobile${n}.webp')`;
-            } else {
-                document.body.style.backgroundImage = `url('img/fond${n}.webp')`;
-            }
+            const n = Math.floor(Math.random() * (isMobile ? 13 : 64)) + 1;
+            bgLayer.style.backgroundImage = `url('img/${isMobile ? 'mobile' : 'fond'}${n}.webp')`;
+            // Sur mobile : pas de fixed pour éviter les glitches webkit
+            bgLayer.style.backgroundAttachment = isMobile ? 'scroll' : 'fixed';
 
             try {
                 const response = await fetch('animes.csv');
                 const rawData = await response.text();
                 
-                // Extraction des données
                 allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
                     const c = line.split(';');
                     if (!c[0] || c.length < 9) return null;
@@ -156,28 +235,40 @@
             const tagsList = document.getElementById('tags-list');
             const allTags = new Set();
             
-            allAnimes.forEach(a => {
-                a.tags.forEach(t => allTags.add(t));
-            });
+            allAnimes.forEach(a => a.tags.forEach(t => allTags.add(t)));
 
             const sortedTags = Array.from(allTags).sort();
             
-            if(sortedTags.length === 0) {
+            if (sortedTags.length === 0) {
                 tagsList.innerHTML = "Aucun tag trouvé dans le fichier CSV (Colonne M).";
                 return;
             }
 
             tagsList.innerHTML = sortedTags.map(t => `
-                <div class="tag-pill ${t === activeTag ? 'active' : ''}" onclick="filterByTag('${t}')">
+                <div class="tag-pill ${t === activeTag ? 'active' : ''}" onclick="filterByTag('${t.replace(/'/g,"\\'")}')">
                     ${t}
                 </div>
             `).join('');
         }
 
+        function showTagDefinition(tag) {
+            const defBox = document.getElementById('tag-definition');
+            const defTitle = document.getElementById('tag-def-title');
+            const defText = document.getElementById('tag-def-text');
+
+            const def = tagDefinitions[tag];
+            if (def) {
+                defTitle.textContent = `🏷️ ${tag}`;
+                defText.textContent = def;
+                defBox.style.display = 'block';
+            } else {
+                defBox.style.display = 'none';
+            }
+        }
+
         function filterByTag(tag) {
             activeTag = tag;
             
-            // Mise à jour visuelle des boutons
             document.querySelectorAll('.tag-pill').forEach(btn => {
                 btn.classList.toggle('active', btn.innerText.trim() === tag);
             });
@@ -188,8 +279,11 @@
             if (!tag) {
                 title.innerText = "Sélectionnez un tag pour voir les animes correspondants.";
                 container.innerHTML = "";
+                document.getElementById('tag-definition').style.display = 'none';
                 return;
             }
+
+            showTagDefinition(tag);
 
             const filtered = allAnimes.filter(a => a.tags.includes(tag));
             title.innerText = `${filtered.length} anime(s) pour le tag : ${tag}`;
