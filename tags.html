@@ -72,17 +72,20 @@
 
         /* Définition du tag sélectionné */
         .tag-def-box {
-            background: rgba(255,71,87,0.08);
-            border: 1px solid rgba(255,71,87,0.3);
+            background: rgba(15, 15, 15, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,71,87,0.4);
             border-left: 4px solid var(--primary);
             border-radius: 8px;
             padding: 14px 18px;
             margin-bottom: 18px;
             display: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
         .tag-def-box.visible { display: block; }
         .tag-def-name { font-weight: 800; color: var(--primary); font-size: 1.05em; margin-bottom: 5px; }
-        .tag-def-text { color: #ccc; font-size: 0.9em; line-height: 1.55; }
+        .tag-def-text { color: #ddd; font-size: 0.9em; line-height: 1.55; }
 
         /* Contrôles de tri */
         .sort-controls {
@@ -158,8 +161,9 @@
             // Fond aléatoire
             const isMobile = window.innerWidth <= 1000;
             const n = Math.floor(Math.random() * (isMobile ? 14 : 64)) + 1;
-            document.body.style.backgroundImage = `url('img/${isMobile ? 'mobile' : 'fond'}${n}.webp')`;
             if (isMobile) {
+                // Sur mobile : uniquement via la div fixe, pas sur le body (évite le doublement)
+                document.body.style.backgroundImage = 'none';
                 let _mbg = document.getElementById('mobile-bg-layer');
                 if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
                 _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
