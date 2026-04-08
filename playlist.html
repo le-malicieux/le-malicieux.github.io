@@ -54,6 +54,19 @@
         .list-img { width: 40px; height: 55px; object-fit: cover; border-radius: 3px; vertical-align: middle; margin-right: 10px; }
 
         .empty-msg { text-align: center; font-size: 1.2em; color: #888; margin-top: 50px; grid-column: 1 / -1; }
+
+        /* ── MODALE CONFIRMATION ── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: #1a1a1a; border: 1px solid #444; border-radius: 12px; padding: 28px 24px; max-width: 360px; width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+        .modal-box p { margin: 0 0 22px; font-size: 0.95em; color: #ddd; line-height: 1.5; }
+        .modal-box strong { color: var(--primary); }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; }
+        .modal-btn { padding: 10px 24px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 0.9em; transition: 0.2s; }
+        .modal-btn-cancel { background: #333; color: #ccc; border: 1px solid #555; }
+        .modal-btn-cancel:hover { background: #444; }
+        .modal-btn-confirm { background: var(--primary); color: white; }
+        .modal-btn-confirm:hover { opacity: 0.85; }
     </style>
 </head>
 <body>
@@ -113,6 +126,17 @@
             </thead>
             <tbody id="list-body"></tbody>
         </table>
+    </div>
+
+    <!-- MODALE CONFIRMATION -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-box">
+            <p id="modal-msg"></p>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" id="modal-cancel">Annuler</button>
+                <button class="modal-btn modal-btn-confirm" id="modal-confirm">Supprimer</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -260,22 +284,30 @@
             });
         }
 
+        function showConfirm(msg, onConfirm) {
+            const overlay = document.getElementById('confirm-modal');
+            document.getElementById('modal-msg').innerHTML = msg;
+            overlay.classList.add('active');
+            document.getElementById('modal-confirm').onclick = () => { overlay.classList.remove('active'); onConfirm(); };
+            document.getElementById('modal-cancel').onclick  = () => { overlay.classList.remove('active'); };
+        }
+
         window.removeAnime = async (e, id) => {
             e.preventDefault(); e.stopPropagation();
-            if(confirm("Supprimer cet anime ?")) await deleteDoc(doc(db, "playlists", id));
+            showConfirm('Supprimer cet anime ?', async () => await deleteDoc(doc(db, "playlists", id)));
         };
 
         
-        document.getElementById('btn-del-playlist').onclick = async () => {
+        document.getElementById('btn-del-playlist').onclick = () => {
             const name = document.getElementById('custom-selector').value;
             if(name === "all") return;
-            if(confirm(`Supprimer la playlist "${name}" ?`)) {
+            showConfirm(`Supprimer la playlist <strong>${name}</strong> ?`, async () => {
                 const q = query(collection(db, "playlists_custom"), where("uid", "==", currentUser.uid), where("name", "==", name));
                 const snap = await getDocs(q);
                 snap.forEach(async (d) => await deleteDoc(doc(db, "playlists_custom", d.id)));
                 document.getElementById('custom-selector').value = "all";
                 toggleDeleteBtn();
-            }
+            });
         };
 
         function toggleDeleteBtn() {
