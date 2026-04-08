@@ -254,15 +254,23 @@
                 onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", user.uid)), (snap) => {
                     const selector = document.getElementById('custom-selector');
                     const currentVal = selector.value;
-                    selector.innerHTML = '<option value="all">Toutes mes playlists</option>';
+
+                    // Reconstruire le sélecteur en deux groupes
+                    let myOpts = '';
+                    let sharedOpts = '';
                     snap.forEach(d => {
                         const data = d.data();
-                        // Exclure les playlists partagées (shared === true)
-                        if (!data.shared) {
-                            selector.innerHTML += `<option value="${data.name}">${data.name}</option>`;
-                        }
+                        const opt = `<option value="${data.name}">${data.name}</option>`;
+                        if (data.shared) sharedOpts += opt;
+                        else myOpts += opt;
                     });
-                    selector.value = currentVal;
+
+                    let html = '<option value="all">Toutes mes playlists</option>';
+                    if (myOpts) html += myOpts;
+                    if (sharedOpts) html += `<optgroup label="── Playlists reçues ──">${sharedOpts}</optgroup>`;
+
+                    selector.innerHTML = html;
+                    selector.value = currentVal || 'all';
                     toggleDeleteBtn();
                 });
 
@@ -301,10 +309,17 @@
         document.getElementById('btn-del-playlist').onclick = () => {
             const name = document.getElementById('custom-selector').value;
             if(name === "all") return;
-            showConfirm(`Supprimer la playlist <strong>${name}</strong> ?`, async () => {
-                const q = query(collection(db, "playlists_custom"), where("uid", "==", currentUser.uid), where("name", "==", name));
-                const snap = await getDocs(q);
-                snap.forEach(async (d) => await deleteDoc(doc(db, "playlists_custom", d.id)));
+            showConfirm(`Supprimer la playlist <strong>${name}</strong> et tout son contenu ?`, async () => {
+                // 1. Supprimer le doc playlists_custom
+                const qCustom = query(collection(db, "playlists_custom"), where("uid", "==", currentUser.uid), where("name", "==", name));
+                const snapCustom = await getDocs(qCustom);
+                snapCustom.forEach(async (d) => await deleteDoc(doc(db, "playlists_custom", d.id)));
+
+                // 2. Supprimer TOUS les animes ayant ce playlistTarget
+                const qAnimes = query(collection(db, "playlists"), where("uid", "==", currentUser.uid), where("playlistTarget", "==", name));
+                const snapAnimes = await getDocs(qAnimes);
+                snapAnimes.forEach(async (d) => await deleteDoc(doc(db, "playlists", d.id)));
+
                 document.getElementById('custom-selector').value = "all";
                 toggleDeleteBtn();
             });
@@ -337,9 +352,21 @@
             const selectedList = document.getElementById('custom-selector').value;
             const mode = document.getElementById('display-mode').value;
             const sortVal = document.getElementById('sort-selector').value;
-            
+
+            // Récupérer les noms des playlists partagées pour les exclure de "all"
+            const sharedPlaylistNames = new Set(
+                Array.from(document.getElementById('custom-selector').querySelectorAll('optgroup option'))
+                     .map(o => o.value)
+            );
+
             let filtered = userAnimes.filter(a => a.status === currentStatus);
-            if (selectedList !== 'all') filtered = filtered.filter(a => a.playlistTarget === selectedList);
+
+            if (selectedList === 'all') {
+                // "Toutes mes playlists" = exclure les animes appartenant à une playlist partagée reçue
+                filtered = filtered.filter(a => !a.playlistTarget || !sharedPlaylistNames.has(a.playlistTarget));
+            } else {
+                filtered = filtered.filter(a => a.playlistTarget === selectedList);
+            }
 
             filtered.sort((a, b) => {
                 if (sortVal === "nom") return a.anime.localeCompare(b.anime);
