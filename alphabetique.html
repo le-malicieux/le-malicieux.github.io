@@ -403,14 +403,15 @@
 
         async function init() {
             const isMobile = window.innerWidth <= 1000;
-            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
-            document.body.style.backgroundImage = `url('img/${fileName}')`;
+            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 14) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
             if (isMobile) {
-            document.body.style.backgroundAttachment = 'scroll';
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center top';
-            document.body.style.backgroundRepeat = 'no-repeat';
-        }
+                let _mbg = document.getElementById('mobile-bg-layer');
+                if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
+                _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
+                _mbg.style.backgroundImage = `url('img/${fileName}')`;
+            } else {
+                document.body.style.backgroundImage = `url('img/${fileName}')`;
+            }
 
             try {
                 const response = await fetch('animes.csv');

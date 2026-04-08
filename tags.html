@@ -117,14 +117,15 @@
         async function init() {
             // Fond aléatoire
             const isMobile = window.innerWidth <= 1000;
-            const n = Math.floor(Math.random() * (isMobile ? 13 : 64)) + 1;
-            document.body.style.backgroundImage = `url('img/${isMobile ? 'mobile' : 'fond'}${n}.webp')`;
+            const n = Math.floor(Math.random() * (isMobile ? 14 : 64)) + 1;
             if (isMobile) {
-            document.body.style.backgroundAttachment = 'scroll';
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center top';
-            document.body.style.backgroundRepeat = 'no-repeat';
-        }
+                let _mbg = document.getElementById('mobile-bg-layer');
+                if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
+                _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
+                _mbg.style.backgroundImage = `url('img/mobile${n}.webp')`;
+            } else {
+                document.body.style.backgroundImage = `url('img/fond${n}.webp')`;
+            }
 
             try {
                 const response = await fetch('animes.csv');

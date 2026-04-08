@@ -88,15 +88,16 @@
         (function() {
             const isMobile = window.innerWidth <= 768;
             const prefix = isMobile ? 'mobile' : 'fond';
-            const count = isMobile ? 13 : 64; 
+            const count = isMobile ? 14 : 64; 
             const randomId = Math.floor(Math.random() * count) + 1;
-            document.body.style.backgroundImage = `url('img/${prefix}${randomId}.webp')`;
             if (isMobile) {
-            document.body.style.backgroundAttachment = 'scroll';
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center top';
-            document.body.style.backgroundRepeat = 'no-repeat';
-        }
+                let _mbg = document.getElementById('mobile-bg-layer');
+                if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
+                _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
+                _mbg.style.backgroundImage = `url('img/${prefix}${randomId}.webp')`;
+            } else {
+                document.body.style.backgroundImage = `url('img/${prefix}${randomId}.webp')`;
+            }
         })();
     </script>
 

@@ -505,15 +505,16 @@ function statusLabel(s) {
 function setRandomBackground() {
     const isMobile = window.innerWidth <= 1000;
     const num = isMobile
-        ? Math.floor(Math.random() * 13) + 1
+        ? Math.floor(Math.random() * 14) + 1
         : Math.floor(Math.random() * 64) + 1;
     const file = isMobile ? `mobile${num}.webp` : `fond${num}.webp`;
     document.body.style.backgroundImage = `url('img/${file}')`;
     if (isMobile) {
-        document.body.style.backgroundAttachment = 'scroll';
-        document.body.style.backgroundSize = 'cover';
-        document.body.style.backgroundPosition = 'center top';
-        document.body.style.backgroundRepeat = 'no-repeat';
+        document.body.style.backgroundImage = 'none';
+        let _mbg = document.getElementById('mobile-bg-layer');
+        if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
+        _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
+        _mbg.style.backgroundImage = `url('img/${file}')`;
     }
 }
 
