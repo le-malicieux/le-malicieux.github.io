@@ -6,97 +6,71 @@
     <link rel="stylesheet" href="mobile.css">
     <title>Tags - Le Malicieux</title>
     <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.92); --text: #eee; --nav-bg: rgba(15,15,15,0.88); }
-
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', sans-serif;
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
+        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
             background-color: var(--bg);
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
-            color: var(--text);
-            margin: 0; min-height: 100vh; overflow-x: hidden;
+            color: var(--text); 
+            margin: 0; 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        body::before { content:''; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:0; pointer-events:none; }
+        .top-navbar, .container { position: relative; z-index: 1; }
+
+        @media (max-width: 600px) {
+            .container { padding: 12px; }
+            .grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
         }
 
-        /* Overlay sombre — z-index négatif pour ne jamais bloquer les clics */
-        #bg-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.52);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* Fond mobile injecté par JS — également z-index négatif */
-        #bg-layer {
-            position: fixed; inset: 0;
-            z-index: -2;
-            pointer-events: none;
-            background-size: cover;
-            background-position: center top;
-            background-repeat: no-repeat;
-        }
-
+        /* Navbar identique à index.html */
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; text-decoration: none; }
 
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
 
-        /* Tags pills */
-        .tags-container {
-            background: var(--card-bg);
-            padding: 20px; border-radius: 15px; border: 1px solid #333;
-            margin-bottom: 24px;
-            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+        /* Section des Tags */
+        .tags-container { 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 15px; 
+            border: 1px solid #333; 
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
         }
         .tag-pill {
-            padding: 7px 15px; background: #222; border: 1px solid #444;
-            border-radius: 20px; color: #ccc; cursor: pointer; font-size: 0.88em; transition: 0.25s;
-            /* isolation explicite pour garantir la cliquabilité */
-            position: relative; z-index: 2;
-            user-select: none;
+            padding: 8px 16px;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 20px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: 0.3s;
         }
-        .tag-pill:hover, .tag-pill.active { background: var(--primary); border-color: var(--primary); color: white; }
+        .tag-pill:hover, .tag-pill.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
 
-        /* Définition du tag — fond opaque solide, pas de backdrop-filter */
-        .tag-def-box {
-            background: #0a0a0a;
-            border: 1px solid rgba(255,71,87,0.4);
-            border-left: 4px solid var(--primary);
-            border-radius: 10px;
-            padding: 16px 20px;
-            margin-bottom: 16px;
-            display: none;
-        }
-        .tag-def-box.visible { display: block; }
-        .tag-def-name { font-weight: 800; color: var(--primary); font-size: 1.08em; margin-bottom: 7px; }
-        .tag-def-text { color: #ddd; font-size: 0.9em; line-height: 1.6; }
-
-        /* Barre résultats + tri */
-        .results-bar {
-            display: none;
-            justify-content: space-between; align-items: center;
-            flex-wrap: wrap; gap: 10px;
-            margin-bottom: 16px;
-        }
-        .results-bar.visible { display: flex; }
-        .results-count { font-weight: bold; color: #888; font-size: 0.9em; }
-        .sort-select {
-            background: #1a1a1a; border: 1px solid #444; color: white;
-            padding: 7px 12px; border-radius: 6px; font-size: 0.85em; cursor: pointer; outline: none;
-        }
-        .sort-select:focus { border-color: var(--primary); }
-
-        /* Cartes */
+        /* Grille d'animes identique à index.html */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-        .card {
-            background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s;
+        .card { 
+            background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
             border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
             display: flex; flex-direction: column;
         }
@@ -106,185 +80,121 @@
         .card-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
-        .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; order: -1; }
-        .card-editeur { margin-top: auto; padding-top: 4px; font-size: 0.68em; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-top: 1px solid rgba(255,255,255,0.05); }
-        .card-editeur.highlight { color: white; background: var(--primary); padding: 0 3px; border-radius: 3px; border-top: none; }
 
         @media (max-width: 1000px) {
             .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .card-info { padding: 5px; }
-            .card-title { font-size: 0.78em; height: 2.2em; }
-            .card-meta-row { font-size: 0.6em; gap: 2px; }
         }
     </style>
 </head>
 <body>
-
-    <!-- Overlay sombre séparé du fond, z-index négatif -->
-    <div id="bg-overlay"></div>
-    <!-- Fond image pour mobile, également z-index négatif -->
-    <div id="bg-layer"></div>
 
     <div class="top-navbar">
         <a href="index.html" class="nav-brand">
             <img src="img/logo.jpg" class="nav-logo-small">
             <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Tags</small></span>
         </a>
-        <a href="index.html" style="color:var(--primary); text-decoration:none; font-weight:bold; font-size:0.9em;">← Catalogue</a>
+        <a href="index.html" style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 0.9em;">← Catalogue</a>
     </div>
 
     <div class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
-            <h2 style="color:var(--primary); margin:0;">Explorer par catégories</h2>
-            <a href="lexique.html" style="background:#222; color:#fff; text-decoration:none; padding:10px 20px; border-radius:8px; border:1px solid var(--primary); font-weight:bold; font-size:0.9em; transition:0.3s;" onmouseover="this.style.background='var(--primary)'" onmouseout="this.style.background='#222'">
-                📖 Lexique des tags
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <h2 style="color: var(--primary); margin: 0;">Explorer par catégories</h2>
+            <a href="lexique.html" style="background: #222; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--primary); font-weight: bold; font-size: 0.9em; transition: 0.3s;" onmouseover="this.style.background='var(--primary)'" onmouseout="this.style.background='#222'">
+                📖 Consulter le lexique des tags
             </a>
         </div>
-
+        
         <div id="tags-list" class="tags-container">Chargement des tags...</div>
-
-        <!-- Définition du tag -->
-        <div id="tag-def-box" class="tag-def-box">
-            <div class="tag-def-name" id="tag-def-name"></div>
-            <div class="tag-def-text" id="tag-def-text"></div>
-        </div>
-
-        <!-- Barre résultats + tri -->
-        <div id="results-bar" class="results-bar">
-            <div id="results-count" class="results-count"></div>
-            <select id="tag-sort" class="sort-select" onchange="applySort()">
-                <option value="">🔀 Aléatoire</option>
-                <option value="score">⭐ Score ↓</option>
-                <option value="popularite">📈 Popularité ↑</option>
-                <option value="sortie">📅 Année ↓</option>
-                <option value="episodes">🎞️ Épisodes ↓</option>
-                <option value="nom">🔤 Nom (A-Z)</option>
-                <option value="censure">🔞 Censure</option>
-                <option value="etat">🛠️ État</option>
-                <option value="editeur">🏢 Éditeur</option>
-            </select>
-        </div>
-
+        
+        <div id="results-title" style="margin-bottom: 20px; font-weight: bold; color: #888;"></div>
         <div id="anime-container" class="grid"></div>
     </div>
 
     <script>
-        // ── Fond unique via éléments dédiés (z-index négatifs, pas de doublon) ──
-        (function() {
-            const isMobile = window.innerWidth <= 1000;
-            const n = Math.floor(Math.random() * (isMobile ? 14 : 64)) + 1;
-            const url = `url('img/${isMobile ? 'mobile' : 'fond'}${n}.webp')`;
-            if (isMobile) {
-                document.getElementById('bg-layer').style.backgroundImage = url;
-            } else {
-                document.body.style.backgroundImage = url;
-            }
-        })();
-
         let allAnimes = [];
-        let tagDescriptions = {};
         let activeTag = new URLSearchParams(window.location.search).get('tag');
-        let currentFiltered = [];
 
         async function init() {
-            try {
-                const [csvResp, tagResp] = await Promise.all([
-                    fetch('animes.csv'),
-                    fetch('tags_description.csv').catch(() => null)
-                ]);
+            // Fond aléatoire
+            const isMobile = window.innerWidth <= 1000;
+            const n = Math.floor(Math.random() * (isMobile ? 14 : 64)) + 1;
+            if (isMobile) {
+                let _mbg = document.getElementById('mobile-bg-layer');
+                if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
+                _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
+                _mbg.style.backgroundImage = `url('img/mobile${n}.webp')`;
+            } else {
+                document.body.style.backgroundImage = `url('img/fond${n}.webp')`;
+            }
 
-                const rawData = await csvResp.text();
+            try {
+                const response = await fetch('animes.csv');
+                const rawData = await response.text();
+                
+                // Extraction des données
                 allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
                     const c = line.split(';');
                     if (!c[0] || c.length < 9) return null;
-                    const cl = s => s ? s.trim().replace(/^"|"$/g, '') : '';
-                    return {
-                        nom: cl(c[0]), pop: cl(c[1]), score: cl(c[2]),
-                        sortie: cl(c[3]), ep: cl(c[4]), censure: cl(c[5]),
-                        etat: cl(c[6]), img: cl(c[8]),
-                        tags: c[12] ? c[12].split(',').map(cl).filter(t => t) : [],
-                        editeur: cl(c[14])
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    return { 
+                        nom: clean(c[0]), sortie: clean(c[3]), score: clean(c[2]), 
+                        pop: clean(c[1]), ep: clean(c[4]), censure: clean(c[5]), 
+                        etat: clean(c[6]), img: clean(c[8]),
+                        tags: c[12] ? c[12].split(',').map(clean).filter(t => t !== "") : [],
+                        editeur: clean(c[14])
                     };
-                }).filter(a => a);
-
-                if (tagResp && tagResp.ok) {
-                    const txt = await tagResp.text();
-                    txt.split(/\r?\n/).slice(1).forEach(line => {
-                        if (!line.trim()) return;
-                        let cols = [], f = '', q = false;
-                        for (const c of line) {
-                            if (c === '"') { q = !q; }
-                            else if (c === ';' && !q) { cols.push(f); f = ''; }
-                            else f += c;
-                        }
-                        cols.push(f);
-                        const name = cols[0]?.trim().replace(/^"|"$/g,'');
-                        const desc = cols[1]?.trim().replace(/^"|"$/g,'');
-                        if (name) tagDescriptions[name] = desc || '';
-                    });
-                }
+                }).filter(a => a !== null);
 
                 generateTagCloud();
-                if (activeTag) filterByTag(activeTag);
-            } catch (err) { console.error(err); }
+                filterByTag(activeTag);
+            } catch (err) {
+                console.error("Erreur:", err);
+            }
         }
 
         function generateTagCloud() {
+            const tagsList = document.getElementById('tags-list');
             const allTags = new Set();
-            allAnimes.forEach(a => a.tags.forEach(t => allTags.add(t)));
-            const sorted = Array.from(allTags).sort();
-            if (!sorted.length) { document.getElementById('tags-list').innerHTML = "Aucun tag trouvé."; return; }
-            document.getElementById('tags-list').innerHTML = sorted.map(t =>
-                `<div class="tag-pill${t === activeTag ? ' active' : ''}" onclick="filterByTag(${JSON.stringify(t)})">${t}</div>`
-            ).join('');
+            
+            allAnimes.forEach(a => {
+                a.tags.forEach(t => allTags.add(t));
+            });
+
+            const sortedTags = Array.from(allTags).sort();
+            
+            if(sortedTags.length === 0) {
+                tagsList.innerHTML = "Aucun tag trouvé dans le fichier CSV (Colonne M).";
+                return;
+            }
+
+            tagsList.innerHTML = sortedTags.map(t => `
+                <div class="tag-pill ${t === activeTag ? 'active' : ''}" onclick="filterByTag('${t}')">
+                    ${t}
+                </div>
+            `).join('');
         }
 
         function filterByTag(tag) {
             activeTag = tag;
-            document.querySelectorAll('.tag-pill').forEach(p => p.classList.toggle('active', p.textContent.trim() === tag));
+            
+            // Mise à jour visuelle des boutons
+            document.querySelectorAll('.tag-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.trim() === tag);
+            });
 
-            const defBox = document.getElementById('tag-def-box');
-            const bar = document.getElementById('results-bar');
+            const container = document.getElementById('anime-container');
+            const title = document.getElementById('results-title');
 
             if (!tag) {
-                defBox.classList.remove('visible');
-                bar.classList.remove('visible');
-                document.getElementById('anime-container').innerHTML = '';
+                title.innerText = "Sélectionnez un tag pour voir les animes correspondants.";
+                container.innerHTML = "";
                 return;
             }
 
-            if (tagDescriptions[tag]) {
-                document.getElementById('tag-def-name').textContent = tag;
-                document.getElementById('tag-def-text').textContent = tagDescriptions[tag];
-                defBox.classList.add('visible');
-            } else {
-                defBox.classList.remove('visible');
-            }
+            const filtered = allAnimes.filter(a => a.tags.includes(tag));
+            title.innerText = `${filtered.length} anime(s) pour le tag : ${tag}`;
 
-            currentFiltered = allAnimes.filter(a => a.tags.includes(tag));
-            document.getElementById('results-count').textContent = `${currentFiltered.length} anime${currentFiltered.length > 1 ? 's' : ''} pour le tag : ${tag}`;
-            bar.classList.add('visible');
-            document.getElementById('tag-sort').value = '';
-            renderCards(currentFiltered, '');
-        }
-
-        function applySort() {
-            const sortVal = document.getElementById('tag-sort').value;
-            let list = [...currentFiltered];
-            if (sortVal === 'score')     list.sort((a,b) => parseFloat((b.score||'0').replace(',','.')) - parseFloat((a.score||'0').replace(',','.')));
-            else if (sortVal === 'popularite') list.sort((a,b) => (parseInt((a.pop||'').replace('#',''))||99999) - (parseInt((b.pop||'').replace('#',''))||99999));
-            else if (sortVal === 'sortie')    list.sort((a,b) => { const ya=parseInt((a.sortie||'').match(/\d{4}/)?.[0]||0),yb=parseInt((b.sortie||'').match(/\d{4}/)?.[0]||0); return yb-ya; });
-            else if (sortVal === 'episodes')  list.sort((a,b) => { const ea=parseInt((a.ep||'').match(/\d+/g)?.pop()||0),eb=parseInt((b.ep||'').match(/\d+/g)?.pop()||0); return eb-ea; });
-            else if (sortVal === 'nom')       list.sort((a,b) => a.nom.localeCompare(b.nom,'fr'));
-            else if (sortVal === 'censure')   list.sort((a,b) => (a.censure||'').localeCompare(b.censure||''));
-            else if (sortVal === 'etat')      list.sort((a,b) => (a.etat||'').localeCompare(b.etat||''));
-            else if (sortVal === 'editeur')   list.sort((a,b) => (a.editeur||'').localeCompare(b.editeur||''));
-            renderCards(list, sortVal);
-        }
-
-        function renderCards(list, sortVal) {
-            const hl = f => sortVal === f ? 'class="highlight"' : '';
-            document.getElementById('anime-container').innerHTML = list.map(a => `
+            container.innerHTML = filtered.map(a => `
                 <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                     <div class="img-container">
                         <img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">
@@ -292,16 +202,11 @@
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
                         <div class="card-meta-row">
-                            <span ${hl('sortie')}>📅${a.sortie}</span>
-                            <span ${hl('score')}>⭐${a.score}</span>
-                            <span ${hl('popularite')}>📈${a.pop}</span>
+                            <span>📅${a.sortie}</span>
+                            <span>⭐${a.score}</span>
+                            <span>📈${a.pop}</span>
                         </div>
-                        <div class="card-meta-row">
-                            <span ${hl('episodes')}>🎞️${a.ep}</span>
-                            <span ${hl('censure')}>🔞${a.censure}</span>
-                            <span ${hl('etat')}>🛠️${a.etat}</span>
-                        </div>
-                        ${a.editeur ? `<div class="card-editeur${sortVal==='editeur'?' highlight':''}">🏢 ${a.editeur}</div>` : '<div class="card-editeur" style="visibility:hidden">·</div>'}
+                        ${a.editeur ? `<div class="card-meta-row"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;">🏢${a.editeur}</span></div>` : ''}
                     </div>
                 </a>`).join('');
         }
