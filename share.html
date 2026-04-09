@@ -2,8 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="mobile.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Le Malicieux — Partager</title>
     <style>
         :root {
@@ -322,14 +321,6 @@
         /* ── LOADING ── */
         .loading { text-align: center; color: var(--muted); padding: 40px; font-size: 0.9em; animation: pulse 1.4s ease-in-out infinite; }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-        @media (max-width: 600px) {
-            .page-header { padding: 18px 12px 8px; }
-            .page-header h1 { font-size: 1.2em; }
-            .tabs-bar { gap: 6px; padding: 12px 10px 0; }
-            .tab-btn { padding: 7px 12px; font-size: 0.78em; }
-            .container { padding: 16px 12px 40px; }
-        }
     </style>
 </head>
 <body>
@@ -505,17 +496,10 @@ function statusLabel(s) {
 function setRandomBackground() {
     const isMobile = window.innerWidth <= 1000;
     const num = isMobile
-        ? Math.floor(Math.random() * 14) + 1
+        ? Math.floor(Math.random() * 13) + 1
         : Math.floor(Math.random() * 64) + 1;
     const file = isMobile ? `mobile${num}.webp` : `fond${num}.webp`;
     document.body.style.backgroundImage = `url('img/${file}')`;
-    if (isMobile) {
-        document.body.style.backgroundImage = 'none';
-        let _mbg = document.getElementById('mobile-bg-layer');
-        if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
-        _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
-        _mbg.style.backgroundImage = `url('img/${file}')`;
-    }
 }
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
@@ -871,11 +855,13 @@ window.handleImport = async function(docId) {
         const animes = shared.playlist?.animes || [];
 
         // Créer une playlist custom avec le nom + suffixe
-        const playlistName = `${shared.playlist?.name || 'Partagée'} (de ${shared.fromName || shared.fromEmail})`;
+        const sharedByName = shared.fromName || shared.fromEmail || 'quelqu\'un';
+        const playlistName = `${shared.playlist?.name || 'Partagée'} (partagée par ${sharedByName})`;
         await addDoc(collection(db, "playlists_custom"), {
-            uid:    currentUser.uid,
-            name:   playlistName,
-            shared: true,  // playlist importée → exclue des filtres personnels
+            uid:      currentUser.uid,
+            name:     playlistName,
+            shared:   true,             // marquer comme partagée → exclue du sélecteur principal
+            sharedBy: sharedByName,
         });
 
         // Ajouter chaque anime dans la collection playlists de l'utilisateur
@@ -885,7 +871,8 @@ window.handleImport = async function(docId) {
                 anime:          a.anime,
                 status:         a.status || 'waiting',
                 rating:         a.rating || 0,
-                epSeen:         0,          // on remet à 0 pour l'importeur
+                epSeen:         a.epSeen || 0,   // conserver la progression du partageur
+                epMax:          a.epMax  || 0,
                 img:            a.img || '',
                 playlistTarget: playlistName,
             })
