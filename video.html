@@ -333,7 +333,7 @@
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if(u) {
-                        const docRef = doc(db, "playlists", u.uid + "_" + anime.nom);
+                        const docRef = doc(db, "playlists", u.uid + "_" + animeName);
                         let snap = await getDoc(docRef);
                         if(snap.exists()) {
                             const d = snap.data();
@@ -360,7 +360,7 @@
                             const now       = new Date();
 
                             const updates = {
-                                uid: u.uid, anime: anime.nom, img: anime.img,
+                                uid: u.uid, anime: animeName, img: anime.img,
                                 status: statusVal, epSeen: epVal,
                                 rating: userRating, epMax: maxEp
                             };
