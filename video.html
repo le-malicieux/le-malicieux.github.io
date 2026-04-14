@@ -61,25 +61,25 @@
             .info-generale-fixe { font-size: 0.72em; }
         }
         /* ── SECTION RELATIONS (PREQUELS / SEQUELS) ── */
-        .related-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 18px; }
-        .related-section { flex: 1; min-width: 0; }
+        .related-section { margin-bottom: 18px; }
         .related-label { font-size: 0.7em; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
-        .related-list { display: flex; flex-direction: column; gap: 8px; }
+        .related-list { display: flex; flex-wrap: wrap; gap: 10px; }
         .related-card {
-            display: flex; flex-direction: row; align-items: center;
-            text-decoration: none; gap: 10px;
+            display: flex; flex-direction: column; align-items: center;
+            width: 80px; text-decoration: none; gap: 6px;
             transition: transform 0.2s;
         }
-        .related-card:hover { transform: translateX(3px); }
+        .related-card:hover { transform: translateY(-3px); }
         .related-card img {
-            width: 55px; height: 75px; object-fit: cover; flex-shrink: 0;
-            border-radius: 6px; border: 2px solid #333;
+            width: 80px; height: 110px; object-fit: cover;
+            border-radius: 7px; border: 2px solid #333;
             transition: border-color 0.2s;
         }
         .related-card:hover img { border-color: var(--primary); }
         .related-card span {
-            font-size: 0.78em; color: #ccc; text-align: left;
-            line-height: 1.4; word-break: break-word;
+            font-size: 0.72em; color: #ccc; text-align: center;
+            line-height: 1.3; word-break: break-word;
+            max-width: 80px;
         }
         .related-card:hover span { color: white; }
         /* ── MODALE CONFIRMATION ── */
@@ -199,11 +199,14 @@
                 const data = await resp.text();
                 const lines = data.split(/\r?\n/).slice(1);
                 
+                const imgMap = {};
                 let anime = null;
                 for (let line of lines) {
                     const c = line.split(';');
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    if (clean(c[0]) === animeName) {
+                    const t = clean(c[0]);
+                    if (t && clean(c[8])) imgMap[t] = clean(c[8]);
+                    if (t === animeName) {
                         anime = {
                             nom:    clean(c[0]),  pop:   clean(c[1]),  score: clean(c[2]),
                             year:   clean(c[3]),  ep:    clean(c[4]),  censure: clean(c[5]),
@@ -234,18 +237,21 @@
 
                 const makeRelatedCards = (list) =>
                     list.map(name => {
-                        const slug = name.replace(/\.[^/.]+$/, '');
+                        const imgFile = imgMap[name] || '';
+                        const imgSrc = imgFile ? `img/${imgFile.split('.')[0]}.jpg` : '';
+                        const imgTag = imgSrc
+                            ? `<img src="${imgSrc}" onerror="this.src='${imgSrc.replace('.jpg','.png')}'; this.onerror=null;">`
+                            : `<div style="width:55px;height:75px;background:#222;border-radius:6px;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:1.2em;">?</div>`;
                         return `<a href="video.html?name=${encodeURIComponent(name)}" class="related-card">
-                            <img src="img/${slug}.jpg" onerror="this.src='img/${slug}.png'; this.onerror=null;">
+                            ${imgTag}
                             <span>${name}</span>
                         </a>`;
                     }).join('');
 
-                const relatedSection = (anime.prequels.length || anime.sequels.length) ? `
-                    <div class="related-row">
-                        ${anime.prequels.length ? `<div class="related-section"><div class="related-label">⬅️ Préquel(s)</div><div class="related-list">${makeRelatedCards(anime.prequels)}</div></div>` : ''}
-                        ${anime.sequels.length  ? `<div class="related-section"><div class="related-label">➡️ Suite(s)</div><div class="related-list">${makeRelatedCards(anime.sequels)}</div></div>` : ''}
-                    </div>` : '';
+                const relatedSection = [
+                    anime.prequels.length ? `<div class="related-section"><div class="related-label">⬅️ Préquel(s)</div><div class="related-list">${makeRelatedCards(anime.prequels)}</div></div>` : '',
+                    anime.sequels.length  ? `<div class="related-section"><div class="related-label">➡️ Suite(s)</div><div class="related-list">${makeRelatedCards(anime.sequels)}</div></div>`   : ''
+                ].join('');
 
                 display.innerHTML = `
                     <div class="anime-header">
