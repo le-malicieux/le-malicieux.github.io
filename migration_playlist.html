@@ -26,34 +26,31 @@
         .log-ok { color: var(--ok); }
         .log-warn { color: var(--warn); }
         .log-err { color: var(--primary); }
-        .orphan-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 0.85em; gap: 10px; flex-wrap: wrap; }
+        .orphan-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; font-size: 0.85em; gap: 10px; flex-wrap: wrap; }
         .orphan-item:last-child { border-bottom: none; }
-        .doc-id { color: #aaa; font-family: monospace; font-size: 0.8em; word-break: break-all; flex: 1; }
-        .match-label { color: var(--ok); font-size: 0.8em; }
-        .no-match { color: #555; font-size: 0.8em; }
-        select.match-select { background: #222; border: 1px solid #444; color: white; padding: 6px; border-radius: 5px; max-width: 220px; font-size: 0.8em; }
+        select.match-select { background: #222; border: 1px solid #444; color: white; padding: 6px; border-radius: 5px; max-width: 240px; font-size: 0.8em; }
         #summary { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-        .stat { background: #222; border-radius: 8px; padding: 10px 16px; text-align: center; }
+        .stat { background: #222; border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 80px; }
         .stat strong { display: block; font-size: 1.4em; color: var(--primary); }
         .stat span { font-size: 0.75em; color: #888; }
         .progress-bar { height: 4px; background: #222; border-radius: 2px; margin: 12px 0; }
         .progress-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.3s; }
-        .section-label { font-size: 0.7em; text-transform: uppercase; letter-spacing: 1px; color: #555; margin: 14px 0 4px; }
-        .tag { display: inline-block; font-size: 0.7em; padding: 2px 7px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
-        .tag-playlist { background: rgba(255,165,2,0.2); color: var(--warn); border: 1px solid var(--warn); }
-        .tag-anime { background: rgba(100,100,255,0.2); color: #aaf; border: 1px solid #aaf; }
+        .match-label { color: var(--ok); font-size: 0.8em; white-space: nowrap; }
+        .no-match { color: #555; font-size: 0.8em; }
+        .old-name { color: #ccc; font-size: 0.85em; }
+        .old-id { color: #444; font-size: 0.75em; font-family: monospace; }
     </style>
 </head>
 <body>
 
 <div id="login-box">
     <h1>🔧 Migration Playlist</h1>
-    <p class="subtitle">Connecte-toi pour détecter et corriger les documents dont le nom ne correspond plus au CSV.</p>
-    <button id="btn-login" style="display:inline-flex; align-items:center; gap:10px; background:#fff; color:#333; border:1px solid #ccc; padding:10px 20px; border-radius:6px; font-size:0.95em; cursor:pointer;">
+    <p class="subtitle">Connecte-toi pour vérifier que tous les animes du CSV ont un document Firestore à jour.</p>
+    <button id="btn-login" style="display:inline-flex;align-items:center;gap:10px;background:#fff;color:#333;border:1px solid #ccc;padding:10px 20px;border-radius:6px;font-size:0.95em;cursor:pointer;">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20">
         Se connecter avec Google
     </button>
-    <p id="login-err" style="color:var(--primary); font-size:0.85em; margin-top:8px;"></p>
+    <p id="login-err" style="color:var(--primary);font-size:0.85em;margin-top:8px;"></p>
 </div>
 
 <div id="app" style="display:none;">
@@ -62,30 +59,28 @@
 
     <div class="card" id="step1">
         <div class="status loading" id="s1-status">En attente</div>
-        <strong>Étape 1 — Chargement des données</strong>
-        <p style="font-size:0.85em; color:#888; margin:8px 0 12px;">
-            Lecture du CSV et de toutes les collections Firestore liées à tes animes.<br>
-            <span style="color:#555;">Collections inspectées : <code>playlists</code> (épisodes vus) + <code>animes</code> (cartes animes)</span>
+        <strong>Analyse complète CSV ↔ Firestore</strong>
+        <p style="font-size:0.85em;color:#888;margin:8px 0 12px;">
+            Lit tous les animes du CSV + tous tes documents Firestore.<br>
+            Détecte les documents dont le nom ne correspond plus à aucun titre CSV.
         </p>
-        <button id="btn-load">Charger</button>
+        <button id="btn-load">Lancer l'analyse</button>
         <div class="progress-bar" id="pb1" style="display:none;"><div class="progress-fill" id="pf1" style="width:0%"></div></div>
+        <div id="progress-label" style="font-size:0.75em;color:#555;margin-top:4px;"></div>
     </div>
 
     <div class="card" id="step2" style="display:none;">
-        <div class="status warn" id="s2-status">À vérifier</div>
-        <strong>Étape 2 — Documents dont le nom ne correspond plus au CSV</strong>
+        <div class="status warn" id="s2-status">À corriger</div>
+        <strong>Documents à migrer</strong>
         <div id="summary"></div>
-        <p style="font-size:0.85em; color:#888; margin:8px 0 4px;">
-            Vérifie les correspondances suggérées. Chaque document sera renommé pour correspondre exactement au CSV.
-        </p>
-        <p style="font-size:0.8em; color:#555; margin:0 0 12px;">
-            <span class="tag tag-playlist">playlist</span> = épisodes vus &nbsp;
-            <span class="tag tag-anime">anime</span> = carte anime (ajout playlist, progression)
+        <p style="font-size:0.85em;color:#888;margin:0 0 12px;">
+            Ces documents existent dans ta playlist mais leur nom ne correspond plus au CSV.<br>
+            Sélectionne le nouveau nom pour chacun, puis clique sur Migrer.
         </p>
         <div id="orphans-list"></div>
         <br>
-        <button id="btn-migrate">Migrer les documents sélectionnés</button>
-        <button class="btn-secondary" style="margin-left:10px;" id="btn-skip">Tout ignorer</button>
+        <button id="btn-migrate">✓ Migrer les documents sélectionnés</button>
+        <button class="btn-secondary" style="margin-left:10px;" id="btn-skip">Ignorer</button>
     </div>
 
     <div id="log" style="display:none;"></div>
@@ -93,8 +88,13 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+    getFirestore, collection, query, where,
+    getDocs, doc, setDoc, deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+    getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",
@@ -104,15 +104,14 @@ const firebaseConfig = {
     messagingSenderId: "938147445933",
     appId: "1:938147445933:web:86f9c65ee0737e66a9da24"
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
 const auth = getAuth(app);
 
 let currentUser = null;
-let csvTitles = [];
-// orphanDocs: { id, data, collection, type }
-// type: 'playlist' | 'anime'
-let orphanDocs = [];
+let csvTitles   = [];
+let orphanDocs  = [];
 
 function log(msg, cls = '') {
     const el = document.getElementById('log');
@@ -121,33 +120,39 @@ function log(msg, cls = '') {
     el.scrollTop = el.scrollHeight;
 }
 
+function setProgress(pct, label = '') {
+    document.getElementById('pf1').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = label;
+}
+
 function similarity(a, b) {
     a = a.toLowerCase().trim();
     b = b.toLowerCase().trim();
     if (a === b) return 1;
+    if (!a || !b) return 0;
     if (b.includes(a) || a.includes(b)) return 0.9;
-    // Levenshtein simplifié : ratio de caractères communs
     const shorter = a.length < b.length ? a : b;
     const longer  = a.length < b.length ? b : a;
     let matches = 0;
     const used = Array(longer.length).fill(false);
     for (let i = 0; i < shorter.length; i++) {
-        const idx = longer.indexOf(shorter[i]);
-        if (idx !== -1 && !used[idx]) { matches++; used[idx] = true; }
+        for (let j = 0; j < longer.length; j++) {
+            if (!used[j] && shorter[i] === longer[j]) { matches++; used[j] = true; break; }
+        }
     }
     return matches / longer.length;
 }
 
-function bestMatch(docTitle, titles) {
+function bestMatch(title, titles) {
     let best = null, bestScore = 0;
     for (const t of titles) {
-        const s = similarity(docTitle, t);
+        const s = similarity(title, t);
         if (s > bestScore) { bestScore = s; best = t; }
     }
-    return bestScore > 0.5 ? { title: best, score: bestScore } : null;
+    return bestScore >= 0.5 ? { title: best, score: bestScore } : null;
 }
 
-// ─── Auth ────────────────────────────────────────────────────────────────────
+// ─── Auth ─────────────────────────────────────────────────────────────────
 const provider = new GoogleAuthProvider();
 document.getElementById('btn-login').onclick = async () => {
     try { await signInWithPopup(auth, provider); }
@@ -162,191 +167,143 @@ onAuthStateChanged(auth, u => {
     }
 });
 
-// ─── Chargement ──────────────────────────────────────────────────────────────
+// ─── Analyse ──────────────────────────────────────────────────────────────
 document.getElementById('btn-load').onclick = async () => {
     document.getElementById('btn-load').disabled = true;
-    document.getElementById('s1-status').textContent = 'Chargement…';
+    document.getElementById('s1-status').textContent = 'En cours…';
     document.getElementById('s1-status').className = 'status loading';
     document.getElementById('pb1').style.display = 'block';
-    document.getElementById('pf1').style.width = '10%';
+    csvTitles  = [];
     orphanDocs = [];
 
     // 1. CSV
+    setProgress(5, 'Lecture du CSV…');
     try {
         const resp = await fetch('animes.csv');
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const text = await resp.text();
         const lines = text.split(/\r?\n/).slice(1);
         const clean = s => s ? s.trim().replace(/^"|"$/g, '') : '';
         for (const line of lines) {
-            const c = line.split(';');
-            const titre = clean(c[0]);
+            if (!line.trim()) continue;
+            const titre = clean(line.split(';')[0]);
             if (titre) csvTitles.push(titre);
         }
-        log(`CSV chargé : ${csvTitles.length} animes.`, 'log-ok');
+        log(`CSV : ${csvTitles.length} animes chargés.`, 'log-ok');
     } catch (e) {
-        log('Impossible de charger animes.csv — place ce fichier dans le même dossier.', 'log-err');
-        document.getElementById('s1-status').textContent = 'Erreur'; document.getElementById('s1-status').className = 'status error';
+        log('Impossible de charger animes.csv : ' + e.message, 'log-err');
+        document.getElementById('s1-status').textContent = 'Erreur';
+        document.getElementById('s1-status').className = 'status error';
         return;
     }
+
     const csvSet = new Set(csvTitles);
-    document.getElementById('pf1').style.width = '30%';
+    setProgress(30, 'Lecture Firestore…');
 
-    // 2. Collection "playlists" (épisodes vus, indexée par uid_animeTitre)
+    // 2. Tous les docs playlists de l'utilisateur
+    let allDocs = [];
     try {
-        const q = query(collection(db, "playlists"), where("uid", "==", currentUser.uid));
+        const q    = query(collection(db, 'playlists'), where('uid', '==', currentUser.uid));
         const snap = await getDocs(q);
-        let total = 0;
-        snap.forEach(d => {
-            total++;
-            // Le champ qui contient le titre de l'anime dans cette collection
-            const animeField = d.data().anime || d.data().animeName || d.data().titre || '';
-            if (!csvSet.has(animeField)) {
-                orphanDocs.push({ id: d.id, data: d.data(), col: 'playlists', type: 'playlist', animeField });
-            }
-        });
-        log(`Collection "playlists" : ${total} docs, ${orphanDocs.filter(o => o.col === 'playlists').length} orphelins.`, 'log-ok');
+        snap.forEach(d => allDocs.push({ id: d.id, data: d.data() }));
+        log(`Firestore : ${allDocs.length} documents dans ta playlist.`, 'log-ok');
     } catch (e) {
-        log('Erreur lecture "playlists" : ' + e.message, 'log-err');
+        log('Erreur Firestore : ' + e.message, 'log-err');
+        document.getElementById('s1-status').textContent = 'Erreur';
+        document.getElementById('s1-status').className = 'status error';
+        return;
     }
-    document.getElementById('pf1').style.width = '60%';
 
-    // 3. Collection "animes" (cartes animes, indexée par uid_animeTitre ou animeTitre)
-    //    C'est cette collection qui bloque l'ajout à la playlist quand le titre change
-    try {
-        // Essai avec filtre uid
-        let snap = null;
-        try {
-            const q = query(collection(db, "animes"), where("uid", "==", currentUser.uid));
-            snap = await getDocs(q);
-        } catch(_) {
-            // Peut-être pas de champ uid dans cette collection — on lit tout
-            snap = await getDocs(collection(db, "animes"));
+    setProgress(70, 'Comparaison en cours…');
+
+    // 3. Docs dont le champ anime n'est pas dans le CSV = ancien nom
+    const getTitle = d => d.data.anime || d.data.animeName || d.data.titre || d.data.nom || '';
+    for (const d of allDocs) {
+        const title = getTitle(d);
+        if (!csvSet.has(title)) {
+            orphanDocs.push({ id: d.id, data: d.data, animeField: title });
         }
-        let total = 0;
-        const beforeCount = orphanDocs.length;
-        snap.forEach(d => {
-            total++;
-            // Champs possibles pour le titre dans la collection animes
-            const animeField = d.data().nom || d.data().anime || d.data().titre || d.data().animeName || '';
-            if (!csvSet.has(animeField)) {
-                orphanDocs.push({ id: d.id, data: d.data(), col: 'animes', type: 'anime', animeField });
-            }
-        });
-        log(`Collection "animes" : ${total} docs, ${orphanDocs.length - beforeCount} orphelins.`, 'log-ok');
-    } catch (e) {
-        log('Collection "animes" introuvable ou non accessible : ' + e.message, 'log-warn');
-        log('Si tes cartes animes sont dans une autre collection, indique son nom.', 'log-warn');
     }
-    document.getElementById('pf1').style.width = '100%';
 
-    // 4. Résumé
-    const total = orphanDocs.length;
-    const playlistOrphans = orphanDocs.filter(o => o.col === 'playlists').length;
-    const animeOrphans = orphanDocs.filter(o => o.col === 'animes').length;
+    setProgress(100, '');
 
+    const okCount = allDocs.length - orphanDocs.length;
     document.getElementById('summary').innerHTML = `
         <div class="stat"><strong>${csvTitles.length}</strong><span>Animes CSV</span></div>
-        <div class="stat"><strong style="color:var(--warn)">${playlistOrphans}</strong><span>playlist orphelins</span></div>
-        <div class="stat"><strong style="color:#aaf">${animeOrphans}</strong><span>anime orphelins</span></div>
+        <div class="stat"><strong>${allDocs.length}</strong><span>Docs Firestore</span></div>
+        <div class="stat"><strong style="color:var(--ok)">${okCount}</strong><span>Synchronisés</span></div>
+        <div class="stat"><strong style="color:var(--warn)">${orphanDocs.length}</strong><span>À corriger</span></div>
     `;
+
     document.getElementById('s1-status').textContent = 'Terminé';
     document.getElementById('s1-status').className = 'status ok';
 
-    if (total === 0) {
-        log('✅ Aucun document orphelin. Tout est synchronisé avec le CSV !', 'log-ok');
+    if (orphanDocs.length === 0) {
+        log('✅ Tout est synchronisé ! Aucun document à migrer.', 'log-ok');
         return;
     }
 
-    // 5. Afficher les orphelins
+    log(`⚠️ ${orphanDocs.length} document(s) dont le nom ne correspond plus au CSV.`, 'log-warn');
+
+    // 4. Afficher avec suggestions
     const list = document.getElementById('orphans-list');
     list.innerHTML = '';
-
-    // Grouper par collection
-    const groups = [
-        { col: 'animes',    label: 'Cartes animes (bloquent l\'ajout à la playlist)',  tagClass: 'tag-anime' },
-        { col: 'playlists', label: 'Épisodes vus',                                      tagClass: 'tag-playlist' },
-    ];
-
-    for (const group of groups) {
-        const items = orphanDocs.filter(o => o.col === group.col);
-        if (items.length === 0) continue;
-        list.innerHTML += `<div class="section-label">${group.label}</div>`;
-        items.forEach((d, _) => {
-            const globalIdx = orphanDocs.indexOf(d);
-            const match = bestMatch(d.animeField, csvTitles);
-            const options = csvTitles.map(t =>
-                `<option value="${t.replace(/"/g,'&quot;')}" ${match && t === match.title ? 'selected' : ''}>${t}</option>`
-            ).join('');
-            list.innerHTML += `
-                <div class="orphan-item">
-                    <div class="doc-id">
-                        <span class="tag ${group.tagClass}">${group.col}</span>
-                        <span style="color:#ccc; margin-left:6px;">${d.animeField || '(titre vide)'}</span><br>
-                        <span style="color:#444; font-size:0.85em;">ID: ${d.id}</span>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                        <span style="color:#555; font-size:0.8em;">→ renommer en</span>
-                        <select class="match-select" data-idx="${globalIdx}">
-                            <option value="">-- Ignorer --</option>
-                            ${options}
-                        </select>
-                        ${match
-                            ? `<span class="match-label">✓ ${Math.round(match.score * 100)}%</span>`
-                            : '<span class="no-match">aucune suggestion</span>'}
-                    </div>
-                </div>`;
-        });
-    }
+    orphanDocs.forEach((d, i) => {
+        const match   = bestMatch(d.animeField, csvTitles);
+        const options = csvTitles.map(t =>
+            `<option value="${t.replace(/"/g, '&quot;')}" ${match && t === match.title ? 'selected' : ''}>${t}</option>`
+        ).join('');
+        list.innerHTML += `
+            <div class="orphan-item">
+                <div style="flex:1;min-width:160px;">
+                    <div class="old-name">📄 ${d.animeField || '(titre vide)'}</div>
+                    <div class="old-id">ID: ${d.id}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="color:#555;font-size:0.8em;">→ nouveau nom</span>
+                    <select class="match-select" data-idx="${i}">
+                        <option value="">-- Ignorer --</option>
+                        ${options}
+                    </select>
+                    ${match
+                        ? `<span class="match-label">✓ ${Math.round(match.score * 100)}%</span>`
+                        : '<span class="no-match">aucune suggestion</span>'}
+                </div>
+            </div>`;
+    });
 
     document.getElementById('step2').style.display = 'block';
 };
 
-// ─── Migration ───────────────────────────────────────────────────────────────
+// ─── Migration ────────────────────────────────────────────────────────────
 document.getElementById('btn-migrate').onclick = async () => {
     document.getElementById('btn-migrate').disabled = true;
     let ok = 0, skipped = 0;
 
     for (const sel of document.querySelectorAll('.match-select')) {
         const newTitle = sel.value;
-        const idx = parseInt(sel.dataset.idx);
-        const d = orphanDocs[idx];
+        const idx      = parseInt(sel.dataset.idx);
+        const d        = orphanDocs[idx];
         if (!newTitle) { skipped++; continue; }
 
         try {
-            if (d.col === 'playlists') {
-                // ID format: uid_animeTitre
-                const newId = currentUser.uid + '_' + newTitle;
-                const newData = { ...d.data, anime: newTitle };
-                // Si animeName existe aussi, on le met à jour
-                if ('animeName' in d.data) newData.animeName = newTitle;
-                await setDoc(doc(db, 'playlists', newId), newData);
-                await deleteDoc(doc(db, 'playlists', d.id));
-                log(`✓ [playlist] "${d.animeField}" → "${newTitle}"`, 'log-ok');
+            const newId   = currentUser.uid + '_' + newTitle;
+            const newData = { ...d.data };
+            if ('anime'     in newData) newData.anime     = newTitle;
+            if ('animeName' in newData) newData.animeName = newTitle;
+            if ('titre'     in newData) newData.titre     = newTitle;
+            if ('nom'       in newData) newData.nom       = newTitle;
 
-            } else if (d.col === 'animes') {
-                // Même logique pour la collection animes
-                // L'ID peut être uid_titre ou juste le titre selon ton code
-                const oldRef = doc(db, 'animes', d.id);
-                const newId = d.id.includes('_')
-                    ? currentUser.uid + '_' + newTitle   // format uid_titre
-                    : newTitle;                            // format titre seul
-                const newData = { ...d.data };
-                // Mettre à jour tous les champs de titre possibles
-                if ('nom'       in d.data) newData.nom       = newTitle;
-                if ('anime'     in d.data) newData.anime     = newTitle;
-                if ('titre'     in d.data) newData.titre     = newTitle;
-                if ('animeName' in d.data) newData.animeName = newTitle;
-                await setDoc(doc(db, 'animes', newId), newData);
-                await deleteDoc(oldRef);
-                log(`✓ [anime] "${d.animeField}" → "${newTitle}"`, 'log-ok');
-            }
+            await setDoc(doc(db, 'playlists', newId), newData);
+            await deleteDoc(doc(db, 'playlists', d.id));
+            log(`✓ "${d.animeField}" → "${newTitle}"`, 'log-ok');
             ok++;
         } catch (e) {
-            log(`✗ Erreur pour "${d.animeField}" : ${e.message}`, 'log-err');
+            log(`✗ "${d.animeField}" : ${e.message}`, 'log-err');
         }
     }
 
-    log(`─── Migration terminée : ${ok} doc(s) migrés, ${skipped} ignorés. ───`, 'log-ok');
+    log(`─── ${ok} migré(s), ${skipped} ignoré(s). ───`, 'log-ok');
     document.getElementById('s2-status').textContent = 'Terminé';
     document.getElementById('s2-status').className = 'status ok';
     document.getElementById('btn-migrate').textContent = 'Terminé ✓';
@@ -354,7 +311,7 @@ document.getElementById('btn-migrate').onclick = async () => {
 
 document.getElementById('btn-skip').onclick = () => {
     document.getElementById('step2').style.display = 'none';
-    log('Migration annulée.', 'log-warn');
+    log('Ignoré.', 'log-warn');
 };
 </script>
 </body>
