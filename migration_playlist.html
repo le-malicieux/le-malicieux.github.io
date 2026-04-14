@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migration Playlist</title>
+    <style>
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card: #1a1a1a; --text: #eee; --border: #333; --ok: #2ed573; --warn: #ffa502; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        h1 { color: var(--primary); font-size: 1.4em; margin-bottom: 4px; }
+        .subtitle { color: #888; font-size: 0.85em; margin-bottom: 24px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+        .status { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; margin-bottom: 10px; }
+        .status.loading { background: #333; color: #aaa; }
+        .status.ok { background: rgba(46,213,115,0.15); color: var(--ok); border: 1px solid var(--ok); }
+        .status.warn { background: rgba(255,165,2,0.15); color: var(--warn); border: 1px solid var(--warn); }
+        .status.error { background: rgba(255,71,87,0.15); color: var(--primary); border: 1px solid var(--primary); }
+        #login-box { text-align: center; padding: 40px 20px; }
+        input[type=email], input[type=password] { background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 6px; width: 100%; max-width: 320px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+        button { background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.95em; transition: 0.2s; }
+        button:hover { opacity: 0.85; }
+        button:disabled { opacity: 0.4; cursor: default; }
+        .btn-secondary { background: #333; border: 1px solid #555; color: #ccc; }
+        .btn-secondary:hover { background: #444; opacity: 1; }
+        #log { background: #111; border: 1px solid #222; border-radius: 8px; padding: 14px; font-size: 0.8em; font-family: monospace; color: #aaa; max-height: 300px; overflow-y: auto; margin-top: 16px; }
+        .log-ok { color: var(--ok); }
+        .log-warn { color: var(--warn); }
+        .log-err { color: var(--primary); }
+        .orphan-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 0.85em; gap: 10px; flex-wrap: wrap; }
+        .orphan-item:last-child { border-bottom: none; }
+        .doc-id { color: #aaa; font-family: monospace; font-size: 0.8em; word-break: break-all; flex: 1; }
+        .match-label { color: var(--ok); font-size: 0.8em; }
+        .no-match { color: #555; font-size: 0.8em; }
+        select.match-select { background: #222; border: 1px solid #444; color: white; padding: 6px; border-radius: 5px; max-width: 220px; font-size: 0.8em; }
+        #summary { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+        .stat { background: #222; border-radius: 8px; padding: 10px 16px; text-align: center; }
+        .stat strong { display: block; font-size: 1.4em; color: var(--primary); }
+        .stat span { font-size: 0.75em; color: #888; }
+        .progress-bar { height: 4px; background: #222; border-radius: 2px; margin: 12px 0; }
+        .progress-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+
+<div id="login-box">
+    <h1>🔧 Migration Playlist</h1>
+    <p class="subtitle">Connecte-toi pour détecter et corriger les documents orphelins dans ta playlist.</p>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="pw" placeholder="Mot de passe" />
+    <br>
+    <button id="btn-login">Se connecter</button>
+    <p id="login-err" style="color:var(--primary); font-size:0.85em; margin-top:8px;"></p>
+</div>
+
+<div id="app" style="display:none;">
+    <h1>🔧 Migration Playlist</h1>
+    <p class="subtitle" id="user-label"></p>
+
+    <div class="card" id="step1">
+        <div class="status loading" id="s1-status">En attente</div>
+        <strong>Étape 1 — Chargement des données</strong>
+        <p style="font-size:0.85em; color:#888; margin:8px 0 12px;">Lecture du CSV et des documents Firestore de ta playlist.</p>
+        <button id="btn-load">Charger</button>
+        <div class="progress-bar" id="pb1" style="display:none;"><div class="progress-fill" id="pf1" style="width:0%"></div></div>
+    </div>
+
+    <div class="card" id="step2" style="display:none;">
+        <div class="status warn" id="s2-status">À vérifier</div>
+        <strong>Étape 2 — Documents orphelins détectés</strong>
+        <div id="summary"></div>
+        <p style="font-size:0.85em; color:#888; margin:8px 0 12px;">Ces documents n'ont pas de correspondance exacte dans le CSV. Vérifie les correspondances suggérées avant de migrer.</p>
+        <div id="orphans-list"></div>
+        <br>
+        <button id="btn-migrate">Migrer les documents sélectionnés</button>
+        <button class="btn-secondary" style="margin-left:10px;" id="btn-skip">Tout ignorer</button>
+    </div>
+
+    <div id="log" style="display:none;"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let csvTitles = [];
+let orphanDocs = [];
+
+function log(msg, cls='') {
+    const el = document.getElementById('log');
+    el.style.display = 'block';
+    el.innerHTML += `<div class="${cls}">${msg}</div>`;
+    el.scrollTop = el.scrollHeight;
+}
+
+function similarity(a, b) {
+    a = a.toLowerCase(); b = b.toLowerCase();
+    if (a === b) return 1;
+    if (b.includes(a) || a.includes(b)) return 0.9;
+    const shorter = a.length < b.length ? a : b;
+    const longer  = a.length < b.length ? b : a;
+    let matches = 0;
+    for (let i = 0; i < shorter.length; i++) if (longer.includes(shorter[i])) matches++;
+    return matches / longer.length;
+}
+
+function bestMatch(docTitle, titles) {
+    let best = null, bestScore = 0;
+    for (const t of titles) {
+        const s = similarity(docTitle, t);
+        if (s > bestScore) { bestScore = s; best = t; }
+    }
+    return bestScore > 0.55 ? { title: best, score: bestScore } : null;
+}
+
+document.getElementById('btn-login').onclick = async () => {
+    const email = document.getElementById('email').value.trim();
+    const pw = document.getElementById('pw').value;
+    try {
+        await signInWithEmailAndPassword(auth, email, pw);
+    } catch(e) {
+        document.getElementById('login-err').textContent = 'Erreur : ' + e.message;
+    }
+};
+
+onAuthStateChanged(auth, u => {
+    if (u) {
+        currentUser = u;
+        document.getElementById('login-box').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('user-label').textContent = 'Connecté : ' + (u.displayName || u.email);
+    }
+});
+
+document.getElementById('btn-load').onclick = async () => {
+    document.getElementById('btn-load').disabled = true;
+    document.getElementById('s1-status').textContent = 'Chargement…';
+    document.getElementById('s1-status').className = 'status loading';
+    document.getElementById('pb1').style.display = 'block';
+    document.getElementById('pf1').style.width = '20%';
+
+    // 1. Charger le CSV
+    try {
+        const resp = await fetch('animes.csv');
+        const text = await resp.text();
+        const lines = text.split(/\r?\n/).slice(1);
+        const clean = s => s ? s.trim().replace(/^"|"$/g, '') : '';
+        for (const line of lines) {
+            const c = line.split(';');
+            const titre = clean(c[0]);
+            if (titre) csvTitles.push(titre);
+        }
+        log(`CSV chargé : ${csvTitles.length} animes trouvés.`, 'log-ok');
+    } catch(e) {
+        log('Impossible de charger animes.csv. Place ce fichier dans le même dossier.', 'log-err');
+        document.getElementById('s1-status').textContent = 'Erreur';
+        document.getElementById('s1-status').className = 'status error';
+        return;
+    }
+
+    document.getElementById('pf1').style.width = '60%';
+
+    // 2. Charger les docs Firestore
+    const csvSet = new Set(csvTitles);
+    let allDocs = [];
+    try {
+        const q = query(collection(db, "playlists"), where("uid", "==", currentUser.uid));
+        const snap = await getDocs(q);
+        snap.forEach(d => allDocs.push({ id: d.id, data: d.data() }));
+        log(`Firestore : ${allDocs.length} documents dans ta playlist.`, 'log-ok');
+    } catch(e) {
+        log('Erreur Firestore : ' + e.message, 'log-err');
+        return;
+    }
+
+    document.getElementById('pf1').style.width = '100%';
+
+    // 3. Trouver les orphelins
+    orphanDocs = allDocs.filter(d => {
+        const animeField = d.data.anime || '';
+        return !csvSet.has(animeField);
+    });
+
+    const matched = allDocs.length - orphanDocs.length;
+    document.getElementById('summary').innerHTML = `
+        <div class="stat"><strong>${allDocs.length}</strong><span>Total docs</span></div>
+        <div class="stat" style="--primary:#2ed573"><strong style="color:#2ed573">${matched}</strong><span>OK</span></div>
+        <div class="stat"><strong>${orphanDocs.length}</strong><span>Orphelins</span></div>
+    `;
+
+    document.getElementById('s1-status').textContent = 'Terminé';
+    document.getElementById('s1-status').className = 'status ok';
+
+    if (orphanDocs.length === 0) {
+        log('Aucun document orphelin. Ta playlist est propre !', 'log-ok');
+        return;
+    }
+
+    // 4. Afficher les orphelins avec suggestions
+    const list = document.getElementById('orphans-list');
+    list.innerHTML = '';
+    orphanDocs.forEach((d, i) => {
+        const animeTitle = d.data.anime || '(titre vide)';
+        const match = bestMatch(animeTitle, csvTitles);
+        const options = csvTitles.map(t => `<option value="${t}" ${match && t === match.title ? 'selected' : ''}>${t}</option>`).join('');
+        list.innerHTML += `
+            <div class="orphan-item">
+                <div class="doc-id">
+                    <span style="color:#aaa;">📄 ${animeTitle}</span><br>
+                    <span style="color:#555; font-size:0.9em;">ID: ${d.id}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <span style="color:#555; font-size:0.8em;">→ renommer en</span>
+                    <select class="match-select" data-idx="${i}">
+                        <option value="">-- Ignorer --</option>
+                        ${options}
+                    </select>
+                    ${match ? `<span class="match-label">✓ suggestion à ${Math.round(match.score*100)}%</span>` : '<span class="no-match">aucune suggestion</span>'}
+                </div>
+            </div>`;
+    });
+
+    document.getElementById('step2').style.display = 'block';
+};
+
+document.getElementById('btn-migrate').onclick = async () => {
+    document.getElementById('btn-migrate').disabled = true;
+    let ok = 0, skipped = 0;
+
+    for (const sel of document.querySelectorAll('.match-select')) {
+        const newTitle = sel.value;
+        const idx = parseInt(sel.dataset.idx);
+        const d = orphanDocs[idx];
+        if (!newTitle) { skipped++; continue; }
+
+        const oldDocRef = doc(db, "playlists", d.id);
+        const newId = currentUser.uid + "_" + newTitle;
+        const newDocRef = doc(db, "playlists", newId);
+        const newData = { ...d.data, anime: newTitle };
+
+        try {
+            await setDoc(newDocRef, newData);
+            await deleteDoc(oldDocRef);
+            log(`✓ "${d.data.anime}" → "${newTitle}"`, 'log-ok');
+            ok++;
+        } catch(e) {
+            log(`✗ Erreur pour "${d.data.anime}" : ${e.message}`, 'log-err');
+        }
+    }
+
+    log(`Migration terminée : ${ok} migrés, ${skipped} ignorés.`, 'log-ok');
+    document.getElementById('s2-status').textContent = 'Terminé';
+    document.getElementById('s2-status').className = 'status ok';
+    document.getElementById('btn-migrate').textContent = 'Terminé ✓';
+};
+
+document.getElementById('btn-skip').onclick = () => {
+    document.getElementById('step2').style.display = 'none';
+    log('Migration annulée.', 'log-warn');
+};
+</script>
+</body>
+</html>
