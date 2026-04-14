@@ -46,10 +46,10 @@
 <div id="login-box">
     <h1>🔧 Migration Playlist</h1>
     <p class="subtitle">Connecte-toi pour détecter et corriger les documents orphelins dans ta playlist.</p>
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="pw" placeholder="Mot de passe" />
-    <br>
-    <button id="btn-login">Se connecter</button>
+    <button id="btn-login" style="display:inline-flex; align-items:center; gap:10px; background:#fff; color:#333; border:1px solid #ccc; padding:10px 20px; border-radius:6px; font-size:0.95em; cursor:pointer;">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20">
+        Se connecter avec Google
+    </button>
     <p id="login-err" style="color:var(--primary); font-size:0.85em; margin-top:8px;"></p>
 </div>
 
@@ -82,7 +82,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, query, where, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
 const app = initializeApp(firebaseConfig);
@@ -120,11 +120,10 @@ function bestMatch(docTitle, titles) {
     return bestScore > 0.55 ? { title: best, score: bestScore } : null;
 }
 
+const provider = new GoogleAuthProvider();
 document.getElementById('btn-login').onclick = async () => {
-    const email = document.getElementById('email').value.trim();
-    const pw = document.getElementById('pw').value;
     try {
-        await signInWithEmailAndPassword(auth, email, pw);
+        await signInWithPopup(auth, provider);
     } catch(e) {
         document.getElementById('login-err').textContent = 'Erreur : ' + e.message;
     }
