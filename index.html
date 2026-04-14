@@ -104,11 +104,11 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="top-navbar">
         <div class="nav-left">
-            <div class="nav-brand">
-                <div class="burger" onclick="toggleM()">☰</div>
+            <a class="nav-brand" onclick="resetToHome()" href="index.html" style="text-decoration:none; cursor:pointer;">
+                <div class="burger" onclick="event.stopPropagation();toggleM()">☰</div>
                 <img src="img/logo.jpg" class="nav-logo-small">
                 <span class="nav-title">LE MALICIEUX</span>
-            </div>
+            </a>
             <a id="back-home" onclick="resetToHome()">← Retour à l'accueil</a>
         </div>
 

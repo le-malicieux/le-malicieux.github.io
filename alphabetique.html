@@ -30,7 +30,35 @@
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         .nav-left { display: flex; flex-direction: column; align-items: flex-start; }
-        .nav-brand { display: flex; align-items: center; gap: 12px; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+
+        /* ── BARRE SECONDAIRE STICKY ── */
+        .sub-navbar {
+            position: sticky; top: 57px; z-index: 999;
+            background: var(--nav-bg); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 8px 20px;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .sub-top {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .sub-title {
+            font-weight: 800; font-size: 1.1em; color: var(--primary); white-space: nowrap;
+        }
+        .sub-top select {
+            background: #222; border: 1px solid #444; color: white;
+            padding: 5px 8px; border-radius: 4px; font-size: 0.82em; cursor: pointer;
+        }
+        .sub-bottom {
+            display: flex; align-items: center; gap: 10px; flex-wrap: nowrap;
+        }
+        .sub-bottom input {
+            background: #1a1a1a; border: 1px solid #444; color: white;
+            padding: 6px 10px; border-radius: 5px; font-size: 0.85em;
+            width: 180px; flex-shrink: 0;
+        }
+        .sub-bottom input:focus { outline: none; border-color: var(--primary); }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
 
@@ -67,12 +95,9 @@
             margin: 0 auto;
         }
 
-        .page-title {
-            font-size: 1.8em;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 20px;
-            padding-left: 5px;
+        #no-result {
+            text-align: center; color: #ccc; padding: 40px; font-size: 1.1em;
+            display: none; text-shadow: 0 1px 4px rgba(0,0,0,0.8);
         }
 
         /* Lettre ancre */
@@ -128,12 +153,8 @@
         .alpha-nav {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 25px;
-            padding: 12px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 10px;
-            border: 1px solid #333;
+            gap: 4px;
+            flex: 1;
         }
         .alpha-nav a {
             color: #aaa;
@@ -147,31 +168,6 @@
         }
         .alpha-nav a:hover { color: white; border-color: var(--primary); background: rgba(255,71,87,0.1); }
         .alpha-nav a.disabled { color: #444; border-color: #222; pointer-events: none; }
-
-        /* Barre de recherche */
-        .search-bar-wrap {
-            margin-bottom: 20px;
-        }
-        .search-bar-wrap input {
-            width: 100%;
-            box-sizing: border-box;
-            background: #222;
-            border: 1px solid #444;
-            color: white;
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 1em;
-        }
-        .search-bar-wrap input:focus { outline: none; border-color: var(--primary); }
-
-        #no-result {
-            text-align: center;
-            color: #ccc;
-            padding: 40px;
-            font-size: 1.1em;
-            display: none;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-        }
 
         /* Mode liste */
         .anime-list.list-mode {
@@ -221,13 +217,11 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <div class="top-navbar">
-        <div class="nav-left">
-            <div class="nav-brand">
-                <div class="burger" onclick="toggleM()">☰</div>
-                <img src="img/logo.jpg" class="nav-logo-small">
-                <span class="nav-title">LE MALICIEUX</span>
-            </div>
-        </div>
+        <a href="index.html" class="nav-brand">
+            <div class="burger" onclick="event.preventDefault();toggleM()">☰</div>
+            <img src="img/logo.jpg" class="nav-logo-small">
+            <span class="nav-title">LE MALICIEUX</span>
+        </a>
 
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
 
@@ -236,10 +230,7 @@
             <a href="index.html" class="btn-red">🏠 Accueil</a>
             <a href="tags.html" class="btn-red">🏷️ Tags</a>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
-            <select id="view-mode">
-                <option value="cards">🖼️ Photos</option>
-                <option value="list">📋 Liste</option>
-            </select>
+            <a href="editeurs.html" class="btn-red">🏢 Studios</a>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
 
@@ -251,14 +242,23 @@
         </div>
     </div>
 
-    <div class="content-area">
-        <div class="page-title">📖 Index Alphabétique</div>
-
-        <div class="search-bar-wrap">
-            <input type="text" id="search" placeholder="Rechercher un anime...">
+    <!-- Barre secondaire sticky : titre + sélecteur | recherche + alpha-nav -->
+    <div class="sub-navbar" id="sub-navbar">
+        <div class="sub-top">
+            <span class="sub-title">📖 Index Alphabétique</span>
+            <select id="view-mode">
+                <option value="cards">🖼️ Photos</option>
+                <option value="list">📋 Liste</option>
+            </select>
         </div>
+        <div class="sub-bottom">
+            <input type="text" id="search" placeholder="Rechercher un anime...">
+            <div class="alpha-nav" id="alpha-nav"></div>
+        </div>
+    </div>
 
-        <div class="alpha-nav" id="alpha-nav"></div>
+    <div class="content-area" style="padding-top: 10px;">
+
 
         <div id="groups-container"></div>
         <div id="no-result">Aucun anime trouvé pour cette recherche.</div>

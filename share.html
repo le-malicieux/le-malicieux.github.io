@@ -37,6 +37,18 @@
             z-index: 0;
             pointer-events: none;
         }
+        .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        .nav-center { display: flex; gap: 8px; align-items: center; }
+        .nav-center a, .nav-center button { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none; cursor: pointer; font-weight: bold; }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
+        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+        @media (max-width: 1000px) { .burger { display: block; } .close-menu { display: block; } .nav-center { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch; } .nav-center.active { left: 0; } .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; } .mobile-overlay.active { display: block; } }
         .top-navbar, .container, .page-header, .tabs-bar { position: relative; z-index: 1; }
 
         /* ── NAVBAR ── */
@@ -327,11 +339,23 @@
 
 <!-- NAVBAR -->
 <nav class="top-navbar">
-    <a href="index.html" class="nav-left">
-        <img src="img/logo.jpg" class="nav-logo-small" onerror="this.style.display='none'">
-        <span class="nav-title">Le Malicieux</span>
-    </a>
-    <a href="playlist.html" class="nav-back">← Mes playlists</a>
+        <a href="index.html" class="nav-brand">
+            <img src="img/logo.jpg" class="nav-logo-small">
+            <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Partage</small></span>
+        </a>
+        <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
+        <div class="nav-center" id="menu">
+            <div class="close-menu" onclick="toggleM()">← Retour</div>
+            <a href="index.html" class="btn-red">🏠 Accueil</a>
+            <a href="tags.html" class="btn-red">🏷️ Tags</a>
+            <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
+            <a href="playlist.html" class="btn-red">📂 Playlist</a>
+            <a href="editeurs.html" class="btn-red">🏢 Studios</a>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div class="burger" onclick="toggleM()">☰</div>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
+        </div>
 </nav>
 
 <!-- PAGE HEADER -->
