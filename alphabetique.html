@@ -37,28 +37,14 @@
             position: sticky; top: 57px; z-index: 999;
             background: var(--nav-bg); backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding: 8px 20px;
-            display: flex; flex-direction: column; gap: 8px;
+            padding: 10px 20px;
+            display: flex; flex-direction: column; gap: 10px;
         }
-        .sub-top {
-            display: flex; align-items: center; gap: 12px;
-        }
-        .sub-title {
-            font-weight: 800; font-size: 1.1em; color: var(--primary); white-space: nowrap;
-        }
-        .sub-top select {
-            background: #222; border: 1px solid #444; color: white;
-            padding: 5px 8px; border-radius: 4px; font-size: 0.82em; cursor: pointer;
-        }
-        .sub-bottom {
-            display: flex; align-items: center; gap: 10px; flex-wrap: nowrap;
-        }
-        .sub-bottom input {
-            background: #1a1a1a; border: 1px solid #444; color: white;
-            padding: 6px 10px; border-radius: 5px; font-size: 0.85em;
-            width: 180px; flex-shrink: 0;
-        }
-        .sub-bottom input:focus { outline: none; border-color: var(--primary); }
+        .sub-top { display: flex; align-items: center; gap: 12px; }
+        .sub-title { font-weight: 800; font-size: 1.3em; color: var(--primary); white-space: nowrap; }
+        .sub-top select { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; cursor: pointer; }
+        .sub-search input { width: 100%; box-sizing: border-box; background: #222; border: 1px solid #444; color: white; padding: 10px 14px; border-radius: 6px; font-size: 1em; }
+        .sub-search input:focus { outline: none; border-color: var(--primary); }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
 
@@ -151,10 +137,11 @@
 
         /* Navigation alphabétique rapide */
         .alpha-nav {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            flex: 1;
+            display: flex; flex-wrap: wrap; gap: 6px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            border: 1px solid #333;
         }
         .alpha-nav a {
             color: #aaa;
@@ -242,7 +229,7 @@
         </div>
     </div>
 
-    <!-- Barre secondaire sticky : titre + sélecteur | recherche + alpha-nav -->
+    <!-- Barre secondaire sticky : titre + sélecteur / recherche / alpha-nav -->
     <div class="sub-navbar" id="sub-navbar">
         <div class="sub-top">
             <span class="sub-title">📖 Index Alphabétique</span>
@@ -251,10 +238,10 @@
                 <option value="list">📋 Liste</option>
             </select>
         </div>
-        <div class="sub-bottom">
+        <div class="sub-search">
             <input type="text" id="search" placeholder="Rechercher un anime...">
-            <div class="alpha-nav" id="alpha-nav"></div>
         </div>
+        <div class="alpha-nav" id="alpha-nav"></div>
     </div>
 
     <div class="content-area" style="padding-top: 10px;">
