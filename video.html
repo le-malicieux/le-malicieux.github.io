@@ -145,31 +145,116 @@
             }
         };
 
-        // ─── JIKAN / MAL ────────────────────────────────────────────────────────────
+        // ─── JIKAN / MAL AVEC CACHE ────────────────────────────────────────────
+        // Le cache est valable 7 jours (604800 secondes)
+        const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 jours en millisecondes
+        
         function traduitStatutMAL(status) {
             const map = { 'Finished Airing': 'Terminé', 'Currently Airing': 'En cours', 'Not yet aired': 'À venir', 'Airing': 'En cours' };
             return map[status] || status || '—';
         }
+        
         function formatPop(n) { return (!n && n !== 0) ? '—' : '#' + n.toLocaleString('fr-FR'); }
         function formatScore(s) { return (!s && s !== 0) ? '—' : parseFloat(s).toFixed(2); }
 
-        async function fetchMALData(nomAnime, malId) {
+        // Fonction pour sauvegarder dans le cache
+        function saveToCache(animeKey, malData) {
+            const cacheItem = {
+                data: malData,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(`mal_cache_${animeKey}`, JSON.stringify(cacheItem));
+        }
+
+        // Fonction pour lire le cache
+        function getFromCache(animeKey) {
+            const cached = localStorage.getItem(`mal_cache_${animeKey}`);
+            if (!cached) return null;
+            
             try {
+                const cacheItem = JSON.parse(cached);
+                const isExpired = (Date.now() - cacheItem.timestamp) > CACHE_DURATION;
+                if (isExpired) {
+                    localStorage.removeItem(`mal_cache_${animeKey}`);
+                    return null;
+                }
+                return cacheItem.data;
+            } catch(e) {
+                return null;
+            }
+        }
+
+        async function fetchMALData(nomAnime, malId, retryCount = 0) {
+            const maxRetries = 2;
+            const delay = 2000; // 2 secondes
+            
+            // Créer une clé unique pour cet anime
+            const cacheKey = malId && malId.trim() ? `id_${malId}` : `name_${nomAnime}`;
+            
+            // Vérifier le cache d'abord
+            const cachedData = getFromCache(cacheKey);
+            if (cachedData) {
+                console.log(`📦 Données MAL en cache pour : ${nomAnime}`);
+                return cachedData;
+            }
+            
+            try {
+                console.log(`🌐 Appel API Jikan pour : ${nomAnime}`);
+                
                 if (malId && malId.trim() !== '') {
                     const resp = await fetch(`https://api.jikan.moe/v4/anime/${malId.trim()}`);
+                    
+                    if (resp.status === 429) { // Trop de requêtes
+                        if (retryCount < maxRetries) {
+                            console.log(`⏳ API limitée, nouvel essai dans ${delay/1000}s... (${retryCount + 1}/${maxRetries})`);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            return fetchMALData(nomAnime, malId, retryCount + 1);
+                        }
+                        return null;
+                    }
+                    
                     if (!resp.ok) return null;
                     const json = await resp.json();
                     if (!json.data) return null;
                     const item = json.data;
-                    return { score: item.score, popularity: item.popularity, status: item.status, malUrl: item.url };
+                    
+                    const malData = { 
+                        score: item.score, 
+                        popularity: item.popularity, 
+                        status: item.status, 
+                        malUrl: item.url 
+                    };
+                    
+                    // Sauvegarder dans le cache
+                    saveToCache(cacheKey, malData);
+                    return malData;
+                    
                 } else {
                     const searchQuery = nomAnime.split('/')[0].trim();
                     const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(searchQuery)}&limit=1&sfw=false`);
+                    
+                    if (resp.status === 429) {
+                        if (retryCount < maxRetries) {
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            return fetchMALData(nomAnime, malId, retryCount + 1);
+                        }
+                        return null;
+                    }
+                    
                     if (!resp.ok) return null;
                     const json = await resp.json();
                     if (!json.data || json.data.length === 0) return null;
                     const item = json.data[0];
-                    return { score: item.score, popularity: item.popularity, status: item.status, malUrl: item.url };
+                    
+                    const malData = { 
+                        score: item.score, 
+                        popularity: item.popularity, 
+                        status: item.status, 
+                        malUrl: item.url 
+                    };
+                    
+                    saveToCache(cacheKey, malData);
+                    return malData;
                 }
             } catch(e) {
                 console.warn('Erreur Jikan:', e);
@@ -319,14 +404,24 @@
                 anime.dl.filter(l => l.trim()).forEach((l, i) => document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">${dlLabels[i] || '⬇️ Lien ' + (i+1)}</a>`);
                 anime.stream.filter(l => l.trim()).forEach((l, i) => document.getElementById('stream-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lien ${i+1} ↗</a>`);
 
-                // ── Récupération MAL en arrière-plan ──────────────────────────────
-                fetchMALData(anime.nom, anime.malId).then(malData => {
-                    applyMALStats(malData);
-                    if (!malData) {
-                        const badge = document.getElementById('mal-badge');
-                        if (badge) badge.innerHTML = `<span style="font-size:0.72em; color:#555;">Données MAL indisponibles</span>`;
-                    }
-                });
+                // ── Récupération MAL AVEC CACHE ──────────────────────────────
+                // Vérifier d'abord le cache
+                const cacheKey = anime.malId && anime.malId.trim() ? `id_${anime.malId}` : `name_${anime.nom}`;
+                const cachedData = getFromCache(cacheKey);
+                
+                if (cachedData) {
+                    // Afficher les données du cache immédiatement
+                    applyMALStats(cachedData);
+                } else {
+                    // Sinon, faire l'appel API
+                    fetchMALData(anime.nom, anime.malId).then(malData => {
+                        applyMALStats(malData);
+                        if (!malData) {
+                            const badge = document.getElementById('mal-badge');
+                            if (badge) badge.innerHTML = `<span style="font-size:0.72em; color:#555;">Données MAL indisponibles</span>`;
+                        }
+                    });
+                }
 
                 // Adapter le label du bouton retour selon la page d'origine
                 const _ref = document.referrer;
@@ -344,11 +439,6 @@
                         const docRef   = doc(db, "playlists", newDocId);
                         let snap       = await getDoc(docRef);
 
-                        // 🔧 AUTO-MIGRATION
-                        // Si le doc avec le nouveau nom n'existe pas, on parcourt tous les
-                        // docs de l'utilisateur pour trouver un ancien doc dont le champ
-                        // anime correspond à l'animeName de l'URL (comparaison insensible
-                        // à la casse). Si trouvé → on le migre silencieusement.
                         if (!snap.exists()) {
                             try {
                                 const q       = query(collection(db, "playlists"), where("uid", "==", u.uid));
@@ -375,87 +465,4 @@
                                         snap = await getDoc(docRef);
                                         console.log(`✅ Auto-migré : "${oldAnime}" → "${animeName}"`);
                                         break;
-                                    }
-                                }
-                            } catch (e) {
-                                console.warn("Auto-migration échouée :", e);
-                            }
-                        }
-
-                        // Charger la progression si le doc existe (nouveau ou migré)
-                        if (snap.exists()) {
-                            const d = snap.data();
-                            document.getElementById('user-status').value = d.status || 'watching';
-                            document.getElementById('user-ep').value = d.epSeen || 0;
-                            userRating = d.rating || 0;
-                            updateStars(userRating);
-                        }
-
-                        const isNew = !snap.exists();
-
-                        function showConfirm(msg, onConfirm) {
-                            const overlay = document.getElementById('confirm-modal');
-                            document.getElementById('modal-msg').innerHTML = msg;
-                            overlay.classList.add('active');
-                            document.getElementById('modal-confirm').onclick = () => { overlay.classList.remove('active'); onConfirm(); };
-                            document.getElementById('modal-cancel').onclick  = () => { overlay.classList.remove('active'); };
-                        }
-
-                        const autoSave = async () => {
-                            const statusVal = document.getElementById('user-status').value;
-                            const epVal     = parseInt(document.getElementById('user-ep').value);
-                            const prevData  = snap.exists() ? snap.data() : {};
-                            const now       = new Date();
-
-                            const updates = {
-                                uid: u.uid, anime: animeName, img: anime.img,
-                                status: statusVal, epSeen: epVal,
-                                rating: userRating, epMax: maxEp
-                            };
-
-                            if (isNew || !prevData.addedAt)                                         updates.addedAt     = now;
-                            if (epVal !== (prevData.epSeen || 0))                                   updates.epUpdatedAt = now;
-                            if (userRating !== (prevData.rating || 0) && userRating > 0)            updates.ratedAt     = now;
-                            if (statusVal === 'completed' && prevData.status !== 'completed')       updates.completedAt = now;
-
-                            await setDoc(docRef, updates, { merge: true });
-                            snap = await getDoc(docRef);
-                        };
-
-                        document.getElementById('user-status').onchange = autoSave;
-                        document.getElementById('user-ep').onchange     = autoSave;
-                        document.getElementById('stars').onclick = (e) => {
-                            if (e.target.dataset.v) {
-                                userRating = parseInt(e.target.dataset.v);
-                                updateStars(userRating);
-                                autoSave();
-                            }
-                        };
-                        document.getElementById('delete-btn').onclick = () => {
-                            showConfirm('Supprimer cet anime de votre liste ?', () => deleteDoc(docRef).then(() => location.reload()));
-                        };
-                    }
-                });
-
-                onSnapshot(query(collection(db, "commentaires"), where("anime", "==", animeName)), (snap) => {
-                    const cDisp = document.getElementById('comments-display');
-                    let docs = [];
-                    snap.forEach(d => docs.push(d.data()));
-                    docs.sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
-                    cDisp.innerHTML = docs.map(d => `<div style="margin-bottom:12px; border-bottom:1px solid #333; padding-bottom:8px;"><b style="color:var(--primary)">${d.userName}</b><p style="margin:4px 0; font-size:0.9em; color:#ddd;">${d.text}</p></div>`).join('');
-                });
-
-                document.getElementById('btn-post').onclick = async () => {
-                    const t = document.getElementById('comment-input').value;
-                    if (t.trim() && currentUser) {
-                        await addDoc(collection(db, "commentaires"), { anime: animeName, text: t, userName: sessionStorage.getItem("userPseudo") || currentUser.displayName, date: serverTimestamp() });
-                        document.getElementById('comment-input').value = "";
-                    }
-                };
-
-            } catch (err) { console.error(err); }
-        }
-        load();
-    </script>
-</body>
-</html>
+                                   
