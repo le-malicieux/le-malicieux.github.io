@@ -22,19 +22,17 @@
             color: var(--text);
             margin: 0;
             min-height: 100vh;
-            padding-top: 50px;
         }
 
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 5px 16px; background: var(--nav-bg); backdrop-filter: blur(10px);
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
-            height: 50px;
+            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         .nav-left { display: flex; flex-direction: column; align-items: flex-start; }
-        .nav-brand { display: flex; align-items: center; gap: 8px; }
-        .nav-logo-small { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
 
         .nav-center { display: flex; gap: 8px; align-items: center; }
         .nav-center input, .nav-center select, .nav-center button, .nav-center a {
@@ -128,43 +126,58 @@
 
         /* Navigation alphabétique rapide */
         .alpha-nav {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 25px;
-            padding: 12px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 10px;
-            border: 1px solid #333;
+            position: fixed; top: 94px; left: 0; right: 0; z-index: 998;
+            display: flex; flex-wrap: nowrap; overflow-x: auto;
+            gap: 4px; padding: 6px 16px;
+            background: rgba(15,15,15,0.95); backdrop-filter: blur(10px);
+            border-bottom: 1px solid #222;
+            scrollbar-width: none;
         }
+        .alpha-nav::-webkit-scrollbar { display: none; }
         .alpha-nav a {
-            color: #aaa;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.9em;
-            padding: 4px 8px;
-            border-radius: 5px;
-            transition: 0.2s;
-            border: 1px solid #333;
+            color: #aaa; text-decoration: none; font-weight: bold;
+            font-size: 0.82em; padding: 3px 7px; border-radius: 4px;
+            transition: 0.2s; border: 1px solid #333; flex-shrink: 0;
         }
         .alpha-nav a:hover { color: white; border-color: var(--primary); background: rgba(255,71,87,0.1); }
         .alpha-nav a.disabled { color: #444; border-color: #222; pointer-events: none; }
 
-        /* Barre de recherche */
+        /* Barre de recherche + Studios fixed */
         .search-bar-wrap {
-            margin-bottom: 20px;
+            position: fixed; top: 50px; left: 0; right: 0; z-index: 999;
+            background: rgba(15,15,15,0.95); backdrop-filter: blur(10px);
+            border-bottom: 1px solid #222;
+            display: flex; align-items: center; gap: 10px;
+            padding: 6px 16px; height: 44px; box-sizing: border-box;
         }
         .search-bar-wrap input {
-            width: 100%;
+            flex: 1;
             box-sizing: border-box;
             background: #222;
             border: 1px solid #444;
             color: white;
-            padding: 10px 14px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 1em;
+            font-size: 0.9em;
+            height: 32px;
         }
         .search-bar-wrap input:focus { outline: none; border-color: var(--primary); }
+        .studios-btn {
+            background: #222; border: 1px solid #444; color: white;
+            padding: 5px 12px; border-radius: 6px; font-size: 0.85em;
+            cursor: pointer; white-space: nowrap; position: relative;
+        }
+        .studios-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .studios-dropdown {
+            display: none; position: absolute; top: 100%; right: 0; margin-top: 4px;
+            background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+            max-height: 300px; overflow-y: auto; z-index: 2000; min-width: 200px;
+        }
+        .studios-dropdown.open { display: block; }
+        .studios-dropdown a {
+            display: block; padding: 8px 14px; color: #ccc; text-decoration: none; font-size: 0.85em;
+        }
+        .studios-dropdown a:hover { background: rgba(255,71,87,0.1); color: white; }
 
         #no-result {
             text-align: center;
@@ -253,14 +266,16 @@
         </div>
     </div>
 
-    <div class="content-area">
-        <div class="page-title">📖 Index Alphabétique</div>
-
-        <div class="search-bar-wrap">
-            <input type="text" id="search" placeholder="Rechercher un anime...">
+    <div class="search-bar-wrap">
+        <input type="text" id="search" placeholder="Rechercher un anime...">
+        <div class="studios-btn" id="studios-btn">🎬 Studios ▾
+            <div class="studios-dropdown" id="studios-dropdown"></div>
         </div>
+    </div>
 
-        <div class="alpha-nav" id="alpha-nav"></div>
+    <div class="alpha-nav" id="alpha-nav"></div>
+
+    <div class="content-area">
 
         <div id="groups-container"></div>
         <div id="no-result">Aucun anime trouvé pour cette recherche.</div>
@@ -441,11 +456,33 @@
                 buildAlphaNav(allGroups);
 
                 render();
+                buildStudiosDropdown();
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
         document.getElementById('search').oninput = (e) => render(e.target.value);
         document.getElementById('view-mode').onchange = () => render(document.getElementById('search').value);
+
+        // Studios dropdown
+        function buildStudiosDropdown() {
+            const studios = [...new Set(allAnimes.map(a => a.editeur).filter(Boolean))].sort();
+            const dd = document.getElementById('studios-dropdown');
+            dd.innerHTML = studios.map(s =>
+                `<a href="#" onclick="filterStudio('${s.replace(/'/g,"\\'")}'); return false;">${s}</a>`
+            ).join('');
+        }
+        window.filterStudio = (studio) => {
+            document.getElementById('search').value = studio;
+            render(studio);
+            document.getElementById('studios-dropdown').classList.remove('open');
+        };
+        document.getElementById('studios-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('studios-dropdown').classList.toggle('open');
+        });
+        document.addEventListener('click', () => {
+            document.getElementById('studios-dropdown').classList.remove('open');
+        });
 
         window.toggleM = () => {
             const menu = document.getElementById('menu');
