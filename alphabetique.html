@@ -149,24 +149,41 @@
         .search-bar-wrap {
             position: fixed; top: 50px; left: 0; right: 0; z-index: 999;
             background: rgba(15,15,15,0.97); backdrop-filter: blur(10px);
-            display: flex; align-items: center; gap: 8px;
-            padding: 5px 16px; height: 40px; box-sizing: border-box;
+            display: flex; align-items: center;
+            gap: 8px;
+            padding: 5px 16px;
+            height: 40px;
+            box-sizing: border-box;
         }
         .search-bar-wrap input {
-            flex: 1; box-sizing: border-box;
-            background: #1e1e1e; border: 1px solid #3a3a3a;
-            color: white; padding: 4px 12px;
-            border-radius: 5px; font-size: 0.88em; height: 28px;
+            flex: 1;
+            box-sizing: border-box;
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 5px;
+            font-size: 0.88em;
+            height: 28px;
         }
         .search-bar-wrap input:focus { outline: none; border-color: var(--primary); }
-        .studios-link {
-            background: #1e1e1e; border: 1px solid #3a3a3a; color: #ccc;
-            padding: 4px 10px; border-radius: 5px; font-size: 0.82em;
-            text-decoration: none; white-space: nowrap; height: 28px;
-            display: flex; align-items: center; gap: 4px;
-            transition: 0.2s;
+        
+        /* Nouveau style pour le select dans la barre de recherche */
+        .search-bar-wrap select {
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.82em;
+            height: 28px;
+            cursor: pointer;
+            white-space: nowrap;
         }
-        .studios-link:hover { border-color: var(--primary); color: var(--primary); }
+        .search-bar-wrap select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
 
         #no-result {
             text-align: center;
@@ -241,10 +258,7 @@
             <a href="tags.html" class="btn-red">🏷️ Tags</a>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
             <a href="editeurs.html" class="btn-red">🏢 Studios</a>
-            <select id="view-mode">
-                <option value="cards">🖼️ Photos</option>
-                <option value="list">📋 Liste</option>
-            </select>
+            <!-- Le menu déroulant a été retiré d'ici pour être déplacé dans la barre de recherche -->
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
 
@@ -258,13 +272,16 @@
 
     <div class="search-bar-wrap">
         <input type="text" id="search" placeholder="Rechercher un anime...">
-        <a href="editeurs.html" class="studios-link">🏢 Studios</a>
+        <!-- Le menu déroulant "Mode d'affichage" est déplacé ici -->
+        <select id="view-mode">
+            <option value="cards">🖼️ Photos</option>
+            <option value="list">📋 Liste</option>
+        </select>
     </div>
 
     <div class="alpha-nav" id="alpha-nav"></div>
 
     <div class="content-area">
-
         <div id="groups-container"></div>
         <div id="no-result">Aucun anime trouvé pour cette recherche.</div>
     </div>
