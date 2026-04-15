@@ -22,17 +22,19 @@
             color: var(--text);
             margin: 0;
             min-height: 100vh;
+            padding-top: 126px;
         }
 
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 5px 16px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            height: 50px; border-bottom: 1px solid #1a1a1a;
         }
         .nav-left { display: flex; flex-direction: column; align-items: flex-start; }
         .nav-brand { display: flex; align-items: center; gap: 12px; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        .nav-logo-small { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; }
 
         .nav-center { display: flex; gap: 8px; align-items: center; }
         .nav-center input, .nav-center select, .nav-center button, .nav-center a {
@@ -124,60 +126,47 @@
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
 
-        /* Navigation alphabétique rapide */
+        /* Navigation alphabétique fixed */
         .alpha-nav {
-            position: fixed; top: 94px; left: 0; right: 0; z-index: 998;
+            position: fixed; top: 90px; left: 0; right: 0; z-index: 998;
             display: flex; flex-wrap: nowrap; overflow-x: auto;
-            gap: 4px; padding: 6px 16px;
-            background: rgba(15,15,15,0.95); backdrop-filter: blur(10px);
-            border-bottom: 1px solid #222;
-            scrollbar-width: none;
+            gap: 4px; padding: 4px 16px;
+            background: rgba(15,15,15,0.97); backdrop-filter: blur(10px);
+            border-bottom: 1px solid #1a1a1a;
+            height: 36px; align-items: center;
+            scrollbar-width: none; box-sizing: border-box;
         }
         .alpha-nav::-webkit-scrollbar { display: none; }
         .alpha-nav a {
             color: #aaa; text-decoration: none; font-weight: bold;
-            font-size: 0.82em; padding: 3px 7px; border-radius: 4px;
-            transition: 0.2s; border: 1px solid #333; flex-shrink: 0;
+            font-size: 0.8em; padding: 2px 6px; border-radius: 4px;
+            transition: 0.2s; border: 1px solid #2a2a2a; flex-shrink: 0;
         }
         .alpha-nav a:hover { color: white; border-color: var(--primary); background: rgba(255,71,87,0.1); }
-        .alpha-nav a.disabled { color: #444; border-color: #222; pointer-events: none; }
+        .alpha-nav a.disabled { color: #333; border-color: #1a1a1a; pointer-events: none; }
 
-        /* Barre de recherche + Studios fixed */
+        /* Barre de recherche fixed */
         .search-bar-wrap {
             position: fixed; top: 50px; left: 0; right: 0; z-index: 999;
-            background: rgba(15,15,15,0.95); backdrop-filter: blur(10px);
-            border-bottom: 1px solid #222;
-            display: flex; align-items: center; gap: 10px;
-            padding: 6px 16px; height: 44px; box-sizing: border-box;
+            background: rgba(15,15,15,0.97); backdrop-filter: blur(10px);
+            display: flex; align-items: center; gap: 8px;
+            padding: 5px 16px; height: 40px; box-sizing: border-box;
         }
         .search-bar-wrap input {
-            flex: 1;
-            box-sizing: border-box;
-            background: #222;
-            border: 1px solid #444;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.9em;
-            height: 32px;
+            flex: 1; box-sizing: border-box;
+            background: #1e1e1e; border: 1px solid #3a3a3a;
+            color: white; padding: 4px 12px;
+            border-radius: 5px; font-size: 0.88em; height: 28px;
         }
         .search-bar-wrap input:focus { outline: none; border-color: var(--primary); }
-        .studios-btn {
-            background: #222; border: 1px solid #444; color: white;
-            padding: 5px 12px; border-radius: 6px; font-size: 0.85em;
-            cursor: pointer; white-space: nowrap; position: relative;
+        .studios-link {
+            background: #1e1e1e; border: 1px solid #3a3a3a; color: #ccc;
+            padding: 4px 10px; border-radius: 5px; font-size: 0.82em;
+            text-decoration: none; white-space: nowrap; height: 28px;
+            display: flex; align-items: center; gap: 4px;
+            transition: 0.2s;
         }
-        .studios-btn:hover { border-color: var(--primary); color: var(--primary); }
-        .studios-dropdown {
-            display: none; position: absolute; top: 100%; right: 0; margin-top: 4px;
-            background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
-            max-height: 300px; overflow-y: auto; z-index: 2000; min-width: 200px;
-        }
-        .studios-dropdown.open { display: block; }
-        .studios-dropdown a {
-            display: block; padding: 8px 14px; color: #ccc; text-decoration: none; font-size: 0.85em;
-        }
-        .studios-dropdown a:hover { background: rgba(255,71,87,0.1); color: white; }
+        .studios-link:hover { border-color: var(--primary); color: var(--primary); }
 
         #no-result {
             text-align: center;
@@ -251,6 +240,7 @@
             <a href="index.html" class="btn-red">🏠 Accueil</a>
             <a href="tags.html" class="btn-red">🏷️ Tags</a>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
+            <a href="editeurs.html" class="btn-red">🏢 Studios</a>
             <select id="view-mode">
                 <option value="cards">🖼️ Photos</option>
                 <option value="list">📋 Liste</option>
@@ -268,9 +258,7 @@
 
     <div class="search-bar-wrap">
         <input type="text" id="search" placeholder="Rechercher un anime...">
-        <div class="studios-btn" id="studios-btn">🎬 Studios ▾
-            <div class="studios-dropdown" id="studios-dropdown"></div>
-        </div>
+        <a href="editeurs.html" class="studios-link">🏢 Studios</a>
     </div>
 
     <div class="alpha-nav" id="alpha-nav"></div>
@@ -456,33 +444,11 @@
                 buildAlphaNav(allGroups);
 
                 render();
-                buildStudiosDropdown();
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
         document.getElementById('search').oninput = (e) => render(e.target.value);
         document.getElementById('view-mode').onchange = () => render(document.getElementById('search').value);
-
-        // Studios dropdown
-        function buildStudiosDropdown() {
-            const studios = [...new Set(allAnimes.map(a => a.editeur).filter(Boolean))].sort();
-            const dd = document.getElementById('studios-dropdown');
-            dd.innerHTML = studios.map(s =>
-                `<a href="#" onclick="filterStudio('${s.replace(/'/g,"\\'")}'); return false;">${s}</a>`
-            ).join('');
-        }
-        window.filterStudio = (studio) => {
-            document.getElementById('search').value = studio;
-            render(studio);
-            document.getElementById('studios-dropdown').classList.remove('open');
-        };
-        document.getElementById('studios-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            document.getElementById('studios-dropdown').classList.toggle('open');
-        });
-        document.addEventListener('click', () => {
-            document.getElementById('studios-dropdown').classList.remove('open');
-        });
 
         window.toggleM = () => {
             const menu = document.getElementById('menu');
