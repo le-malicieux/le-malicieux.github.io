@@ -242,7 +242,7 @@
         let allAnimes = [];
         let allTags = [];
 
-        // ─── Cache MAL ────────────────────────────────────────────────────────
+        // MAL Cache
         const MAL_TTL = 60 * 60 * 1000;
         function malCacheGet(nom) {
             try {
@@ -322,7 +322,7 @@
             });
         }, { rootMargin: '200px' });
 
-        // ─── Firebase Auth ────────────────────────────────────────────────────
+        // Firebase Auth
         onAuthStateChanged(auth, async (user) => {
             const authUi = document.getElementById('auth-ui');
             if (user) {
@@ -343,15 +343,10 @@
                     }
                 }
                 const avatarUrl = sessionStorage.getItem('userAvatar') || user.photoURL || 'img/logo.jpg';
-                authUi.innerHTML = `
-                    <a href="profil.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;margin-right:8px;">
-                        <img src="${avatarUrl}" style="width:30px;height:30px;border-radius:50%;border:2px solid var(--primary);object-fit:cover;" onerror="this.src='img/logo.jpg'">
-                        <span class="auth-status" style="color:white;">${displayName}</span>
-                    </a>
-                    <button id="logout-btn" class="discord-btn" style="background:#333;border:none;cursor:pointer;">Quitter</button>`;
+                authUi.innerHTML = '<a href="profil.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;margin-right:8px;"><img src="'+avatarUrl+'" style="width:30px;height:30px;border-radius:50%;border:2px solid var(--primary);object-fit:cover;" onerror="this.src=\'img/logo.jpg\'"><span class="auth-status" style="color:white;">'+displayName+'</span></a><button id="logout-btn" class="discord-btn" style="background:#333;border:none;cursor:pointer;">Quitter</button>';
                 document.getElementById('logout-btn').onclick = () => signOut(auth);
             } else {
-                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;
+                authUi.innerHTML = '<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>';
                 document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
             }
         });
@@ -377,9 +372,9 @@
             if (!img.dataset.attempt) img.dataset.attempt = "1";
             const lastDotIndex = fileNameFromCSV.lastIndexOf('.');
             const base = lastDotIndex !== -1 ? fileNameFromCSV.substring(0, lastDotIndex) : fileNameFromCSV;
-            if (img.dataset.attempt === "1") { img.dataset.attempt = "2"; img.src = `img/${base}.webp`; } 
-            else if (img.dataset.attempt === "2") { img.dataset.attempt = "3"; img.src = `img/${base}.png`; } 
-            else if (img.dataset.attempt === "3") { img.dataset.attempt = "4"; img.src = `img/${base}.jpg`; } 
+            if (img.dataset.attempt === "1") { img.dataset.attempt = "2"; img.src = 'img/'+base+'.webp'; } 
+            else if (img.dataset.attempt === "2") { img.dataset.attempt = "3"; img.src = 'img/'+base+'.png'; } 
+            else if (img.dataset.attempt === "3") { img.dataset.attempt = "4"; img.src = 'img/'+base+'.jpg'; } 
             else { img.onerror = null; img.src = 'img/logo.jpg'; }
         };
 
@@ -393,26 +388,7 @@
         }
 
         function createCardHTML(a) {
-            return `
-                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" data-nom="${a.nom.replace(/"/g,'&quot;')}" data-malid="${a.malId || ''}" onclick="saveState()">
-                    <div class="img-container">
-                        <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
-                    </div>
-                    <div class="card-info">
-                        <div class="card-title">${a.nom}</div>
-                        <div class="card-meta-row">
-                            <span>📅${a.sortie}</span>
-                            <span class="mal-score">⭐${a.score}</span>
-                            <span class="mal-pop">📈${a.pop}</span>
-                        </div>
-                        <div class="card-meta-row">
-                            <span>🎞️${a.ep}</span>
-                            <span>🔞${a.censure}</span>
-                            <span>🛠️${a.etat}</span>
-                        </div>
-                        ${a.editeur ? `<div class="card-meta-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;">🏢${a.editeur}</span></div>` : ''}
-                    </div>
-                </a>`;
+            return '<a href="video.html?name='+encodeURIComponent(a.nom)+'" class="card" data-nom="'+a.nom.replace(/"/g,'&quot;')+'" data-malid="'+(a.malId||'')+'" onclick="saveState()"><div class="img-container"><img src="img/'+a.img+'" loading="lazy" onerror="handleImgError(this, \''+a.img+'\')"></div><div class="card-info"><div class="card-title">'+a.nom+'</div><div class="card-meta-row"><span>📅'+a.sortie+'</span><span class="mal-score">⭐'+a.score+'</span><span class="mal-pop">📈'+a.pop+'</span></div><div class="card-meta-row"><span>🎞️'+a.ep+'</span><span>🔞'+a.censure+'</span><span>🛠️'+a.etat+'</span></div>'+(a.editeur?'<div class="card-meta-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;">🏢'+a.editeur+'</span></div>':'')+'</div></a>';
         }
 
         function buildCarousel(trackId, prevBtnId, nextBtnId, animeList) {
@@ -420,8 +396,11 @@
             const prevBtn = document.getElementById(prevBtnId);
             const nextBtn = document.getElementById(nextBtnId);
             
+            prevBtn.style.display = 'flex';
+            nextBtn.style.display = 'flex';
+            
             if (animeList.length === 0) {
-                track.innerHTML = '<p style="color:#ff6b7a;padding:20px;text-shadow:1px 1px 3px rgba(0,0,0,0.9);">Aucun anime à afficher pour le moment.</p>';
+                track.innerHTML = '<p style="color:#ff6b7a;padding:20px;text-shadow:1px 1px 3px rgba(0,0,0,0.9);">Aucun anime pour le moment.</p>';
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
                 return;
@@ -456,21 +435,17 @@
             }
 
             function scrollToIndex() {
-                const cardWidth = getCardWidth();
-                track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+                track.style.transform = 'translateX(-'+(currentIndex * getCardWidth())+'px)';
                 updateButtons();
             }
 
             prevBtn.onclick = () => {
-                const cardsPerView = getCardsPerView();
-                currentIndex = Math.max(0, currentIndex - cardsPerView);
+                currentIndex = Math.max(0, currentIndex - getCardsPerView());
                 scrollToIndex();
             };
 
             nextBtn.onclick = () => {
-                const cardsPerView = getCardsPerView();
-                const maxIdx = getMaxIndex();
-                currentIndex = Math.min(maxIdx, currentIndex + cardsPerView);
+                currentIndex = Math.min(getMaxIndex(), currentIndex + getCardsPerView());
                 scrollToIndex();
             };
 
@@ -484,99 +459,81 @@
                 }
             });
 
+            let resizeTimeout;
             window.addEventListener('resize', () => {
-                currentIndex = Math.min(currentIndex, getMaxIndex());
-                scrollToIndex();
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    currentIndex = Math.min(currentIndex, getMaxIndex());
+                    scrollToIndex();
+                }, 150);
             });
 
             updateButtons();
         }
 
-        // ─── INIT ─────────────────────────────────────────────────────────────
+        // INIT
         async function init() {
-            // FOND D'ÉCRAN
             const isMobile = window.innerWidth <= 1000;
-            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
-            document.body.style.backgroundImage = `url('img/${fileName}')`;
+            let fileName = isMobile ? 'mobile' + Math.floor(Math.random() * 13 + 1) + '.webp' : 'fond' + Math.floor(Math.random() * 64 + 1) + '.webp';
+            document.body.style.backgroundImage = "url('img/" + fileName + "')";
 
             try {
-                // Charger animes.csv
-                const response = await fetch('animes.csv');
-                const rawData = await response.text();
-                const lines = rawData.split(/\r?\n/);
-                const headerLine = lines[0];
-                const headers = headerLine.split(';').map(h => h.trim().toLowerCase());
-                
-                // Colonne R = index 17 (0-indexed)
-                // On cherche "ordre_ajout" dans les headers
+                const resp = await fetch('animes.csv');
+                const raw = await resp.text();
+                const lines = raw.split(/\r?\n/);
+                const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
                 const ordreAjoutIndex = headers.indexOf('ordre_ajout');
                 
-                console.log('📋 Headers trouvés (' + headers.length + ' colonnes) :', headers);
-                console.log('🔍 Index de "ordre_ajout" :', ordreAjoutIndex);
+                console.log('Headers ('+headers.length+'):', headers);
+                console.log('ordre_ajout index:', ordreAjoutIndex);
 
                 allAnimes = lines.slice(1).map(line => {
                     const c = line.split(';');
                     if (!c[0] || c.length < 9) return null;
-                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : '';
                     let ordreAjout = 0;
                     if (ordreAjoutIndex >= 0 && ordreAjoutIndex < c.length) {
                         ordreAjout = parseInt(clean(c[ordreAjoutIndex])) || 0;
                     }
-                    
                     return { 
                         nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), 
                         sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), 
                         etat: clean(c[6]), img: clean(c[8]),
-                        tags: clean(c[12]),
-                        malId: clean(c[13]),
-                        editeur: clean(c[14]),
+                        tags: clean(c[12]), malId: clean(c[13]), editeur: clean(c[14]),
                         ordreAjout: ordreAjout
                     };
                 }).filter(a => a !== null);
 
-                console.log('✅ ' + allAnimes.length + ' animes chargés');
-                
+                console.log('Animes charges:', allAnimes.length);
                 const avecOrdre = allAnimes.filter(a => a.ordreAjout > 0);
-                console.log('📊 Animes avec ordre_ajout > 0 : ' + avecOrdre.length);
+                console.log('Avec ordre_ajout:', avecOrdre.length);
 
-                // Charger tags_description.csv
+                // Tags
                 try {
-                    const tagsResp = await fetch('tags_description.csv');
-                    const tagsRaw = await tagsResp.text();
-                    allTags = tagsRaw.split(/\r?\n/).slice(1).map(line => {
+                    const tr = await fetch('tags_description.csv');
+                    const trRaw = await tr.text();
+                    allTags = trRaw.split(/\r?\n/).slice(1).map(line => {
                         const c = line.split(';');
                         if (!c[0]) return null;
-                        return { nom: c[0].trim(), description: (c[1] || '').trim() };
+                        return { nom: c[0].trim(), description: (c[1]||'').trim() };
                     }).filter(t => t !== null);
-                    console.log('🏷️ ' + allTags.length + ' tags chargés');
-                } catch(e) { 
-                    console.warn('⚠️ tags_description.csv non trouvé');
-                    allTags = []; 
-                }
+                } catch(e) { allTags = []; }
 
-                // SECTION 1 : Sélection aléatoire
-                const random20 = shuffle(allAnimes).slice(0, 20);
-                buildCarousel('carousel-random-track', 'carousel-random-prev', 'carousel-random-next', random20);
+                // SECTION 1: Aleatoire
+                buildCarousel('carousel-random-track', 'carousel-random-prev', 'carousel-random-next', shuffle(allAnimes).slice(0, 20));
 
-                // SECTION 2 : Derniers ajouts
-                const avecOrdreTries = [...avecOrdre].sort((a, b) => b.ordreAjout - a.ordreAjout);
-                const recent20 = avecOrdreTries.slice(0, 20);
-                buildCarousel('carousel-recent-track', 'carousel-recent-prev', 'carousel-recent-next', recent20);
+                // SECTION 2: Derniers ajouts
+                const recents = [...avecOrdre].sort((a,b) => b.ordreAjout - a.ordreAjout).slice(0, 20);
+                buildCarousel('carousel-recent-track', 'carousel-recent-prev', 'carousel-recent-next', recents);
 
-                // SECTION 3 : Tag aléatoire
+                // SECTION 3: Tag
                 if (allTags.length > 0) {
-                    const randomTag = allTags[Math.floor(Math.random() * allTags.length)];
-                    document.getElementById('tag-name').textContent = randomTag.nom;
-                    document.getElementById('tag-description').textContent = randomTag.description;
-                    
-                    const tagAnimes = allAnimes.filter(a => 
-                        a.tags && a.tags.toLowerCase().includes(randomTag.nom.toLowerCase())
-                    );
-                    
+                    const rTag = allTags[Math.floor(Math.random() * allTags.length)];
+                    document.getElementById('tag-name').textContent = rTag.nom;
+                    document.getElementById('tag-description').textContent = rTag.description;
+                    const tagAnimes = allAnimes.filter(a => a.tags && a.tags.toLowerCase().includes(rTag.nom.toLowerCase()));
                     if (tagAnimes.length > 0) {
-                        const tag20 = shuffle(tagAnimes).slice(0, 20);
-                        buildCarousel('carousel-tag-track', 'carousel-tag-prev', 'carousel-tag-next', tag20);
+                        buildCarousel('carousel-tag-track', 'carousel-tag-prev', 'carousel-tag-next', shuffle(tagAnimes).slice(0, 20));
                     } else {
                         document.getElementById('tag-section-title').style.display = 'none';
                         document.getElementById('carousel-tag-wrapper').style.display = 'none';
@@ -586,23 +543,10 @@
                     document.getElementById('carousel-tag-wrapper').style.display = 'none';
                 }
 
-                // COMPTEUR
-                document.getElementById('anime-count').innerHTML = 
-                    '📊 <span class="count-number">' + allAnimes.length + '</span> animes référencés dans le catalogue';
+                // Compteur
+                document.getElementById('anime-count').innerHTML = '📊 <span class="count-number">'+allAnimes.length+'</span> animes dans le catalogue';
 
-                // Restaurer
-                const savedSearch = sessionStorage.getItem('indexSearch');
-                const savedSort   = sessionStorage.getItem('indexSort');
-                const savedScroll = sessionStorage.getItem('indexScroll');
-                if (savedSearch !== null) document.getElementById('search').value = savedSearch;
-                if (savedSort   !== null) document.getElementById('sort').value   = savedSort;
-                if (savedScroll && parseInt(savedScroll) > 0) {
-                    requestAnimationFrame(() => requestAnimationFrame(() => {
-                        window.scrollTo({ top: parseInt(savedScroll), behavior: 'instant' });
-                    }));
-                }
-
-            } catch (err) { console.error('❌ Erreur:', err); }
+            } catch(e) { console.error('Erreur:', e); }
         }
 
         window.toggleM = () => {
@@ -613,10 +557,20 @@
         window.randomAnime = () => {
             if(allAnimes.length > 0) {
                 const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
-                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+                window.location.href = 'video.html?name='+encodeURIComponent(a.nom);
             }
         };
 
-        document.getElementById('search').oninput = () => {
-            const val = document.getElementById('search').value.toLowerCase();
-            if (val) window.location.href = `catalogue.html?search=${encodeURIComponent
+        document.getElementById('search').oninput = function() {
+            const v = this.value.toLowerCase();
+            if (v) window.location.href = 'catalogue.html?search='+encodeURIComponent(v);
+        };
+        document.getElementById('sort').onchange = function() {
+            const v = this.value;
+            if (v) window.location.href = 'catalogue.html?sort='+encodeURIComponent(v);
+        };
+
+        init();
+    </script>
+</body>
+</html>
