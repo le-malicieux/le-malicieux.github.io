@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --text-bright: #ffffff; --text-secondary: #e0e0e0; --nav-bg: rgba(15, 15, 15, 0.85); }
+        :root { --primary: #ff4757; --primary-soft: #e04050; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --text-bright: #ffffff; --text-secondary: #ccc; --nav-bg: rgba(15, 15, 15, 0.85); }
         
         body { 
             font-family: 'Segoe UI', sans-serif; 
@@ -27,9 +27,9 @@
             display: flex; align-items: center; justify-content: space-between;
             padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
-            will-change: transform;
+            will-change: transform; gap: 12px;
         }
-        .nav-left { display: flex; flex-direction: row; align-items: center; gap: 10px; }
+        .nav-left { display: flex; flex-direction: row; align-items: center; gap: 10px; flex-shrink: 0; }
         .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; cursor: pointer; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
@@ -39,9 +39,47 @@
 
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 4px; user-select: none; }
 
-        .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
-            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
+        /* Barre de recherche */
+        .search-wrapper {
+            position: relative; flex: 1; max-width: 500px; min-width: 200px;
+        }
+        .search-wrapper input {
+            width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; 
+            padding: 10px 40px 10px 15px; border-radius: 25px; font-size: 0.9em;
+            transition: 0.3s; box-sizing: border-box; outline: none;
+        }
+        .search-wrapper input:focus {
+            border-color: var(--primary); box-shadow: 0 0 10px rgba(255,71,87,0.3);
+        }
+        .search-wrapper input::placeholder { color: #777; }
+        .search-icon {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            color: #888; font-size: 1.1em; pointer-events: none;
+        }
+        .search-suggestions {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #1a1a1a; border: 1px solid #333; border-radius: 0 0 12px 12px;
+            max-height: 350px; overflow-y: auto; display: none; z-index: 2000;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.8);
+        }
+        .search-suggestions.active { display: block; }
+        .search-suggestions .suggestion-item {
+            padding: 10px 15px; cursor: pointer; color: #ccc; font-size: 0.85em;
+            border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.15s;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .search-suggestions .suggestion-item:hover { background: #2a2a2a; color: white; }
+        .search-suggestions .suggestion-item .sugg-img {
+            width: 32px; height: 45px; border-radius: 4px; object-fit: cover; flex-shrink: 0;
+            background: #111;
+        }
+        .search-suggestions .no-result {
+            padding: 15px; color: #888; text-align: center; font-size: 0.85em;
+        }
+
+        .nav-center { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+        .nav-center a { 
+            background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 25px; font-size: 0.85em; text-decoration: none; white-space: nowrap;
         }
         .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
 
@@ -58,19 +96,22 @@
 
         .content-area { padding: 20px 15px 40px; }
         
-        /* TITRE DE SECTION : bande noire + texte rouge */
+        /* Titres de section : adoucis */
         .section-title {
-            max-width: 1400px; margin: 30px auto 15px; padding: 10px 15px;
-            font-size: 1.5em; font-weight: bold; color: var(--primary);
-            background: rgba(0, 0, 0, 0.75);
-            border-radius: 6px;
+            max-width: 1400px; margin: 30px auto 15px; padding: 8px 15px;
+            font-size: 1.4em; font-weight: 600; 
+            color: var(--primary-soft);
+            background: rgba(0, 0, 0, 0.45);
+            border-radius: 20px;
             display: inline-block;
+            letter-spacing: 0.3px;
         }
         .section-title-wrapper {
             max-width: 1400px; margin: 30px auto 15px; padding: 0 15px;
         }
         .section-subtitle { 
-            font-size: 0.55em; color: var(--text-secondary); font-weight: normal; display: block; margin-top: 4px;
+            font-size: 0.55em; color: var(--text-secondary); font-weight: 400; display: block; margin-top: 3px;
+            opacity: 0.85;
         }
 
         .carousel-wrapper {
@@ -84,15 +125,16 @@
         
         .carousel-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
-            background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2); color: white;
+            background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); color: white;
             font-size: 18px; width: 30px; height: 60px; cursor: pointer; z-index: 10; border-radius: 4px;
             transition: 0.2s; display: flex; align-items: center; justify-content: center;
+            opacity: 0.7;
         }
-        .carousel-btn:hover { background: var(--primary); border-color: var(--primary); }
+        .carousel-btn:hover { background: var(--primary); border-color: var(--primary); opacity: 1; }
         .carousel-btn.prev { left: 0; }
         .carousel-btn.next { right: 0; }
-        .carousel-btn:disabled { opacity: 0.25; cursor: default; }
-        .carousel-btn:disabled:hover { background: rgba(0,0,0,0.7); border-color: rgba(255,255,255,0.2); }
+        .carousel-btn:disabled { opacity: 0.2; cursor: default; }
+        .carousel-btn:disabled:hover { background: rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.15); }
 
         .card { 
             background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
@@ -113,15 +155,13 @@
         .mal-updated { color: #5dade2; }
 
         .anime-count {
-            text-align: center; padding: 15px 15px; 
-            color: var(--primary); font-size: 1em; font-weight: bold;
-            background: rgba(0, 0, 0, 0.75);
-            display: inline-block; border-radius: 6px;
-            margin: 40px auto 0; 
-            text-shadow: none;
+            text-align: center; padding: 12px 20px; 
+            color: var(--primary-soft); font-size: 0.95em; font-weight: 600;
+            background: rgba(0, 0, 0, 0.45);
+            display: inline-block; border-radius: 20px;
         }
         .anime-count-wrapper {
-            text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; margin-top: 40px;
+            text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; margin-top: 40px;
         }
         .anime-count .count-number { color: var(--text-bright); font-weight: bold; }
 
@@ -131,6 +171,7 @@
         @media (max-width: 1000px) {
             .burger { display: block; }
             .close-menu { display: block; }
+            .search-wrapper { max-width: none; }
             .nav-center {
                 position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
@@ -141,7 +182,7 @@
             .mobile-overlay.active { display: block; }
             .hero-section { height: 50vh; }
             .main-title { font-size: 2em; }
-            .section-title { font-size: 1.2em; padding: 8px 12px; }
+            .section-title { font-size: 1.1em; padding: 6px 12px; }
             .carousel-wrapper { padding: 0 28px; }
             .carousel-btn { width: 24px; height: 48px; font-size: 14px; }
             .card { width: 150px; }
@@ -149,6 +190,7 @@
             .card-title { font-size: 0.85em; height: 2.4em; }
             .card-meta-row { font-size: 0.65em; gap: 2px; }
             .carousel-track { gap: 10px; }
+            .nav-center a { border-radius: 8px; }
         }
 
         @media (max-width: 480px) {
@@ -170,22 +212,17 @@
             <a id="back-home" onclick="resetToHome()">← Retour à l'accueil</a>
         </div>
 
+        <!-- Barre de recherche centrale -->
+        <div class="search-wrapper" id="search-wrapper">
+            <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
+            <span class="search-icon">🔍</span>
+            <div class="search-suggestions" id="search-suggestions"></div>
+        </div>
+
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
 
         <div class="nav-center" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
-            <input type="text" id="search" placeholder="Rechercher un anime...">
-            <select id="sort">
-                <option value="">🔀 Aléatoire</option>
-                <option value="popularite">Popularité</option>
-                <option value="score">Score</option>
-                <option value="nom">Nom (A-Z)</option>
-                <option value="sortie">Année</option>
-                <option value="episodes">Épisodes (Nombre)</option>
-                <option value="etat">État (Fini/En cours)</option>
-                <option value="censure">Censure</option>
-                <option value="editeur">Éditeur</option>
-            </select>
             <a href="tags.html" class="btn-red">🏷️ Tags</a>
             <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
@@ -193,7 +230,7 @@
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
 
-        <div style="display:flex; align-items:center;">
+        <div style="display:flex; align-items:center; flex-shrink: 0;">
             <div id="auth-ui" style="display:flex; align-items:center;">
                 <button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>
             </div>
@@ -368,16 +405,13 @@
 
         window.saveState = () => {
             sessionStorage.setItem('indexSearch', document.getElementById('search').value);
-            sessionStorage.setItem('indexSort', document.getElementById('sort').value);
             sessionStorage.setItem('indexScroll', window.scrollY);
         };
 
         window.resetToHome = () => {
             document.getElementById('search').value = '';
-            document.getElementById('sort').value = '';
             document.getElementById('search').placeholder = 'Rechercher un anime...';
             sessionStorage.removeItem('indexSearch');
-            sessionStorage.removeItem('indexSort');
             sessionStorage.removeItem('indexScroll');
             history.replaceState(null, '', window.location.pathname);
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -415,7 +449,7 @@
             nextBtn.style.display = 'flex';
             
             if (animeList.length === 0) {
-                track.innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.7);border-radius:6px;display:inline-block;">Aucun anime pour le moment.</p>';
+                track.innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.5);border-radius:12px;display:inline-block;font-size:0.9em;">Aucun anime pour le moment.</p>';
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
                 return;
@@ -486,6 +520,75 @@
             updateButtons();
         }
 
+        // Recherche tolérante
+        function normalize(str) {
+            return str
+                .toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // enlever accents
+                .replace(/[-_.:;,!?()'"&~#|]/g, ' ') // ponctuation → espace
+                .replace(/\s+/g, ' ') // espaces multiples → un
+                .trim();
+        }
+
+        function searchAnimes(query) {
+            const q = normalize(query);
+            if (q.length < 1) return [];
+            return allAnimes.filter(a => normalize(a.nom).includes(q));
+        }
+
+        // Suggestions
+        const searchInput = document.getElementById('search');
+        const searchSuggestions = document.getElementById('search-suggestions');
+
+        searchInput.addEventListener('input', function() {
+            const val = this.value.trim();
+            if (val.length < 1) {
+                searchSuggestions.classList.remove('active');
+                return;
+            }
+            const results = searchAnimes(val).slice(0, 8);
+            if (results.length === 0) {
+                searchSuggestions.innerHTML = '<div class="no-result">Aucun résultat</div>';
+            } else {
+                searchSuggestions.innerHTML = results.map(a => 
+                    '<div class="suggestion-item" data-name="'+a.nom.replace(/"/g,'&quot;')+'"><img src="img/'+a.img+'" class="sugg-img" onerror="this.src=\'img/logo.jpg\'"><span>'+a.nom+'</span></div>'
+                ).join('');
+            }
+            searchSuggestions.classList.add('active');
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = this.value.trim();
+                if (!val) return;
+                const results = searchAnimes(val);
+                if (results.length === 1) {
+                    window.location.href = 'video.html?name='+encodeURIComponent(results[0].nom);
+                } else if (results.length > 1) {
+                    window.location.href = 'catalogue.html?search='+encodeURIComponent(val);
+                } else {
+                    window.location.href = 'catalogue.html?search='+encodeURIComponent(val);
+                }
+                searchSuggestions.classList.remove('active');
+                this.blur();
+            }
+        });
+
+        searchSuggestions.addEventListener('click', function(e) {
+            const item = e.target.closest('.suggestion-item');
+            if (item) {
+                const name = item.dataset.name;
+                window.location.href = 'video.html?name='+encodeURIComponent(name);
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-wrapper')) {
+                searchSuggestions.classList.remove('active');
+            }
+        });
+
         // INIT
         async function init() {
             const isMobile = window.innerWidth <= 1000;
@@ -538,39 +641,46 @@
                     allTags = []; 
                 }
 
-                // SECTION 1: Aleatoire
+                // SECTIONS
                 buildCarousel('carousel-random-track', 'carousel-random-prev', 'carousel-random-next', shuffle(allAnimes).slice(0, 20));
 
-                // SECTION 2: Derniers ajouts
                 const recents = [...avecOrdre].sort((a,b) => b.ordreAjout - a.ordreAjout).slice(0, 20);
                 buildCarousel('carousel-recent-track', 'carousel-recent-prev', 'carousel-recent-next', recents);
 
-                // SECTION 3: Tag aleatoire (TOUJOURS AFFICHEE)
                 if (allTags.length > 0) {
                     const rTag = allTags[Math.floor(Math.random() * allTags.length)];
                     document.getElementById('tag-name').textContent = rTag.nom;
                     document.getElementById('tag-description').textContent = rTag.description;
                     
                     const tagAnimes = allAnimes.filter(a => a.tags && a.tags.toLowerCase().includes(rTag.nom.toLowerCase()));
-                    console.log('Tag "' + rTag.nom + '" : ' + tagAnimes.length + ' animes trouves');
+                    console.log('Tag "' + rTag.nom + '" : ' + tagAnimes.length + ' animes');
                     
                     if (tagAnimes.length > 0) {
                         buildCarousel('carousel-tag-track', 'carousel-tag-prev', 'carousel-tag-next', shuffle(tagAnimes).slice(0, 20));
                     } else {
-                        document.getElementById('carousel-tag-track').innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.7);border-radius:6px;display:inline-block;">Aucun anime avec ce tag.</p>';
+                        document.getElementById('carousel-tag-track').innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.5);border-radius:12px;display:inline-block;font-size:0.9em;">Aucun anime avec ce tag.</p>';
                         document.getElementById('carousel-tag-prev').style.display = 'none';
                         document.getElementById('carousel-tag-next').style.display = 'none';
                     }
                 } else {
                     document.getElementById('tag-name').textContent = 'Tags non disponibles';
                     document.getElementById('tag-description').textContent = 'Fichier tags_description.csv introuvable';
-                    document.getElementById('carousel-tag-track').innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.7);border-radius:6px;display:inline-block;">Fichier tags_description.csv introuvable.</p>';
+                    document.getElementById('carousel-tag-track').innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.5);border-radius:12px;display:inline-block;font-size:0.9em;">Fichier tags_description.csv introuvable.</p>';
                     document.getElementById('carousel-tag-prev').style.display = 'none';
                     document.getElementById('carousel-tag-next').style.display = 'none';
                 }
 
-                // Compteur
                 document.getElementById('anime-count').innerHTML = '📊 <span class="count-number">' + allAnimes.length + '</span> animes dans le catalogue';
+
+                // Restaurer recherche
+                const savedSearch = sessionStorage.getItem('indexSearch');
+                const savedScroll = sessionStorage.getItem('indexScroll');
+                if (savedSearch !== null) document.getElementById('search').value = savedSearch;
+                if (savedScroll && parseInt(savedScroll) > 0) {
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        window.scrollTo({ top: parseInt(savedScroll), behavior: 'instant' });
+                    }));
+                }
 
             } catch(e) { console.error('Erreur:', e); }
         }
@@ -585,15 +695,6 @@
                 const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
                 window.location.href = 'video.html?name='+encodeURIComponent(a.nom);
             }
-        };
-
-        document.getElementById('search').oninput = function() {
-            const v = this.value.toLowerCase();
-            if (v) window.location.href = 'catalogue.html?search='+encodeURIComponent(v);
-        };
-        document.getElementById('sort').onchange = function() {
-            const v = this.value;
-            if (v) window.location.href = 'catalogue.html?sort='+encodeURIComponent(v);
         };
 
         init();
