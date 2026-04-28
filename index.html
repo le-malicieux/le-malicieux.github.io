@@ -29,7 +29,7 @@
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
             will-change: transform;
         }
-        .nav-left { display: flex; flex-direction: column; align-items: flex-start; }
+        .nav-left { display: flex; flex-direction: row; align-items: center; gap: 10px; }
         .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; cursor: pointer; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
@@ -37,7 +37,7 @@
         #back-home { font-size: 0.75em; color: #888; text-decoration: none; display: none; cursor: pointer; margin-top: 2px; }
         #back-home:hover { color: var(--primary); }
 
-        .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 8px; user-select: none; }
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 4px; user-select: none; }
 
         .nav-center { display: flex; gap: 8px; align-items: center; }
         .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
@@ -56,7 +56,9 @@
         .main-title { font-size: 3em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
         .main-slogan { font-size: 1.4em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
 
-        /* Sections */
+        /* ─── Sections ─── */
+        .content-area { padding: 20px 15px 40px; }
+        
         .section-title {
             max-width: 1400px; margin: 30px auto 15px; padding: 0 15px;
             font-size: 1.5em; font-weight: bold; color: var(--primary);
@@ -64,36 +66,38 @@
         .section-subtitle { font-size: 0.6em; color: #aaa; font-weight: normal; display: block; margin-top: 4px; }
 
         .carousel-wrapper {
-            position: relative; max-width: 1430px; margin: 0 auto; padding: 0 15px;
+            position: relative; max-width: 1400px; margin: 0 auto; padding: 0 35px;
         }
         .carousel-container { overflow: hidden; }
         
         .carousel-track {
-            display: flex; gap: 20px; transition: transform 0.4s ease;
+            display: flex; gap: 15px; transition: transform 0.4s ease;
         }
         
         .carousel-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
-            background: rgba(0,0,0,0.7); border: 1px solid var(--primary); color: white;
-            font-size: 24px; padding: 12px 8px; cursor: pointer; z-index: 10; border-radius: 6px;
-            transition: 0.2s;
+            background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2); color: white;
+            font-size: 18px; width: 30px; height: 60px; cursor: pointer; z-index: 10; border-radius: 4px;
+            transition: 0.2s; display: flex; align-items: center; justify-content: center;
         }
-        .carousel-btn:hover { background: var(--primary); }
-        .carousel-btn.prev { left: -5px; }
-        .carousel-btn.next { right: -5px; }
-        .carousel-btn:disabled { opacity: 0.3; cursor: default; }
-        .carousel-btn:disabled:hover { background: rgba(0,0,0,0.7); }
+        .carousel-btn:hover { background: var(--primary); border-color: var(--primary); }
+        .carousel-btn.prev { left: 0; }
+        .carousel-btn.next { right: 0; }
+        .carousel-btn:disabled { opacity: 0.25; cursor: default; }
+        .carousel-btn:disabled:hover { background: rgba(0,0,0,0.7); border-color: rgba(255,255,255,0.2); }
 
+        /* ─── Cartes (mêmes dimensions qu'avant) ─── */
         .card { 
             background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
             border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
             display: flex; flex-direction: column; flex-shrink: 0;
+            width: 180px;
         }
-        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
+        .card:hover { transform: translateY(-6px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
 
-        .card-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-info { padding: 7px 8px; flex-grow: 1; display: flex; flex-direction: column; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
         
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
@@ -122,12 +126,20 @@
             .nav-center.active { left: 0; }
             .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
             .mobile-overlay.active { display: block; }
+            .hero-section { height: 50vh; }
+            .main-title { font-size: 2em; }
+            .carousel-wrapper { padding: 0 28px; }
+            .carousel-btn { width: 24px; height: 48px; font-size: 14px; }
+            .card { width: 150px; }
             .card-info { padding: 5px; }
             .card-title { font-size: 0.85em; height: 2.4em; }
             .card-meta-row { font-size: 0.65em; gap: 2px; }
-            .hero-section { height: 50vh; }
-            .main-title { font-size: 2em; }
-            .carousel-btn { font-size: 18px; padding: 8px 5px; }
+            .carousel-track { gap: 10px; }
+        }
+
+        @media (max-width: 480px) {
+            .card { width: 140px; }
+            .carousel-wrapper { padding: 0 24px; }
         }
     </style>
 </head>
@@ -135,8 +147,7 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="top-navbar">
-        <div class="nav-left" style="flex-direction: row; align-items: center; gap: 10px;">
-            <!-- BURGER SÉPARÉ DU LIEN -->
+        <div class="nav-left">
             <div class="burger" onclick="toggleM()">☰</div>
             <a class="nav-brand" onclick="resetToHome()" href="index.html">
                 <img src="img/logo.jpg" class="nav-logo-small">
@@ -182,34 +193,36 @@
         <p class="main-slogan">Catalogue d'animes malicieux</p>
     </div>
 
-    <!-- SECTION : Découvrir des animes aléatoires -->
-    <h2 class="section-title">🎲 Découvrir des animes</h2>
-    <div class="carousel-wrapper" id="carousel-random-wrapper">
-        <button class="carousel-btn prev" id="carousel-random-prev">◀</button>
-        <div class="carousel-container" id="carousel-random-container">
-            <div class="carousel-track" id="carousel-random-track"></div>
+    <div class="content-area">
+        <!-- SECTION 1 : Sélection aléatoire -->
+        <h2 class="section-title">🎲 Sélection aléatoire</h2>
+        <div class="carousel-wrapper" id="carousel-random-wrapper">
+            <button class="carousel-btn prev" id="carousel-random-prev">◀</button>
+            <div class="carousel-container">
+                <div class="carousel-track" id="carousel-random-track"></div>
+            </div>
+            <button class="carousel-btn next" id="carousel-random-next">▶</button>
         </div>
-        <button class="carousel-btn next" id="carousel-random-next">▶</button>
-    </div>
 
-    <!-- SECTION : Derniers ajouts -->
-    <h2 class="section-title">🆕 Derniers ajouts</h2>
-    <div class="carousel-wrapper" id="carousel-recent-wrapper">
-        <button class="carousel-btn prev" id="carousel-recent-prev">◀</button>
-        <div class="carousel-container" id="carousel-recent-container">
-            <div class="carousel-track" id="carousel-recent-track"></div>
+        <!-- SECTION 2 : Derniers ajouts -->
+        <h2 class="section-title">🆕 Derniers ajouts</h2>
+        <div class="carousel-wrapper" id="carousel-recent-wrapper">
+            <button class="carousel-btn prev" id="carousel-recent-prev">◀</button>
+            <div class="carousel-container">
+                <div class="carousel-track" id="carousel-recent-track"></div>
+            </div>
+            <button class="carousel-btn next" id="carousel-recent-next">▶</button>
         </div>
-        <button class="carousel-btn next" id="carousel-recent-next">▶</button>
-    </div>
 
-    <!-- SECTION : Tag aléatoire -->
-    <h2 class="section-title" id="tag-section-title">🏷️ <span id="tag-name"></span><span class="section-subtitle" id="tag-description"></span></h2>
-    <div class="carousel-wrapper" id="carousel-tag-wrapper">
-        <button class="carousel-btn prev" id="carousel-tag-prev">◀</button>
-        <div class="carousel-container" id="carousel-tag-container">
-            <div class="carousel-track" id="carousel-tag-track"></div>
+        <!-- SECTION 3 : Tag aléatoire -->
+        <h2 class="section-title" id="tag-section-title">🏷️ <span id="tag-name"></span><span class="section-subtitle" id="tag-description"></span></h2>
+        <div class="carousel-wrapper" id="carousel-tag-wrapper">
+            <button class="carousel-btn prev" id="carousel-tag-prev">◀</button>
+            <div class="carousel-container">
+                <div class="carousel-track" id="carousel-tag-track"></div>
+            </div>
+            <button class="carousel-btn next" id="carousel-tag-next">▶</button>
         </div>
-        <button class="carousel-btn next" id="carousel-tag-next">▶</button>
     </div>
 
     <!-- COMPTEUR -->
@@ -228,10 +241,9 @@
         provider.setCustomParameters({ prompt: 'select_account' });
 
         let allAnimes = [];
-        let allTags = []; // {nom, description}
-        let randomTag = null;
+        let allTags = [];
 
-        // ─── Cache MAL (sessionStorage) ─────────────────────────────────────────────
+        // ─── Cache MAL ──────────────────────────────────────────────────────────────
         const MAL_TTL = 60 * 60 * 1000;
 
         function malCacheGet(nom) {
@@ -268,10 +280,7 @@
 
         function fetchMALForCard(nom, malId, scoreEl, popEl) {
             const cached = malCacheGet(nom);
-            if (cached) {
-                applyCardMAL(scoreEl, popEl, cached);
-                return;
-            }
+            if (cached) { applyCardMAL(scoreEl, popEl, cached); return; }
             jikanEnqueue(async () => {
                 try {
                     let item = null;
@@ -385,7 +394,7 @@
             else { img.onerror = null; img.src = 'img/logo.jpg'; }
         };
 
-        // ─── Shuffle (Fisher-Yates) ──────────────────────────────────────────────────
+        // ─── Utilitaires ────────────────────────────────────────────────────────────
         function shuffle(arr) {
             const a = [...arr];
             for (let i = a.length - 1; i > 0; i--) {
@@ -395,7 +404,6 @@
             return a;
         }
 
-        // ─── Créer une carte HTML ────────────────────────────────────────────────────
         function createCardHTML(a) {
             return `
                 <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" data-nom="${a.nom.replace(/"/g,'&quot;')}" data-malid="${a.malId || ''}" onclick="saveState()">
@@ -419,33 +427,46 @@
                 </a>`;
         }
 
-        // ─── Carousel ─────────────────────────────────────────────────────────────────
+        // ─── Carousel ───────────────────────────────────────────────────────────────
         function buildCarousel(trackId, prevBtnId, nextBtnId, animeList) {
             const track = document.getElementById(trackId);
             const prevBtn = document.getElementById(prevBtnId);
             const nextBtn = document.getElementById(nextBtnId);
             
+            if (animeList.length === 0) {
+                track.innerHTML = '<p style="color:#888; padding:20px;">Aucun anime à afficher.</p>';
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                return;
+            }
+
             track.innerHTML = animeList.map(a => createCardHTML(a)).join('');
-            
-            // Observer les cartes MAL
             track.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
 
             let currentIndex = 0;
-            const isMobile = window.innerWidth <= 1000;
-            const cardsPerView = isMobile ? 2 : 5;
-            const totalCards = animeList.length;
-            const maxIndex = Math.max(0, totalCards - cardsPerView);
 
-            // Largeur d'une carte + gap
+            function getCardsPerView() {
+                const w = window.innerWidth;
+                if (w <= 480) return 2;
+                if (w <= 1000) return 3;
+                return 5;
+            }
+
             function getCardWidth() {
                 const card = track.querySelector('.card');
-                if (!card) return 200;
-                return card.offsetWidth + 20; // 20 = gap
+                if (!card) return 180;
+                const style = window.getComputedStyle(card);
+                return card.offsetWidth + parseInt(style.marginRight || 0) + 15; // 15 = gap
+            }
+
+            function getMaxIndex() {
+                return Math.max(0, track.children.length - getCardsPerView());
             }
 
             function updateButtons() {
+                const maxIdx = getMaxIndex();
                 prevBtn.disabled = currentIndex <= 0;
-                nextBtn.disabled = currentIndex >= maxIndex;
+                nextBtn.disabled = currentIndex >= maxIdx;
             }
 
             function scrollToIndex() {
@@ -455,27 +476,37 @@
             }
 
             prevBtn.onclick = () => {
-                if (currentIndex > 0) {
-                    currentIndex = Math.max(0, currentIndex - cardsPerView);
-                    scrollToIndex();
-                }
+                const cardsPerView = getCardsPerView();
+                currentIndex = Math.max(0, currentIndex - cardsPerView);
+                scrollToIndex();
             };
 
             nextBtn.onclick = () => {
-                if (currentIndex < maxIndex) {
-                    currentIndex = Math.min(maxIndex, currentIndex + cardsPerView);
-                    scrollToIndex();
-                }
+                const cardsPerView = getCardsPerView();
+                const maxIdx = getMaxIndex();
+                currentIndex = Math.min(maxIdx, currentIndex + cardsPerView);
+                scrollToIndex();
             };
 
-            // Recalculer au resize
+            // Touch/swipe support mobile
+            let touchStartX = 0;
+            let touchEndX = 0;
+            track.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+            track.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                const diff = touchStartX - touchEndX;
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) nextBtn.click();
+                    else prevBtn.click();
+                }
+            });
+
             window.addEventListener('resize', () => {
-                currentIndex = Math.min(currentIndex, Math.max(0, track.children.length - (window.innerWidth <= 1000 ? 2 : 5)));
+                currentIndex = Math.min(currentIndex, getMaxIndex());
                 scrollToIndex();
             });
 
             updateButtons();
-            return { track, scrollToIndex, updateButtons };
         }
 
         // ─── Initialisation ──────────────────────────────────────────────────────────
@@ -498,7 +529,8 @@
                         etat: clean(c[6]), img: clean(c[8]),
                         tags: clean(c[12]),
                         malId: clean(c[13]),
-                        editeur: clean(c[14])
+                        editeur: clean(c[14]),
+                        ordreAjout: parseInt(clean(c[15])) || 0 // colonne 16 (index 15) = numéro d'ajout
                     };
                 }).filter(a => a !== null);
 
@@ -513,18 +545,19 @@
                     }).filter(t => t !== null);
                 } catch(e) { allTags = []; }
 
-                // ── SECTION 1 : 20 animes aléatoires ──
+                // ── SECTION 1 : Sélection aléatoire (20 animes) ──
                 const random20 = shuffle(allAnimes).slice(0, 20);
                 buildCarousel('carousel-random-track', 'carousel-random-prev', 'carousel-random-next', random20);
 
-                // ── SECTION 2 : 20 derniers animes du CSV (dernières lignes non vides) ──
-                // On prend les 20 derniers ajoutés (fin du tableau)
-                const recent20 = allAnimes.slice(-20).reverse(); // du plus récent au plus ancien
+                // ── SECTION 2 : Derniers ajouts (triés par ordreAjout décroissant) ──
+                const avecOrdre = allAnimes.filter(a => a.ordreAjout > 0);
+                avecOrdre.sort((a, b) => b.ordreAjout - a.ordreAjout); // du plus grand numéro au plus petit
+                const recent20 = avecOrdre.slice(0, 20);
                 buildCarousel('carousel-recent-track', 'carousel-recent-prev', 'carousel-recent-next', recent20);
 
-                // ── SECTION 3 : Tag aléatoire + 20 animes avec ce tag ──
+                // ── SECTION 3 : Tag aléatoire ──
                 if (allTags.length > 0) {
-                    randomTag = allTags[Math.floor(Math.random() * allTags.length)];
+                    const randomTag = allTags[Math.floor(Math.random() * allTags.length)];
                     document.getElementById('tag-name').textContent = randomTag.nom;
                     document.getElementById('tag-description').textContent = randomTag.description;
                     
@@ -548,7 +581,7 @@
                 document.getElementById('anime-count').innerHTML = 
                     `📊 <span>${allAnimes.length}</span> animes référencés dans le catalogue`;
 
-                // Restaurer recherche/tri si présents
+                // Restaurer recherche/tri
                 const savedSearch = sessionStorage.getItem('indexSearch');
                 const savedSort   = sessionStorage.getItem('indexSort');
                 const savedScroll = sessionStorage.getItem('indexScroll');
@@ -563,7 +596,7 @@
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
-        // ─── Fonctions globales ──────────────────────────────────────────────────────
+        // ─── Global ──────────────────────────────────────────────────────────────────
         window.toggleM = () => {
             document.getElementById('menu').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
@@ -576,22 +609,14 @@
             }
         };
 
-        // Garder les fonctions de recherche/tri pour la navbar
-        const searchInput = document.getElementById('search');
-        const sortSelect = document.getElementById('sort');
-        
-        searchInput.oninput = () => {
-            const val = searchInput.value.toLowerCase();
-            if (val) {
-                window.location.href = `catalogue.html?search=${encodeURIComponent(val)}`;
-            }
+        document.getElementById('search').oninput = () => {
+            const val = document.getElementById('search').value.toLowerCase();
+            if (val) window.location.href = `catalogue.html?search=${encodeURIComponent(val)}`;
         };
         
-        sortSelect.onchange = () => {
-            const val = sortSelect.value;
-            if (val) {
-                window.location.href = `catalogue.html?sort=${encodeURIComponent(val)}`;
-            }
+        document.getElementById('sort').onchange = () => {
+            const val = document.getElementById('sort').value;
+            if (val) window.location.href = `catalogue.html?sort=${encodeURIComponent(val)}`;
         };
 
         init();
