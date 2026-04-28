@@ -53,11 +53,9 @@
             text-align: center; padding: 20px;
         }
         .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px rgba(255,71,87,0.3); object-fit: cover; }
-        /* Titre et slogan : conservés en BLANC comme demandé */
         .main-title { font-size: 3em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
         .main-slogan { font-size: 1.4em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
 
-        /* ─── Sections : texte en ROUGE sur fond noir ─── */
         .content-area { padding: 20px 15px 40px; }
         
         .section-title {
@@ -91,7 +89,6 @@
         .carousel-btn:disabled { opacity: 0.25; cursor: default; }
         .carousel-btn:disabled:hover { background: rgba(0,0,0,0.7); border-color: rgba(255,255,255,0.2); }
 
-        /* ─── Cartes ─── */
         .card { 
             background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
             border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
@@ -110,7 +107,6 @@
 
         .mal-updated { color: #5dade2; }
 
-        /* Footer compteur : ROUGE */
         .anime-count {
             text-align: center; padding: 30px 15px; 
             color: var(--primary); font-size: 1em; font-weight: bold;
@@ -201,7 +197,6 @@
     </div>
 
     <div class="content-area">
-        <!-- SECTION 1 : Sélection aléatoire -->
         <h2 class="section-title">🎲 Sélection aléatoire</h2>
         <div class="carousel-wrapper" id="carousel-random-wrapper">
             <button class="carousel-btn prev" id="carousel-random-prev">◀</button>
@@ -211,7 +206,6 @@
             <button class="carousel-btn next" id="carousel-random-next">▶</button>
         </div>
 
-        <!-- SECTION 2 : Derniers ajouts -->
         <h2 class="section-title">🆕 Derniers ajouts</h2>
         <div class="carousel-wrapper" id="carousel-recent-wrapper">
             <button class="carousel-btn prev" id="carousel-recent-prev">◀</button>
@@ -221,7 +215,6 @@
             <button class="carousel-btn next" id="carousel-recent-next">▶</button>
         </div>
 
-        <!-- SECTION 3 : Tag aléatoire -->
         <h2 class="section-title" id="tag-section-title">🏷️ <span id="tag-name"></span><span class="section-subtitle" id="tag-description"></span></h2>
         <div class="carousel-wrapper" id="carousel-tag-wrapper">
             <button class="carousel-btn prev" id="carousel-tag-prev">◀</button>
@@ -232,7 +225,6 @@
         </div>
     </div>
 
-    <!-- COMPTEUR -->
     <div class="anime-count" id="anime-count"></div>
 
     <script type="module">
@@ -250,9 +242,8 @@
         let allAnimes = [];
         let allTags = [];
 
-        // ─── Cache MAL ──────────────────────────────────────────────────────────────
+        // ─── Cache MAL ────────────────────────────────────────────────────────
         const MAL_TTL = 60 * 60 * 1000;
-
         function malCacheGet(nom) {
             try {
                 const raw = sessionStorage.getItem('mal_cache_' + nom);
@@ -262,19 +253,16 @@
                 return obj;
             } catch { return null; }
         }
-
         function malCacheSet(nom, data) {
             try { sessionStorage.setItem('mal_cache_' + nom, JSON.stringify({ ...data, ts: Date.now() })); } catch {}
         }
 
         let jikanQueue = [];
         let jikanRunning = false;
-
         function jikanEnqueue(task) {
             jikanQueue.push(task);
             if (!jikanRunning) jikanDrain();
         }
-
         async function jikanDrain() {
             jikanRunning = true;
             while (jikanQueue.length > 0) {
@@ -284,7 +272,6 @@
             }
             jikanRunning = false;
         }
-
         function fetchMALForCard(nom, malId, scoreEl, popEl) {
             const cached = malCacheGet(nom);
             if (cached) { applyCardMAL(scoreEl, popEl, cached); return; }
@@ -307,7 +294,6 @@
                 } catch(e) {}
             });
         }
-
         function applyCardMAL(scoreEl, popEl, data) {
             if (!scoreEl || !popEl) return;
             if (data.score != null) {
@@ -315,8 +301,8 @@
                 scoreEl.classList.add('mal-updated');
             }
             if (data.popularity != null) {
-                scoreEl.textContent = '📈#' + data.popularity.toLocaleString('fr-FR');
-                scoreEl.classList.add('mal-updated');
+                popEl.textContent = '📈#' + data.popularity.toLocaleString('fr-FR');
+                popEl.classList.add('mal-updated');
             }
         }
 
@@ -336,18 +322,14 @@
             });
         }, { rootMargin: '200px' });
 
-        // ─── Firebase Auth ──────────────────────────────────────────────────────────
+        // ─── Firebase Auth ────────────────────────────────────────────────────
         onAuthStateChanged(auth, async (user) => {
             const authUi = document.getElementById('auth-ui');
             if (user) {
                 await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName || '',
-                    photoURL: user.photoURL || '',
-                    lastSeen: new Date().toISOString(),
+                    uid: user.uid, email: user.email, displayName: user.displayName || '',
+                    photoURL: user.photoURL || '', lastSeen: new Date().toISOString(),
                 }, { merge: true });
-
                 const cachedPseudo = sessionStorage.getItem('userPseudo');
                 let displayName = cachedPseudo || user.displayName;
                 if (!cachedPseudo) {
@@ -362,11 +344,11 @@
                 }
                 const avatarUrl = sessionStorage.getItem('userAvatar') || user.photoURL || 'img/logo.jpg';
                 authUi.innerHTML = `
-                    <a href="profil.html" style="display:flex; align-items:center; gap:8px; text-decoration:none; margin-right:8px;">
-                        <img src="${avatarUrl}" style="width:30px; height:30px; border-radius:50%; border:2px solid var(--primary); object-fit:cover;" onerror="this.src='img/logo.jpg'">
+                    <a href="profil.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;margin-right:8px;">
+                        <img src="${avatarUrl}" style="width:30px;height:30px;border-radius:50%;border:2px solid var(--primary);object-fit:cover;" onerror="this.src='img/logo.jpg'">
                         <span class="auth-status" style="color:white;">${displayName}</span>
                     </a>
-                    <button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
+                    <button id="logout-btn" class="discord-btn" style="background:#333;border:none;cursor:pointer;">Quitter</button>`;
                 document.getElementById('logout-btn').onclick = () => signOut(auth);
             } else {
                 authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;
@@ -401,7 +383,6 @@
             else { img.onerror = null; img.src = 'img/logo.jpg'; }
         };
 
-        // ─── Utilitaires ────────────────────────────────────────────────────────────
         function shuffle(arr) {
             const a = [...arr];
             for (let i = a.length - 1; i > 0; i--) {
@@ -429,19 +410,18 @@
                             <span>🔞${a.censure}</span>
                             <span>🛠️${a.etat}</span>
                         </div>
-                        ${a.editeur ? `<div class="card-meta-row"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;">🏢${a.editeur}</span></div>` : ''}
+                        ${a.editeur ? `<div class="card-meta-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;">🏢${a.editeur}</span></div>` : ''}
                     </div>
                 </a>`;
         }
 
-        // ─── Carousel ───────────────────────────────────────────────────────────────
         function buildCarousel(trackId, prevBtnId, nextBtnId, animeList) {
             const track = document.getElementById(trackId);
             const prevBtn = document.getElementById(prevBtnId);
             const nextBtn = document.getElementById(nextBtnId);
             
             if (animeList.length === 0) {
-                track.innerHTML = '<p style="color:#ff6b7a; padding:20px; text-shadow: 1px 1px 3px rgba(0,0,0,0.9);">Aucun anime à afficher pour le moment.</p>';
+                track.innerHTML = '<p style="color:#ff6b7a;padding:20px;text-shadow:1px 1px 3px rgba(0,0,0,0.9);">Aucun anime à afficher pour le moment.</p>';
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
                 return;
@@ -494,13 +474,10 @@
                 scrollToIndex();
             };
 
-            // Touch/swipe support mobile
             let touchStartX = 0;
-            let touchEndX = 0;
             track.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
             track.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
-                const diff = touchStartX - touchEndX;
+                const diff = touchStartX - e.changedTouches[0].screenX;
                 if (Math.abs(diff) > 50) {
                     if (diff > 0) nextBtn.click();
                     else prevBtn.click();
@@ -515,8 +492,9 @@
             updateButtons();
         }
 
-        // ─── Initialisation ──────────────────────────────────────────────────────────
+        // ─── INIT ─────────────────────────────────────────────────────────────
         async function init() {
+            // FOND D'ÉCRAN
             const isMobile = window.innerWidth <= 1000;
             let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
             document.body.style.backgroundImage = `url('img/${fileName}')`;
@@ -527,14 +505,14 @@
                 const rawData = await response.text();
                 const lines = rawData.split(/\r?\n/);
                 const headerLine = lines[0];
-                
-                // Détecter dynamiquement l'index de "ordre_ajout"
                 const headers = headerLine.split(';').map(h => h.trim().toLowerCase());
+                
+                // Colonne R = index 17 (0-indexed)
+                // On cherche "ordre_ajout" dans les headers
                 const ordreAjoutIndex = headers.indexOf('ordre_ajout');
                 
-                console.log('📋 Colonnes détectées :', headers);
-                console.log('🔍 Index de "ordre_ajout" :', ordreAjoutIndex, 
-                    ordreAjoutIndex >= 0 ? `(colonne ${String.fromCharCode(65 + ordreAjoutIndex)})` : '(NON TROUVÉE)');
+                console.log('📋 Headers trouvés (' + headers.length + ' colonnes) :', headers);
+                console.log('🔍 Index de "ordre_ajout" :', ordreAjoutIndex);
 
                 allAnimes = lines.slice(1).map(line => {
                     const c = line.split(';');
@@ -557,14 +535,10 @@
                     };
                 }).filter(a => a !== null);
 
-                console.log(`✅ ${allAnimes.length} animes chargés`);
+                console.log('✅ ' + allAnimes.length + ' animes chargés');
                 
                 const avecOrdre = allAnimes.filter(a => a.ordreAjout > 0);
-                console.log(`📊 Animes avec ordre_ajout > 0 : ${avecOrdre.length}`);
-                if (avecOrdre.length > 0) {
-                    const triees = [...avecOrdre].sort((a, b) => b.ordreAjout - a.ordreAjout);
-                    console.log('   Top 5 :', triees.slice(0, 5).map(a => `#${a.ordreAjout} ${a.nom}`).join(', '));
-                }
+                console.log('📊 Animes avec ordre_ajout > 0 : ' + avecOrdre.length);
 
                 // Charger tags_description.csv
                 try {
@@ -575,22 +549,22 @@
                         if (!c[0]) return null;
                         return { nom: c[0].trim(), description: (c[1] || '').trim() };
                     }).filter(t => t !== null);
-                    console.log(`🏷️ ${allTags.length} tags chargés`);
+                    console.log('🏷️ ' + allTags.length + ' tags chargés');
                 } catch(e) { 
-                    console.warn('⚠️ Impossible de charger tags_description.csv');
+                    console.warn('⚠️ tags_description.csv non trouvé');
                     allTags = []; 
                 }
 
-                // ── SECTION 1 : Sélection aléatoire ──
+                // SECTION 1 : Sélection aléatoire
                 const random20 = shuffle(allAnimes).slice(0, 20);
                 buildCarousel('carousel-random-track', 'carousel-random-prev', 'carousel-random-next', random20);
 
-                // ── SECTION 2 : Derniers ajouts (triés par ordre_ajout décroissant) ──
+                // SECTION 2 : Derniers ajouts
                 const avecOrdreTries = [...avecOrdre].sort((a, b) => b.ordreAjout - a.ordreAjout);
                 const recent20 = avecOrdreTries.slice(0, 20);
                 buildCarousel('carousel-recent-track', 'carousel-recent-prev', 'carousel-recent-next', recent20);
 
-                // ── SECTION 3 : Tag aléatoire ──
+                // SECTION 3 : Tag aléatoire
                 if (allTags.length > 0) {
                     const randomTag = allTags[Math.floor(Math.random() * allTags.length)];
                     document.getElementById('tag-name').textContent = randomTag.nom;
@@ -604,4 +578,45 @@
                         const tag20 = shuffle(tagAnimes).slice(0, 20);
                         buildCarousel('carousel-tag-track', 'carousel-tag-prev', 'carousel-tag-next', tag20);
                     } else {
-                        document.getElementById('tag-section-title
+                        document.getElementById('tag-section-title').style.display = 'none';
+                        document.getElementById('carousel-tag-wrapper').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('tag-section-title').style.display = 'none';
+                    document.getElementById('carousel-tag-wrapper').style.display = 'none';
+                }
+
+                // COMPTEUR
+                document.getElementById('anime-count').innerHTML = 
+                    '📊 <span class="count-number">' + allAnimes.length + '</span> animes référencés dans le catalogue';
+
+                // Restaurer
+                const savedSearch = sessionStorage.getItem('indexSearch');
+                const savedSort   = sessionStorage.getItem('indexSort');
+                const savedScroll = sessionStorage.getItem('indexScroll');
+                if (savedSearch !== null) document.getElementById('search').value = savedSearch;
+                if (savedSort   !== null) document.getElementById('sort').value   = savedSort;
+                if (savedScroll && parseInt(savedScroll) > 0) {
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        window.scrollTo({ top: parseInt(savedScroll), behavior: 'instant' });
+                    }));
+                }
+
+            } catch (err) { console.error('❌ Erreur:', err); }
+        }
+
+        window.toggleM = () => {
+            document.getElementById('menu').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        };
+
+        window.randomAnime = () => {
+            if(allAnimes.length > 0) {
+                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
+                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+            }
+        };
+
+        document.getElementById('search').oninput = () => {
+            const val = document.getElementById('search').value.toLowerCase();
+            if (val) window.location.href = `catalogue.html?search=${encodeURIComponent
