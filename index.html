@@ -58,14 +58,19 @@
 
         .content-area { padding: 20px 15px 40px; }
         
+        /* TITRE DE SECTION : bande noire + texte rouge */
         .section-title {
-            max-width: 1400px; margin: 30px auto 15px; padding: 0 15px;
+            max-width: 1400px; margin: 30px auto 15px; padding: 10px 15px;
             font-size: 1.5em; font-weight: bold; color: var(--primary);
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .section-title-wrapper {
+            max-width: 1400px; margin: 30px auto 15px; padding: 0 15px;
         }
         .section-subtitle { 
             font-size: 0.55em; color: var(--text-secondary); font-weight: normal; display: block; margin-top: 4px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
         }
 
         .carousel-wrapper {
@@ -108,10 +113,15 @@
         .mal-updated { color: #5dade2; }
 
         .anime-count {
-            text-align: center; padding: 30px 15px; 
+            text-align: center; padding: 15px 15px; 
             color: var(--primary); font-size: 1em; font-weight: bold;
-            border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.75);
+            display: inline-block; border-radius: 6px;
+            margin: 40px auto 0; 
+            text-shadow: none;
+        }
+        .anime-count-wrapper {
+            text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; margin-top: 40px;
         }
         .anime-count .count-number { color: var(--text-bright); font-weight: bold; }
 
@@ -131,6 +141,7 @@
             .mobile-overlay.active { display: block; }
             .hero-section { height: 50vh; }
             .main-title { font-size: 2em; }
+            .section-title { font-size: 1.2em; padding: 8px 12px; }
             .carousel-wrapper { padding: 0 28px; }
             .carousel-btn { width: 24px; height: 48px; font-size: 14px; }
             .card { width: 150px; }
@@ -197,7 +208,7 @@
     </div>
 
     <div class="content-area">
-        <h2 class="section-title">🎲 Sélection aléatoire</h2>
+        <div class="section-title-wrapper"><h2 class="section-title">🎲 Sélection aléatoire</h2></div>
         <div class="carousel-wrapper" id="carousel-random-wrapper">
             <button class="carousel-btn prev" id="carousel-random-prev">◀</button>
             <div class="carousel-container">
@@ -206,7 +217,7 @@
             <button class="carousel-btn next" id="carousel-random-next">▶</button>
         </div>
 
-        <h2 class="section-title">🆕 Derniers ajouts</h2>
+        <div class="section-title-wrapper"><h2 class="section-title">🆕 Derniers ajouts</h2></div>
         <div class="carousel-wrapper" id="carousel-recent-wrapper">
             <button class="carousel-btn prev" id="carousel-recent-prev">◀</button>
             <div class="carousel-container">
@@ -215,7 +226,9 @@
             <button class="carousel-btn next" id="carousel-recent-next">▶</button>
         </div>
 
-        <h2 class="section-title" id="tag-section-title">🏷️ <span id="tag-name"></span><span class="section-subtitle" id="tag-description"></span></h2>
+        <div class="section-title-wrapper" id="tag-section-title-wrapper">
+            <h2 class="section-title" id="tag-section-title">🏷️ <span id="tag-name"></span><span class="section-subtitle" id="tag-description"></span></h2>
+        </div>
         <div class="carousel-wrapper" id="carousel-tag-wrapper">
             <button class="carousel-btn prev" id="carousel-tag-prev">◀</button>
             <div class="carousel-container">
@@ -225,7 +238,9 @@
         </div>
     </div>
 
-    <div class="anime-count" id="anime-count"></div>
+    <div class="anime-count-wrapper">
+        <div class="anime-count" id="anime-count"></div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -279,11 +294,11 @@
                 try {
                     let item = null;
                     if (malId && malId.trim() !== '') {
-                        const resp = await fetch(`https://api.jikan.moe/v4/anime/${malId.trim()}`);
+                        const resp = await fetch('https://api.jikan.moe/v4/anime/' + malId.trim());
                         if (resp.ok) { const j = await resp.json(); item = j.data || null; }
                     } else {
                         const q = nom.split('/')[0].trim();
-                        const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`);
+                        const resp = await fetch('https://api.jikan.moe/v4/anime?q=' + encodeURIComponent(q) + '&limit=1&sfw=false');
                         if (resp.ok) { const j = await resp.json(); item = j.data?.[0] || null; }
                     }
                     if (item) {
@@ -310,10 +325,10 @@
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const card = entry.target;
-                    const nom   = card.dataset.nom;
+                    const nom = card.dataset.nom;
                     const malId = card.dataset.malid || '';
                     const scoreEl = card.querySelector('.mal-score');
-                    const popEl   = card.querySelector('.mal-pop');
+                    const popEl = card.querySelector('.mal-pop');
                     if (nom && scoreEl && popEl) {
                         fetchMALForCard(nom, malId, scoreEl, popEl);
                     }
@@ -400,7 +415,7 @@
             nextBtn.style.display = 'flex';
             
             if (animeList.length === 0) {
-                track.innerHTML = '<p style="color:#ff6b7a;padding:20px;text-shadow:1px 1px 3px rgba(0,0,0,0.9);">Aucun anime pour le moment.</p>';
+                track.innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.7);border-radius:6px;display:inline-block;">Aucun anime pour le moment.</p>';
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
                 return;
@@ -435,7 +450,7 @@
             }
 
             function scrollToIndex() {
-                track.style.transform = 'translateX(-'+(currentIndex * getCardWidth())+'px)';
+                track.style.transform = 'translateX(-' + (currentIndex * getCardWidth()) + 'px)';
                 updateButtons();
             }
 
@@ -504,9 +519,9 @@
                     };
                 }).filter(a => a !== null);
 
-                console.log('Animes charges:', allAnimes.length);
+                console.log('Animes charges: ' + allAnimes.length);
                 const avecOrdre = allAnimes.filter(a => a.ordreAjout > 0);
-                console.log('Avec ordre_ajout:', avecOrdre.length);
+                console.log('Avec ordre_ajout: ' + avecOrdre.length);
 
                 // Tags
                 try {
@@ -517,7 +532,11 @@
                         if (!c[0]) return null;
                         return { nom: c[0].trim(), description: (c[1]||'').trim() };
                     }).filter(t => t !== null);
-                } catch(e) { allTags = []; }
+                    console.log('Tags charges: ' + allTags.length);
+                } catch(e) { 
+                    console.warn('tags_description.csv non trouve');
+                    allTags = []; 
+                }
 
                 // SECTION 1: Aleatoire
                 buildCarousel('carousel-random-track', 'carousel-random-prev', 'carousel-random-next', shuffle(allAnimes).slice(0, 20));
@@ -526,25 +545,32 @@
                 const recents = [...avecOrdre].sort((a,b) => b.ordreAjout - a.ordreAjout).slice(0, 20);
                 buildCarousel('carousel-recent-track', 'carousel-recent-prev', 'carousel-recent-next', recents);
 
-                // SECTION 3: Tag
+                // SECTION 3: Tag aleatoire (TOUJOURS AFFICHEE)
                 if (allTags.length > 0) {
                     const rTag = allTags[Math.floor(Math.random() * allTags.length)];
                     document.getElementById('tag-name').textContent = rTag.nom;
                     document.getElementById('tag-description').textContent = rTag.description;
+                    
                     const tagAnimes = allAnimes.filter(a => a.tags && a.tags.toLowerCase().includes(rTag.nom.toLowerCase()));
+                    console.log('Tag "' + rTag.nom + '" : ' + tagAnimes.length + ' animes trouves');
+                    
                     if (tagAnimes.length > 0) {
                         buildCarousel('carousel-tag-track', 'carousel-tag-prev', 'carousel-tag-next', shuffle(tagAnimes).slice(0, 20));
                     } else {
-                        document.getElementById('tag-section-title').style.display = 'none';
-                        document.getElementById('carousel-tag-wrapper').style.display = 'none';
+                        document.getElementById('carousel-tag-track').innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.7);border-radius:6px;display:inline-block;">Aucun anime avec ce tag.</p>';
+                        document.getElementById('carousel-tag-prev').style.display = 'none';
+                        document.getElementById('carousel-tag-next').style.display = 'none';
                     }
                 } else {
-                    document.getElementById('tag-section-title').style.display = 'none';
-                    document.getElementById('carousel-tag-wrapper').style.display = 'none';
+                    document.getElementById('tag-name').textContent = 'Tags non disponibles';
+                    document.getElementById('tag-description').textContent = 'Fichier tags_description.csv introuvable';
+                    document.getElementById('carousel-tag-track').innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.7);border-radius:6px;display:inline-block;">Fichier tags_description.csv introuvable.</p>';
+                    document.getElementById('carousel-tag-prev').style.display = 'none';
+                    document.getElementById('carousel-tag-next').style.display = 'none';
                 }
 
                 // Compteur
-                document.getElementById('anime-count').innerHTML = '📊 <span class="count-number">'+allAnimes.length+'</span> animes dans le catalogue';
+                document.getElementById('anime-count').innerHTML = '📊 <span class="count-number">' + allAnimes.length + '</span> animes dans le catalogue';
 
             } catch(e) { console.error('Erreur:', e); }
         }
