@@ -98,7 +98,7 @@
             .nav-links.active { left: 0; }
             .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
-            .discord-btn { background: #5865F2; margin-top: 10px; }
+            .discord-btn { margin-top: 10px; }
         }
 
         .hero-section {
@@ -123,9 +123,12 @@
 
         .carousel-wrapper {
             position: relative; max-width: 1400px; margin: 0 auto; padding: 0 35px;
+            overflow: hidden;
         }
-        .carousel-container { overflow: hidden; }
-        .carousel-track { display: flex; gap: 15px; transition: transform 0.4s ease; }
+        .carousel-container { overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+        .carousel-track {
+            display: flex; gap: 15px; transition: transform 0.4s ease;
+        }
         .carousel-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
             background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2); color: white;
@@ -446,6 +449,9 @@
             const isMobile = window.innerWidth <= 1000;
             let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
             document.body.style.backgroundImage = `url('img/${fileName}')`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            document.body.style.backgroundAttachment = 'fixed';
 
             try {
                 const resp = await fetch('animes.csv');

@@ -7,7 +7,8 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M65SBS3C');</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="stylesheet" href="mobile.css">
     <title>Le Malicieux - Catalogue d'Animes (version classique)</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
@@ -21,6 +22,7 @@
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .top-navbar {
@@ -30,11 +32,13 @@
             gap: 12px;
             flex-wrap: wrap;
         }
-        .nav-left { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
         .nav-logo-small { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; white-space: nowrap; }
         
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 5px; order: -1; }
+
         .search-wrapper {
             position: relative; flex: 1; min-width: 180px; max-width: 300px;
         }
@@ -62,21 +66,20 @@
         .search-suggestions .suggestion-item:hover { background: #2a2a2a; color: white; }
         .search-suggestions .suggestion-item .sugg-img {
             width: 28px; height: 40px; border-radius: 4px; object-fit: cover;
+            flex-shrink: 0;
         }
-        
+
         .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
         .nav-links a, .nav-links button { 
-            background: #222; border: 1px solid #444; color: white; 
+            background: var(--primary); border: none; color: white; 
             padding: 5px 10px; border-radius: 4px; font-size: 0.8em; 
             text-decoration: none; cursor: pointer; white-space: nowrap;
+            font-weight: bold;
         }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; }
-        
         .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
-        
-        .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
+
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
-        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
         
         @media (max-width: 900px) {
             .top-navbar { flex-wrap: wrap; }
@@ -88,11 +91,12 @@
                 position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
                 transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
+                overflow-y: auto;
             }
             .nav-links.active { left: 0; }
             .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
-            .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
+            .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
             .card-info { padding: 5px; }
             .card-title { font-size: 0.85em; }
         }
@@ -122,6 +126,9 @@
         .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; font-weight: bold; }
         .mal-updated { color: #5dade2; }
         
+        .sort-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .sort-select { background: #1e1e1e; border: 1px solid #3a3a3a; color: white; padding: 6px 10px; border-radius: 5px; font-size: 0.85em; cursor: pointer; }
+        
         @media (max-width: 480px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } .card-title { font-size: 0.85em; } }
     </style>
 </head>
@@ -148,7 +155,7 @@
 
         <div class="nav-links" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
-            <a href="index.html" class="btn-red">🏠 Nouvel Index</a>
+            <a href="index.html">🏠 Nouvel Index</a>
             <a href="tags.html">🏷️ Tags</a>
             <a href="alphabetique.html">📖 A-Z</a>
             <a href="playlist.html">📂 Playlist</a>
@@ -165,20 +172,28 @@
     </div>
 
     <div class="content-area">
+        <div class="sort-controls">
+            <select id="sort" class="sort-select">
+                <option value="">🔀 Aléatoire</option>
+                <option value="ordre_ajout">🆕 Ajout récent</option>
+                <option value="popularite">📈 Popularité</option>
+                <option value="score">⭐ Score</option>
+                <option value="nom">📝 Nom (A-Z)</option>
+                <option value="sortie">📅 Année</option>
+                <option value="episodes">🎞️ Épisodes</option>
+                <option value="etat">🛠️ État</option>
+                <option value="censure">🔞 Censure</option>
+                <option value="editeur">🏢 Éditeur</option>
+            </select>
+        </div>
         <div id="anime-container" class="grid"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
 
         let allAnimes = [];
         let shuffledAnimes = [];
@@ -246,10 +261,29 @@
             else { img.onerror = null; img.src = 'img/logo.jpg'; }
         };
 
+        function highlightTitle(title, query) {
+            if (!query) return title;
+            const normTitle = normalize(title);
+            const normQuery = normalize(query);
+            const index = normTitle.indexOf(normQuery);
+            if (index === -1) return title;
+            let charCount = 0, origIndex = -1;
+            for (let i = 0; i < title.length; i++) {
+                if (normalize(title[i]).length > 0) charCount++;
+                if (charCount > index && origIndex === -1) origIndex = i;
+            }
+            if (origIndex === -1) return title;
+            const endIndex = origIndex + query.length;
+            return title.substring(0, origIndex) + '<span class="highlight">' + title.substring(origIndex, Math.min(endIndex, title.length)) + '</span>' + title.substring(Math.min(endIndex, title.length));
+        }
+
         async function init() {
             const isMobile = window.innerWidth <= 1000;
             let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
             document.body.style.backgroundImage = `url('img/${fileName}')`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            document.body.style.backgroundAttachment = 'fixed';
 
             try {
                 const response = await fetch('animes.csv');
@@ -273,7 +307,6 @@
                     [shuffledAnimes[i], shuffledAnimes[j]] = [shuffledAnimes[j], shuffledAnimes[i]];
                 }
 
-                // Lecture du paramètre search dans l'URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const searchParam = urlParams.get('search');
                 if (searchParam) {
@@ -283,7 +316,6 @@
 
                 runFilterAndSort();
                 
-                // Recherche tolérante avec suggestions
                 const searchInput = document.getElementById('search');
                 const searchSuggestions = document.getElementById('search-suggestions');
                 
@@ -311,7 +343,6 @@
                         e.preventDefault();
                         searchSuggestions.classList.remove('active');
                         this.blur();
-                        // Mettre à jour l'URL avec le paramètre search
                         if (currentSearch) {
                             window.history.pushState({}, '', `index_old.html?search=${encodeURIComponent(currentSearch)}`);
                         } else {
@@ -373,37 +404,15 @@
             container.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.unobserve(c));
             const hl = (m) => (sortMode === m) ? 'class="highlight"' : '';
             
-            // Fonction pour surligner la partie du titre qui correspond à la recherche
-            function highlightTitle(title, search) {
-                if (!search) return title;
-                const normalizedSearch = normalize(search);
-                const normalizedTitle = normalize(title);
-                const index = normalizedTitle.indexOf(normalizedSearch);
-                if (index === -1) return title;
-                
-                // Trouver la position dans le titre original
-                let charCount = 0;
-                let origIndex = -1;
-                for (let i = 0; i < title.length; i++) {
-                    const char = title[i];
-                    if (normalize(char).length > 0) charCount++;
-                    if (charCount > index && origIndex === -1) origIndex = i;
-                }
-                if (origIndex === -1) return title;
-                
-                const endIndex = origIndex + search.length;
-                return title.substring(0, origIndex) + 
-                       '<span class="highlight">' + title.substring(origIndex, Math.min(endIndex, title.length)) + '</span>' + 
-                       title.substring(Math.min(endIndex, title.length));
-            }
-
-            container.innerHTML = list.map(a => `
+            container.innerHTML = list.map(a => {
+                const titleHtml = highlightTitle(a.nom, currentSearch);
+                return `
                 <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" data-nom="${a.nom.replace(/"/g,'&quot;')}" data-malid="${a.malId || ''}">
                     <div class="img-container">
                         <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
                     </div>
                     <div class="card-info">
-                        <div class="card-title">${highlightTitle(a.nom, currentSearch)}</div>
+                        <div class="card-title">${titleHtml}</div>
                         <div class="card-meta-row">
                             <span ${hl('sortie')}>📅${a.sortie}</span>
                             <span ${hl('score')} class="mal-score">⭐${a.score}</span>
@@ -416,7 +425,8 @@
                         </div>
                         ${a.editeur ? `<div class="card-meta-row"><span ${hl('editeur')} style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🏢${a.editeur}</span></div>` : ''}
                     </div>
-                </a>`).join('');
+                </a>`;
+            }).join('');
             container.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
         }
 
@@ -436,25 +446,6 @@
         }
         window.toggleM = toggleM;
         
-        // Créer le select de tri s'il n'existe pas
-        const sortContainer = document.createElement('div');
-        sortContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
-        sortContainer.innerHTML = `
-            <select id="sort" style="background:#222; border:1px solid #444; color:white; padding:5px 10px; border-radius:4px; font-size:0.8em; cursor:pointer;">
-                <option value="">🔀 Aléatoire</option>
-                <option value="ordre_ajout">🆕 Ajout récent</option>
-                <option value="popularite">📈 Popularité</option>
-                <option value="score">⭐ Score</option>
-                <option value="nom">📝 Nom (A-Z)</option>
-                <option value="sortie">📅 Année</option>
-                <option value="episodes">🎞️ Épisodes</option>
-                <option value="etat">🛠️ État</option>
-                <option value="censure">🔞 Censure</option>
-                <option value="editeur">🏢 Éditeur</option>
-            </select>
-        `;
-        const navLinks = document.querySelector('.nav-links');
-        navLinks.insertBefore(sortContainer, navLinks.children[1]);
         document.getElementById('sort').onchange = runFilterAndSort;
 
         init();

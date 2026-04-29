@@ -102,7 +102,18 @@
         .letter-anchor { display: flex; align-items: center; gap: 12px; margin: 30px 0 12px 0; }
         .letter-badge { font-size: 1.1em; font-weight: 900; color: var(--primary); min-width: 50px; height: 50px; padding: 0 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,71,87,0.1); border: 2px solid var(--primary); border-radius: 10px; flex-shrink: 0; white-space: nowrap; }
         .letter-line { flex: 1; height: 1px; background: linear-gradient(to right, rgba(255,71,87,0.4), transparent); }
+        
+        .view-controls { display: flex; justify-content: flex-end; margin-bottom: 15px; gap: 8px; }
+        .view-controls select { background: #1e1e1e; border: 1px solid #3a3a3a; color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; cursor: pointer; }
+        
         .anime-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 10px; }
+        .anime-list.list-mode { display: flex; flex-direction: column; gap: 4px; }
+        .anime-list.list-mode .card { display: flex; flex-direction: row; align-items: center; gap: 10px; }
+        .anime-list.list-mode .card .img-container { width: 60px; aspect-ratio: 2/3; }
+        .anime-list.list-mode .card-info { padding: 5px; }
+        .anime-list.list-mode .card-title { height: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .anime-list.list-mode .card-meta-row { display: none; }
+        
         .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
@@ -165,6 +176,12 @@
     <div class="alpha-nav" id="alpha-nav"></div>
 
     <div class="content-area">
+        <div class="view-controls">
+            <select id="view-mode">
+                <option value="cards">🖼️ Photos</option>
+                <option value="list">📋 Liste</option>
+            </select>
+        </div>
         <div id="groups-container"></div>
         <div id="no-result">Aucun anime trouvé pour cette recherche.</div>
     </div>
@@ -182,10 +199,6 @@
 
         let allAnimes = [];
         let currentFiltered = [];
-
-        onAuthStateChanged(auth, async (user) => {
-            // Auth UI optionnelle - pas affichée dans cette page
-        });
 
         window.handleImgError = function(img, fileNameFromCSV) {
             if (!img.dataset.attempt) img.dataset.attempt = "1";
@@ -254,6 +267,8 @@
             const container = document.getElementById('groups-container');
             const noResult = document.getElementById('no-result');
             const query = normalizeSearch(searchVal);
+            const viewMode = document.getElementById('view-mode').value;
+            const listClass = viewMode === 'list' ? ' list-mode' : '';
 
             let filtered = allAnimes;
             if (query) {
@@ -312,7 +327,7 @@
                         <div class="letter-badge">${label}</div>
                         <div class="letter-line"></div>
                     </div>
-                    <div class="anime-list">${cards}</div>`;
+                    <div class="anime-list${listClass}">${cards}</div>`;
             }).join('');
 
             const navGroups = {};
@@ -327,14 +342,10 @@
         async function init() {
             const isMobile = window.innerWidth <= 1000;
             let fileName = isMobile ? `mobile${Math.floor(Math.random() * 14) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
-            if (isMobile) {
-                let _mbg = document.getElementById('mobile-bg-layer');
-                if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
-                _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
-                _mbg.style.backgroundImage = `url('img/${fileName}')`;
-            } else {
-                document.body.style.backgroundImage = `url('img/${fileName}')`;
-            }
+            document.body.style.backgroundImage = `url('img/${fileName}')`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            document.body.style.backgroundAttachment = 'fixed';
 
             try {
                 const response = await fetch('animes.csv');
@@ -364,6 +375,7 @@
 
         document.getElementById('search').oninput = (e) => render(e.target.value, document.getElementById('sort-select').value);
         document.getElementById('sort-select').onchange = () => render(document.getElementById('search').value, document.getElementById('sort-select').value);
+        document.getElementById('view-mode').onchange = () => render(document.getElementById('search').value, document.getElementById('sort-select').value);
 
         function toggleM() {
             const menu = document.getElementById('menu');
