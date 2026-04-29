@@ -22,100 +22,86 @@
             color: var(--text);
             margin: 0;
             min-height: 100vh;
-            padding-top: 126px;
+            padding-top: 116px;
         }
 
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 5px 16px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            height: 50px; border-bottom: 1px solid #1a1a1a;
+            border-bottom: 1px solid #1a1a1a;
+            gap: 12px;
+            flex-wrap: wrap;
         }
-        .nav-left { display: flex; flex-direction: column; align-items: flex-start; }
-        .nav-brand { display: flex; align-items: center; gap: 12px; }
-        .nav-logo-small { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; }
-
-        .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center input, .nav-center select, .nav-center button, .nav-center a {
-            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
+        .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .nav-logo-small { width: 30px; height: 30px; border-radius: 4px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; white-space: nowrap; }
+        
+        .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .nav-links a, .nav-links button { 
+            background: #222; border: 1px solid #444; color: white; 
+            padding: 5px 10px; border-radius: 4px; font-size: 0.8em; 
+            text-decoration: none; cursor: pointer; white-space: nowrap;
         }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
-
-        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
-
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
-        .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
-
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; }
+        
+        .search-bar-wrap {
+            display: flex; align-items: center; gap: 8px;
+            flex: 1; min-width: 200px;
+        }
+        .search-bar-wrap input {
+            flex: 1;
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            height: 30px;
+        }
+        .search-bar-wrap input:focus { outline: none; border-color: var(--primary); }
+        .search-bar-wrap select {
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            height: 30px;
+            cursor: pointer;
+        }
+        
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
+        
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.55);
-            z-index: 0;
-            pointer-events: none;
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
+        
+        @media (max-width: 900px) {
+            .top-navbar { flex-wrap: wrap; }
+            .search-bar-wrap { order: 3; width: 100%; margin-top: 8px; }
+            .nav-links { order: 2; }
+            .burger { display: block; order: 1; }
+            .close-menu { display: block; }
+            .nav-links {
+                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
+                transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
+            }
+            .nav-links.active { left: 0; }
+            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
+            .mobile-overlay.active { display: block; }
+            body { padding-top: 106px; }
         }
 
-        .content-area {
-            position: relative;
-            z-index: 1;
-            padding: 30px 15px;
-            min-height: 100vh;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .page-title {
-            font-size: 1.8em;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 20px;
-            padding-left: 5px;
-        }
-
-        .letter-anchor {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 30px 0 12px 0;
-        }
-        .letter-badge {
-            font-size: 1.1em;
-            font-weight: 900;
-            color: var(--primary);
-            min-width: 50px;
-            height: 50px;
-            padding: 0 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,71,87,0.1);
-            border: 2px solid var(--primary);
-            border-radius: 10px;
-            flex-shrink: 0;
-            white-space: nowrap;
-        }
-        .letter-line {
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(to right, rgba(255,71,87,0.4), transparent);
-        }
-
-        .anime-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 14px;
-            margin-bottom: 10px;
-        }
-
-        .card {
-            background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s;
-            border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
-            display: flex; flex-direction: column;
-        }
+        body::before { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 0; pointer-events: none; }
+        .content-area { position: relative; z-index: 1; padding: 20px 15px; min-height: 100vh; max-width: 1400px; margin: 0 auto; }
+        .letter-anchor { display: flex; align-items: center; gap: 12px; margin: 30px 0 12px 0; }
+        .letter-badge { font-size: 1.1em; font-weight: 900; color: var(--primary); min-width: 50px; height: 50px; padding: 0 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,71,87,0.1); border: 2px solid var(--primary); border-radius: 10px; flex-shrink: 0; white-space: nowrap; }
+        .letter-line { flex: 1; height: 1px; background: linear-gradient(to right, rgba(255,71,87,0.4), transparent); }
+        .anime-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 10px; }
+        .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
@@ -123,87 +109,13 @@
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
         .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; }
-
-        .alpha-nav {
-            position: fixed; top: 90px; left: 0; right: 0; z-index: 998;
-            display: flex; flex-wrap: nowrap; overflow-x: auto;
-            gap: 4px; padding: 4px 16px;
-            background: rgba(15,15,15,0.97); backdrop-filter: blur(10px);
-            border-bottom: 1px solid #1a1a1a;
-            height: 36px; align-items: center;
-            scrollbar-width: none; box-sizing: border-box;
-        }
+        .alpha-nav { position: fixed; top: 50px; left: 0; right: 0; z-index: 998; display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 4px; padding: 4px 16px; background: rgba(15,15,15,0.97); backdrop-filter: blur(10px); border-bottom: 1px solid #1a1a1a; height: 36px; align-items: center; scrollbar-width: none; box-sizing: border-box; }
         .alpha-nav::-webkit-scrollbar { display: none; }
-        .alpha-nav a {
-            color: #aaa; text-decoration: none; font-weight: bold;
-            font-size: 0.8em; padding: 2px 6px; border-radius: 4px;
-            transition: 0.2s; border: 1px solid #2a2a2a; flex-shrink: 0;
-        }
+        .alpha-nav a { color: #aaa; text-decoration: none; font-weight: bold; font-size: 0.8em; padding: 2px 6px; border-radius: 4px; transition: 0.2s; border: 1px solid #2a2a2a; flex-shrink: 0; }
         .alpha-nav a:hover { color: white; border-color: var(--primary); background: rgba(255,71,87,0.1); }
         .alpha-nav a.disabled { color: #333; border-color: #1a1a1a; pointer-events: none; }
-
-        .search-bar-wrap {
-            position: fixed; top: 50px; left: 0; right: 0; z-index: 999;
-            background: rgba(15,15,15,0.97); backdrop-filter: blur(10px);
-            display: flex; align-items: center;
-            gap: 8px;
-            padding: 5px 16px;
-            height: 40px;
-            box-sizing: border-box;
-        }
-        .search-bar-wrap input {
-            flex: 1;
-            background: #1e1e1e;
-            border: 1px solid #3a3a3a;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 5px;
-            font-size: 0.88em;
-            height: 28px;
-        }
-        .search-bar-wrap input:focus { outline: none; border-color: var(--primary); }
-        .search-bar-wrap select, .search-bar-wrap .sort-select {
-            background: #1e1e1e;
-            border: 1px solid #3a3a3a;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 0.82em;
-            height: 28px;
-            cursor: pointer;
-        }
-
-        #no-result {
-            text-align: center;
-            color: #ccc;
-            padding: 40px;
-            font-size: 1.1em;
-            display: none;
-        }
-
-        @media (max-width: 1000px) {
-            .burger { display: block; }
-            .close-menu { display: block; }
-            .nav-center {
-                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
-                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
-                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1100; align-items: stretch;
-            }
-            .nav-center.active { left: 0; }
-            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
-            .mobile-overlay.active { display: block; }
-            .anime-list { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .card-info { padding: 5px; }
-            .card-title { font-size: 0.85em; }
-            .card-meta-row { font-size: 0.65em; gap: 2px; }
-        }
-        
-        .btn-old-index {
-            background: #222; border: 1px solid #ff4757; color: #ff4757;
-            padding: 5px 10px; border-radius: 5px; font-size: 0.75em;
-            text-decoration: none; margin-left: 8px;
-        }
-        .btn-old-index:hover { background: #ff4757; color: white; }
+        #no-result { text-align: center; color: #ccc; padding: 40px; font-size: 1.1em; display: none; }
+        @media (max-width: 1000px) { .anime-list { grid-template-columns: repeat(3, 1fr); gap: 8px; } .card-info { padding: 5px; } .card-title { font-size: 0.85em; } .card-meta-row { font-size: 0.65em; gap: 2px; } }
     </style>
 </head>
 <body>
@@ -211,55 +123,46 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <div class="top-navbar">
+        <div class="burger" onclick="toggleM()">☰</div>
         <div class="nav-left">
-            <div class="nav-brand">
-                <div class="burger" onclick="toggleM()">☰</div>
+            <a href="index.html" class="nav-brand">
                 <img src="img/logo.jpg" class="nav-logo-small">
                 <span class="nav-title">LE MALICIEUX</span>
-            </div>
+            </a>
+        </div>
+
+        <div class="search-bar-wrap">
+            <input type="text" id="search" placeholder="Rechercher un anime...">
+            <select id="sort-select">
+                <option value="">🔀 Aléatoire</option>
+                <option value="popularite">📈 Popularité</option>
+                <option value="score">⭐ Score</option>
+                <option value="nom">📝 Nom (A-Z)</option>
+                <option value="sortie">📅 Année</option>
+                <option value="episodes">🎞️ Épisodes</option>
+                <option value="etat">🛠️ État</option>
+                <option value="censure">🔞 Censure</option>
+                <option value="editeur">🏢 Éditeur</option>
+            </select>
         </div>
 
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
 
-        <div class="nav-center" id="menu">
+        <div class="nav-links" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
             <a href="index.html" class="btn-red">🏠 Accueil</a>
-            <a href="tags.html" class="btn-red">🏷️ Tags</a>
-            <a href="playlist.html" class="btn-red">📂 Playlist</a>
-            <a href="editeurs.html" class="btn-red">🏢 Studios</a>
-            <a href="index_old.html" class="btn-red">🕰️ Ancien index</a>
+            <a href="tags.html">🏷️ Tags</a>
+            <a href="playlist.html">📂 Playlist</a>
+            <a href="editeurs.html">🏢 Studios</a>
+            <a href="index_old.html">🕰️ Ancien Index</a>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
-
-        <div style="display:flex; align-items:center;">
-            <div id="auth-ui" style="display:flex; align-items:center;">
-                <button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>
-            </div>
-            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" style="margin-left:10px;">Discord</a>
-        </div>
-    </div>
-
-    <div class="search-bar-wrap">
-        <input type="text" id="search" placeholder="Rechercher un anime...">
-        <select id="sort-select">
-            <option value="">🔀 Aléatoire</option>
-            <option value="popularite">📈 Popularité</option>
-            <option value="score">⭐ Score</option>
-            <option value="nom">📝 Nom (A-Z)</option>
-            <option value="sortie">📅 Année</option>
-            <option value="episodes">🎞️ Épisodes</option>
-            <option value="etat">🛠️ État</option>
-            <option value="censure">🔞 Censure</option>
-            <option value="editeur">🏢 Éditeur</option>
-        </select>
     </div>
 
     <div class="alpha-nav" id="alpha-nav"></div>
 
     <div class="content-area">
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-            <a href="index_old.html" class="btn-old-index">🕰️ Ancien catalogue</a>
-        </div>
         <div id="groups-container"></div>
         <div id="no-result">Aucun anime trouvé pour cette recherche.</div>
     </div>
@@ -290,21 +193,14 @@
                         const uSnap = await getDoc(doc(db, "users", user.uid));
                         if (uSnap.exists()) {
                             const data = uSnap.data();
-                            if (data.pseudo)    { dispName   = data.pseudo;    sessionStorage.setItem('userPseudo', data.pseudo); }
-                            if (data.photoURL)  { dispAvatar = data.photoURL;  sessionStorage.setItem('userAvatar', data.photoURL); }
+                            if (data.pseudo) { dispName = data.pseudo; sessionStorage.setItem('userPseudo', data.pseudo); }
+                            if (data.photoURL) { dispAvatar = data.photoURL; sessionStorage.setItem('userAvatar', data.photoURL); }
                         }
                     } catch(e) {}
                 }
-                authUi.innerHTML = `
-                    <a href="profil.html" style="display:flex; align-items:center; gap:8px; text-decoration:none; margin-right:8px;">
-                        <img src="${dispAvatar}" style="width:30px; height:30px; border-radius:50%; border:2px solid var(--primary); object-fit:cover;" onerror="this.src='img/logo.jpg'">
-                        <span class="auth-status" style="color:white;">${dispName}</span>
-                    </a>
-                    <button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
-                document.getElementById('logout-btn').onclick = () => signOut(auth);
+                // auth UI simplifié pour cette page
             } else {
-                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;
-                document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
+                // pas d'auth UI nécessaire ici
             }
         });
 
@@ -486,13 +382,14 @@
         document.getElementById('search').oninput = (e) => render(e.target.value, document.getElementById('sort-select').value);
         document.getElementById('sort-select').onchange = () => render(document.getElementById('search').value, document.getElementById('sort-select').value);
 
-        window.toggleM = () => {
+        function toggleM() {
             const menu = document.getElementById('menu');
             const overlay = document.getElementById('overlay');
             const isOpen = menu.classList.toggle('active');
             overlay.classList.toggle('active');
             document.body.style.overflow = isOpen ? 'hidden' : '';
-        };
+        }
+        window.toggleM = toggleM;
 
         window.randomAnime = () => {
             if (allAnimes.length > 0) {

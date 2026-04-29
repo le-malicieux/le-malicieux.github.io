@@ -21,27 +21,36 @@
 
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+            gap: 12px;
+            flex-wrap: wrap;
         }
-        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        .nav-left { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .nav-logo-small { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; white-space: nowrap; }
         
-        /* Barre de recherche */
+        .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .nav-links a, .nav-links button { 
+            background: #222; border: 1px solid #444; color: white; 
+            padding: 5px 10px; border-radius: 4px; font-size: 0.8em; 
+            text-decoration: none; cursor: pointer; white-space: nowrap;
+        }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; }
+        
         .search-wrapper {
-            position: relative; flex: 1; max-width: 400px; min-width: 200px;
+            position: relative; flex: 1; min-width: 180px; max-width: 300px;
         }
         .search-wrapper input {
             width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; 
-            padding: 8px 35px 8px 12px; border-radius: 5px; font-size: 0.85em;
-            transition: 0.3s; box-sizing: border-box; outline: none;
+            padding: 6px 30px 6px 10px; border-radius: 5px; font-size: 0.85em;
+            box-sizing: border-box; outline: none;
         }
         .search-wrapper input:focus { border-color: var(--primary); }
-        .search-wrapper input::placeholder { color: #777; }
         .search-icon {
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            color: #888; font-size: 1em; pointer-events: none;
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            color: #888; font-size: 0.9em; pointer-events: none;
         }
         .search-suggestions {
             position: absolute; top: 100%; left: 0; right: 0;
@@ -59,60 +68,40 @@
             width: 28px; height: 40px; border-radius: 4px; object-fit: cover;
         }
         
-        .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center a, .nav-center button { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none; cursor: pointer; }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
-        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
+        
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
         
-        @media (max-width: 1000px) {
-            .burger { display: block; }
+        @media (max-width: 900px) {
+            .top-navbar { flex-wrap: wrap; }
+            .search-wrapper { order: 3; width: 100%; max-width: none; margin-top: 8px; }
+            .nav-links { order: 2; }
+            .burger { display: block; order: 1; }
             .close-menu { display: block; }
-            .search-wrapper { max-width: none; }
-            .nav-center {
+            .nav-links {
                 position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
                 transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
             }
-            .nav-center.active { left: 0; }
-            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
+            .nav-links.active { left: 0; }
+            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
-            .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .card-info { padding: 5px; }
-            .card-title { font-size: 0.85em; height: 2.4em; }
         }
 
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-
         .tags-container { 
-            background: var(--card-bg); 
-            padding: 20px; 
-            border-radius: 15px; 
-            border: 1px solid #333; 
-            margin-bottom: 30px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+            background: var(--card-bg); padding: 20px; border-radius: 15px; 
+            border: 1px solid #333; margin-bottom: 30px;
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
         }
         .tag-pill {
-            padding: 8px 16px;
-            background: #222;
-            border: 1px solid #444;
-            border-radius: 20px;
-            color: #ccc;
-            cursor: pointer;
-            font-size: 0.9em;
+            padding: 8px 16px; background: #222; border: 1px solid #444;
+            border-radius: 20px; color: #ccc; cursor: pointer; font-size: 0.9em;
             transition: 0.3s;
         }
-        .tag-pill:hover, .tag-pill.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-
+        .tag-pill:hover, .tag-pill.active { background: var(--primary); border-color: var(--primary); color: white; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
         .card { 
             background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
@@ -126,73 +115,51 @@
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
         .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; }
-
         .tag-def-box {
-            background: rgba(15, 15, 15, 0.88);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,71,87,0.4);
-            border-left: 4px solid var(--primary);
-            border-radius: 8px;
-            padding: 14px 18px;
-            margin-bottom: 18px;
-            display: none;
+            background: rgba(15, 15, 15, 0.88); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,71,87,0.4); border-left: 4px solid var(--primary);
+            border-radius: 8px; padding: 14px 18px; margin-bottom: 18px; display: none;
         }
         .tag-def-box.visible { display: block; }
         .tag-def-name { font-weight: 800; color: var(--primary); font-size: 1.05em; margin-bottom: 5px; }
         .tag-def-text { color: #ddd; font-size: 0.9em; line-height: 1.55; }
-
-        .sort-controls {
-            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-            margin-bottom: 14px;
-        }
-        .sort-controls select {
-            background: #222; border: 1px solid #444; color: white;
-            padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer;
-        }
-        .btn-old-index {
-            background: #222; border: 1px solid #ff4757; color: #ff4757;
-            padding: 6px 12px; border-radius: 6px; font-size: 0.8em;
-            text-decoration: none; transition: 0.2s;
-        }
-        .btn-old-index:hover { background: #ff4757; color: white; }
-
+        .sort-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+        .sort-controls select { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
         @media (max-width: 1000px) { .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } }
     </style>
 </head>
 <body>
 
     <div class="top-navbar">
-        <a href="index.html" class="nav-brand">
-            <img src="img/logo.jpg" class="nav-logo-small">
-            <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Tags</small></span>
-        </a>
+        <div class="burger" onclick="toggleM()">☰</div>
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand">
+                <img src="img/logo.jpg" class="nav-logo-small">
+                <span class="nav-title">LE MALICIEUX <small style="color:white;">• Tags</small></span>
+            </a>
+        </div>
         
-        <div class="search-wrapper" id="search-wrapper">
+        <div class="search-wrapper">
             <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
             <span class="search-icon">🔍</span>
             <div class="search-suggestions" id="search-suggestions"></div>
         </div>
 
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
-        <div class="nav-center" id="menu">
+        
+        <div class="nav-links" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
             <a href="index.html" class="btn-red">🏠 Accueil</a>
-            <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
-            <a href="playlist.html" class="btn-red">📂 Playlist</a>
-            <a href="editeurs.html" class="btn-red">🏢 Studios</a>
-            <a href="index_old.html" class="btn-red">🕰️ Ancien index</a>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px;">
-            <div class="burger" onclick="toggleM()">☰</div>
+            <a href="alphabetique.html">📖 A-Z</a>
+            <a href="playlist.html">📂 Playlist</a>
+            <a href="editeurs.html">🏢 Studios</a>
+            <a href="index_old.html">🕰️ Ancien Index</a>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
     </div>
 
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-            <h2 style="color: var(--primary); margin: 0;">Explorer par catégories</h2>
-            <a href="index_old.html" class="btn-old-index">🕰️ Ancien catalogue</a>
-        </div>
+        <h2 style="color: var(--primary); margin-bottom: 20px;">Explorer par catégories</h2>
         
         <div id="tags-list" class="tags-container">Chargement des tags...</div>
         
@@ -296,7 +263,6 @@
                 generateTagCloud();
                 filterByTag(activeTag);
                 
-                // Recherche tolérante
                 const searchInput = document.getElementById('search');
                 const searchSuggestions = document.getElementById('search-suggestions');
                 
@@ -324,16 +290,7 @@
                         e.preventDefault();
                         const val = this.value.trim();
                         if (val) {
-                            const results = searchAnimes(val);
-                            if (results.length === 1) {
-                                window.location.href = 'video.html?name=' + encodeURIComponent(results[0].nom);
-                            } else if (results.length > 1) {
-                                currentFiltered = results;
-                                document.getElementById('results-header').style.display = 'block';
-                                document.getElementById('results-title').innerHTML = `${results.length} résultat(s) pour "${val}"`;
-                                document.getElementById('tag-def-box').classList.remove('visible');
-                                renderCards(results, '');
-                            }
+                            window.location.href = 'index.html?search=' + encodeURIComponent(val);
                         }
                         searchSuggestions.classList.remove('active');
                         this.blur();
@@ -460,14 +417,16 @@
                 </a>`).join('');
         }
 
-        init();
-        window.toggleM = () => {
+        function toggleM() {
             const menu = document.getElementById('menu');
             const overlay = document.getElementById('overlay');
             const isOpen = menu.classList.toggle('active');
             overlay.classList.toggle('active');
             document.body.style.overflow = isOpen ? 'hidden' : '';
-        };
+        }
+        window.toggleM = toggleM;
+
+        init();
     </script>
 </body>
 </html>

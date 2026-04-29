@@ -6,9 +6,7 @@
     <title>Éditeurs & Studios - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.9); --text: #eee; --nav-bg: rgba(15,15,15,0.85); --blue: #2e86de; }
-
         * { box-sizing: border-box; }
-
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg);
@@ -19,244 +17,140 @@
             margin: 0;
             min-height: 100vh;
         }
+        body::before { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 0; pointer-events: none; }
 
-        body::before {
-            content: '';
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 0; pointer-events: none;
+        .top-navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+            gap: 12px;
+            flex-wrap: wrap;
         }
-
-        .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        .nav-left { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .nav-logo-small { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1em; white-space: nowrap; }
         
         .search-wrapper {
-            position: relative; flex: 1; max-width: 400px; min-width: 200px;
+            position: relative; flex: 1; min-width: 180px; max-width: 300px;
         }
         .search-wrapper input {
             width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; 
-            padding: 8px 35px 8px 12px; border-radius: 5px; font-size: 0.85em;
-            transition: 0.3s; box-sizing: border-box; outline: none;
+            padding: 6px 30px 6px 10px; border-radius: 5px; font-size: 0.85em;
+            box-sizing: border-box; outline: none;
         }
         .search-wrapper input:focus { border-color: var(--primary); }
         .search-icon {
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            color: #888; font-size: 1em; pointer-events: none;
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            color: #888; font-size: 0.9em; pointer-events: none;
         }
         
-        .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center a, .nav-center button { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none; cursor: pointer; font-weight: bold; }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
-        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
+        .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .nav-links a, .nav-links button { 
+            background: #222; border: 1px solid #444; color: white; 
+            padding: 5px 10px; border-radius: 4px; font-size: 0.8em; 
+            text-decoration: none; cursor: pointer; white-space: nowrap;
+        }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; }
+        
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
+        
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
         
-        @media (max-width: 1000px) {
-            .burger { display: block; }
+        @media (max-width: 900px) {
+            .top-navbar { flex-wrap: wrap; }
+            .search-wrapper { order: 3; width: 100%; max-width: none; margin-top: 8px; }
+            .nav-links { order: 2; }
+            .burger { display: block; order: 1; }
             .close-menu { display: block; }
-            .search-wrapper { max-width: none; }
-            .nav-center {
+            .nav-links {
                 position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
                 transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
             }
-            .nav-center.active { left: 0; }
-            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
+            .nav-links.active { left: 0; }
+            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .studios-grid { grid-template-columns: 1fr 1fr; }
         }
 
-        .page-wrap {
-            position: relative; z-index: 1;
-            max-width: 1300px; margin: 0 auto;
-            padding: 30px 20px 60px;
-        }
-
+        .page-wrap { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 20px 20px 60px; }
         #view-list { display: block; }
         #view-producer { display: none; }
-
-        .list-header {
-            display: flex; align-items: center; justify-content: space-between;
-            flex-wrap: wrap; gap: 14px; margin-bottom: 28px;
-        }
-        .list-header h1 { font-size: 1.7em; font-weight: 900; color: var(--primary); margin: 0; }
+        .list-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; }
+        .list-header h1 { font-size: 1.5em; font-weight: 900; color: var(--primary); margin: 0; }
         .list-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-        .sort-select {
-            background: #1a1a1a; border: 1px solid #444; color: white;
-            padding: 8px 12px; border-radius: 6px; font-size: 0.85em;
-            cursor: pointer;
-        }
-
-        .studios-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 14px;
-        }
-
-        .studio-card {
-            background: var(--card-bg);
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 14px 16px;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex; gap: 14px; align-items: flex-start;
-        }
+        .sort-select { background: #1a1a1a; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
+        .studios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+        .studio-card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: 0.2s; display: flex; gap: 12px; align-items: flex-start; }
         .studio-card:hover { border-color: var(--primary); transform: translateY(-4px); }
-        .studio-logo-wrap {
-            flex-shrink: 0;
-            width: 72px; height: 72px;
-            border-radius: 10px; overflow: hidden;
-            background: #111;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .studio-logo-wrap { flex-shrink: 0; width: 64px; height: 64px; border-radius: 10px; overflow: hidden; background: #111; display: flex; align-items: center; justify-content: center; }
         .studio-logo { width: 100%; height: 100%; object-fit: contain; }
-        .studio-logo-fallback { font-size: 1.6em; font-weight: 900; color: var(--primary); text-transform: uppercase; }
+        .studio-logo-fallback { font-size: 1.4em; font-weight: 900; color: var(--primary); text-transform: uppercase; }
         .studio-card-body { flex: 1; min-width: 0; }
-        .studio-name { font-weight: 800; font-size: 0.95em; color: white; word-break: break-word; }
-        .studio-count { font-size: 0.78em; color: #888; margin-top: 4px; }
+        .studio-name { font-weight: 800; font-size: 0.9em; color: white; word-break: break-word; }
+        .studio-count { font-size: 0.75em; color: #888; margin-top: 4px; }
         .studio-count span { color: var(--primary); font-weight: bold; }
         .studio-preview { display: flex; gap: 4px; margin-top: 6px; }
-        .studio-preview img { width: 36px; height: 52px; object-fit: cover; border-radius: 4px; }
-
-        .producer-header {
-            background: var(--card-bg);
-            border: 1px solid #2a2a2a;
-            border-radius: 14px;
-            overflow: hidden;
-            margin-bottom: 24px;
-        }
-        .producer-banner {
-            height: 140px;
-            background: linear-gradient(135deg, #1a0008 0%, #2d0014 40%, #0a000f 100%);
-            position: relative;
-            display: flex; align-items: flex-end;
-            padding: 0 28px 0;
-        }
-        .producer-avatar {
-            width: 90px; height: 90px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #ff4757, #c0392b);
-            border: 3px solid var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2.2em; font-weight: 900;
-            color: white;
-            position: relative; z-index: 1;
-            transform: translateY(45px);
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-        .producer-info-wrap {
-            padding: 56px 28px 20px;
-            display: flex; align-items: flex-start;
-            justify-content: space-between; flex-wrap: wrap; gap: 16px;
-        }
-        .producer-name { font-size: 1.9em; font-weight: 900; color: white; margin: 0 0 4px; }
-        .producer-stats-row { display: flex; gap: 20px; flex-wrap: wrap; }
-        .pstat {
-            background: #111;
-            border: 1px solid #2a2a2a;
-            border-radius: 10px;
-            padding: 10px 18px;
-            text-align: center;
-        }
-        .pstat-val { font-size: 1.4em; font-weight: 800; color: var(--primary); display: block; }
-        .pstat-lbl { font-size: 0.7em; color: #666; text-transform: uppercase; }
-
-        .btn-back-list {
-            display: inline-flex; align-items: center; gap: 6px;
-            color: #aaa; font-size: 0.85em; cursor: pointer;
-            border: 1px solid #333; background: #1a1a1a;
-            padding: 7px 14px; border-radius: 6px;
-            margin-bottom: 20px;
-        }
+        .studio-preview img { width: 32px; height: 46px; object-fit: cover; border-radius: 4px; }
+        .producer-header { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
+        .producer-banner { height: 120px; background: linear-gradient(135deg, #1a0008 0%, #2d0014 40%, #0a000f 100%); position: relative; display: flex; align-items: flex-end; padding: 0 20px; }
+        .producer-avatar { width: 80px; height: 80px; border-radius: 14px; background: linear-gradient(135deg, #ff4757, #c0392b); border: 3px solid var(--bg); display: flex; align-items: center; justify-content: center; font-size: 2em; font-weight: 900; color: white; position: relative; z-index: 1; transform: translateY(40px); flex-shrink: 0; overflow: hidden; }
+        .producer-info-wrap { padding: 50px 20px 15px; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .producer-name { font-size: 1.6em; font-weight: 900; color: white; margin: 0; }
+        .producer-stats-row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .pstat { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 6px 12px; text-align: center; }
+        .pstat-val { font-size: 1.2em; font-weight: 800; color: var(--primary); display: block; }
+        .pstat-lbl { font-size: 0.65em; color: #666; text-transform: uppercase; }
+        .btn-back-list { display: inline-flex; align-items: center; gap: 6px; color: #aaa; font-size: 0.85em; cursor: pointer; border: 1px solid #333; background: #1a1a1a; padding: 5px 12px; border-radius: 6px; margin-bottom: 15px; }
         .btn-back-list:hover { color: var(--primary); border-color: var(--primary); }
-
-        .producer-controls {
-            display: flex; gap: 10px; align-items: center;
-            flex-wrap: wrap; margin-bottom: 20px;
-        }
-        .ctrl-select {
-            background: #1a1a1a; border: 1px solid #333; color: white;
-            padding: 7px 12px; border-radius: 6px; font-size: 0.85em;
-            cursor: pointer;
-        }
-        .result-count { font-size: 0.82em; color: #666; margin-left: auto; }
-
-        .producer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 16px;
-        }
-
-        .anime-card {
-            background: var(--card-bg);
-            border: 1px solid #2a2a2a;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: 0.2s;
-            text-decoration: none; color: inherit;
-            display: flex; flex-direction: column;
-        }
-        .anime-card:hover { border-color: var(--primary); transform: translateY(-6px); }
+        .producer-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
+        .ctrl-select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
+        .result-count { font-size: 0.8em; color: #666; margin-left: auto; }
+        .producer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+        .anime-card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; transition: 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
+        .anime-card:hover { border-color: var(--primary); transform: translateY(-4px); }
         .anime-card .img-wrap { width: 100%; aspect-ratio: 2/3; background: #111; position: relative; }
         .anime-card img { width: 100%; height: 100%; object-fit: cover; }
-        .ac-info { padding: 8px; flex: 1; }
-        .ac-title { font-weight: 700; color: var(--primary); font-size: 1.05em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .ac-meta { font-size: 0.72em; color: #888; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-        .score-badge { position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.75); color: #f1c40f; font-size: 0.72em; padding: 2px 6px; border-radius: 4px; }
-
-        .empty-state { text-align: center; color: #555; padding: 60px 20px; grid-column: 1/-1; }
-        
-        .btn-old-index {
-            background: #222; border: 1px solid #ff4757; color: #ff4757;
-            padding: 6px 12px; border-radius: 6px; font-size: 0.8em;
-            text-decoration: none; transition: 0.2s;
-        }
-        .btn-old-index:hover { background: #ff4757; color: white; }
-
-        @media (max-width: 700px) {
-            .producer-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .producer-name { font-size: 1.3em; }
-        }
+        .ac-info { padding: 6px; flex: 1; }
+        .ac-title { font-weight: 700; color: var(--primary); font-size: 0.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .ac-meta { font-size: 0.7em; color: #888; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+        .score-badge { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color: #f1c40f; font-size: 0.7em; padding: 2px 5px; border-radius: 4px; }
+        .empty-state { text-align: center; color: #555; padding: 40px 20px; grid-column: 1/-1; }
+        @media (max-width: 700px) { .producer-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } .producer-name { font-size: 1.2em; } }
     </style>
 </head>
 <body>
 
     <nav class="top-navbar">
-        <a href="index.html" class="nav-brand">
-            <img src="img/logo.jpg" class="nav-logo-small">
-            <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Studios</small></span>
-        </a>
+        <div class="burger" onclick="toggleM()">☰</div>
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand">
+                <img src="img/logo.jpg" class="nav-logo-small">
+                <span class="nav-title">LE MALICIEUX <small style="color:white;">• Studios</small></span>
+            </a>
+        </div>
         
-        <div class="search-wrapper" id="search-wrapper">
+        <div class="search-wrapper">
             <input type="text" id="studio-search" placeholder="Rechercher un studio..." autocomplete="off">
             <span class="search-icon">🔍</span>
         </div>
 
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
-        <div class="nav-center" id="menu">
+        <div class="nav-links" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
             <a href="index.html" class="btn-red">🏠 Accueil</a>
-            <a href="tags.html" class="btn-red">🏷️ Tags</a>
-            <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
-            <a href="playlist.html" class="btn-red">📂 Playlist</a>
-            <a href="index_old.html" class="btn-red">🕰️ Ancien index</a>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px;">
-            <div class="burger" onclick="toggleM()">☰</div>
+            <a href="tags.html">🏷️ Tags</a>
+            <a href="alphabetique.html">📖 A-Z</a>
+            <a href="playlist.html">📂 Playlist</a>
+            <a href="index_old.html">🕰️ Ancien Index</a>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
     </nav>
 
     <div class="page-wrap">
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
-            <a href="index_old.html" class="btn-old-index">🕰️ Ancien catalogue</a>
-        </div>
-        
         <div id="view-list">
             <div class="list-header">
                 <h1>🏢 Éditeurs & Studios</h1>
@@ -344,7 +238,6 @@
                 renderList('');
             }
             
-            // Recherche tolérante
             const searchInput = document.getElementById('studio-search');
             searchInput.addEventListener('input', (e) => renderList(e.target.value));
         }
@@ -540,13 +433,14 @@
             }
         });
         
-        window.toggleM = () => {
+        function toggleM() {
             const menu = document.getElementById('menu');
             const overlay = document.getElementById('overlay');
             const isOpen = menu.classList.toggle('active');
             overlay.classList.toggle('active');
             document.body.style.overflow = isOpen ? 'hidden' : '';
-        };
+        }
+        window.toggleM = toggleM;
     </script>
 </body>
 </html>

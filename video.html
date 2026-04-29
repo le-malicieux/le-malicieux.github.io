@@ -13,22 +13,24 @@
         
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: rgba(15,15,15,0.95); backdrop-filter: blur(10px);
+            padding: 8px 16px; background: rgba(15,15,15,0.95); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 20px;
-            border-radius: 8px;
+            margin-bottom: 20px; border-radius: 8px;
+            gap: 12px;
+            flex-wrap: wrap;
         }
-        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .nav-logo-small { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; white-space: nowrap; }
         
         .search-wrapper {
-            position: relative; flex: 1; max-width: 300px; min-width: 150px;
+            position: relative; flex: 1; min-width: 180px; max-width: 280px;
         }
         .search-wrapper input {
             width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; 
             padding: 6px 30px 6px 10px; border-radius: 5px; font-size: 0.8em;
-            transition: 0.3s; box-sizing: border-box; outline: none;
+            box-sizing: border-box; outline: none;
         }
         .search-wrapper input:focus { border-color: var(--primary); }
         .search-icon {
@@ -42,136 +44,144 @@
         }
         .search-suggestions.active { display: block; }
         .search-suggestions .suggestion-item {
-            padding: 6px 10px; cursor: pointer; color: #ccc; font-size: 0.8em;
+            padding: 6px 10px; cursor: pointer; color: #ccc; font-size: 0.75em;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             display: flex; align-items: center; gap: 8px;
         }
         .search-suggestions .suggestion-item:hover { background: #2a2a2a; }
-        .search-suggestions .suggestion-item .sugg-img { width: 24px; height: 34px; border-radius: 3px; object-fit: cover; }
+        .search-suggestions .suggestion-item .sugg-img { width: 22px; height: 32px; border-radius: 3px; object-fit: cover; }
         
-        .nav-links {
-            display: flex; gap: 8px; align-items: center;
+        .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .nav-links a, .nav-links button { 
+            background: var(--primary); border: none; color: white; 
+            padding: 5px 10px; border-radius: 4px; font-size: 0.75em; 
+            text-decoration: none; cursor: pointer; white-space: nowrap;
+            font-weight: bold;
         }
-        .nav-links a, .nav-links button {
-            background: #222; border: 1px solid #444; color: white;
-            padding: 5px 10px; border-radius: 4px; font-size: 0.75em;
-            text-decoration: none; cursor: pointer;
-        }
-        .btn-red { background: var(--primary) !important; border: none !important; }
         
-        .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 6px; transition: 0.3s; }
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.75em; font-weight: bold; white-space: nowrap; }
+        
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
+        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
+        
+        @media (max-width: 900px) {
+            .top-navbar { flex-wrap: wrap; }
+            .search-wrapper { order: 3; width: 100%; max-width: none; margin-top: 8px; }
+            .nav-links { order: 2; }
+            .burger { display: block; order: 1; }
+            .close-menu { display: block; }
+            .nav-links {
+                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
+                transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
+            }
+            .nav-links.active { left: 0; }
+            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
+            .mobile-overlay.active { display: block; }
+        }
+        
+        .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; transition: 0.3s; font-size: 0.85em; }
         .back-btn:hover { background: var(--primary); color: white; }
-        
-        .anime-header { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
+        .anime-header { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
         .top-info { display: flex; gap: 25px; margin-bottom: 25px; }
-        .poster { width: 280px; flex-shrink: 0; }
+        .poster { width: 260px; flex-shrink: 0; }
         .poster img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .main-details { flex: 1; display: flex; flex-direction: column; gap: 15px; }
-        .anime-title { font-size: 2.2em; color: var(--primary); margin: 0; }
+        .anime-title { font-size: 2em; color: var(--primary); margin: 0; }
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .stat-item { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; position: relative; }
-        .stat-item small { color: var(--primary); font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 4px; }
-        .stat-item span { font-weight: bold; font-size: 0.9em; }
+        .stat-item { background: #222; padding: 8px; border-radius: 8px; border: 1px solid #333; text-align: center; position: relative; }
+        .stat-item small { color: var(--primary); font-size: 0.65em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+        .stat-item span { font-weight: bold; font-size: 0.85em; }
         .stat-item.mal-live { border-color: #2e86de; }
-        .mal-loading { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75em; color: #888; margin-top: 6px; }
-        .mal-loading .dot { width: 6px; height: 6px; background: #2e86de; border-radius: 50%; animation: pulse 1s infinite; }
-        .mal-loading .dot:nth-child(2) { animation-delay: 0.2s; }
-        .mal-loading .dot:nth-child(3) { animation-delay: 0.4s; }
+        .mal-loading { display: inline-flex; align-items: center; gap: 6px; font-size: 0.7em; color: #888; margin-top: 6px; }
+        .mal-loading .dot { width: 5px; height: 5px; background: #2e86de; border-radius: 50%; animation: pulse 1s infinite; }
         @keyframes pulse { 0%,100% { opacity:0.2; } 50% { opacity:1; } }
-        
         .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-        select { background: #333; color: #fff; border: 1px solid #555; padding: 10px; width: 100%; border-radius: 4px; margin-bottom: 12px; cursor: pointer; }
-        .ep-row { display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #444; }
-        .ep-row span { font-weight: bold; color: #aaa; }
-        #user-ep { width: auto; min-width: 80px; margin-bottom: 0; text-align: center; padding: 5px; }
-        .star-rating { font-size: 1.4em; color: #444; cursor: pointer; margin: 10px 0; text-align: center; display: flex; justify-content: center; gap: 2px; }
+        select { background: #333; color: #fff; border: 1px solid #555; padding: 8px; width: 100%; border-radius: 4px; margin-bottom: 10px; cursor: pointer; font-size: 0.85em; }
+        .ep-row { display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #444; }
+        .ep-row span { font-weight: bold; color: #aaa; font-size: 0.85em; }
+        #user-ep { width: auto; min-width: 70px; margin-bottom: 0; text-align: center; padding: 5px; }
+        .star-rating { font-size: 1.3em; color: #444; cursor: pointer; margin: 10px 0; text-align: center; display: flex; justify-content: center; gap: 2px; }
         .star-rating span.active { color: #f1c40f; }
         .link-box { background: rgba(255, 71, 87, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 71, 87, 0.3); }
-        .link-title { font-size: 0.8em; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
-        .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 10px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9em; text-align: center; border: 1px solid #444; font-weight: bold; transition: 0.2s; }
+        .link-title { font-size: 0.75em; font-weight: bold; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; }
+        .btn-link { display: block; background: #333; color: white; text-decoration: none; padding: 8px; border-radius: 5px; margin-bottom: 6px; font-size: 0.85em; text-align: center; border: 1px solid #444; font-weight: bold; transition: 0.2s; }
         .btn-link:hover { background: var(--primary); border-color: var(--primary); }
-        .info-visionnage-csv { background: rgba(255,255,255,0.05); border-left: 3px solid var(--primary); padding: 10px; border-radius: 4px; font-size: 0.85em; margin-bottom: 12px; color: #bbb; }
-        .info-generale-fixe { margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8em; color: #888; line-height: 1.4; }
-        .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
-        .mal-link { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75em; color: #2e86de; text-decoration: none; margin-top: 4px; opacity: 0.8; transition: opacity 0.2s; }
-        .mal-link:hover { opacity: 1; text-decoration: underline; }
-        
-        .related-row { display: flex; gap: 16px; align-items: stretch; margin-bottom: 18px; flex-wrap: wrap; }
+        .info-visionnage-csv { background: rgba(255,255,255,0.05); border-left: 3px solid var(--primary); padding: 8px; border-radius: 4px; font-size: 0.8em; margin-bottom: 10px; color: #bbb; }
+        .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 6px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.75em; margin-top: 10px; }
+        .mal-link { display: inline-flex; align-items: center; gap: 5px; font-size: 0.7em; color: #2e86de; text-decoration: none; margin-top: 4px; }
+        .related-row { display: flex; gap: 16px; align-items: stretch; margin-bottom: 15px; flex-wrap: wrap; }
         .related-section { flex: 1; min-width: 0; }
-        .related-label { font-size: 0.7em; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
-        .related-card { display: flex; flex-direction: row; align-items: center; text-decoration: none; gap: 10px; background: #222; border: 1px solid #333; border-radius: 8px; padding: 8px; transition: border-color 0.2s, transform 0.2s; }
-        .related-card:hover { border-color: var(--primary); transform: translateY(-2px); }
-        .related-card img { width: 56px; height: 78px; object-fit: cover; flex-shrink: 0; border-radius: 5px; border: 2px solid #444; }
-        .related-card:hover img { border-color: var(--primary); }
-        .related-card span { font-size: 0.8em; color: #ccc; line-height: 1.4; word-break: break-word; flex: 1; }
-        
+        .related-label { font-size: 0.65em; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 6px; }
+        .related-card { display: flex; flex-direction: row; align-items: center; text-decoration: none; gap: 8px; background: #222; border: 1px solid #333; border-radius: 8px; padding: 6px; transition: border-color 0.2s; }
+        .related-card:hover { border-color: var(--primary); }
+        .related-card img { width: 48px; height: 66px; object-fit: cover; flex-shrink: 0; border-radius: 4px; border: 1px solid #444; }
+        .related-card span { font-size: 0.75em; color: #ccc; line-height: 1.3; flex: 1; }
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
-        .modal-box { background: #1a1a1a; border: 1px solid #444; border-radius: 12px; padding: 28px 24px; max-width: 360px; width: 90%; text-align: center; }
-        .modal-box p { margin: 0 0 22px; font-size: 0.95em; color: #ddd; line-height: 1.5; }
-        .modal-actions { display: flex; gap: 10px; justify-content: center; }
-        .modal-btn { padding: 10px 24px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 0.9em; transition: 0.2s; }
+        .modal-box { background: #1a1a1a; border: 1px solid #444; border-radius: 12px; padding: 20px; max-width: 320px; width: 90%; text-align: center; }
+        .modal-box p { margin: 0 0 18px; font-size: 0.9em; color: #ddd; }
+        .modal-actions { display: flex; gap: 8px; justify-content: center; }
+        .modal-btn { padding: 8px 20px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 0.85em; }
         .modal-btn-cancel { background: #333; color: #ccc; border: 1px solid #555; }
         .modal-btn-confirm { background: var(--primary); color: white; }
-        
-        .comments-section { margin-top:20px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333; }
-        
+        .comments-section { margin-top: 20px; background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; }
         @media (max-width: 800px) {
             body { padding: 10px; }
-            .top-navbar { flex-wrap: wrap; gap: 8px; }
-            .search-wrapper { max-width: 100%; order: 3; margin-top: 8px; }
             .top-info { flex-direction: column; gap: 15px; }
-            .poster { width: 100%; max-width: 220px; margin: 0 auto; }
+            .poster { width: 100%; max-width: 200px; margin: 0 auto; }
             .anime-title { font-size: 1.5em; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 6px; }
             .bottom-controls { grid-template-columns: 1fr; gap: 12px; }
         }
     </style>
 </head>
 <body>
     <div class="top-navbar">
-        <a href="index.html" class="nav-brand">
-            <img src="img/logo.jpg" class="nav-logo-small">
-            <span class="nav-title">LE MALICIEUX</span>
-        </a>
+        <div class="burger" onclick="toggleM()">☰</div>
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand">
+                <img src="img/logo.jpg" class="nav-logo-small">
+                <span class="nav-title">LE MALICIEUX</span>
+            </a>
+        </div>
         
         <div class="search-wrapper">
             <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
             <span class="search-icon">🔍</span>
             <div class="search-suggestions" id="search-suggestions"></div>
         </div>
+
+        <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
         
-        <div class="nav-links">
-            <a href="index.html" class="btn-red">🏠 Accueil</a>
+        <div class="nav-links" id="menu">
+            <div class="close-menu" onclick="toggleM()">← Retour</div>
+            <a href="index.html">🏠 Accueil</a>
             <a href="tags.html">🏷️ Tags</a>
             <a href="alphabetique.html">📖 A-Z</a>
             <a href="playlist.html">📂 Playlist</a>
             <a href="editeurs.html">🏢 Studios</a>
-            <a href="index_old.html">🕰️ Ancien</a>
-            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
+            <a href="index_old.html">🕰️ Ancien Index</a>
+            <button onclick="randomAnime()">🎲 Random</button>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
     </div>
 
     <div class="container">
         <a href="index.html" id="back-link" class="back-btn" onclick="handleBack(event)">← Retour au catalogue</a>
         <div id="anime-details">Chargement des données...</div>
-        <div id="comments-section" class="comments-section">
-            <h3>Commentaires</h3>
-            <textarea id="comment-input" style="width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box;" placeholder="Ajouter un commentaire..." rows="3"></textarea>
-            <button id="btn-post" style="background:var(--primary); color:white; border:none; padding:10px 30px; border-radius:5px; cursor:pointer; font-weight:bold;">Publier</button>
+        <div class="comments-section">
+            <h3 style="font-size:1.1em;">Commentaires</h3>
+            <textarea id="comment-input" style="width:100%; background:#222; border:1px solid #444; color:white; padding:8px; border-radius:5px; margin-bottom:10px; resize:none; box-sizing:border-box;" placeholder="Ajouter un commentaire..." rows="2"></textarea>
+            <button id="btn-post" style="background:var(--primary); color:white; border:none; padding:8px 25px; border-radius:5px; cursor:pointer; font-weight:bold;">Publier</button>
             <div id="comments-display" style="margin-top: 20px;"></div>
         </div>
     </div>
 
     <div class="modal-overlay" id="confirm-modal">
-        <div class="modal-box">
-            <p id="modal-msg"></p>
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-cancel" id="modal-cancel">Annuler</button>
-                <button class="modal-btn modal-btn-confirm" id="modal-confirm">Supprimer</button>
-            </div>
-        </div>
+        <div class="modal-box"><p id="modal-msg"></p><div class="modal-actions"><button class="modal-btn modal-btn-cancel" id="modal-cancel">Annuler</button><button class="modal-btn modal-btn-confirm" id="modal-confirm">Supprimer</button></div></div>
     </div>
 
     <script type="module">
@@ -198,11 +208,8 @@
         window.handleBack = (e) => {
             e.preventDefault();
             const from = document.referrer;
-            if (from && from.startsWith(window.location.origin)) {
-                history.back();
-            } else {
-                window.location.href = 'index.html';
-            }
+            if (from && from.startsWith(window.location.origin)) { history.back(); } 
+            else { window.location.href = 'index.html'; }
         };
 
         async function loadAnimesForSearch() {
@@ -225,36 +232,22 @@
             const val = this.value.trim();
             if (val.length < 2) { searchSuggestions.classList.remove('active'); return; }
             const results = allAnimesForSearch.filter(a => normalize(a.nom).includes(normalize(val))).slice(0, 8);
-            if (results.length === 0) {
-                searchSuggestions.innerHTML = '<div class="no-result" style="padding:10px;color:#888;">Aucun résultat</div>';
-            } else {
-                searchSuggestions.innerHTML = results.map(a => 
-                    '<div class="suggestion-item" data-name="'+a.nom.replace(/"/g,'&quot;')+'"><img src="img/'+a.img+'" class="sugg-img" onerror="this.src=\'img/logo.jpg\'"><span>'+a.nom+'</span></div>'
-                ).join('');
-            }
+            if (results.length === 0) { searchSuggestions.innerHTML = '<div style="padding:8px;color:#888;">Aucun résultat</div>'; } 
+            else { searchSuggestions.innerHTML = results.map(a => '<div class="suggestion-item" data-name="'+a.nom.replace(/"/g,'&quot;')+'"><img src="img/'+a.img+'" class="sugg-img" onerror="this.src=\'img/logo.jpg\'"><span>'+a.nom+'</span></div>').join(''); }
             searchSuggestions.classList.add('active');
         });
         searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 const val = this.value.trim();
-                if (val) {
-                    const results = allAnimesForSearch.filter(a => normalize(a.nom).includes(normalize(val)));
-                    if (results.length === 1) {
-                        window.location.href = 'video.html?name=' + encodeURIComponent(results[0].nom);
-                    } else if (results.length > 1) {
-                        window.location.href = 'index.html?search=' + encodeURIComponent(val);
-                    }
-                }
+                if (val) { window.location.href = 'index.html?search=' + encodeURIComponent(val); }
                 searchSuggestions.classList.remove('active');
                 this.blur();
             }
         });
         searchSuggestions.addEventListener('click', function(e) {
             const item = e.target.closest('.suggestion-item');
-            if (item && item.dataset.name) {
-                window.location.href = 'video.html?name=' + encodeURIComponent(item.dataset.name);
-            }
+            if (item && item.dataset.name) { window.location.href = 'video.html?name=' + encodeURIComponent(item.dataset.name); }
         });
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.search-wrapper')) searchSuggestions.classList.remove('active');
@@ -267,10 +260,7 @@
             }
         };
 
-        function traduitStatutMAL(status) {
-            const map = { 'Finished Airing': 'Terminé', 'Currently Airing': 'En cours', 'Not yet aired': 'À venir', 'Airing': 'En cours' };
-            return map[status] || status || '—';
-        }
+        function traduitStatutMAL(status) { const map = { 'Finished Airing': 'Terminé', 'Currently Airing': 'En cours', 'Not yet aired': 'À venir', 'Airing': 'En cours' }; return map[status] || status || '—'; }
         function formatPop(n) { return (!n && n !== 0) ? '—' : '#' + n.toLocaleString('fr-FR'); }
         function formatScore(s) { return (!s && s !== 0) ? '—' : parseFloat(s).toFixed(2); }
 
@@ -344,8 +334,8 @@
                 for(let i = 0; i <= maxEp; i++) { epOptions += `<option value="${i}">${i}</option>`; }
 
                 const tagsHtml = anime.tags.length > 0 
-                    ? anime.tags.map(t => `<a href="tags.html?tag=${encodeURIComponent(t)}" style="display:inline-block; background:rgba(255,255,255,0.05); color:#aaa; text-decoration:none; font-size:0.75em; padding:5px 8px; border-radius:4px; border:1px solid #333; transition:0.3s; margin:2px;" onmouseover="this.style.borderColor='var(--primary)';this.style.color='white'" onmouseout="this.style.borderColor='#333';this.style.color='#aaa'">${t}</a>`).join('')
-                    : `<div style="color:#555; font-size:0.75em; padding:5px; border:1px dashed #333; border-radius:4px;">Aucun tag répertorié</div>`;
+                    ? anime.tags.map(t => `<a href="tags.html?tag=${encodeURIComponent(t)}" style="display:inline-block; background:rgba(255,255,255,0.05); color:#aaa; text-decoration:none; font-size:0.7em; padding:4px 6px; border-radius:4px; border:1px solid #333; margin:2px;">${t}</a>`).join('')
+                    : `<div style="color:#555; font-size:0.7em; padding:4px;">Aucun tag répertorié</div>`;
 
                 const imgIndex = {};
                 for (const line of lines) {
@@ -358,22 +348,16 @@
                 const makeRelatedCards = (list) => list.map(name => {
                     const imgFile = imgIndex[name] || '';
                     const imgBase = imgFile ? imgFile.replace(/\.[^.]+$/, '') : '';
-                    const imgTag = imgBase ? `<img src="img/${imgBase}.jpg" onerror="this.src='img/${imgBase}.png'; this.onerror=null;">` : `<div style="width:56px;height:78px;background:#333;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.4em;">🎬</div>`;
+                    const imgTag = imgBase ? `<img src="img/${imgBase}.jpg" onerror="this.src='img/${imgBase}.png'; this.onerror=null;">` : `<div style="width:48px;height:66px;background:#333;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2em;">🎬</div>`;
                     return `<a href="video.html?name=${encodeURIComponent(name)}" class="related-card">${imgTag}<span>${name}</span></a>`;
                 }).join('');
 
-                const relatedSection = (anime.prequels.length || anime.sequels.length) ? `
-                    <div class="related-row">
-                        ${anime.prequels.length ? `<div class="related-section"><div class="related-label">⬅️ Préquel(s)</div>${makeRelatedCards(anime.prequels)}</div>` : ''}
-                        ${anime.sequels.length ? `<div class="related-section"><div class="related-label">➡️ Suite(s)</div>${makeRelatedCards(anime.sequels)}</div>` : ''}
-                    </div>` : '';
+                const relatedSection = (anime.prequels.length || anime.sequels.length) ? `<div class="related-row">${anime.prequels.length ? `<div class="related-section"><div class="related-label">⬅️ Préquel(s)</div>${makeRelatedCards(anime.prequels)}</div>` : ''}${anime.sequels.length ? `<div class="related-section"><div class="related-label">➡️ Suite(s)</div>${makeRelatedCards(anime.sequels)}</div>` : ''}</div>` : '';
 
                 display.innerHTML = `
                     <div class="anime-header">
                         <div class="top-info">
-                            <div class="poster">
-                                <img src="img/${anime.img.split('.')[0]}.jpg" onerror="this.src='img/${anime.img.split('.')[0]}.png'">
-                            </div>
+                            <div class="poster"><img src="img/${anime.img.split('.')[0]}.jpg" onerror="this.src='img/${anime.img.split('.')[0]}.png'"></div>
                             <div class="main-details">
                                 <h1 class="anime-title">${anime.nom}</h1>
                                 <div class="stats-grid">
@@ -385,20 +369,20 @@
                                     <div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div>
                                     <div class="stat-item" style="grid-column: span 2; cursor:${anime.editeur ? 'pointer' : 'default'};" ${anime.editeur ? `onclick="window.location='editeurs.html?studio='+encodeURIComponent('${anime.editeur.split(',')[0].trim()}')"` : ''}>
                                         <small>Éditeur${anime.editeur && anime.editeur.includes(',') ? 's' : ''}</small>
-                                        <span style="font-size:0.85em; ${anime.editeur ? 'color:#ff4757;' : ''}">
-                                            ${anime.editeur ? anime.editeur.split(',').map(e => e.trim()).map((e,i,arr) => arr.length > 1 ? `<a href="editeurs.html?studio=${encodeURIComponent(e)}" style="color:var(--primary); text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${e}</a>` : e).join(' / ') : '—'}
+                                        <span style="font-size:0.8em; ${anime.editeur ? 'color:#ff4757;' : ''}">
+                                            ${anime.editeur ? anime.editeur.split(',').map(e => e.trim()).map((e,i,arr) => arr.length > 1 ? `<a href="editeurs.html?studio=${encodeURIComponent(e)}" style="color:var(--primary); text-decoration:none;">${e}</a>` : e).join(' / ') : '—'}
                                         </span>
                                     </div>
                                 </div>
                                 <div id="mal-badge"><span class="mal-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span>Chargement MAL…</span></div>
-                                <p style="font-size:0.95em; color:#ccc; line-height:1.6;">${anime.desc}</p>
+                                <p style="font-size:0.85em; color:#ccc; line-height:1.5;">${anime.desc}</p>
                             </div>
                         </div>
-                        <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:${relatedSection ? '14px' : '20px'};">${tagsHtml}</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:${relatedSection ? '10px' : '15px'};">${tagsHtml}</div>
                         ${relatedSection}
                         <div class="bottom-controls">
                             <div class="playlist-box">
-                                <label style="font-size:0.7em; color:var(--primary); font-weight:bold; text-transform:uppercase; margin-bottom:10px; display:block;">Ma Progression</label>
+                                <label style="font-size:0.65em; color:var(--primary); font-weight:bold; margin-bottom:8px; display:block;">Ma Progression</label>
                                 <select id="user-status"><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
                                 <div class="ep-row"><span>Vu :</span><select id="user-ep">${epOptions}</select><span>/ ${maxEp}</span></div>
                                 <div class="star-rating" id="stars">${Array.from({length:10}, (_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
@@ -406,24 +390,20 @@
                             </div>
                             <div class="link-box">
                                 <div class="link-title">📥 Téléchargement</div>
-                                <div id="dl-area" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px;"></div>
+                                <div id="dl-area" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
                                 <div class="link-title">🎬 Visionnage</div>
-                                <div class="info-visionnage-csv">${anime.infoV || "Aucune information supplémentaire pour le visionnage."}</div>
-                                <div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
-                                <div class="info-generale-fixe">
-                                    <strong>Attention :</strong> Quand une œuvre possède une deuxième saison qui porte le même nom ou un nom très ressemblant, je créé une seule carte pour toutes les saisons…
-                                </div>
+                                <div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;"></div>
                             </div>
                         </div>
                     </div>`;
 
                 const dlLabels = ['⬇️ Terabox', '⬇️ Mega', '⬇️ Lien 3', '⬇️ Lien 4'];
-                anime.dl.filter(l => l.trim()).forEach((l, i) => document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">${dlLabels[i] || '⬇️ Lien ' + (i+1)}</a>`);
+                anime.dl.filter(l => l.trim()).forEach((l, i) => document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:70px;">${dlLabels[i] || '⬇️ Lien ' + (i+1)}</a>`);
                 anime.stream.filter(l => l.trim()).forEach((l, i) => document.getElementById('stream-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lien ${i+1} ↗</a>`);
 
                 fetchMALData(anime.nom, anime.malId).then(malData => {
                     applyMALStats(malData);
-                    if (!malData) { const badge = document.getElementById('mal-badge'); if (badge) badge.innerHTML = `<span style="font-size:0.72em; color:#555;">Données MAL indisponibles</span>`; }
+                    if (!malData) { const badge = document.getElementById('mal-badge'); if (badge) badge.innerHTML = `<span style="font-size:0.7em; color:#555;">Données MAL indisponibles</span>`; }
                 });
 
                 const _ref = document.referrer;
@@ -504,7 +484,7 @@
                     let docs = [];
                     snap.forEach(d => docs.push(d.data()));
                     docs.sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
-                    cDisp.innerHTML = docs.map(d => `<div style="margin-bottom:12px; border-bottom:1px solid #333; padding-bottom:8px;"><b style="color:var(--primary)">${d.userName}</b><p style="margin:4px 0; font-size:0.9em; color:#ddd;">${d.text}</p></div>`).join('');
+                    cDisp.innerHTML = docs.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:6px;"><b style="color:var(--primary); font-size:0.85em;">${d.userName}</b><p style="margin:4px 0; font-size:0.85em; color:#ddd;">${d.text}</p></div>`).join('');
                 });
 
                 document.getElementById('btn-post').onclick = async () => {
@@ -517,6 +497,9 @@
             } catch (err) { console.error(err); }
         }
         load();
+        
+        function toggleM() { const menu = document.getElementById('menu'); const overlay = document.getElementById('overlay'); const isOpen = menu.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow = isOpen ? 'hidden' : ''; }
+        window.toggleM = toggleM;
     </script>
 </body>
 </html>
