@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-M65SBS3C');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Malicieux - Catalogue d'Animes</title>
+    <style>
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
+        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg); 
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: var(--text); 
+            margin: 0; 
+            min-height: 100vh;
+        }
+
+        .top-navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+            /* Forcer le sticky même avec les transformations de scroll */
+            will-change: transform;
+        }
+        .nav-left { display: flex; flex-direction: column; align-items: flex-start; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        
+        #back-home { font-size: 0.75em; color: #888; text-decoration: none; display: none; cursor: pointer; margin-top: 2px; }
+        #back-home:hover { color: var(--primary); }
+
+        .nav-center { display: flex; gap: 8px; align-items: center; }
+        .nav-center input, .nav-center select, .nav-center button, .nav-center a { 
+            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none;
+        }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
+
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
+
+        .hero-section {
+            height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
+        }
+        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px rgba(255,71,87,0.3); object-fit: cover; }
+        .main-title { font-size: 3em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
+        .main-slogan { font-size: 1.4em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
+
+        .content-area { background: linear-gradient(to top, rgba(0,0,0,0.75) 80%, transparent); padding: 40px 15px; min-height: 600px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
+        
+        .card { 
+            background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
+            border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
+            display: flex; flex-direction: column;
+        }
+        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
+        .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
+
+        .card-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
+        
+        .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
+        .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; order: -1; }
+
+        /* Stat MAL mise à jour sur la carte */
+        .mal-updated { color: #5dade2; }
+        
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
+        .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
+
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
+        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+
+        @media (max-width: 1000px) {
+            .burger { display: block; }
+            .close-menu { display: block; }
+            .nav-center {
+                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
+                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1100; align-items: stretch;
+            }
+            .nav-center.active { left: 0; }
+            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
+            .mobile-overlay.active { display: block; }
+            .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
+            .card-info { padding: 5px; }
+            .card-title { font-size: 0.85em; height: 2.4em; }
+            .card-meta-row { font-size: 0.65em; gap: 2px; }
+        }
+    </style>
+</head>
+<body>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <div class="top-navbar">
+        <div class="nav-left">
+            <a class="nav-brand" onclick="resetToHome()" href="index.html" style="text-decoration:none; cursor:pointer;">
+                <div class="burger" onclick="event.stopPropagation();toggleM()">☰</div>
+                <img src="img/logo.jpg" class="nav-logo-small">
+                <span class="nav-title">LE MALICIEUX</span>
+            </a>
+            <a id="back-home" onclick="resetToHome()">← Retour à l'accueil</a>
+        </div>
+
+        <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
+
+        <div class="nav-center" id="menu">
+            <div class="close-menu" onclick="toggleM()">← Retour</div>
+            <input type="text" id="search" placeholder="Rechercher un anime...">
+            <select id="sort">
+                <option value="">🔀 Aléatoire</option>
+                <option value="popularite">Popularité</option>
+                <option value="score">Score</option>
+                <option value="nom">Nom (A-Z)</option>
+                <option value="sortie">Année</option>
+                <option value="episodes">Épisodes (Nombre)</option>
+                <option value="etat">État (Fini/En cours)</option>
+                <option value="censure">Censure</option>
+                            <option value="editeur">Éditeur</option>
+            </select>
+            <a href="tags.html" class="btn-red">🏷️ Tags</a>
+            <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
+            <a href="playlist.html" class="btn-red">📂 Playlist</a>
+            <a href="editeurs.html" class="btn-red">🏢 Studios</a>
+            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
+        </div>
+
+        <div style="display:flex; align-items:center;">
+            <div id="auth-ui" style="display:flex; align-items:center;">
+                <button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>
+            </div>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" style="margin-left:10px;">Discord</a>
+        </div>
+    </div>
+
+    <div class="hero-section">
+        <img src="img/logo.jpg" class="main-logo">
+        <h1 class="main-title">le-malicieux.github.io</h1>
+        <p class="main-slogan">Catalogue d'animes malicieux</p>
+    </div>
+
+    <div class="content-area">
+        <div id="anime-container" class="grid"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+
+        let allAnimes = [];
+        let shuffledAnimes = [];
+
+        // ─── Cache MAL (sessionStorage) ─────────────────────────────────────────────
+        // Clé : "mal_cache_<nomAnime>", valeur JSON : { score, popularity, ts }
+        // Durée de vie : 1h (évite de re-requêter à chaque tri/filtre)
+        const MAL_TTL = 60 * 60 * 1000; // 1 heure en ms
+
+        function malCacheGet(nom) {
+            try {
+                const raw = sessionStorage.getItem('mal_cache_' + nom);
+                if (!raw) return null;
+                const obj = JSON.parse(raw);
+                if (Date.now() - obj.ts > MAL_TTL) { sessionStorage.removeItem('mal_cache_' + nom); return null; }
+                return obj;
+            } catch { return null; }
+        }
+
+        function malCacheSet(nom, data) {
+            try { sessionStorage.setItem('mal_cache_' + nom, JSON.stringify({ ...data, ts: Date.now() })); } catch {}
+        }
+
+        // File d'attente pour éviter le rate-limit Jikan (max ~3 req/s)
+        let jikanQueue = [];
+        let jikanRunning = false;
+
+        function jikanEnqueue(task) {
+            jikanQueue.push(task);
+            if (!jikanRunning) jikanDrain();
+        }
+
+        async function jikanDrain() {
+            jikanRunning = true;
+            while (jikanQueue.length > 0) {
+                const task = jikanQueue.shift();
+                await task();
+                await new Promise(r => setTimeout(r, 400)); // ~2.5 req/s
+            }
+            jikanRunning = false;
+        }
+
+        /**
+         * Récupère score+popularité MAL pour une carte.
+         * Utilise le cache sessionStorage si dispo, sinon appelle Jikan.
+         * malId = ID forcé depuis le CSV (colonne N), peut être vide.
+         */
+        function fetchMALForCard(nom, malId, scoreEl, popEl) {
+            const cached = malCacheGet(nom);
+            if (cached) {
+                applyCardMAL(scoreEl, popEl, cached);
+                return;
+            }
+            jikanEnqueue(async () => {
+                try {
+                    let item = null;
+                    if (malId && malId.trim() !== '') {
+                        const resp = await fetch(`https://api.jikan.moe/v4/anime/${malId.trim()}`);
+                        if (resp.ok) { const j = await resp.json(); item = j.data || null; }
+                    } else {
+                        const q = nom.split('/')[0].trim();
+                        const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`);
+                        if (resp.ok) { const j = await resp.json(); item = j.data?.[0] || null; }
+                    }
+                    if (item) {
+                        const data = { score: item.score, popularity: item.popularity };
+                        malCacheSet(nom, data);
+                        applyCardMAL(scoreEl, popEl, data);
+                    }
+                } catch(e) { /* silencieux */ }
+            });
+        }
+
+        function applyCardMAL(scoreEl, popEl, data) {
+            if (!scoreEl || !popEl) return;
+            if (data.score != null) {
+                scoreEl.textContent = '⭐' + parseFloat(data.score).toFixed(2);
+                scoreEl.classList.add('mal-updated');
+            }
+            if (data.popularity != null) {
+                popEl.textContent = '📈#' + data.popularity.toLocaleString('fr-FR');
+                popEl.classList.add('mal-updated');
+            }
+        }
+
+        // Intersection Observer : ne charge MAL que quand la carte est visible
+        const cardObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const card = entry.target;
+                    const nom   = card.dataset.nom;
+                    const malId = card.dataset.malid || '';
+                    const scoreEl = card.querySelector('.mal-score');
+                    const popEl   = card.querySelector('.mal-pop');
+                    if (nom && scoreEl && popEl) {
+                        fetchMALForCard(nom, malId, scoreEl, popEl);
+                    }
+                    cardObserver.unobserve(card); // On ne charge qu'une fois
+                }
+            });
+        }, { rootMargin: '200px' }); // Précharge 200px avant l'entrée dans le viewport
+        // ────────────────────────────────────────────────────────────────────────────
+
+        onAuthStateChanged(auth, async (user) => {
+            const authUi = document.getElementById('auth-ui');
+            if (user) {
+                // Enregistre (ou met à jour) l'utilisateur dans Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || '',
+                    photoURL: user.photoURL || '',
+                    lastSeen: new Date().toISOString(),
+                }, { merge: true });
+
+                // Récupérer le pseudo depuis Firestore ou sessionStorage
+                const cachedPseudo = sessionStorage.getItem('userPseudo');
+                let displayName = cachedPseudo || user.displayName;
+                if (!cachedPseudo) {
+                    const uSnap = await getDoc(doc(db, "users", user.uid));
+                    if (uSnap.exists() && uSnap.data().pseudo) {
+                        displayName = uSnap.data().pseudo;
+                        sessionStorage.setItem('userPseudo', displayName);
+                    }
+                    // Stocker l'avatar aussi
+                    if (uSnap.exists() && uSnap.data().photoURL) {
+                        sessionStorage.setItem('userAvatar', uSnap.data().photoURL);
+                    }
+                }
+                const avatarUrl = sessionStorage.getItem('userAvatar') || user.photoURL || 'img/logo.jpg';
+                authUi.innerHTML = `
+                    <a href="profil.html" style="display:flex; align-items:center; gap:8px; text-decoration:none; margin-right:8px;">
+                        <img src="${avatarUrl}" style="width:30px; height:30px; border-radius:50%; border:2px solid var(--primary); object-fit:cover;" onerror="this.src='img/logo.jpg'">
+                        <span class="auth-status" style="color:white;">${displayName}</span>
+                    </a>
+                    <button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer;">Quitter</button>`;
+                document.getElementById('logout-btn').onclick = () => signOut(auth);
+            } else {
+                authUi.innerHTML = `<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>`;
+                document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
+            }
+        });
+
+        window.saveState = () => {
+            sessionStorage.setItem('indexSearch', document.getElementById('search').value);
+            sessionStorage.setItem('indexSort', document.getElementById('sort').value);
+            sessionStorage.setItem('indexScroll', window.scrollY);
+        };
+
+        // Retour à l'accueil SANS rechargement : vide search/sort et ré-affiche
+        window.resetToHome = () => {
+            document.getElementById('search').value = '';
+            document.getElementById('sort').value = '';
+            document.getElementById('search').placeholder = 'Rechercher un anime...';
+            sessionStorage.removeItem('indexSearch');
+            sessionStorage.removeItem('indexSort');
+            sessionStorage.removeItem('indexScroll');
+            // Supprimer le paramètre ?tag= de l'URL sans recharger
+            history.replaceState(null, '', window.location.pathname);
+            runFilterAndSort();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.handleImgError = function(img, fileNameFromCSV) {
+            if (!img.dataset.attempt) img.dataset.attempt = "1";
+            const lastDotIndex = fileNameFromCSV.lastIndexOf('.');
+            const base = lastDotIndex !== -1 ? fileNameFromCSV.substring(0, lastDotIndex) : fileNameFromCSV;
+            if (img.dataset.attempt === "1") { img.dataset.attempt = "2"; img.src = `img/${base}.webp`; } 
+            else if (img.dataset.attempt === "2") { img.dataset.attempt = "3"; img.src = `img/${base}.png`; } 
+            else if (img.dataset.attempt === "3") { img.dataset.attempt = "4"; img.src = `img/${base}.jpg`; } 
+            else { img.onerror = null; img.src = 'img/logo.jpg'; }
+        };
+
+        async function init() {
+            const isMobile = window.innerWidth <= 1000;
+            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
+            document.body.style.backgroundImage = `url('img/${fileName}')`;
+
+            try {
+                const response = await fetch('animes.csv');
+                const rawData = await response.text();
+                allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
+                    const c = line.split(';');
+                    if (!c[0] || c.length < 9) return null;
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    return { 
+                        nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), 
+                        sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), 
+                        etat: clean(c[6]), img: clean(c[8]),
+                        tags: clean(c[12]),
+                        malId: clean(c[13]),
+                        editeur: clean(c[14]) // ← Colonne O : Éditeur
+                    };
+                }).filter(a => a !== null);
+
+                shuffledAnimes = [...allAnimes];
+                for (let i = shuffledAnimes.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledAnimes[i], shuffledAnimes[j]] = [shuffledAnimes[j], shuffledAnimes[i]];
+                }
+
+                const savedSearch = sessionStorage.getItem('indexSearch');
+                const savedSort   = sessionStorage.getItem('indexSort');
+                const savedScroll = sessionStorage.getItem('indexScroll');
+                if (savedSearch !== null) document.getElementById('search').value = savedSearch;
+                if (savedSort   !== null) document.getElementById('sort').value   = savedSort;
+
+                runFilterAndSort();
+
+                // Restaurer la position de scroll si on revient de video.html
+                if (savedScroll && parseInt(savedScroll) > 0) {
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        window.scrollTo({ top: parseInt(savedScroll), behavior: 'instant' });
+                    }));
+                }
+            } catch (err) { console.error("Erreur CSV:", err); }
+        }
+
+        function runFilterAndSort() {
+            const searchVal = document.getElementById('search').value.toLowerCase();
+            const sortMode = document.getElementById('sort').value;
+            const backBtn = document.getElementById('back-home');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const tagFilter = urlParams.get('tag');
+
+            saveState();
+            backBtn.style.display = (searchVal !== "" || sortMode !== "" || tagFilter) ? "block" : "none";
+
+            let base = (searchVal === "" && sortMode === "" && !tagFilter) ? shuffledAnimes : allAnimes;
+            
+            let filtered = base.filter(a => {
+                const matchSearch = a.nom.toLowerCase().includes(searchVal);
+                const matchTag = tagFilter ? (a.tags && a.tags.toLowerCase().includes(tagFilter.toLowerCase())) : true;
+                return matchSearch && matchTag;
+            });
+
+            if (tagFilter) document.getElementById('search').placeholder = "Tag : " + tagFilter;
+
+            if (sortMode) {
+                filtered.sort((a, b) => {
+                    let valA = a[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
+                    let valB = b[sortMode === "popularite" ? "pop" : (sortMode === "episodes" ? "ep" : sortMode)];
+                    if (sortMode === "score") return parseFloat((valB||'0').replace(',', '.')) - parseFloat((valA||'0').replace(',', '.'));
+                    if (sortMode === "episodes") {
+                        // Extraire le dernier nombre trouvé (ex: "pas fini(4)" → 4, "12" → 12)
+                        const numA = parseInt((valA||'').match(/\d+/g)?.pop() || '0');
+                        const numB = parseInt((valB||'').match(/\d+/g)?.pop() || '0');
+                        return numB - numA;
+                    }
+                    if (sortMode === "popularite") return (parseInt((valA||'').replace('#','')) || 99999) - (parseInt((valB||'').replace('#','')) || 99999);
+                    if (sortMode === "editeur") return (valA || '').localeCompare(valB || '');
+                    return (valA||'').localeCompare(valB||'');
+                });
+            }
+            displayAnimes(filtered, sortMode);
+        }
+
+        function displayAnimes(list, sortMode) {
+            const container = document.getElementById('anime-container');
+
+            // Désobserver les anciennes cartes avant de vider le conteneur
+            container.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.unobserve(c));
+
+            const hl = (m) => (sortMode === m) ? 'class="highlight"' : '';
+            container.innerHTML = list.map(a => `
+                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" data-nom="${a.nom.replace(/"/g,'&quot;')}" data-malid="${a.malId || ''}" onclick="saveState()">
+                    <div class="img-container">
+                        <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">${a.nom}</div>
+                        <div class="card-meta-row">
+                            <span ${hl('sortie')}>📅${a.sortie}</span>
+                            <span ${hl('score')} class="mal-score">⭐${a.score}</span>
+                            <span ${hl('popularite')} class="mal-pop">📈${a.pop}</span>
+                        </div>
+                        <div class="card-meta-row">
+                            <span ${hl('episodes')}>🎞️${a.ep}</span>
+                            <span ${hl('censure')}>🔞${a.censure}</span>
+                            <span ${hl('etat')}>🛠️${a.etat}</span>
+                        </div>
+                        ${a.editeur ? `<div class="card-meta-row"><span ${hl('editeur')} style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;">🏢${a.editeur}</span></div>` : ''}
+                    </div>
+                </a>`).join('');
+
+            // Observer chaque nouvelle carte
+            container.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
+        }
+
+        window.toggleM = () => {
+            document.getElementById('menu').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        };
+
+        document.getElementById('sort').onchange = runFilterAndSort;
+        document.getElementById('search').oninput = runFilterAndSort;
+
+        window.randomAnime = () => {
+            if(allAnimes.length > 0) {
+                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
+                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>
