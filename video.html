@@ -8,11 +8,6 @@
     <title>Visionnage - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
-        #bg-layer {
-            position: fixed; inset: 0; z-index: -2; pointer-events: none;
-            background-size: cover; background-position: center center;
-            background-repeat: no-repeat; background-attachment: scroll;
-        }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; overflow-x: hidden; }
         .container { max-width: 1100px; margin: 0 auto; }
         .top-navbar {
@@ -36,9 +31,8 @@
         .search-suggestions .suggestion-item:hover { background: #2a2a2a; }
         .search-suggestions .suggestion-item .sugg-img { width: 22px; height: 32px; border-radius: 3px; object-fit: cover; }
         .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .nav-links a, .nav-links .nav-btn { background: var(--primary); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75em; text-decoration: none; cursor: pointer; white-space: nowrap; font-weight: bold; }
-        .nav-links .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; white-space: nowrap; border: 2px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; gap: 5px; }
-        .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
+        .nav-links a, .nav-links button { background: var(--primary); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75em; text-decoration: none; cursor: pointer; white-space: nowrap; font-weight: bold; }
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.75em; font-weight: bold; white-space: nowrap; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
         @media (max-width: 900px) {
@@ -49,9 +43,8 @@
             .close-menu { display: block; }
             .nav-links { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s; z-index: 1100; align-items: stretch; overflow-y: auto; }
             .nav-links.active { left: 0; }
-            .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
+            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
-            .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
         }
         .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; font-size: 0.85em; }
         .back-btn:hover { background: var(--primary); color: white; }
@@ -106,7 +99,6 @@
     </style>
 </head>
 <body>
-    <div id="bg-layer"></div>
     <div class="top-navbar">
         <div class="burger" onclick="toggleM()">☰</div>
         <div class="nav-left">
@@ -128,8 +120,8 @@
             <a href="alphabetique.html">📖 A-Z</a>
             <a href="playlist.html">📂 Playlist</a>
             <a href="editeurs.html">🏢 Studios</a>
-            <button class="nav-btn" onclick="randomAnime()">🎲 Random</button>
             <a href="index_old.html">🕰️ Ancien Index</a>
+            <button onclick="randomAnime()">🎲 Random</button>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
     </div>
@@ -161,13 +153,6 @@
         let currentUser = null;
         let userRating = 0;
         let allAnimesForSearch = [];
-
-        function setBackground() {
-            const isMobile = window.innerWidth <= 1000;
-            const n = isMobile ? Math.floor(Math.random() * 13) + 1 : Math.floor(Math.random() * 64) + 1;
-            document.getElementById('bg-layer').style.backgroundImage = `url('img/${isMobile ? 'mobile' + n : 'fond' + n}.webp')`;
-        }
-        setBackground();
 
         function normalize(str) { return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[-_.:;,!?()'"&~#|]/g,' ').replace(/\s+/g,' ').trim(); }
 
