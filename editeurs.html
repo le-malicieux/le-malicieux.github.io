@@ -20,7 +20,6 @@
             min-height: 100vh;
         }
 
-        /* ── OVERLAY sombre constant ── */
         body::before {
             content: '';
             position: fixed; inset: 0;
@@ -28,11 +27,25 @@
             z-index: 0; pointer-events: none;
         }
 
-        /* ── NAVBAR ── */
         .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        
+        .search-wrapper {
+            position: relative; flex: 1; max-width: 400px; min-width: 200px;
+        }
+        .search-wrapper input {
+            width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; 
+            padding: 8px 35px 8px 12px; border-radius: 5px; font-size: 0.85em;
+            transition: 0.3s; box-sizing: border-box; outline: none;
+        }
+        .search-wrapper input:focus { border-color: var(--primary); }
+        .search-icon {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            color: #888; font-size: 1em; pointer-events: none;
+        }
+        
         .nav-center { display: flex; gap: 8px; align-items: center; }
         .nav-center a, .nav-center button { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none; cursor: pointer; font-weight: bold; }
         .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
@@ -40,29 +53,28 @@
         .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
-        @media (max-width: 1000px) { .burger { display: block; } .close-menu { display: block; } .nav-center { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch; } .nav-center.active { left: 0; } .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; } .mobile-overlay.active { display: block; } }
-        .top-navbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        
+        @media (max-width: 1000px) {
+            .burger { display: block; }
+            .close-menu { display: block; }
+            .search-wrapper { max-width: none; }
+            .nav-center {
+                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
+                transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
+            }
+            .nav-center.active { left: 0; }
+            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
+            .mobile-overlay.active { display: block; }
+            .studios-grid { grid-template-columns: 1fr 1fr; }
         }
-        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
-        .nav-back { color: #aaa; text-decoration: none; font-size: 0.88em; transition: color 0.2s; }
-        .nav-back:hover { color: var(--primary); }
 
-        /* ── CONTENU ── */
         .page-wrap {
             position: relative; z-index: 1;
             max-width: 1300px; margin: 0 auto;
             padding: 30px 20px 60px;
         }
 
-        /* ════════════════════════════════════════
-           VUE LISTE DES ÉDITEURS
-        ════════════════════════════════════════ */
         #view-list { display: block; }
         #view-producer { display: none; }
 
@@ -70,26 +82,14 @@
             display: flex; align-items: center; justify-content: space-between;
             flex-wrap: wrap; gap: 14px; margin-bottom: 28px;
         }
-        .list-header h1 {
-            font-size: 1.7em; font-weight: 900; color: var(--primary); margin: 0;
-        }
-        .list-controls {
-            display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
-        }
-        .search-input {
-            background: #1a1a1a; border: 1px solid #444; color: white;
-            padding: 8px 14px; border-radius: 6px; font-size: 0.9em; width: 220px;
-            outline: none; transition: border-color 0.2s;
-        }
-        .search-input:focus { border-color: var(--primary); }
+        .list-header h1 { font-size: 1.7em; font-weight: 900; color: var(--primary); margin: 0; }
+        .list-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         .sort-select {
             background: #1a1a1a; border: 1px solid #444; color: white;
             padding: 8px 12px; border-radius: 6px; font-size: 0.85em;
-            outline: none; cursor: pointer; transition: border-color 0.2s;
+            cursor: pointer;
         }
-        .sort-select:focus { border-color: var(--primary); }
 
-        /* Grille de studios */
         .studios-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -102,57 +102,26 @@
             border-radius: 12px;
             padding: 14px 16px;
             cursor: pointer;
-            transition: border-color 0.25s, transform 0.2s, box-shadow 0.2s;
-            display: flex; flex-direction: row; gap: 14px; align-items: flex-start;
+            transition: 0.2s;
+            display: flex; gap: 14px; align-items: flex-start;
         }
+        .studio-card:hover { border-color: var(--primary); transform: translateY(-4px); }
         .studio-logo-wrap {
             flex-shrink: 0;
             width: 72px; height: 72px;
             border-radius: 10px; overflow: hidden;
-            background: #111; border: 1px solid #2a2a2a;
+            background: #111;
             display: flex; align-items: center; justify-content: center;
         }
-        .studio-logo {
-            width: 100%; height: 100%;
-            object-fit: contain;
-        }
-        .studio-logo-fallback {
-            font-size: 1.6em; font-weight: 900; color: var(--primary);
-            text-transform: uppercase; letter-spacing: -1px;
-        }
-        .studio-card-body {
-            flex: 1; min-width: 0;
-            display: flex; flex-direction: column; gap: 5px;
-        }
-        .studio-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(255,71,87,0.15);
-        }
-        .studio-name {
-            font-weight: 800; font-size: 0.95em; color: white;
-            overflow-wrap: break-word; word-break: break-word;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            overflow: hidden; line-height: 1.25;
-        }
-        .studio-count {
-            font-size: 0.78em; color: #888;
-        }
+        .studio-logo { width: 100%; height: 100%; object-fit: contain; }
+        .studio-logo-fallback { font-size: 1.6em; font-weight: 900; color: var(--primary); text-transform: uppercase; }
+        .studio-card-body { flex: 1; min-width: 0; }
+        .studio-name { font-weight: 800; font-size: 0.95em; color: white; word-break: break-word; }
+        .studio-count { font-size: 0.78em; color: #888; margin-top: 4px; }
         .studio-count span { color: var(--primary); font-weight: bold; }
-        .studio-preview {
-            display: flex; gap: 4px; margin-top: 6px;
-        }
-        .studio-preview img {
-            width: 36px; height: 52px; object-fit: cover;
-            border-radius: 4px; border: 1px solid #333;
-            flex-shrink: 0;
-        }
+        .studio-preview { display: flex; gap: 4px; margin-top: 6px; }
+        .studio-preview img { width: 36px; height: 52px; object-fit: cover; border-radius: 4px; }
 
-        /* ════════════════════════════════════════
-           VUE PRODUCER (style MAL)
-        ════════════════════════════════════════ */
-
-        /* Header producer */
         .producer-header {
             background: var(--card-bg);
             border: 1px solid #2a2a2a;
@@ -167,14 +136,6 @@
             display: flex; align-items: flex-end;
             padding: 0 28px 0;
         }
-        .producer-banner::after {
-            content: '';
-            position: absolute; inset: 0;
-            background: repeating-linear-gradient(
-                45deg, transparent, transparent 40px,
-                rgba(255,71,87,0.04) 40px, rgba(255,71,87,0.04) 80px
-            );
-        }
         .producer-avatar {
             width: 90px; height: 90px;
             border-radius: 14px;
@@ -186,57 +147,34 @@
             position: relative; z-index: 1;
             transform: translateY(45px);
             flex-shrink: 0;
-            text-transform: uppercase;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-            user-select: none;
             overflow: hidden;
-        }
-        .producer-avatar img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .producer-avatar .avatar-initials {
-            display: flex; align-items: center; justify-content: center;
-            width: 100%; height: 100%;
         }
         .producer-info-wrap {
             padding: 56px 28px 20px;
             display: flex; align-items: flex-start;
             justify-content: space-between; flex-wrap: wrap; gap: 16px;
         }
-        .producer-name {
-            font-size: 1.9em; font-weight: 900; color: white; margin: 0 0 4px;
-        }
-        .producer-sub {
-            font-size: 0.82em; color: #666;
-        }
-        .producer-stats-row {
-            display: flex; gap: 20px; flex-wrap: wrap;
-        }
+        .producer-name { font-size: 1.9em; font-weight: 900; color: white; margin: 0 0 4px; }
+        .producer-stats-row { display: flex; gap: 20px; flex-wrap: wrap; }
         .pstat {
             background: #111;
             border: 1px solid #2a2a2a;
             border-radius: 10px;
             padding: 10px 18px;
             text-align: center;
-            min-width: 80px;
         }
         .pstat-val { font-size: 1.4em; font-weight: 800; color: var(--primary); display: block; }
-        .pstat-lbl { font-size: 0.7em; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .pstat-lbl { font-size: 0.7em; color: #666; text-transform: uppercase; }
 
-        /* Bouton retour à la liste */
         .btn-back-list {
             display: inline-flex; align-items: center; gap: 6px;
             color: #aaa; font-size: 0.85em; cursor: pointer;
             border: 1px solid #333; background: #1a1a1a;
             padding: 7px 14px; border-radius: 6px;
-            transition: color 0.2s, border-color 0.2s;
-            text-decoration: none; margin-bottom: 20px;
+            margin-bottom: 20px;
         }
         .btn-back-list:hover { color: var(--primary); border-color: var(--primary); }
 
-        /* Tri & filtre */
         .producer-controls {
             display: flex; gap: 10px; align-items: center;
             flex-wrap: wrap; margin-bottom: 20px;
@@ -244,12 +182,10 @@
         .ctrl-select {
             background: #1a1a1a; border: 1px solid #333; color: white;
             padding: 7px 12px; border-radius: 6px; font-size: 0.85em;
-            cursor: pointer; outline: none;
+            cursor: pointer;
         }
-        .ctrl-select:focus { border-color: var(--primary); }
         .result-count { font-size: 0.82em; color: #666; margin-left: auto; }
 
-        /* Grille animes du producer */
         .producer-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -261,52 +197,30 @@
             border: 1px solid #2a2a2a;
             border-radius: 10px;
             overflow: hidden;
-            transition: border-color 0.2s, transform 0.2s;
+            transition: 0.2s;
             text-decoration: none; color: inherit;
             display: flex; flex-direction: column;
-            font-size: 0.8em;
         }
         .anime-card:hover { border-color: var(--primary); transform: translateY(-6px); }
-        .anime-card .img-wrap { width: 100%; aspect-ratio: 2/3; background: #111; }
-        .anime-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .anime-card .ac-info { padding: 8px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
-        .ac-title {
-            font-weight: 700; color: var(--primary);
-            overflow: hidden; display: -webkit-box;
-            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            line-height: 1.25; font-size: 1.05em;
-        }
-        .ac-studio-label {
-            font-size: 0.7em; color: #666;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            margin-top: -2px;
-        }
-        .ac-meta { font-size: 0.72em; color: #888; display: flex; flex-wrap: wrap; gap: 4px; }
-        .ac-meta .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; }
-        .ac-score { color: #f1c40f; font-weight: bold; }
+        .anime-card .img-wrap { width: 100%; aspect-ratio: 2/3; background: #111; position: relative; }
+        .anime-card img { width: 100%; height: 100%; object-fit: cover; }
+        .ac-info { padding: 8px; flex: 1; }
+        .ac-title { font-weight: 700; color: var(--primary); font-size: 1.05em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .ac-meta { font-size: 0.72em; color: #888; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+        .score-badge { position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.75); color: #f1c40f; font-size: 0.72em; padding: 2px 6px; border-radius: 4px; }
 
-        /* Score badge flottant */
-        .score-badge {
-            position: absolute; top: 6px; left: 6px;
-            background: rgba(0,0,0,0.75);
-            color: #f1c40f; font-size: 0.72em; font-weight: bold;
-            padding: 2px 6px; border-radius: 4px;
-            backdrop-filter: blur(4px);
+        .empty-state { text-align: center; color: #555; padding: 60px 20px; grid-column: 1/-1; }
+        
+        .btn-old-index {
+            background: #222; border: 1px solid #ff4757; color: #ff4757;
+            padding: 6px 12px; border-radius: 6px; font-size: 0.8em;
+            text-decoration: none; transition: 0.2s;
         }
-        .anime-card .img-wrap { position: relative; }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center; color: #555; padding: 60px 20px;
-            font-size: 1em; grid-column: 1/-1;
-        }
+        .btn-old-index:hover { background: #ff4757; color: white; }
 
         @media (max-width: 700px) {
-            .studios-grid { grid-template-columns: 1fr 1fr; }
             .producer-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
             .producer-name { font-size: 1.3em; }
-            .producer-stats-row { gap: 10px; }
-            .pstat { padding: 8px 12px; min-width: 60px; }
         }
     </style>
 </head>
@@ -317,6 +231,12 @@
             <img src="img/logo.jpg" class="nav-logo-small">
             <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Studios</small></span>
         </a>
+        
+        <div class="search-wrapper" id="search-wrapper">
+            <input type="text" id="studio-search" placeholder="Rechercher un studio..." autocomplete="off">
+            <span class="search-icon">🔍</span>
+        </div>
+
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
         <div class="nav-center" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
@@ -324,7 +244,7 @@
             <a href="tags.html" class="btn-red">🏷️ Tags</a>
             <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
-            <a href="editeurs.html" class="btn-red">🏢 Studios</a>
+            <a href="index_old.html" class="btn-red">🕰️ Ancien index</a>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
             <div class="burger" onclick="toggleM()">☰</div>
@@ -333,8 +253,10 @@
     </nav>
 
     <div class="page-wrap">
-
-        <!-- ═══ VUE LISTE ═══ -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+            <a href="index_old.html" class="btn-old-index">🕰️ Ancien catalogue</a>
+        </div>
+        
         <div id="view-list">
             <div class="list-header">
                 <h1>🏢 Éditeurs & Studios</h1>
@@ -345,7 +267,6 @@
                         <option value="nom-desc">Trier : Z → A</option>
                         <option value="score">Trier : Score ↓</option>
                     </select>
-                    <input type="text" class="search-input" id="studio-search" placeholder="Rechercher un studio…">
                 </div>
             </div>
             <div class="studios-grid" id="studios-grid">
@@ -353,11 +274,8 @@
             </div>
         </div>
 
-        <!-- ═══ VUE PRODUCER ═══ -->
         <div id="view-producer">
             <a class="btn-back-list" onclick="showList()">← Tous les éditeurs</a>
-
-            <!-- Header -->
             <div class="producer-header">
                 <div class="producer-banner">
                     <div class="producer-avatar" id="prod-avatar">?</div>
@@ -365,26 +283,15 @@
                 <div class="producer-info-wrap">
                     <div>
                         <div class="producer-name" id="prod-name">—</div>
-                        <div class="producer-sub" id="prod-sub">Éditeur / Label</div>
+                        <div class="producer-sub">Éditeur / Label</div>
                     </div>
                     <div class="producer-stats-row">
-                        <div class="pstat">
-                            <span class="pstat-val" id="prod-total">—</span>
-                            <span class="pstat-lbl">Titres</span>
-                        </div>
-                        <div class="pstat">
-                            <span class="pstat-val" id="prod-avg">—</span>
-                            <span class="pstat-lbl">Score moy.</span>
-                        </div>
-                        <div class="pstat">
-                            <span class="pstat-val" id="prod-best">—</span>
-                            <span class="pstat-lbl">Meilleur</span>
-                        </div>
+                        <div class="pstat"><span class="pstat-val" id="prod-total">—</span><span class="pstat-lbl">Titres</span></div>
+                        <div class="pstat"><span class="pstat-val" id="prod-avg">—</span><span class="pstat-lbl">Score moy.</span></div>
+                        <div class="pstat"><span class="pstat-val" id="prod-best">—</span><span class="pstat-lbl">Meilleur</span></div>
                     </div>
                 </div>
             </div>
-
-            <!-- Contrôles -->
             <div class="producer-controls">
                 <select class="ctrl-select" id="prod-sort">
                     <option value="score">Trier : Score</option>
@@ -401,15 +308,11 @@
                 </select>
                 <span class="result-count" id="prod-count"></span>
             </div>
-
-            <!-- Grille animes -->
             <div class="producer-grid" id="producer-grid"></div>
         </div>
-
     </div>
 
     <script>
-        // ── Fond aléatoire ──
         (function() {
             const isMobile = window.innerWidth <= 1000;
             const n = isMobile ? Math.floor(Math.random()*13)+1 : Math.floor(Math.random()*64)+1;
@@ -419,7 +322,6 @@
         let allAnimes = [];
         let currentStudio = null;
 
-        // ── Chargement CSV ──
         async function init() {
             const resp = await fetch('animes.csv');
             const text = await resp.text();
@@ -428,23 +330,25 @@
                 if (!c[0] || c.length < 9) return null;
                 const cl = s => s ? s.trim().replace(/^"|"$/g, '') : '';
                 return {
-                    nom:     cl(c[0]), pop:    cl(c[1]), score:  cl(c[2]),
-                    sortie:  cl(c[3]), ep:     cl(c[4]), censure:cl(c[5]),
-                    etat:    cl(c[6]), img:    cl(c[8]),
+                    nom: cl(c[0]), pop: cl(c[1]), score: cl(c[2]),
+                    sortie: cl(c[3]), ep: cl(c[4]), censure: cl(c[5]),
+                    etat: cl(c[6]), img: cl(c[8]),
                     editeur: cl(c[14])
                 };
             }).filter(a => a && a.editeur);
 
-            // Vérifier si on arrive avec ?studio= dans l'URL
             const param = new URLSearchParams(window.location.search).get('studio');
             if (param) {
                 showProducer(decodeURIComponent(param));
             } else {
-                renderList();
+                renderList('');
             }
+            
+            // Recherche tolérante
+            const searchInput = document.getElementById('studio-search');
+            searchInput.addEventListener('input', (e) => renderList(e.target.value));
         }
 
-        // ── Grouper par studio (un anime peut avoir plusieurs éditeurs) ──
         function buildStudioMap() {
             const map = {};
             allAnimes.forEach(a => {
@@ -456,9 +360,6 @@
             return map;
         }
 
-        // ═══════════════════════════════
-        // VUE LISTE
-        // ═══════════════════════════════
         function renderList(filter = '') {
             document.getElementById('view-list').style.display = 'block';
             document.getElementById('view-producer').style.display = 'none';
@@ -472,10 +373,9 @@
 
             let studios = Object.keys(map).filter(s => !q || s.toLowerCase().includes(q));
 
-            // Tri
             studios.sort((a, b) => {
-                if (sortMode === 'nom')       return a.localeCompare(b, 'fr');
-                if (sortMode === 'nom-desc')  return b.localeCompare(a, 'fr');
+                if (sortMode === 'nom') return a.localeCompare(b, 'fr');
+                if (sortMode === 'nom-desc') return b.localeCompare(a, 'fr');
                 if (sortMode === 'score') {
                     const avgScore = arr => {
                         const sc = arr.map(x => parseFloat(x.score.replace(',','.'))).filter(Boolean);
@@ -483,7 +383,6 @@
                     };
                     return avgScore(map[b]) - avgScore(map[a]);
                 }
-                // count (default)
                 return map[b].length - map[a].length;
             });
 
@@ -520,12 +419,8 @@
             }).join('');
         }
 
-        document.getElementById('studio-search').oninput = e => renderList(e.target.value);
-        document.getElementById('studio-sort').onchange   = () => renderList(document.getElementById('studio-search').value);
+        document.getElementById('studio-sort').onchange = () => renderList(document.getElementById('studio-search').value);
 
-        // ═══════════════════════════════
-        // VUE PRODUCER
-        // ═══════════════════════════════
         function showProducer(studio) {
             currentStudio = studio;
             document.getElementById('view-list').style.display = 'none';
@@ -533,15 +428,11 @@
             document.title = studio + ' - Le Malicieux';
             history.pushState({ studio }, '', `editeurs.html?studio=${encodeURIComponent(studio)}`);
 
-            // Avatar = logo ou initiales en fallback
             const slug = studio.replace(/\s+/g, '-');
             const avatarEl = document.getElementById('prod-avatar');
-            avatarEl.innerHTML = `
-                <img src="img/${slug}.jpg"
-                     onerror="this.parentElement.innerHTML='<span class=\'avatar-initials\'>' + studio.split(/[\\s\\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase() + '</span>'"
-                >`;
+            avatarEl.innerHTML = `<img src="img/${slug}.jpg" style="width:100%;height:100%;object-fit:cover"
+                     onerror="this.parentElement.innerHTML='<span class=\'avatar-initials\' style=\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;\'>' + studio.split(/[\\s\\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase() + '</span>'">`;
             document.getElementById('prod-name').textContent = studio;
-
             renderProducerGrid();
         }
 
@@ -549,50 +440,35 @@
             const map = buildStudioMap();
             let animes = map[currentStudio] || [];
 
-            // Filtrage
             const filterVal = document.getElementById('prod-filter').value;
             if (filterVal === 'oui' || filterVal === 'non') {
                 animes = animes.filter(a => a.censure.toLowerCase() === filterVal);
             } else if (filterVal === 'terminé') {
-                // accepte "Terminé", "Fini", "Finished", "terminé" peu importe la casse/orthographe
-                animes = animes.filter(a => {
-                    const e = a.etat.toLowerCase();
-                    return e.includes('termin') || e.includes('fini') || e.includes('finish');
-                });
+                animes = animes.filter(a => a.etat.toLowerCase().includes('termin') || a.etat.toLowerCase().includes('fini'));
             } else if (filterVal === 'en cours') {
-                animes = animes.filter(a => {
-                    const e = a.etat.toLowerCase();
-                    return e.includes('cours') || e.includes('airing') || e.includes('diffus');
-                });
-            } else if (filterVal) {
-                animes = animes.filter(a => a.etat.toLowerCase().includes(filterVal.toLowerCase()));
+                animes = animes.filter(a => a.etat.toLowerCase().includes('cours') || a.etat.toLowerCase().includes('airing'));
             }
 
-            // Tri
             const sortVal = document.getElementById('prod-sort').value;
             animes = [...animes].sort((a, b) => {
-                if (sortVal === 'score')  return parseFloat(b.score.replace(',','.') || 0) - parseFloat(a.score.replace(',','.') || 0);
-                if (sortVal === 'pop')    return (parseInt(a.pop.replace('#','')) || 99999) - (parseInt(b.pop.replace('#','')) || 99999);
-                if (sortVal === 'année')  return (b.sortie || '').localeCompare(a.sortie || '');
-                if (sortVal === 'nom')    return a.nom.localeCompare(b.nom);
+                if (sortVal === 'score') return parseFloat(b.score.replace(',','.') || 0) - parseFloat(a.score.replace(',','.') || 0);
+                if (sortVal === 'pop') return (parseInt(a.pop.replace('#','')) || 99999) - (parseInt(b.pop.replace('#','')) || 99999);
+                if (sortVal === 'année') return (b.sortie || '').localeCompare(a.sortie || '');
+                if (sortVal === 'nom') return a.nom.localeCompare(b.nom);
                 return 0;
             });
 
-            // Stats header (scores CSV en attendant, puis MAL en async)
             const allForStudio = map[currentStudio] || [];
             document.getElementById('prod-total').textContent = allForStudio.length;
-            document.getElementById('prod-avg').textContent   = '…';
-            document.getElementById('prod-best').textContent  = '…';
-            fetchStudioScoresFromMAL(allForStudio);
             document.getElementById('prod-count').textContent = `${animes.length} titre${animes.length > 1 ? 's' : ''} affiché${animes.length > 1 ? 's' : ''}`;
+            
+            fetchStudioScoresFromMAL(allForStudio);
 
-            // Grille avec mise en valeur du critère actif
             const grid = document.getElementById('producer-grid');
             if (animes.length === 0) {
                 grid.innerHTML = '<div class="empty-state">Aucun anime pour ces critères.</div>';
                 return;
             }
-            const hl = (field) => sortVal === field ? 'class="highlight"' : '';
             grid.innerHTML = animes.map(a => {
                 const scoreNum = parseFloat(a.score.replace(',','.'));
                 const scoreBadge = scoreNum ? `<div class="score-badge">⭐ ${a.score}</div>` : '';
@@ -605,7 +481,7 @@
                     <div class="ac-info">
                         <div class="ac-title">${a.nom}</div>
                         <div class="ac-meta">
-                            <span ${hl('année')}>📅 ${a.sortie}</span>
+                            <span>📅 ${a.sortie}</span>
                             <span>🎞️ ${a.ep}</span>
                         </div>
                         <div class="ac-meta">
@@ -617,11 +493,9 @@
             }).join('');
         }
 
-        // Récupère les scores via Jikan pour les stats du studio
         async function fetchStudioScoresFromMAL(animes) {
             const scores = [];
-            // Limite à 8 animes max pour éviter le rate-limit
-            const sample = animes.slice(0, 8);
+            const sample = animes.slice(0, 6);
             for (const a of sample) {
                 try {
                     await new Promise(r => setTimeout(r, 400));
@@ -631,16 +505,16 @@
                     const json = await resp.json();
                     const s = json.data?.[0]?.score;
                     if (s) scores.push(parseFloat(s));
-                } catch { /* silencieux */ }
+                } catch { }
             }
             if (scores.length === 0) {
-                document.getElementById('prod-avg').textContent  = '—';
+                document.getElementById('prod-avg').textContent = '—';
                 document.getElementById('prod-best').textContent = '—';
                 return;
             }
-            const avg  = (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(2);
+            const avg = (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(2);
             const best = Math.max(...scores).toFixed(2);
-            document.getElementById('prod-avg').textContent  = '⭐ ' + avg;
+            document.getElementById('prod-avg').textContent = '⭐ ' + avg;
             document.getElementById('prod-best').textContent = '⭐ ' + best;
         }
 
@@ -649,12 +523,11 @@
             renderList(document.getElementById('studio-search').value);
         }
 
-        document.getElementById('prod-sort').onchange   = renderProducerGrid;
+        document.getElementById('prod-sort').onchange = renderProducerGrid;
         document.getElementById('prod-filter').onchange = renderProducerGrid;
 
         init();
 
-        // Retour navigateur → revenir à la liste des studios
         window.addEventListener('popstate', (e) => {
             if (e.state && e.state.studio) {
                 showProducer(e.state.studio);
@@ -666,6 +539,14 @@
                 document.title = 'Éditeurs & Studios - Le Malicieux';
             }
         });
+        
+        window.toggleM = () => {
+            const menu = document.getElementById('menu');
+            const overlay = document.getElementById('overlay');
+            const isOpen = menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        };
     </script>
 </body>
 </html>

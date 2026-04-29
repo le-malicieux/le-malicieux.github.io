@@ -50,7 +50,6 @@
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
 
-        /* Page content */
         body::before {
             content: '';
             position: fixed;
@@ -77,7 +76,6 @@
             padding-left: 5px;
         }
 
-        /* Lettre ancre */
         .letter-anchor {
             display: flex;
             align-items: center;
@@ -106,7 +104,6 @@
             background: linear-gradient(to right, rgba(255,71,87,0.4), transparent);
         }
 
-        /* Grille d'animes */
         .anime-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -125,8 +122,8 @@
         .card-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
+        .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; }
 
-        /* Navigation alphabétique fixed */
         .alpha-nav {
             position: fixed; top: 90px; left: 0; right: 0; z-index: 998;
             display: flex; flex-wrap: nowrap; overflow-x: auto;
@@ -145,7 +142,6 @@
         .alpha-nav a:hover { color: white; border-color: var(--primary); background: rgba(255,71,87,0.1); }
         .alpha-nav a.disabled { color: #333; border-color: #1a1a1a; pointer-events: none; }
 
-        /* Barre de recherche fixed */
         .search-bar-wrap {
             position: fixed; top: 50px; left: 0; right: 0; z-index: 999;
             background: rgba(15,15,15,0.97); backdrop-filter: blur(10px);
@@ -157,7 +153,6 @@
         }
         .search-bar-wrap input {
             flex: 1;
-            box-sizing: border-box;
             background: #1e1e1e;
             border: 1px solid #3a3a3a;
             color: white;
@@ -167,9 +162,7 @@
             height: 28px;
         }
         .search-bar-wrap input:focus { outline: none; border-color: var(--primary); }
-        
-        /* Nouveau style pour le select dans la barre de recherche */
-        .search-bar-wrap select {
+        .search-bar-wrap select, .search-bar-wrap .sort-select {
             background: #1e1e1e;
             border: 1px solid #3a3a3a;
             color: white;
@@ -178,11 +171,6 @@
             font-size: 0.82em;
             height: 28px;
             cursor: pointer;
-            white-space: nowrap;
-        }
-        .search-bar-wrap select:focus {
-            outline: none;
-            border-color: var(--primary);
         }
 
         #no-result {
@@ -191,33 +179,7 @@
             padding: 40px;
             font-size: 1.1em;
             display: none;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
         }
-
-        /* Mode liste */
-        .anime-list.list-mode {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .anime-list.list-mode .card {
-            flex-direction: row;
-            align-items: center;
-            border-radius: 6px;
-            gap: 0;
-        }
-        .anime-list.list-mode .card .img-container { display: none; }
-        .anime-list.list-mode .card-info {
-            padding: 10px 14px;
-        }
-        .anime-list.list-mode .card-title {
-            height: auto;
-            overflow: visible;
-            white-space: nowrap;
-            margin-bottom: 0;
-            font-size: 0.95em;
-        }
-        .anime-list.list-mode .card-meta-row { display: none; }
 
         @media (max-width: 1000px) {
             .burger { display: block; }
@@ -235,6 +197,13 @@
             .card-title { font-size: 0.85em; }
             .card-meta-row { font-size: 0.65em; gap: 2px; }
         }
+        
+        .btn-old-index {
+            background: #222; border: 1px solid #ff4757; color: #ff4757;
+            padding: 5px 10px; border-radius: 5px; font-size: 0.75em;
+            text-decoration: none; margin-left: 8px;
+        }
+        .btn-old-index:hover { background: #ff4757; color: white; }
     </style>
 </head>
 <body>
@@ -258,7 +227,7 @@
             <a href="tags.html" class="btn-red">🏷️ Tags</a>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
             <a href="editeurs.html" class="btn-red">🏢 Studios</a>
-            <!-- Le menu déroulant a été retiré d'ici pour être déplacé dans la barre de recherche -->
+            <a href="index_old.html" class="btn-red">🕰️ Ancien index</a>
             <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
         </div>
 
@@ -272,16 +241,25 @@
 
     <div class="search-bar-wrap">
         <input type="text" id="search" placeholder="Rechercher un anime...">
-        <!-- Le menu déroulant "Mode d'affichage" est déplacé ici -->
-        <select id="view-mode">
-            <option value="cards">🖼️ Photos</option>
-            <option value="list">📋 Liste</option>
+        <select id="sort-select">
+            <option value="">🔀 Aléatoire</option>
+            <option value="popularite">📈 Popularité</option>
+            <option value="score">⭐ Score</option>
+            <option value="nom">📝 Nom (A-Z)</option>
+            <option value="sortie">📅 Année</option>
+            <option value="episodes">🎞️ Épisodes</option>
+            <option value="etat">🛠️ État</option>
+            <option value="censure">🔞 Censure</option>
+            <option value="editeur">🏢 Éditeur</option>
         </select>
     </div>
 
     <div class="alpha-nav" id="alpha-nav"></div>
 
     <div class="content-area">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+            <a href="index_old.html" class="btn-old-index">🕰️ Ancien catalogue</a>
+        </div>
         <div id="groups-container"></div>
         <div id="no-result">Aucun anime trouvé pour cette recherche.</div>
     </div>
@@ -293,16 +271,16 @@
 
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig);
-        const db  = getFirestore(app);
+        const db = getFirestore(app);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
         let allAnimes = [];
+        let currentFiltered = [];
 
         onAuthStateChanged(auth, async (user) => {
             const authUi = document.getElementById('auth-ui');
             if (user) {
-                // Pseudo + avatar
                 const cachedPseudo = sessionStorage.getItem('userPseudo');
                 const cachedAvatar = sessionStorage.getItem('userAvatar');
                 let dispName = cachedPseudo || user.displayName;
@@ -345,7 +323,7 @@
             if (/[0-9]/.test(first)) return '#';
             const letter = first.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
             if (/[A-Z]/.test(letter)) return letter;
-            return '★'; // caractères spéciaux
+            return '★';
         }
 
         function buildAlphaNav(groups) {
@@ -356,28 +334,69 @@
                 return `<a href="${hasContent ? '#group-' + k : '#'}" class="${hasContent ? '' : 'disabled'}">${k}</a>`;
             }).join('');
         }
+        
+        function normalizeSearch(str) {
+            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[-_.:;,!?()'"&~#|]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
 
-        function render(searchVal = '') {
+        function sortAnimes(list, sortMode) {
+            if (!sortMode) return [...list];
+            const sorted = [...list];
+            if (sortMode === 'score') {
+                sorted.sort((a,b) => parseFloat((b.score||'0').replace(',','.')) - parseFloat((a.score||'0').replace(',','.')));
+            } else if (sortMode === 'popularite') {
+                sorted.sort((a,b) => (parseInt((a.pop||'').replace('#',''))||99999) - (parseInt((b.pop||'').replace('#',''))||99999));
+            } else if (sortMode === 'sortie') {
+                sorted.sort((a,b) => {
+                    const ya = parseInt((a.sortie||'').match(/\d{4}/)?.[0]||'0');
+                    const yb = parseInt((b.sortie||'').match(/\d{4}/)?.[0]||'0');
+                    return yb - ya;
+                });
+            } else if (sortMode === 'episodes') {
+                sorted.sort((a,b) => {
+                    const ea = parseInt((a.ep||'').match(/\d+/g)?.pop()||'0');
+                    const eb = parseInt((b.ep||'').match(/\d+/g)?.pop()||'0');
+                    return eb - ea;
+                });
+            } else if (sortMode === 'nom') {
+                sorted.sort((a,b) => a.nom.localeCompare(b.nom, 'fr'));
+            } else if (sortMode === 'censure') {
+                sorted.sort((a,b) => (a.censure||'').localeCompare(b.censure||''));
+            } else if (sortMode === 'etat') {
+                sorted.sort((a,b) => (a.etat||'').localeCompare(b.etat||''));
+            } else if (sortMode === 'editeur') {
+                sorted.sort((a,b) => (a.editeur||'').localeCompare(b.editeur||''));
+            }
+            return sorted;
+        }
+
+        function render(searchVal = '', sortMode = '') {
             const container = document.getElementById('groups-container');
             const noResult = document.getElementById('no-result');
-            const query = searchVal.toLowerCase().trim();
+            const query = normalizeSearch(searchVal);
 
-            // Grouper les animes filtrés
+            let filtered = allAnimes;
+            if (query) {
+                filtered = allAnimes.filter(a => normalizeSearch(a.nom).includes(query));
+            }
+            
+            filtered = sortAnimes(filtered, sortMode);
+            currentFiltered = filtered;
+
             const groups = {};
-            for (const a of allAnimes) {
-                if (query && !a.nom.toLowerCase().includes(query)) continue;
+            for (const a of filtered) {
                 const key = getGroupKey(a.nom);
                 if (!groups[key]) groups[key] = [];
                 groups[key].push(a);
             }
 
-            // Trier les animes dans chaque groupe
             for (const key in groups) {
                 groups[key].sort((a, b) => a.nom.localeCompare(b.nom, 'fr', { sensitivity: 'base' }));
             }
 
-            // Ordre d'affichage : spéciaux → chiffres → A-Z
             const orderedKeys = ['★', '#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')].filter(k => groups[k]);
+            const hl = (field) => sortMode === field ? 'class="highlight"' : '';
 
             if (orderedKeys.length === 0) {
                 container.innerHTML = '';
@@ -388,8 +407,6 @@
 
             container.innerHTML = orderedKeys.map(key => {
                 const label = key === '★' ? '★ Spéciaux' : key === '#' ? '# Chiffres' : key;
-                const viewMode = document.getElementById('view-mode').value;
-                const listClass = viewMode === 'list' ? ' list-mode' : '';
                 const cards = groups[key].map(a => `
                     <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                         <div class="img-container">
@@ -398,16 +415,16 @@
                         <div class="card-info">
                             <div class="card-title">${a.nom}</div>
                             <div class="card-meta-row">
-                                <span>📅${a.sortie}</span>
-                                <span>⭐${a.score}</span>
-                                <span>📈${a.pop}</span>
+                                <span ${hl('sortie')}>📅${a.sortie}</span>
+                                <span ${hl('score')}>⭐${a.score}</span>
+                                <span ${hl('popularite')}>📈${a.pop}</span>
                             </div>
                             <div class="card-meta-row">
-                                <span>🎞️${a.ep}</span>
-                                <span>🔞${a.censure}</span>
-                                <span>🛠️${a.etat}</span>
+                                <span ${hl('episodes')}>🎞️${a.ep}</span>
+                                <span ${hl('censure')}>🔞${a.censure}</span>
+                                <span ${hl('etat')}>🛠️${a.etat}</span>
                             </div>
-                            ${a.editeur ? `<div class="card-meta-row"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;">🏢${a.editeur}</span></div>` : ''}
+                            ${a.editeur ? `<div class="card-meta-row"><span ${hl('editeur')} style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🏢${a.editeur}</span></div>` : ''}
                         </div>
                     </a>`).join('');
 
@@ -416,11 +433,16 @@
                         <div class="letter-badge">${label}</div>
                         <div class="letter-line"></div>
                     </div>
-                    <div class="anime-list${listClass}">${cards}</div>`;
+                    <div class="anime-list">${cards}</div>`;
             }).join('');
 
-            // Mettre à jour la nav (griser les lettres sans résultat dans la recherche)
-            buildAlphaNav(groups);
+            const navGroups = {};
+            for (const a of filtered) {
+                const k = getGroupKey(a.nom);
+                if (!navGroups[k]) navGroups[k] = [];
+                navGroups[k].push(a);
+            }
+            buildAlphaNav(navGroups);
         }
 
         async function init() {
@@ -446,12 +468,10 @@
                         nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]),
                         sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]),
                         etat: clean(c[6]), img: clean(c[8]),
-                        tags: clean(c[12]),
-                        editeur: clean(c[14])
+                        tags: clean(c[12]), editeur: clean(c[14])
                     };
                 }).filter(a => a !== null);
 
-                // Construire la nav initiale avec tous les groupes
                 const allGroups = {};
                 for (const a of allAnimes) {
                     const k = getGroupKey(a.nom);
@@ -459,13 +479,12 @@
                     allGroups[k].push(a);
                 }
                 buildAlphaNav(allGroups);
-
                 render();
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
-        document.getElementById('search').oninput = (e) => render(e.target.value);
-        document.getElementById('view-mode').onchange = () => render(document.getElementById('search').value);
+        document.getElementById('search').oninput = (e) => render(e.target.value, document.getElementById('sort-select').value);
+        document.getElementById('sort-select').onchange = () => render(document.getElementById('search').value, document.getElementById('sort-select').value);
 
         window.toggleM = () => {
             const menu = document.getElementById('menu');

@@ -10,8 +10,58 @@
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         .container { max-width: 1100px; margin: 0 auto; }
+        
+        .top-navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: rgba(15,15,15,0.95); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        
+        .search-wrapper {
+            position: relative; flex: 1; max-width: 300px; min-width: 150px;
+        }
+        .search-wrapper input {
+            width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; 
+            padding: 6px 30px 6px 10px; border-radius: 5px; font-size: 0.8em;
+            transition: 0.3s; box-sizing: border-box; outline: none;
+        }
+        .search-wrapper input:focus { border-color: var(--primary); }
+        .search-icon {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            color: #888; font-size: 0.9em; pointer-events: none;
+        }
+        .search-suggestions {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #1a1a1a; border: 1px solid #333; border-radius: 0 0 5px 5px;
+            max-height: 250px; overflow-y: auto; display: none; z-index: 2000;
+        }
+        .search-suggestions.active { display: block; }
+        .search-suggestions .suggestion-item {
+            padding: 6px 10px; cursor: pointer; color: #ccc; font-size: 0.8em;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .search-suggestions .suggestion-item:hover { background: #2a2a2a; }
+        .search-suggestions .suggestion-item .sugg-img { width: 24px; height: 34px; border-radius: 3px; object-fit: cover; }
+        
+        .nav-links {
+            display: flex; gap: 8px; align-items: center;
+        }
+        .nav-links a, .nav-links button {
+            background: #222; border: 1px solid #444; color: white;
+            padding: 5px 10px; border-radius: 4px; font-size: 0.75em;
+            text-decoration: none; cursor: pointer;
+        }
+        .btn-red { background: var(--primary) !important; border: none !important; }
+        
         .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 6px; transition: 0.3s; }
         .back-btn:hover { background: var(--primary); color: white; }
+        
         .anime-header { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
         .top-info { display: flex; gap: 25px; margin-bottom: 25px; }
         .poster { width: 280px; flex-shrink: 0; }
@@ -23,16 +73,15 @@
         .stat-item small { color: var(--primary); font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 4px; }
         .stat-item span { font-weight: bold; font-size: 0.9em; }
         .stat-item.mal-live { border-color: #2e86de; }
-        .stat-item.mal-live::after { content: 'MAL'; position: absolute; top: 4px; right: 5px; font-size: 0.55em; color: #2e86de; font-weight: bold; letter-spacing: 0.5px; }
         .mal-loading { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75em; color: #888; margin-top: 6px; }
         .mal-loading .dot { width: 6px; height: 6px; background: #2e86de; border-radius: 50%; animation: pulse 1s infinite; }
         .mal-loading .dot:nth-child(2) { animation-delay: 0.2s; }
         .mal-loading .dot:nth-child(3) { animation-delay: 0.4s; }
         @keyframes pulse { 0%,100% { opacity:0.2; } 50% { opacity:1; } }
+        
         .bottom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
         .playlist-box { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
         select { background: #333; color: #fff; border: 1px solid #555; padding: 10px; width: 100%; border-radius: 4px; margin-bottom: 12px; cursor: pointer; }
-        select option { background-color: #222 !important; color: #fff !important; }
         .ep-row { display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #444; }
         .ep-row span { font-weight: bold; color: #aaa; }
         #user-ep { width: auto; min-width: 80px; margin-bottom: 0; text-align: center; padding: 5px; }
@@ -47,57 +96,74 @@
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.8em; margin-top: 10px; }
         .mal-link { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75em; color: #2e86de; text-decoration: none; margin-top: 4px; opacity: 0.8; transition: opacity 0.2s; }
         .mal-link:hover { opacity: 1; text-decoration: underline; }
-        @media (max-width: 800px) {
-            body { padding: 10px; }
-            .top-info { flex-direction: column; gap: 15px; }
-            .poster { width: 100%; max-width: 220px; margin: 0 auto; }
-            .anime-title { font-size: 1.5em; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
-            .stat-item { padding: 8px 6px; }
-            .stat-item small { font-size: 0.6em; }
-            .stat-item span { font-size: 0.8em; }
-            .bottom-controls { grid-template-columns: 1fr; gap: 12px; }
-            .anime-header { padding: 14px; }
-            .info-generale-fixe { font-size: 0.72em; }
-        }
-        /* ── SECTION RELATIONS (PREQUELS / SEQUELS) ── */
+        
         .related-row { display: flex; gap: 16px; align-items: stretch; margin-bottom: 18px; flex-wrap: wrap; }
         .related-section { flex: 1; min-width: 0; }
         .related-label { font-size: 0.7em; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
-        .related-card {
-            display: flex; flex-direction: row; align-items: center;
-            text-decoration: none; gap: 10px;
-            background: #222; border: 1px solid #333; border-radius: 8px;
-            padding: 8px; transition: border-color 0.2s, transform 0.2s;
-            overflow: hidden;
-        }
+        .related-card { display: flex; flex-direction: row; align-items: center; text-decoration: none; gap: 10px; background: #222; border: 1px solid #333; border-radius: 8px; padding: 8px; transition: border-color 0.2s, transform 0.2s; }
         .related-card:hover { border-color: var(--primary); transform: translateY(-2px); }
-        .related-card img {
-            width: 56px; height: 78px; object-fit: cover; flex-shrink: 0;
-            border-radius: 5px; border: 2px solid #444;
-            transition: border-color 0.2s;
-        }
+        .related-card img { width: 56px; height: 78px; object-fit: cover; flex-shrink: 0; border-radius: 5px; border: 2px solid #444; }
         .related-card:hover img { border-color: var(--primary); }
-        .related-card span {
-            font-size: 0.8em; color: #ccc; line-height: 1.4;
-            word-break: break-word; flex: 1;
-        }
-        .related-card:hover span { color: white; }
-        /* ── MODALE CONFIRMATION ── */
+        .related-card span { font-size: 0.8em; color: #ccc; line-height: 1.4; word-break: break-word; flex: 1; }
+        
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
-        .modal-box { background: #1a1a1a; border: 1px solid #444; border-radius: 12px; padding: 28px 24px; max-width: 360px; width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+        .modal-box { background: #1a1a1a; border: 1px solid #444; border-radius: 12px; padding: 28px 24px; max-width: 360px; width: 90%; text-align: center; }
         .modal-box p { margin: 0 0 22px; font-size: 0.95em; color: #ddd; line-height: 1.5; }
         .modal-actions { display: flex; gap: 10px; justify-content: center; }
         .modal-btn { padding: 10px 24px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 0.9em; transition: 0.2s; }
         .modal-btn-cancel { background: #333; color: #ccc; border: 1px solid #555; }
-        .modal-btn-cancel:hover { background: #444; }
         .modal-btn-confirm { background: var(--primary); color: white; }
-        .modal-btn-confirm:hover { opacity: 0.85; }
+        
+        .comments-section { margin-top:20px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333; }
+        
+        @media (max-width: 800px) {
+            body { padding: 10px; }
+            .top-navbar { flex-wrap: wrap; gap: 8px; }
+            .search-wrapper { max-width: 100%; order: 3; margin-top: 8px; }
+            .top-info { flex-direction: column; gap: 15px; }
+            .poster { width: 100%; max-width: 220px; margin: 0 auto; }
+            .anime-title { font-size: 1.5em; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+            .bottom-controls { grid-template-columns: 1fr; gap: 12px; }
+        }
     </style>
 </head>
 <body>
-    <!-- MODALE CONFIRMATION -->
+    <div class="top-navbar">
+        <a href="index.html" class="nav-brand">
+            <img src="img/logo.jpg" class="nav-logo-small">
+            <span class="nav-title">LE MALICIEUX</span>
+        </a>
+        
+        <div class="search-wrapper">
+            <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
+            <span class="search-icon">🔍</span>
+            <div class="search-suggestions" id="search-suggestions"></div>
+        </div>
+        
+        <div class="nav-links">
+            <a href="index.html" class="btn-red">🏠 Accueil</a>
+            <a href="tags.html">🏷️ Tags</a>
+            <a href="alphabetique.html">📖 A-Z</a>
+            <a href="playlist.html">📂 Playlist</a>
+            <a href="editeurs.html">🏢 Studios</a>
+            <a href="index_old.html">🕰️ Ancien</a>
+            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <a href="index.html" id="back-link" class="back-btn" onclick="handleBack(event)">← Retour au catalogue</a>
+        <div id="anime-details">Chargement des données...</div>
+        <div id="comments-section" class="comments-section">
+            <h3>Commentaires</h3>
+            <textarea id="comment-input" style="width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box;" placeholder="Ajouter un commentaire..." rows="3"></textarea>
+            <button id="btn-post" style="background:var(--primary); color:white; border:none; padding:10px 30px; border-radius:5px; cursor:pointer; font-weight:bold;">Publier</button>
+            <div id="comments-display" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="confirm-modal">
         <div class="modal-box">
             <p id="modal-msg"></p>
@@ -105,17 +171,6 @@
                 <button class="modal-btn modal-btn-cancel" id="modal-cancel">Annuler</button>
                 <button class="modal-btn modal-btn-confirm" id="modal-confirm">Supprimer</button>
             </div>
-        </div>
-    </div>
-
-    <div class="container">
-        <a href="index.html" id="back-link" class="back-btn" onclick="handleBack(event)">← Retour au catalogue</a>
-        <div id="anime-details">Chargement des données...</div>
-        <div id="comments-section" style="margin-top:20px; background:var(--card-bg); padding:20px; border-radius:15px; border: 1px solid #333;">
-            <h3>Commentaires</h3>
-            <textarea id="comment-input" style="width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; resize: none; box-sizing: border-box;" placeholder="Ajouter un commentaire..." rows="3"></textarea>
-            <button id="btn-post" style="background:var(--primary); color:white; border:none; padding:10px 30px; border-radius:5px; cursor:pointer; font-weight:bold;">Publier</button>
-            <div id="comments-display" style="margin-top: 20px;"></div>
         </div>
     </div>
 
@@ -133,8 +188,13 @@
         const animeName = params.get('name');
         let currentUser = null;
         let userRating = 0;
+        let allAnimesForSearch = [];
 
-        // ─── RETOUR INTELLIGENT ──────────────────────────────────────────────────
+        function normalize(str) {
+            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[-_.:;,!?()'"&~#|]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
         window.handleBack = (e) => {
             e.preventDefault();
             const from = document.referrer;
@@ -145,7 +205,68 @@
             }
         };
 
-        // ─── JIKAN / MAL ────────────────────────────────────────────────────────────
+        async function loadAnimesForSearch() {
+            try {
+                const resp = await fetch('animes.csv');
+                const data = await resp.text();
+                const lines = data.split(/\r?\n/).slice(1);
+                for (const line of lines) {
+                    const c = line.split(';');
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    if (c[0]) allAnimesForSearch.push({ nom: clean(c[0]), img: clean(c[8]) });
+                }
+            } catch(e) {}
+        }
+        loadAnimesForSearch();
+
+        const searchInput = document.getElementById('search');
+        const searchSuggestions = document.getElementById('search-suggestions');
+        searchInput.addEventListener('input', function() {
+            const val = this.value.trim();
+            if (val.length < 2) { searchSuggestions.classList.remove('active'); return; }
+            const results = allAnimesForSearch.filter(a => normalize(a.nom).includes(normalize(val))).slice(0, 8);
+            if (results.length === 0) {
+                searchSuggestions.innerHTML = '<div class="no-result" style="padding:10px;color:#888;">Aucun résultat</div>';
+            } else {
+                searchSuggestions.innerHTML = results.map(a => 
+                    '<div class="suggestion-item" data-name="'+a.nom.replace(/"/g,'&quot;')+'"><img src="img/'+a.img+'" class="sugg-img" onerror="this.src=\'img/logo.jpg\'"><span>'+a.nom+'</span></div>'
+                ).join('');
+            }
+            searchSuggestions.classList.add('active');
+        });
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = this.value.trim();
+                if (val) {
+                    const results = allAnimesForSearch.filter(a => normalize(a.nom).includes(normalize(val)));
+                    if (results.length === 1) {
+                        window.location.href = 'video.html?name=' + encodeURIComponent(results[0].nom);
+                    } else if (results.length > 1) {
+                        window.location.href = 'index.html?search=' + encodeURIComponent(val);
+                    }
+                }
+                searchSuggestions.classList.remove('active');
+                this.blur();
+            }
+        });
+        searchSuggestions.addEventListener('click', function(e) {
+            const item = e.target.closest('.suggestion-item');
+            if (item && item.dataset.name) {
+                window.location.href = 'video.html?name=' + encodeURIComponent(item.dataset.name);
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-wrapper')) searchSuggestions.classList.remove('active');
+        });
+        
+        window.randomAnime = () => {
+            if(allAnimesForSearch.length > 0) {
+                const a = allAnimesForSearch[Math.floor(Math.random() * allAnimesForSearch.length)];
+                window.location.href = 'video.html?name=' + encodeURIComponent(a.nom);
+            }
+        };
+
         function traduitStatutMAL(status) {
             const map = { 'Finished Airing': 'Terminé', 'Currently Airing': 'En cours', 'Not yet aired': 'À venir', 'Airing': 'En cours' };
             return map[status] || status || '—';
@@ -171,26 +292,19 @@
                     const item = json.data[0];
                     return { score: item.score, popularity: item.popularity, status: item.status, malUrl: item.url };
                 }
-            } catch(e) {
-                console.warn('Erreur Jikan:', e);
-                return null;
-            }
+            } catch(e) { return null; }
         }
 
         function applyMALStats(malData) {
             if (!malData) return;
-            const popEl    = document.getElementById('stat-pop');
-            const scoreEl  = document.getElementById('stat-score');
-            const etatEl   = document.getElementById('stat-etat');
+            const popEl = document.getElementById('stat-pop');
+            const scoreEl = document.getElementById('stat-score');
+            const etatEl = document.getElementById('stat-etat');
             const malBadge = document.getElementById('mal-badge');
-            if (popEl && malData.popularity != null)  { popEl.textContent = formatPop(malData.popularity);          popEl.closest('.stat-item').classList.add('mal-live'); }
-            if (scoreEl && malData.score != null)      { scoreEl.textContent = '⭐ ' + formatScore(malData.score);  scoreEl.closest('.stat-item').classList.add('mal-live'); }
-            if (etatEl && malData.status)              { etatEl.textContent = traduitStatutMAL(malData.status);     etatEl.closest('.stat-item').classList.add('mal-live'); }
-            if (malBadge) {
-                malBadge.innerHTML = malData.malUrl
-                    ? `<a href="${malData.malUrl}" target="_blank" class="mal-link">🔗 Voir sur MyAnimeList</a>`
-                    : '';
-            }
+            if (popEl && malData.popularity != null) { popEl.textContent = formatPop(malData.popularity); popEl.closest('.stat-item').classList.add('mal-live'); }
+            if (scoreEl && malData.score != null) { scoreEl.textContent = '⭐ ' + formatScore(malData.score); scoreEl.closest('.stat-item').classList.add('mal-live'); }
+            if (etatEl && malData.status) { etatEl.textContent = traduitStatutMAL(malData.status); etatEl.closest('.stat-item').classList.add('mal-live'); }
+            if (malBadge) { malBadge.innerHTML = malData.malUrl ? `<a href="${malData.malUrl}" target="_blank" class="mal-link">🔗 Voir sur MyAnimeList</a>` : ''; }
         }
 
         async function load() {
@@ -206,17 +320,17 @@
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                     if (clean(c[0]) === animeName) {
                         anime = {
-                            nom:    clean(c[0]),  pop:   clean(c[1]),  score: clean(c[2]),
-                            year:   clean(c[3]),  ep:    clean(c[4]),  censure: clean(c[5]),
-                            etat:   clean(c[6]),  desc:  clean(c[7]),  img:   clean(c[8]),
-                            stream: c[9]  ? c[9].split(',').map(clean)  : [],
-                            dl:     c[10] ? c[10].split(',').map(clean) : [],
-                            infoV:  clean(c[11]),
-                            tags:   c[12] ? c[12].split(',').filter(t => t.trim() !== "").map(clean) : [],
-                            malId:   clean(c[13]),
+                            nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]),
+                            year: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]),
+                            etat: clean(c[6]), desc: clean(c[7]), img: clean(c[8]),
+                            stream: c[9] ? c[9].split(',').map(clean) : [],
+                            dl: c[10] ? c[10].split(',').map(clean) : [],
+                            infoV: clean(c[11]),
+                            tags: c[12] ? c[12].split(',').filter(t => t.trim() !== "").map(clean) : [],
+                            malId: clean(c[13]),
                             editeur: clean(c[14]),
                             prequels: c[15] ? c[15].split(',').map(clean).filter(Boolean) : [],
-                            sequels:  c[16] ? c[16].split(',').map(clean).filter(Boolean) : []
+                            sequels: c[16] ? c[16].split(',').map(clean).filter(Boolean) : []
                         };
                         break;
                     }
@@ -230,35 +344,28 @@
                 for(let i = 0; i <= maxEp; i++) { epOptions += `<option value="${i}">${i}</option>`; }
 
                 const tagsHtml = anime.tags.length > 0 
-                    ? anime.tags.map(t => `<a href="tags.html?tag=${encodeURIComponent(t)}" style="text-align:center; background:rgba(255,255,255,0.05); color:#aaa; text-decoration:none; font-size:0.75em; padding:5px 8px; border-radius:4px; border:1px solid #333; transition:0.3s; white-space:nowrap;" onmouseover="this.style.borderColor='var(--primary)';this.style.color='white'" onmouseout="this.style.borderColor='#333';this.style.color='#aaa'">${t}</a>`).join('')
-                    : `<div style="width:100%; text-align:center; color:#555; font-size:0.75em; padding:5px; border:1px dashed #333; border-radius:4px;">Aucun tag répertorié</div>`;
+                    ? anime.tags.map(t => `<a href="tags.html?tag=${encodeURIComponent(t)}" style="display:inline-block; background:rgba(255,255,255,0.05); color:#aaa; text-decoration:none; font-size:0.75em; padding:5px 8px; border-radius:4px; border:1px solid #333; transition:0.3s; margin:2px;" onmouseover="this.style.borderColor='var(--primary)';this.style.color='white'" onmouseout="this.style.borderColor='#333';this.style.color='#aaa'">${t}</a>`).join('')
+                    : `<div style="color:#555; font-size:0.75em; padding:5px; border:1px dashed #333; border-radius:4px;">Aucun tag répertorié</div>`;
 
-                // Construire un index nom → img depuis le CSV pour les prequels/sequels
                 const imgIndex = {};
                 for (const line of lines) {
                     const c2 = line.split(';');
-                    const n  = c2[0] ? c2[0].trim().replace(/^"|"$/g, '') : '';
+                    const n = c2[0] ? c2[0].trim().replace(/^"|"$/g, '') : '';
                     const im = c2[8] ? c2[8].trim().replace(/^"|"$/g, '') : '';
                     if (n && im) imgIndex[n] = im;
                 }
 
-                const makeRelatedCards = (list) =>
-                    list.map(name => {
-                        const imgFile = imgIndex[name] || '';
-                        const imgBase = imgFile ? imgFile.replace(/\.[^.]+$/, '') : '';
-                        const imgTag  = imgBase
-                            ? `<img src="img/${imgBase}.jpg" onerror="this.src='img/${imgBase}.png'; this.onerror=null;">`
-                            : `<div style="width:56px;height:78px;background:#333;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.4em;">🎬</div>`;
-                        return `<a href="video.html?name=${encodeURIComponent(name)}" class="related-card">
-                            ${imgTag}
-                            <span>${name}</span>
-                        </a>`;
-                    }).join('');
+                const makeRelatedCards = (list) => list.map(name => {
+                    const imgFile = imgIndex[name] || '';
+                    const imgBase = imgFile ? imgFile.replace(/\.[^.]+$/, '') : '';
+                    const imgTag = imgBase ? `<img src="img/${imgBase}.jpg" onerror="this.src='img/${imgBase}.png'; this.onerror=null;">` : `<div style="width:56px;height:78px;background:#333;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.4em;">🎬</div>`;
+                    return `<a href="video.html?name=${encodeURIComponent(name)}" class="related-card">${imgTag}<span>${name}</span></a>`;
+                }).join('');
 
                 const relatedSection = (anime.prequels.length || anime.sequels.length) ? `
                     <div class="related-row">
                         ${anime.prequels.length ? `<div class="related-section"><div class="related-label">⬅️ Préquel(s)</div>${makeRelatedCards(anime.prequels)}</div>` : ''}
-                        ${anime.sequels.length  ? `<div class="related-section"><div class="related-label">➡️ Suite(s)</div>${makeRelatedCards(anime.sequels)}</div>`   : ''}
+                        ${anime.sequels.length ? `<div class="related-section"><div class="related-label">➡️ Suite(s)</div>${makeRelatedCards(anime.sequels)}</div>` : ''}
                     </div>` : '';
 
                 display.innerHTML = `
@@ -283,17 +390,12 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div id="mal-badge">
-                                    <span class="mal-loading">
-                                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                                        ${anime.malId ? 'Chargement MAL (ID forcé)…' : 'Récupération des données MAL…'}
-                                    </span>
-                                </div>
+                                <div id="mal-badge"><span class="mal-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span>Chargement MAL…</span></div>
                                 <p style="font-size:0.95em; color:#ccc; line-height:1.6;">${anime.desc}</p>
                             </div>
                         </div>
                         <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:${relatedSection ? '14px' : '20px'};">${tagsHtml}</div>
-                        ${relatedSection ? `<div style="margin-bottom:20px;">${relatedSection}</div>` : ''}
+                        ${relatedSection}
                         <div class="bottom-controls">
                             <div class="playlist-box">
                                 <label style="font-size:0.7em; color:var(--primary); font-weight:bold; text-transform:uppercase; margin-bottom:10px; display:block;">Ma Progression</label>
@@ -309,7 +411,7 @@
                                 <div class="info-visionnage-csv">${anime.infoV || "Aucune information supplémentaire pour le visionnage."}</div>
                                 <div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
                                 <div class="info-generale-fixe">
-                                    <strong>Attention :</strong> Quand une œuvre possède une deuxième saison qui porte le même nom ou un nom très ressemblant, je créé une seule carte pour toutes les saisons donc les informations comme la popularité sont plus générales, les liens de visionnage et de téléchargement sont biens présents, j'ai aussi inclus par exemple pour l'anime Furifure/2, le slash (/) sépare la saison 1 de la saison 2. Donc quand vous voyez un slash (/) dans un nom, c'est qu'il y a plusieurs saisons, sauf cas compliqués comme Ikenai Koto où ses ses 3 saisons sont en 3 cartes ou Bible Black en une seule. Si ce n'est pas clair n'hésitez pas à poser des questions sur le discord :)
+                                    <strong>Attention :</strong> Quand une œuvre possède une deuxième saison qui porte le même nom ou un nom très ressemblant, je créé une seule carte pour toutes les saisons…
                                 </div>
                             </div>
                         </div>
@@ -319,70 +421,43 @@
                 anime.dl.filter(l => l.trim()).forEach((l, i) => document.getElementById('dl-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link" style="flex:1; min-width:80px;">${dlLabels[i] || '⬇️ Lien ' + (i+1)}</a>`);
                 anime.stream.filter(l => l.trim()).forEach((l, i) => document.getElementById('stream-area').innerHTML += `<a href="${l}" target="_blank" class="btn-link">Lien ${i+1} ↗</a>`);
 
-                // ── Récupération MAL en arrière-plan ──────────────────────────────
                 fetchMALData(anime.nom, anime.malId).then(malData => {
                     applyMALStats(malData);
-                    if (!malData) {
-                        const badge = document.getElementById('mal-badge');
-                        if (badge) badge.innerHTML = `<span style="font-size:0.72em; color:#555;">Données MAL indisponibles</span>`;
-                    }
+                    if (!malData) { const badge = document.getElementById('mal-badge'); if (badge) badge.innerHTML = `<span style="font-size:0.72em; color:#555;">Données MAL indisponibles</span>`; }
                 });
 
-                // Adapter le label du bouton retour selon la page d'origine
                 const _ref = document.referrer;
                 const _bl = document.getElementById('back-link');
-                if (_ref.includes('playlist.html'))  _bl.innerText = '← Retour à la playlist';
+                if (_ref.includes('playlist.html')) _bl.innerText = '← Retour à la playlist';
                 else if (_ref.includes('tags.html')) _bl.innerText = '← Retour aux tags';
 
                 const updateStars = (v) => document.querySelectorAll('#stars span').forEach(s => s.classList.toggle('active', s.dataset.v <= v));
 
-                // ─── AUTH + AUTO-MIGRATION ────────────────────────────────────────
                 onAuthStateChanged(auth, async (u) => {
                     currentUser = u;
                     if (u) {
                         const newDocId = u.uid + "_" + animeName;
-                        const docRef   = doc(db, "playlists", newDocId);
-                        let snap       = await getDoc(docRef);
+                        const docRef = doc(db, "playlists", newDocId);
+                        let snap = await getDoc(docRef);
 
-                        // 🔧 AUTO-MIGRATION
-                        // Si le doc avec le nouveau nom n'existe pas, on parcourt tous les
-                        // docs de l'utilisateur pour trouver un ancien doc dont le champ
-                        // anime correspond à l'animeName de l'URL (comparaison insensible
-                        // à la casse). Si trouvé → on le migre silencieusement.
                         if (!snap.exists()) {
                             try {
-                                const q       = query(collection(db, "playlists"), where("uid", "==", u.uid));
+                                const q = query(collection(db, "playlists"), where("uid", "==", u.uid));
                                 const allSnap = await getDocs(q);
                                 for (const oldDoc of allSnap.docs) {
                                     if (oldDoc.id === newDocId) continue;
-
-                                    const oldAnime = (
-                                        oldDoc.data().anime     ||
-                                        oldDoc.data().animeName ||
-                                        oldDoc.data().titre     ||
-                                        oldDoc.data().nom       || ""
-                                    ).trim();
-
+                                    const oldAnime = (oldDoc.data().anime || oldDoc.data().animeName || oldDoc.data().titre || oldDoc.data().nom || "").trim();
                                     if (oldAnime.toLowerCase() === animeName.toLowerCase()) {
-                                        const newData = { ...oldDoc.data() };
-                                        if ('anime'     in newData) newData.anime     = animeName;
-                                        if ('animeName' in newData) newData.animeName = animeName;
-                                        if ('titre'     in newData) newData.titre     = animeName;
-                                        if ('nom'       in newData) newData.nom       = animeName;
-
+                                        const newData = { ...oldDoc.data(), anime: animeName };
                                         await setDoc(docRef, newData);
                                         await deleteDoc(doc(db, "playlists", oldDoc.id));
                                         snap = await getDoc(docRef);
-                                        console.log(`✅ Auto-migré : "${oldAnime}" → "${animeName}"`);
                                         break;
                                     }
                                 }
-                            } catch (e) {
-                                console.warn("Auto-migration échouée :", e);
-                            }
+                            } catch(e) {}
                         }
 
-                        // Charger la progression si le doc existe (nouveau ou migré)
                         if (snap.exists()) {
                             const d = snap.data();
                             document.getElementById('user-status').value = d.status || 'watching';
@@ -398,42 +473,29 @@
                             document.getElementById('modal-msg').innerHTML = msg;
                             overlay.classList.add('active');
                             document.getElementById('modal-confirm').onclick = () => { overlay.classList.remove('active'); onConfirm(); };
-                            document.getElementById('modal-cancel').onclick  = () => { overlay.classList.remove('active'); };
+                            document.getElementById('modal-cancel').onclick = () => { overlay.classList.remove('active'); };
                         }
 
                         const autoSave = async () => {
                             const statusVal = document.getElementById('user-status').value;
-                            const epVal     = parseInt(document.getElementById('user-ep').value);
-                            const prevData  = snap.exists() ? snap.data() : {};
-                            const now       = new Date();
-
-                            const updates = {
-                                uid: u.uid, anime: animeName, img: anime.img,
-                                status: statusVal, epSeen: epVal,
-                                rating: userRating, epMax: maxEp
-                            };
-
-                            if (isNew || !prevData.addedAt)                                         updates.addedAt     = now;
-                            if (epVal !== (prevData.epSeen || 0))                                   updates.epUpdatedAt = now;
-                            if (userRating !== (prevData.rating || 0) && userRating > 0)            updates.ratedAt     = now;
-                            if (statusVal === 'completed' && prevData.status !== 'completed')       updates.completedAt = now;
-
+                            const epVal = parseInt(document.getElementById('user-ep').value);
+                            const prevData = snap.exists() ? snap.data() : {};
+                            const now = new Date();
+                            const updates = { uid: u.uid, anime: animeName, img: anime.img, status: statusVal, epSeen: epVal, rating: userRating, epMax: maxEp };
+                            if (isNew || !prevData.addedAt) updates.addedAt = now;
+                            if (epVal !== (prevData.epSeen || 0)) updates.epUpdatedAt = now;
+                            if (userRating !== (prevData.rating || 0) && userRating > 0) updates.ratedAt = now;
+                            if (statusVal === 'completed' && prevData.status !== 'completed') updates.completedAt = now;
                             await setDoc(docRef, updates, { merge: true });
                             snap = await getDoc(docRef);
                         };
 
                         document.getElementById('user-status').onchange = autoSave;
-                        document.getElementById('user-ep').onchange     = autoSave;
+                        document.getElementById('user-ep').onchange = autoSave;
                         document.getElementById('stars').onclick = (e) => {
-                            if (e.target.dataset.v) {
-                                userRating = parseInt(e.target.dataset.v);
-                                updateStars(userRating);
-                                autoSave();
-                            }
+                            if (e.target.dataset.v) { userRating = parseInt(e.target.dataset.v); updateStars(userRating); autoSave(); }
                         };
-                        document.getElementById('delete-btn').onclick = () => {
-                            showConfirm('Supprimer cet anime de votre liste ?', () => deleteDoc(docRef).then(() => location.reload()));
-                        };
+                        document.getElementById('delete-btn').onclick = () => { showConfirm('Supprimer cet anime de votre liste ?', () => deleteDoc(docRef).then(() => location.reload())); };
                     }
                 });
 
@@ -452,7 +514,6 @@
                         document.getElementById('comment-input').value = "";
                     }
                 };
-
             } catch (err) { console.error(err); }
         }
         load();
