@@ -2,155 +2,558 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="mobile.css">
-    <title>Profil - Le Malicieux</title>
+    <title>Mon Profil - Le Malicieux</title>
     <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.9); --text: #eee; --nav-bg: rgba(15,15,15,0.85); }
-        #bg-layer {
-            position: fixed; inset: 0; z-index: -2; pointer-events: none;
-            background-size: cover; background-position: center center;
-            background-repeat: no-repeat; background-attachment: scroll;
+        :root {
+            --primary: #ff4757;
+            --bg: #0f0f0f;
+            --card-bg: rgba(20, 20, 20, 0.88);
+            --text: #eee;
+            --nav-bg: rgba(15,15,15,0.9);
+            --border: #2a2a2a;
+            --accent-blue: #2e86de;
+            --accent-green: #2ecc71;
+            --accent-yellow: #f1c40f;
         }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+        }
+
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
-            gap: 12px; flex-wrap: wrap;
         }
-        .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-        .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-        .nav-logo-small { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; white-space: nowrap; }
-        .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 5px; order: -1; }
-        .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .nav-links a, .nav-links .nav-btn {
-            background: var(--primary); border: none; color: white;
-            padding: 5px 10px; border-radius: 4px; font-size: 0.8em;
-            text-decoration: none; cursor: pointer; white-space: nowrap; font-weight: bold;
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        
+        .search-wrapper {
+            position: relative; flex: 1; max-width: 400px; min-width: 200px;
         }
-        .nav-links .discord-btn {
-            background: #5865F2; color: white; text-decoration: none;
-            padding: 5px 10px; border-radius: 20px; font-size: 0.8em;
-            font-weight: bold; white-space: nowrap;
-            border: 2px solid rgba(255,255,255,0.15);
-            display: inline-flex; align-items: center; gap: 5px;
+        .search-wrapper input {
+            width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; 
+            padding: 8px 35px 8px 12px; border-radius: 5px; font-size: 0.85em;
+            transition: 0.3s; box-sizing: border-box; outline: none;
         }
-        .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
+        .search-wrapper input:focus { border-color: var(--primary); }
+        .search-wrapper input::placeholder { color: #777; }
+        .search-icon {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            color: #888; font-size: 1em; pointer-events: none;
+        }
+        .search-suggestions {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #1a1a1a; border: 1px solid #333; border-radius: 0 0 5px 5px;
+            max-height: 300px; overflow-y: auto; display: none; z-index: 2000;
+        }
+        .search-suggestions.active { display: block; }
+        .search-suggestions .suggestion-item {
+            padding: 8px 12px; cursor: pointer; color: #ccc; font-size: 0.85em;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .search-suggestions .suggestion-item:hover { background: #2a2a2a; color: white; }
+        .search-suggestions .suggestion-item .sugg-img {
+            width: 28px; height: 40px; border-radius: 4px; object-fit: cover;
+        }
+        
+        .nav-center { display: flex; gap: 8px; align-items: center; }
+        .nav-center a, .nav-center button { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none; cursor: pointer; font-weight: bold; }
+        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
-        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
-        @media (max-width: 900px) {
-            .top-navbar { flex-wrap: wrap; }
-            .nav-links { order: 2; }
-            .burger { display: block; order: 1; }
+        
+        @media (max-width: 1000px) {
+            .burger { display: block; }
             .close-menu { display: block; }
-            .nav-links {
+            .search-wrapper { max-width: none; }
+            .nav-center {
                 position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
-                transition: 0.4s; z-index: 1100; align-items: stretch; overflow-y: auto;
+                transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
             }
-            .nav-links.active { left: 0; }
-            .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
+            .nav-center.active { left: 0; }
+            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
             .mobile-overlay.active { display: block; }
-            .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
         }
-        .container { max-width: 600px; margin: 40px auto; padding: 30px; background: var(--card-bg); border-radius: 15px; border: 1px solid #333; text-align: center; }
-        .avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; margin-bottom: 15px; }
-        h2 { color: var(--primary); margin-bottom: 10px; }
-        label { display: block; text-align: left; margin-top: 15px; color: #aaa; font-size: 0.9em; }
-        input, textarea { width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px; font-size: 0.9em; margin-top: 5px; }
-        button { background: var(--primary); border: none; color: white; padding: 10px 20px; border-radius: 5px; margin-top: 20px; cursor: pointer; font-weight: bold; }
+
+        .profile-layout { max-width: 1100px; margin: 0 auto; padding: 30px 20px 40px; display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
+        
+        .avatar-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .avatar-wrapper { position: relative; display: inline-block; margin-bottom: 14px; }
+        .avatar-img { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; background: #222; }
+        .avatar-upload-btn {
+            position: absolute; bottom: 4px; right: 4px;
+            width: 30px; height: 30px; background: var(--primary);
+            border: 2px solid var(--bg); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.8em;
+        }
+        #avatar-file-input { display: none; }
+        .profile-username { font-size: 1.3em; font-weight: 800; color: white; margin-bottom: 4px; }
+        .profile-google-name { font-size: 0.75em; color: #555; margin-bottom: 12px; }
+        .edit-pseudo-row { display: flex; gap: 6px; margin-bottom: 12px; }
+        .edit-pseudo-row input { flex: 1; background: #222; border: 1px solid #444; color: white; padding: 7px 10px; border-radius: 6px; font-size: 0.85em; }
+        .edit-pseudo-row button { background: var(--primary); color: white; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8em; }
+        .profile-meta { font-size: 0.78em; color: #666; line-height: 1.8; }
+        
+        .stats-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .stats-card h3 { font-size: 0.75em; text-transform: uppercase; color: var(--primary); margin: 0 0 14px; }
+        .stat-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #222; font-size: 0.85em; }
+        .stat-row .label { color: #888; }
+        .stat-row .value { font-weight: bold; color: white; }
+        
+        .status-bars { margin-top: 14px; }
+        .status-bar-item { margin-bottom: 10px; }
+        .status-bar-item .bar-label { display: flex; justify-content: space-between; font-size: 0.78em; color: #888; margin-bottom: 4px; }
+        .bar-track { height: 6px; background: #222; border-radius: 3px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 3px; }
+        .bar-watching { background: var(--accent-green); }
+        .bar-completed { background: var(--accent-blue); }
+        .bar-waiting { background: var(--accent-yellow); }
+        
+        .score-avg-display { text-align: center; padding: 12px 0 4px; }
+        .score-avg-number { font-size: 2.8em; font-weight: 900; color: var(--accent-yellow); line-height: 1; }
+        .score-stars { font-size: 1.1em; color: var(--accent-yellow); margin-top: 6px; letter-spacing: 2px; }
+        
+        .main-content .section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h2 { font-size: 0.85em; text-transform: uppercase; color: var(--primary); margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
+        
+        .activity-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1f1f1f; }
+        .activity-img { width: 36px; height: 50px; border-radius: 4px; object-fit: cover; background: #222; flex-shrink: 0; }
+        .activity-body { flex: 1; min-width: 0; }
+        .activity-title { font-size: 0.88em; font-weight: bold; color: white; text-decoration: none; }
+        .activity-title:hover { color: var(--primary); }
+        .activity-detail { font-size: 0.75em; color: #888; margin-top: 2px; }
+        .activity-detail .tag { display: inline-block; padding: 1px 7px; border-radius: 20px; font-size: 0.9em; font-weight: bold; margin-right: 5px; }
+        .tag-added { background: rgba(46,134,222,0.2); color: #2e86de; }
+        .tag-ep { background: rgba(46,204,113,0.2); color: #2ecc71; }
+        .tag-rated { background: rgba(241,196,15,0.2); color: #f1c40f; }
+        .tag-finished { background: rgba(255,71,87,0.2); color: #ff4757; }
+        .activity-time { font-size: 0.7em; color: #555; flex-shrink: 0; }
+        
+        .recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
+        .recent-card { text-decoration: none; color: inherit; }
+        .recent-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 6px; border: 1px solid #333; }
+        .recent-card:hover img { border-color: var(--primary); }
+        .recent-card .rc-title { font-size: 0.7em; color: #aaa; margin-top: 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        
+        .score-dist { display: flex; align-items: flex-end; gap: 4px; height: 70px; margin-top: 8px; }
+        .score-dist-bar { flex: 1; background: rgba(241,196,15,0.15); border-radius: 3px 3px 0 0; position: relative; cursor: default; }
+        .score-dist-bar .bar-val { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 0.65em; color: #666; }
+        .score-dist-bar .bar-count { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 0.65em; color: #888; }
+        
+        .not-logged { text-align: center; padding: 80px 20px; color: #666; }
+        .not-logged h2 { color: var(--primary); margin-bottom: 10px; }
+        .btn-login { display: inline-block; margin-top: 20px; background: var(--primary); color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; }
+        
+        .upload-spinner { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.6); border-radius: 50%; align-items: center; justify-content: center; font-size: 1.2em; }
+        .upload-spinner.active { display: flex; }
+        
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(60px); background: #222; color: white; padding: 10px 22px; border-radius: 8px; font-size: 0.88em; border: 1px solid #444; transition: transform 0.3s, opacity 0.3s; opacity: 0; z-index: 9999; pointer-events: none; }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        
+        .btn-old-index {
+            background: #222; border: 1px solid #ff4757; color: #ff4757;
+            padding: 6px 12px; border-radius: 6px; font-size: 0.8em;
+            text-decoration: none; transition: 0.2s;
+        }
+        .btn-old-index:hover { background: #ff4757; color: white; }
+        
+        @media (max-width: 800px) {
+            .profile-layout { grid-template-columns: 1fr; padding: 16px 10px 30px; }
+            .avatar-img { width: 85px; height: 85px; }
+            .recent-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
+        }
     </style>
 </head>
 <body>
-    <div id="bg-layer"></div>
+
     <nav class="top-navbar">
-        <div class="burger" onclick="toggleM()">☰</div>
-        <div class="nav-left">
-            <a href="index.html" class="nav-brand">
-                <img src="img/logo.jpg" class="nav-logo-small">
-                <span class="nav-title">LE MALICIEUX <small style="color:white;">• Profil</small></span>
-            </a>
+        <a href="index.html" class="nav-brand">
+            <img src="img/logo.jpg" class="nav-logo-small">
+            <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Profil</small></span>
+        </a>
+        
+        <div class="search-wrapper" id="search-wrapper">
+            <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
+            <span class="search-icon">🔍</span>
+            <div class="search-suggestions" id="search-suggestions"></div>
         </div>
+
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
-        <div class="nav-links" id="menu">
+        <div class="nav-center" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
-            <a href="index.html">🏠 Accueil</a>
-            <a href="tags.html">🏷️ Tags</a>
-            <a href="alphabetique.html">📖 A-Z</a>
-            <a href="playlist.html">📂 Playlist</a>
-            <a href="editeurs.html">🏢 Studios</a>
-            <a href="index_old.html">🕰️ Ancien Index</a>
+            <a href="index.html" class="btn-red">🏠 Accueil</a>
+            <a href="tags.html" class="btn-red">🏷️ Tags</a>
+            <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
+            <a href="playlist.html" class="btn-red">📂 Playlist</a>
+            <a href="editeurs.html" class="btn-red">🏢 Studios</a>
+            <a href="index_old.html" class="btn-red">🕰️ Ancien index</a>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div class="burger" onclick="toggleM()">☰</div>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
     </nav>
 
-    <div class="container" id="profile-content">
-        <p>Chargement du profil...</p>
+    <div id="root">
+        <div class="not-logged">
+            <h2>Connexion requise</h2>
+            <p>Connecte-toi pour accéder à ton profil.</p>
+            <button class="btn-login" id="btn-login-page">Se connecter avec Google</button>
+        </div>
     </div>
+
+    <div id="toast"></div>
+    <input type="file" id="avatar-file-input" accept="image/*">
+
+    <script>
+        (function() {
+            const isMobile = window.innerWidth <= 1000;
+            const fileName = isMobile ? `mobile${Math.floor(Math.random() * 14) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
+            if (isMobile) {
+                let _mbg = document.getElementById('mobile-bg-layer');
+                if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
+                _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
+                _mbg.style.backgroundImage = `url('img/${fileName}')`;
+            } else {
+                document.body.style.backgroundImage = `url('img/${fileName}')`;
+            }
+        })();
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, orderBy }
+               from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider }
+               from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL }
+               from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
+        const firebaseConfig = {
+            apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",
+            authDomain: "le-malicieux-v2.firebaseapp.com",
+            projectId: "le-malicieux-v2",
+            storageBucket: "le-malicieux-v2.firebasestorage.app",
+            messagingSenderId: "938147445933",
+            appId: "1:938147445933:web:86f9c65ee0737e66a9da24"
+        };
+
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
 
-        function setBackground() {
-            const isMobile = window.innerWidth <= 1000;
-            const n = isMobile ? Math.floor(Math.random() * 13) + 1 : Math.floor(Math.random() * 64) + 1;
-            document.getElementById('bg-layer').style.backgroundImage = `url('img/${isMobile ? 'mobile' + n : 'fond' + n}.webp')`;
+        let allAnimesForSearch = [];
+
+        async function loadAnimesForSearch() {
+            try {
+                const resp = await fetch('animes.csv');
+                const data = await resp.text();
+                const lines = data.split(/\r?\n/).slice(1);
+                for (const line of lines) {
+                    const c = line.split(';');
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    if (c[0]) allAnimesForSearch.push({ nom: clean(c[0]), img: clean(c[8]) });
+                }
+            } catch(e) {}
         }
-        setBackground();
+        loadAnimesForSearch();
 
-        const container = document.getElementById('profile-content');
+        function normalize(str) {
+            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[-_.:;,!?()'"&~#|]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
 
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                container.innerHTML = '<p>Vous devez être connecté pour voir votre profil. <a href="index.html">Retour à l\'accueil</a></p>';
-                return;
+        const searchInput = document.getElementById('search');
+        const searchSuggestions = document.getElementById('search-suggestions');
+        searchInput.addEventListener('input', function() {
+            const val = this.value.trim();
+            if (val.length < 2) { searchSuggestions.classList.remove('active'); return; }
+            const results = allAnimesForSearch.filter(a => normalize(a.nom).includes(normalize(val))).slice(0, 8);
+            if (results.length === 0) {
+                searchSuggestions.innerHTML = '<div class="no-result" style="padding:12px;color:#888;">Aucun résultat</div>';
+            } else {
+                searchSuggestions.innerHTML = results.map(a => 
+                    '<div class="suggestion-item" data-name="'+a.nom.replace(/"/g,'&quot;')+'"><img src="img/'+a.img+'" class="sugg-img" onerror="this.src=\'img/logo.jpg\'"><span>'+a.nom+'</span></div>'
+                ).join('');
             }
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            const data = userDoc.exists() ? userDoc.data() : {};
-            const pseudo = data.pseudo || user.displayName || '';
-            const bio = data.bio || '';
-            const avatar = data.photoURL || user.photoURL || 'img/logo.jpg';
-
-            container.innerHTML = `
-                <img src="${avatar}" class="avatar" onerror="this.src='img/logo.jpg'">
-                <h2>${pseudo || 'Anonyme'}</h2>
-                <label>Pseudo</label>
-                <input type="text" id="pseudo-input" value="${pseudo}">
-                <label>Bio</label>
-                <textarea id="bio-input" rows="3">${bio}</textarea>
-                <button id="save-btn">Enregistrer</button>
-                <button id="logout-btn" style="background:#333; margin-left:10px;">Déconnexion</button>
-            `;
-
-            document.getElementById('save-btn').onclick = async () => {
-                const newPseudo = document.getElementById('pseudo-input').value.trim();
-                const newBio = document.getElementById('bio-input').value.trim();
-                await setDoc(doc(db, "users", user.uid), {
-                    pseudo: newPseudo,
-                    bio: newBio,
-                    displayName: newPseudo || user.displayName,
-                    email: user.email,
-                    photoURL: user.photoURL || avatar,
-                    lastSeen: new Date().toISOString()
-                }, { merge: true });
-                sessionStorage.setItem('userPseudo', newPseudo);
-                alert('Profil mis à jour !');
-            };
-
-            document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => window.location.href = 'index.html');
+            searchSuggestions.classList.add('active');
+        });
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = this.value.trim();
+                if (val) {
+                    const results = allAnimesForSearch.filter(a => normalize(a.nom).includes(normalize(val)));
+                    if (results.length === 1) {
+                        window.location.href = 'video.html?name=' + encodeURIComponent(results[0].nom);
+                    } else if (results.length > 1) {
+                        window.location.href = 'index.html?search=' + encodeURIComponent(val);
+                    }
+                }
+                searchSuggestions.classList.remove('active');
+                this.blur();
+            }
+        });
+        searchSuggestions.addEventListener('click', function(e) {
+            const item = e.target.closest('.suggestion-item');
+            if (item && item.dataset.name) {
+                window.location.href = 'video.html?name=' + encodeURIComponent(item.dataset.name);
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-wrapper')) searchSuggestions.classList.remove('active');
         });
 
-        function toggleM() { const m=document.getElementById('menu'), ov=document.getElementById('overlay'); const isOpen=m.classList.toggle('active'); ov.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }
-        window.toggleM = toggleM;
+        function toast(msg, duration = 2500) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), duration);
+        }
+
+        function timeAgo(ts) {
+            if (!ts) return '';
+            const diff = Date.now() - (ts.seconds ? ts.seconds * 1000 : ts);
+            const m = Math.floor(diff / 60000);
+            if (m < 1) return "à l'instant";
+            if (m < 60) return `il y a ${m} min`;
+            const h = Math.floor(m / 60);
+            if (h < 24) return `il y a ${h}h`;
+            const d = Math.floor(h / 24);
+            if (d < 30) return `il y a ${d}j`;
+            return `il y a ${Math.floor(d/30)} mois`;
+        }
+
+        function getRealImgPath(firebaseImgName) {
+            if (!firebaseImgName) return "img/logo.jpg";
+            const match = firebaseImgName.match(/\d+/);
+            return match ? `img/anime-${match[0]}.jpg` : "img/logo.jpg";
+        }
+
+        function starsHtml(score) {
+            const full = Math.floor(score / 2);
+            const half = (score % 2) >= 1 ? 1 : 0;
+            const empty = 5 - full - half;
+            return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+        }
+
+        function formatDate(isoOrTs) {
+            if (!isoOrTs) return '—';
+            const d = typeof isoOrTs === 'string' ? new Date(isoOrTs) : new Date(isoOrTs.seconds * 1000);
+            return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+        document.getElementById('btn-login-page').onclick = () => signInWithPopup(auth, provider);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return;
+            await buildProfile(user);
+        });
+
+        async function buildProfile(user) {
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            let userData = userSnap.exists() ? userSnap.data() : {};
+
+            if (!userSnap.exists()) {
+                userData = {
+                    uid: user.uid, email: user.email, displayName: user.displayName || '',
+                    pseudo: '', photoURL: user.photoURL || '', createdAt: new Date().toISOString(), lastSeen: new Date().toISOString(),
+                };
+                await setDoc(userRef, userData);
+            }
+
+            const pseudo = userData.pseudo || userData.displayName || user.displayName || 'Utilisateur';
+            const avatarUrl = userData.photoURL || user.photoURL || 'img/logo.jpg';
+            const createdAt = userData.createdAt || user.metadata?.creationTime || null;
+
+            renderProfileShell(user, pseudo, avatarUrl, createdAt, userData.displayName || user.displayName);
+
+            onSnapshot(query(collection(db, "playlists"), where("uid", "==", user.uid)), (snap) => {
+                const animes = [];
+                snap.forEach(d => animes.push({ id: d.id, ...d.data() }));
+                renderStats(animes);
+                renderActivity(animes);
+                renderRecentAnimes(animes);
+                renderScoreDist(animes);
+            });
+
+            document.getElementById('avatar-upload-btn').onclick = () => document.getElementById('avatar-file-input').click();
+            document.getElementById('avatar-file-input').onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const spinner = document.getElementById('avatar-spinner');
+                spinner.classList.add('active');
+                try {
+                    const storageRef = ref(storage, `avatars/${user.uid}`);
+                    await uploadBytes(storageRef, file);
+                    const url = await getDownloadURL(storageRef);
+                    await setDoc(userRef, { photoURL: url }, { merge: true });
+                    document.getElementById('profile-avatar').src = url;
+                    sessionStorage.setItem('userAvatar', url);
+                    toast('✅ Photo de profil mise à jour !');
+                } catch(err) { toast('❌ Erreur lors de l\'upload.'); }
+                finally { spinner.classList.remove('active'); }
+            };
+
+            document.getElementById('btn-save-pseudo').onclick = async () => {
+                const val = document.getElementById('input-pseudo').value.trim();
+                if (!val) { toast('⚠️ Le pseudo ne peut pas être vide.'); return; }
+                if (val.length > 30) { toast('⚠️ 30 caractères max.'); return; }
+                await setDoc(userRef, { pseudo: val }, { merge: true });
+                document.getElementById('display-pseudo').textContent = val;
+                sessionStorage.setItem('userPseudo', val);
+                toast('✅ Pseudo mis à jour !');
+            };
+        }
+
+        function renderProfileShell(user, pseudo, avatarUrl, createdAt, googleName) {
+            document.getElementById('root').innerHTML = `
+                <div class="profile-layout">
+                    <div class="sidebar">
+                        <div class="avatar-card">
+                            <div class="avatar-wrapper">
+                                <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='img/logo.jpg'">
+                                <div id="avatar-upload-btn" class="avatar-upload-btn" title="Changer la photo">📷</div>
+                                <div id="avatar-spinner" class="upload-spinner">⏳</div>
+                            </div>
+                            <div class="profile-username" id="display-pseudo">${pseudo}</div>
+                            <div class="profile-google-name">Compte Google : ${googleName}</div>
+                            <div class="edit-pseudo-row"><input id="input-pseudo" type="text" placeholder="Changer le pseudo…" maxlength="30"><button id="btn-save-pseudo">OK</button></div>
+                            <div class="profile-meta">Membre depuis<br><span>${formatDate(createdAt)}</span></div>
+                        </div>
+                        <div class="stats-card"><h3>📊 Statistiques</h3><div id="stat-rows"><div class="stat-row"><span class="label">Chargement…</span></div></div><div class="status-bars" id="status-bars"></div></div>
+                        <div class="stats-card"><h3>⭐ Score moyen</h3><div class="score-avg-display"><div class="score-avg-number" id="avg-score">—</div><div class="score-stars" id="avg-stars"></div><div class="score-avg-label" id="avg-label">Aucune note pour l'instant</div></div></div>
+                    </div>
+                    <div class="main-content">
+                        <div class="section"><h2>🕐 Activité récente</h2><div id="activity-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
+                        <div class="section"><h2>🎬 Derniers animes ajoutés</h2><div id="recent-grid" class="recent-grid"></div></div>
+                        <div class="section"><h2>📈 Distribution des scores</h2><div class="score-dist" id="score-dist"></div><div style="display:flex; gap:4px; margin-top:24px;">${Array.from({length:10},(_,i)=>`<div style="flex:1; text-align:center; font-size:0.65em; color:#555;">${i+1}</div>`).join('')}</div></div>
+                    </div>
+                </div>`;
+        }
+
+        function renderStats(animes) {
+            const watching = animes.filter(a => a.status === 'watching').length;
+            const completed = animes.filter(a => a.status === 'completed').length;
+            const waiting = animes.filter(a => a.status === 'waiting').length;
+            const total = animes.length;
+            const totalEp = animes.reduce((s, a) => s + (parseInt(a.epSeen) || 0), 0);
+            const rated = animes.filter(a => a.rating && a.rating > 0);
+            const avgScore = rated.length > 0 ? (rated.reduce((s, a) => s + a.rating, 0) / rated.length).toFixed(1) : null;
+
+            document.getElementById('stat-rows').innerHTML = `
+                <div class="stat-row"><span class="label">Total animes</span><span class="value">${total}</span></div>
+                <div class="stat-row"><span class="label" style="color:#2ecc71;">En cours</span><span class="value">${watching}</span></div>
+                <div class="stat-row"><span class="label" style="color:#2e86de;">Terminés</span><span class="value">${completed}</span></div>
+                <div class="stat-row"><span class="label" style="color:#f1c40f;">En attente</span><span class="value">${waiting}</span></div>
+                <div class="stat-row"><span class="label">Épisodes vus</span><span class="value">${totalEp.toLocaleString('fr-FR')}</span></div>
+                <div class="stat-row"><span class="label">Notés</span><span class="value">${rated.length}</span></div>`;
+
+            const pct = (n) => total > 0 ? Math.round((n / total) * 100) : 0;
+            document.getElementById('status-bars').innerHTML = `
+                <div class="status-bar-item"><div class="bar-label"><span style="color:#2ecc71;">En cours</span><span>${watching}</span></div><div class="bar-track"><div class="bar-fill bar-watching" style="width:${pct(watching)}%"></div></div></div>
+                <div class="status-bar-item"><div class="bar-label"><span style="color:#2e86de;">Terminés</span><span>${completed}</span></div><div class="bar-track"><div class="bar-fill bar-completed" style="width:${pct(completed)}%"></div></div></div>
+                <div class="status-bar-item"><div class="bar-label"><span style="color:#f1c40f;">En attente</span><span>${waiting}</span></div><div class="bar-track"><div class="bar-fill bar-waiting" style="width:${pct(waiting)}%"></div></div></div>`;
+
+            if (avgScore) {
+                document.getElementById('avg-score').textContent = avgScore + '/10';
+                document.getElementById('avg-stars').textContent = starsHtml(parseFloat(avgScore));
+                document.getElementById('avg-label').textContent = `Basé sur ${rated.length} note${rated.length > 1 ? 's' : ''}`;
+            }
+        }
+
+        function renderActivity(animes) {
+            const events = [];
+            animes.forEach(a => {
+                if (a.addedAt) events.push({ type: 'added', anime: a, ts: a.addedAt });
+                if (a.status === 'completed' && a.completedAt) events.push({ type: 'finished', anime: a, ts: a.completedAt });
+                if (a.ratedAt && a.rating) events.push({ type: 'rated', anime: a, ts: a.ratedAt });
+                if (a.epUpdatedAt && a.epSeen > 0) events.push({ type: 'ep', anime: a, ts: a.epUpdatedAt });
+            });
+            events.sort((a, b) => {
+                const ta = a.ts?.seconds ? a.ts.seconds : (a.ts ? new Date(a.ts).getTime() / 1000 : 0);
+                const tb = b.ts?.seconds ? b.ts.seconds : (b.ts ? new Date(b.ts).getTime() / 1000 : 0);
+                return tb - ta;
+            });
+            const recent = events.slice(0, 15);
+            if (recent.length === 0) {
+                document.getElementById('activity-feed').innerHTML = `<div style="color:#555; text-align:center; padding:20px;">Aucune activité récente.</div>`;
+                return;
+            }
+            const tagMap = { added: { cls: 'tag-added', label: 'Ajouté' }, finished: { cls: 'tag-finished', label: 'Terminé' }, rated: { cls: 'tag-rated', label: 'Noté' }, ep: { cls: 'tag-ep', label: 'Épisode vu' } };
+            document.getElementById('activity-feed').innerHTML = recent.map(ev => {
+                const a = ev.anime;
+                const tag = tagMap[ev.type];
+                let detail = '';
+                if (ev.type === 'rated') detail = `Note : ⭐ ${a.rating}/10`;
+                if (ev.type === 'ep') detail = `Épisode ${a.epSeen} / ${a.epMax || '?'}`;
+                if (ev.type === 'added') detail = `Statut : ${a.status === 'watching' ? 'En cours' : a.status === 'completed' ? 'Terminé' : 'En attente'}`;
+                if (ev.type === 'finished') detail = `Terminé avec ${a.epSeen} épisode${a.epSeen > 1 ? 's' : ''}`;
+                return `<div class="activity-item"><img class="activity-img" src="${getRealImgPath(a.img)}" onerror="this.src='img/logo.jpg'"><div class="activity-body"><a href="video.html?name=${encodeURIComponent(a.anime)}" class="activity-title">${a.anime}</a><div class="activity-detail"><span class="tag ${tag.cls}">${tag.label}</span>${detail}</div></div><div class="activity-time">${timeAgo(ev.ts)}</div></div>`;
+            }).join('');
+        }
+
+        function renderRecentAnimes(animes) {
+            const sorted = [...animes].filter(a => a.addedAt).sort((a, b) => (b.addedAt?.seconds || 0) - (a.addedAt?.seconds || 0)).slice(0, 12);
+            if (sorted.length === 0) { document.getElementById('recent-grid').innerHTML = `<div style="color:#555;">Aucun anime ajouté.</div>`; return; }
+            document.getElementById('recent-grid').innerHTML = sorted.map(a => `<a href="video.html?name=${encodeURIComponent(a.anime)}" class="recent-card"><img src="${getRealImgPath(a.img)}" onerror="this.src='img/logo.jpg'"><div class="rc-title">${a.anime}</div></a>`).join('');
+        }
+
+        function renderScoreDist(animes) {
+            const counts = Array(10).fill(0);
+            animes.forEach(a => { if (a.rating >= 1 && a.rating <= 10) counts[a.rating - 1]++; });
+            const maxCount = Math.max(...counts, 1);
+            document.getElementById('score-dist').innerHTML = counts.map((c, i) => `<div class="score-dist-bar" style="height:${Math.round((c / maxCount) * 100)}%" title="${c} anime${c > 1 ? 's' : ''} noté${c > 1 ? 's' : ''} ${i+1}/10">${c > 0 ? `<div class="bar-count">${c}</div>` : ''}<div class="bar-val">${i+1}</div></div>`).join('');
+        }
+        
+        window.toggleM = () => {
+            const menu = document.getElementById('menu');
+            const overlay = document.getElementById('overlay');
+            const isOpen = menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        };
     </script>
 </body>
 </html>
