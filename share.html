@@ -2,23 +2,12 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Malicieux — Partager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="stylesheet" href="mobile.css">
+    <title>Éditeurs & Studios - Le Malicieux</title>
     <style>
-        :root {
-            --primary: #ff4757;
-            --bg: #0f0f0f;
-            --card-bg: rgba(20, 20, 20, 0.9);
-            --text: #eee;
-            --nav-bg: rgba(15, 15, 15, 0.85);
-            --surface: rgba(25, 25, 25, 0.95);
-            --border: rgba(255,255,255,0.08);
-            --muted: #a0a0a0;
-            --accent2: #ff6b81;
-        }
-
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.9); --text: #eee; --nav-bg: rgba(15,15,15,0.85); --blue: #2e86de; }
         * { box-sizing: border-box; }
-
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg);
@@ -28,447 +17,179 @@
             color: var(--text);
             margin: 0;
             min-height: 100vh;
+            overflow-x: hidden;
         }
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.72);
-            z-index: 0;
-            pointer-events: none;
+        body::before { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 0; pointer-events: none; }
+
+        .top-navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+            gap: 12px;
+            flex-wrap: wrap;
         }
-        .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
-        .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center a, .nav-center button { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none; cursor: pointer; font-weight: bold; }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
-        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
-        .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
-        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
-        @media (max-width: 1000px) {
-            .burger { display: block; }
-            .close-menu { display: block; }
-            .nav-center {
-                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
-                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
-                transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
-            }
-            .nav-center.active { left: 0; }
-            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
-            .mobile-overlay.active { display: block; }
-        }
-        .top-navbar, .container, .page-header, .tabs-bar { position: relative; z-index: 1; }
-
-        .page-header { padding: 30px 20px 10px; text-align: center; background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent); }
-        .page-header h1 { margin: 0 0 6px; font-size: 1.6em; }
-        .page-header h1 span { color: var(--primary); }
-        .page-header p { color: #bbb; margin: 0; font-size: 0.9em; }
-
-        .tabs-bar { display: flex; justify-content: center; gap: 8px; padding: 20px 20px 0; flex-wrap: wrap; }
-        .tab-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--muted); padding: 10px 22px; border-radius: 8px; cursor: pointer; font-size: 0.9em; font-weight: 600; transition: 0.2s; }
-        .tab-btn:hover { border-color: var(--primary); color: var(--text); }
-        .tab-btn.active { border-color: var(--primary); background: rgba(255,71,87,0.15); color: var(--primary); }
-        .tab-btn .tab-icon { margin-right: 6px; }
-
-        .container { max-width: 800px; margin: 0 auto; padding: 28px 20px 60px; }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
-
-        .section-title { font-size: 1.15em; font-weight: bold; margin: 0 0 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); color: var(--text); }
-        .section-title span { color: var(--primary); }
-
-        .step { margin-bottom: 26px; }
-        .step-label { font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #ccc; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        .step-num { width: 20px; height: 20px; border-radius: 50%; background: var(--primary); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; flex-shrink: 0; }
-
-        .playlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
-        .pl-card { background: rgba(30, 30, 30, 0.92); border: 1px solid rgba(255,255,255,0.13); border-radius: 8px; padding: 14px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 11px; text-align: left; color: var(--text); position: relative; }
-        .pl-card:hover { border-color: var(--primary); background: rgba(255,71,87,0.07); }
-        .pl-card.selected { border-color: var(--primary); background: rgba(255,71,87,0.12); }
-        .pl-card-icon { font-size: 20px; opacity: 0.55; flex-shrink: 0; }
-        .pl-card-info { flex: 1; min-width: 0; }
-        .pl-card-name { font-weight: 600; font-size: 0.88em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; }
-        .pl-card-count { font-size: 0.72em; color: #a0a0a0; margin-top: 3px; }
-        .pl-check { position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 9px; color: #fff; font-weight: 800; }
-
-        .toggle-row { display: flex; gap: 10px; flex-wrap: wrap; }
-        .toggle-btn { flex: 1; min-width: 180px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 13px 16px; cursor: pointer; color: var(--muted); font-size: 0.88em; font-weight: 600; transition: 0.2s; text-align: left; }
-        .toggle-btn:hover { border-color: var(--primary); color: var(--text); }
-        .toggle-btn.active { border-color: var(--primary); color: var(--text); background: rgba(255,71,87,0.12); }
-
-        .sp-input { width: 100%; background: #1a1a1a; border: 1px solid var(--border); border-radius: 6px; padding: 11px 14px; font-size: 0.9em; color: var(--text); outline: none; }
-        .sp-input:focus { border-color: var(--primary); }
-        .search-wrap { position: relative; }
-        .search-spinner { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 16px; animation: spin 0.8s linear infinite; pointer-events: none; display: none; }
-        .search-spinner.active { display: block; }
-        @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
-
-        .user-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
-        .user-item { display: flex; align-items: center; gap: 12px; background: rgba(30, 30, 30, 0.92); border: 1px solid rgba(255,255,255,0.13); border-radius: 8px; padding: 11px 14px; cursor: pointer; transition: 0.2s; }
-        .user-item:hover { border-color: var(--primary); }
-        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0; }
-        .user-avatar.sm { width: 26px; height: 26px; font-size: 11px; }
-        .user-name { font-weight: 600; font-size: 0.88em; }
-        .user-email { font-size: 0.75em; color: var(--muted); }
-        .selected-user { display: flex; align-items: center; gap: 12px; background: rgba(255,71,87,0.08); border: 1px solid var(--primary); border-radius: 8px; padding: 11px 14px; margin-top: 8px; }
-        .clear-btn { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 15px; padding: 4px; }
-        .clear-btn:hover { color: var(--primary); }
-
-        .send-btn { display: block; width: 100%; margin-top: 28px; padding: 14px; border-radius: 8px; background: var(--primary); border: none; font-size: 0.95em; font-weight: 700; color: #fff; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 4px 20px rgba(255,71,87,0.3); }
-        .send-btn:hover:not(:disabled) { opacity: 0.85; }
-        .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-
-        .msg-error { background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.35); border-radius: 8px; padding: 11px 14px; font-size: 0.85em; color: #ff8090; margin-top: 14px; }
-        .msg-success { background: rgba(46,213,115,0.1); border: 1px solid rgba(46,213,115,0.35); border-radius: 8px; padding: 11px 14px; font-size: 0.85em; color: #2ed573; margin-top: 14px; }
-
-        .cards-list { display: flex; flex-direction: column; gap: 10px; }
-        .shared-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.2s; }
-        .shared-card:hover { border-color: rgba(255,71,87,0.3); }
-        .shared-card-header { display: flex; align-items: center; gap: 14px; padding: 16px 18px; }
-        .shared-card-icon { font-size: 26px; opacity: 0.45; flex-shrink: 0; }
-        .shared-card-meta { flex: 1; min-width: 0; }
-        .shared-card-name { font-weight: 700; font-size: 0.95em; margin-bottom: 5px; }
-        .shared-card-sub { font-size: 0.75em; color: var(--muted); }
-        .shared-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .expand-btn { background: #222; border: 1px solid var(--border); border-radius: 6px; padding: 7px 11px; cursor: pointer; color: var(--muted); font-size: 11px; transition: 0.2s; }
-        .expand-btn:hover { color: var(--text); border-color: var(--primary); }
-        .import-btn { background: var(--primary); border: none; border-radius: 8px; padding: 9px 16px; font-size: 0.8em; font-weight: 700; color: #fff; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; box-shadow: 0 2px 10px rgba(255,71,87,0.25); }
-        .import-btn:hover:not(:disabled) { opacity: 0.8; }
-        .import-btn.imported { background: #222; border: 1px solid var(--border); box-shadow: none; color: var(--muted); cursor: default; }
-        .import-btn:disabled { cursor: not-allowed; opacity: 0.6; }
-
-        .track-list { list-style: none; margin: 0; padding: 0 18px 14px; border-top: 1px solid var(--border); }
-        .track-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.82em; }
-        .track-item:last-child { border-bottom: none; }
-        .track-num { color: var(--muted); font-size: 0.75em; min-width: 22px; text-align: right; }
-        .track-thumb { width: 32px; height: 44px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
-        .track-title { flex: 1; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .track-rating { color: #f1c40f; font-size: 0.75em; white-space: nowrap; }
-
-        .status-badge { font-size: 0.7em; padding: 2px 7px; border-radius: 4px; font-weight: 600; flex-shrink: 0; }
-        .status-watching { background: rgba(46,204,113,0.2); color: #2ecc71; }
-        .status-completed { background: rgba(52,152,219,0.2); color: #3498db; }
-        .status-waiting { background: rgba(241,196,15,0.2); color: #f1c40f; }
-
-        .empty-msg { text-align: center; color: var(--muted); font-size: 0.95em; padding: 50px 0; }
-        .login-wall { text-align: center; padding: 50px 20px; color: var(--muted); font-size: 0.95em; }
-        .login-wall a { color: var(--primary); text-decoration: none; font-weight: 600; }
-        .loading { text-align: center; color: var(--muted); padding: 40px; font-size: 0.9em; }
+        .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .nav-logo-small { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; white-space: nowrap; }
         
-        .btn-old-index {
-            background: #222; border: 1px solid #ff4757; color: #ff4757;
-            padding: 6px 12px; border-radius: 6px; font-size: 0.8em;
-            text-decoration: none; transition: 0.2s;
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 5px; order: -1; }
+        .search-wrapper { position: relative; flex: 1; min-width: 180px; max-width: 300px; }
+        .search-wrapper input { width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; padding: 6px 30px 6px 10px; border-radius: 5px; font-size: 0.85em; outline: none; }
+        .search-wrapper input:focus { border-color: var(--primary); }
+        .search-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #888; font-size: 0.9em; pointer-events: none; }
+        
+        .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .nav-links a, .nav-links button { background: var(--primary); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8em; text-decoration: none; cursor: pointer; white-space: nowrap; font-weight: bold; }
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
+        
+        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
+        
+        @media (max-width: 900px) {
+            .top-navbar { flex-wrap: wrap; }
+            .search-wrapper { order: 3; width: 100%; max-width: none; margin-top: 8px; }
+            .nav-links { order: 2; }
+            .burger { display: block; order: 1; }
+            .close-menu { display: block; }
+            .nav-links { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s; z-index: 1100; align-items: stretch; overflow-y: auto; }
+            .nav-links.active { left: 0; }
+            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
+            .mobile-overlay.active { display: block; }
+            .studios-grid { grid-template-columns: 1fr 1fr; }
         }
-        .btn-old-index:hover { background: #ff4757; color: white; }
-        .old-index-link { text-align: right; margin-bottom: 20px; }
+
+        .page-wrap { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 20px 20px 60px; }
+        #view-list { display: block; }
+        #view-producer { display: none; }
+        .list-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; }
+        .list-header h1 { font-size: 1.5em; font-weight: 900; color: var(--primary); margin: 0; }
+        .list-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .sort-select { background: #1a1a1a; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
+        .studios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+        .studio-card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: 0.2s; display: flex; gap: 12px; align-items: flex-start; }
+        .studio-card:hover { border-color: var(--primary); transform: translateY(-4px); }
+        .studio-logo-wrap { flex-shrink: 0; width: 64px; height: 64px; border-radius: 10px; overflow: hidden; background: #111; display: flex; align-items: center; justify-content: center; }
+        .studio-logo { width: 100%; height: 100%; object-fit: contain; }
+        .studio-logo-fallback { font-size: 1.4em; font-weight: 900; color: var(--primary); text-transform: uppercase; }
+        .studio-card-body { flex: 1; min-width: 0; }
+        .studio-name { font-weight: 800; font-size: 0.9em; color: white; word-break: break-word; }
+        .studio-count { font-size: 0.75em; color: #888; margin-top: 4px; }
+        .studio-count span { color: var(--primary); font-weight: bold; }
+        .studio-preview { display: flex; gap: 4px; margin-top: 6px; }
+        .studio-preview img { width: 32px; height: 46px; object-fit: cover; border-radius: 4px; }
+        .producer-header { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
+        .producer-banner { height: 120px; background: linear-gradient(135deg, #1a0008 0%, #2d0014 40%, #0a000f 100%); position: relative; display: flex; align-items: flex-end; padding: 0 20px; }
+        .producer-avatar { width: 80px; height: 80px; border-radius: 14px; background: linear-gradient(135deg, #ff4757, #c0392b); border: 3px solid var(--bg); display: flex; align-items: center; justify-content: center; font-size: 2em; font-weight: 900; color: white; position: relative; z-index: 1; transform: translateY(40px); flex-shrink: 0; overflow: hidden; }
+        .producer-info-wrap { padding: 50px 20px 15px; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .producer-name { font-size: 1.6em; font-weight: 900; color: white; margin: 0; }
+        .producer-stats-row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .pstat { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 6px 12px; text-align: center; }
+        .pstat-val { font-size: 1.2em; font-weight: 800; color: var(--primary); display: block; }
+        .pstat-lbl { font-size: 0.65em; color: #666; text-transform: uppercase; }
+        .btn-back-list { display: inline-flex; align-items: center; gap: 6px; color: #aaa; font-size: 0.85em; cursor: pointer; border: 1px solid #333; background: #1a1a1a; padding: 5px 12px; border-radius: 6px; margin-bottom: 15px; }
+        .btn-back-list:hover { color: var(--primary); border-color: var(--primary); }
+        .producer-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
+        .ctrl-select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
+        .result-count { font-size: 0.8em; color: #666; margin-left: auto; }
+        .producer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+        .anime-card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; transition: 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
+        .anime-card:hover { border-color: var(--primary); transform: translateY(-4px); }
+        .anime-card .img-wrap { width: 100%; aspect-ratio: 2/3; background: #111; position: relative; }
+        .anime-card img { width: 100%; height: 100%; object-fit: cover; }
+        .ac-info { padding: 6px; flex: 1; }
+        .ac-title { font-weight: 700; color: var(--primary); font-size: 0.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .ac-meta { font-size: 0.7em; color: #888; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+        .score-badge { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color: #f1c40f; font-size: 0.7em; padding: 2px 5px; border-radius: 4px; }
+        .empty-state { text-align: center; color: #555; padding: 40px 20px; grid-column: 1/-1; }
+        @media (max-width: 700px) { .producer-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } .producer-name { font-size: 1.2em; } }
     </style>
 </head>
 <body>
-
-<nav class="top-navbar">
-    <a href="index.html" class="nav-brand">
-        <img src="img/logo.jpg" class="nav-logo-small">
-        <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Partage</small></span>
-    </a>
-    <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
-    <div class="nav-center" id="menu">
-        <div class="close-menu" onclick="toggleM()">← Retour</div>
-        <a href="index.html" class="btn-red">🏠 Accueil</a>
-        <a href="tags.html" class="btn-red">🏷️ Tags</a>
-        <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
-        <a href="playlist.html" class="btn-red">📂 Playlist</a>
-        <a href="editeurs.html" class="btn-red">🏢 Studios</a>
-        <a href="index_old.html" class="btn-red">🕰️ Ancien index</a>
-    </div>
-    <div style="display:flex; align-items:center; gap:10px;">
+    <nav class="top-navbar">
         <div class="burger" onclick="toggleM()">☰</div>
-        <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
-    </div>
-</nav>
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand">
+                <img src="img/logo.jpg" class="nav-logo-small">
+                <span class="nav-title">LE MALICIEUX <small style="color:white;">• Studios</small></span>
+            </a>
+        </div>
+        <div class="search-wrapper">
+            <input type="text" id="studio-search" placeholder="Rechercher un studio..." autocomplete="off">
+            <span class="search-icon">🔍</span>
+        </div>
+        <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
+        <div class="nav-links" id="menu">
+            <div class="close-menu" onclick="toggleM()">← Retour</div>
+            <a href="index.html">🏠 Accueil</a>
+            <a href="tags.html">🏷️ Tags</a>
+            <a href="alphabetique.html">📖 A-Z</a>
+            <a href="playlist.html">📂 Playlist</a>
+            <a href="index_old.html">🕰️ Ancien Index</a>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
+        </div>
+    </nav>
 
-<div class="page-header">
-    <h1>Partager <span>une playlist</span></h1>
-    <p>Envoie ta liste à un ami, ou rends-la visible par toute la communauté</p>
-</div>
+    <div class="page-wrap">
+        <div id="view-list">
+            <div class="list-header">
+                <h1>🏢 Éditeurs & Studios</h1>
+                <div class="list-controls">
+                    <select class="sort-select" id="studio-sort">
+                        <option value="count">Trier : Nb titres ↓</option>
+                        <option value="nom">Trier : A → Z</option>
+                        <option value="nom-desc">Trier : Z → A</option>
+                        <option value="score">Trier : Score ↓</option>
+                    </select>
+                </div>
+            </div>
+            <div class="studios-grid" id="studios-grid"><div class="empty-state">Chargement…</div></div>
+        </div>
 
-<div class="tabs-bar">
-    <button class="tab-btn active" data-tab="send"><span class="tab-icon">↑</span> Envoyer</button>
-    <button class="tab-btn" data-tab="inbox"><span class="tab-icon">↓</span> Reçues <span id="inbox-badge" style="display:none; background:var(--primary); color:#fff; font-size:0.7em; padding:1px 6px; border-radius:10px; margin-left:4px;"></span></button>
-    <button class="tab-btn" data-tab="public"><span class="tab-icon">◎</span> Communauté</button>
-</div>
-
-<div class="container">
-    <div class="old-index-link">
-        <a href="index_old.html" class="btn-old-index">🕰️ Ancien catalogue</a>
-    </div>
-    
-    <div id="tab-send" class="tab-panel active">
-        <div class="section-title">Partager <span>une de mes playlists</span></div>
-        <div id="send-not-logged" class="login-wall" style="display:none;"><div style="font-size:2em; margin-bottom:12px;">🔒</div>Tu dois être connecté pour partager une playlist.<br><a href="index.html">Se connecter</a></div>
-        <div id="send-form">
-            <div class="step"><div class="step-label"><span class="step-num">1</span> Choisir une playlist</div><div id="my-playlists-grid" class="playlist-grid"><div class="loading">Chargement...</div></div></div>
-            <div class="step"><div class="step-label"><span class="step-num">2</span> Visibilité</div><div class="toggle-row"><button class="toggle-btn active" id="btn-private" onclick="setVisibility(false)">🔒 Privée — envoyer à un ami</button><button class="toggle-btn" id="btn-public" onclick="setVisibility(true)">🌍 Publique — visible par tous</button></div></div>
-            <div class="step" id="step-recipient"><div class="step-label"><span class="step-num">3</span> Destinataire</div><div class="search-wrap"><input class="sp-input" id="user-search" placeholder="Filtrer par nom ou email..." oninput="handleUserSearch(this.value)"><span class="search-spinner" id="search-spinner">⟳</span></div><ul class="user-list" id="user-results"></ul><div id="selected-user" style="display:none;" class="selected-user"><div class="user-avatar sm" id="sel-avatar"></div><div><div class="user-name" id="sel-name"></div><div class="user-email" id="sel-email"></div></div><button class="clear-btn" onclick="clearSelectedUser()">✕</button></div></div>
-            <div id="send-error" class="msg-error" style="display:none;"></div><div id="send-success" class="msg-success" style="display:none;">✓ Playlist partagée avec succès !</div>
-            <button class="send-btn" id="send-btn" onclick="handleSend()">↑ Partager la playlist</button>
+        <div id="view-producer">
+            <a class="btn-back-list" onclick="showList()">← Tous les éditeurs</a>
+            <div class="producer-header">
+                <div class="producer-banner"><div class="producer-avatar" id="prod-avatar">?</div></div>
+                <div class="producer-info-wrap">
+                    <div><div class="producer-name" id="prod-name">—</div><div class="producer-sub">Éditeur / Label</div></div>
+                    <div class="producer-stats-row">
+                        <div class="pstat"><span class="pstat-val" id="prod-total">—</span><span class="pstat-lbl">Titres</span></div>
+                        <div class="pstat"><span class="pstat-val" id="prod-avg">—</span><span class="pstat-lbl">Score moy.</span></div>
+                        <div class="pstat"><span class="pstat-val" id="prod-best">—</span><span class="pstat-lbl">Meilleur</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="producer-controls">
+                <select class="ctrl-select" id="prod-sort"><option value="score">Trier : Score</option><option value="pop">Trier : Popularité</option><option value="année">Trier : Année</option><option value="nom">Trier : Nom (A-Z)</option></select>
+                <select class="ctrl-select" id="prod-filter"><option value="">Tout afficher</option><option value="en cours">🟢 En cours</option><option value="terminé">✅ Terminés</option><option value="oui">🔞 Censuré</option><option value="non">✔️ Non censuré</option></select>
+                <span class="result-count" id="prod-count"></span>
+            </div>
+            <div class="producer-grid" id="producer-grid"></div>
         </div>
     </div>
 
-    <div id="tab-inbox" class="tab-panel">
-        <div class="section-title">Playlists <span>reçues</span></div>
-        <div id="inbox-not-logged" class="login-wall" style="display:none;"><div style="font-size:2em; margin-bottom:12px;">🔒</div>Tu dois être connecté pour voir tes playlists reçues.<br><a href="index.html">Se connecter</a></div>
-        <div id="inbox-list" class="cards-list"><div class="loading">Chargement...</div></div>
-    </div>
-
-    <div id="tab-public" class="tab-panel">
-        <div class="section-title">Playlists <span>publiques</span></div>
-        <div class="search-bar-wrap"><input class="sp-input" id="public-search" placeholder="Rechercher par nom de playlist ou auteur..." oninput="filterPublic(this.value)"></div>
-        <div id="public-list" class="cards-list"><div class="loading">Chargement...</div></div>
-    </div>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, arrayUnion, increment, serverTimestamp, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",
-    authDomain: "le-malicieux-v2.firebaseapp.com",
-    projectId: "le-malicieux-v2",
-    storageBucket: "le-malicieux-v2.firebasestorage.app",
-    messagingSenderId: "938147445933",
-    appId: "1:938147445933:web:86f9c65ee0737e66a9da24"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-let currentUser = null;
-let selectedPlaylist = null;
-let isPublic = false;
-let selectedTarget = null;
-let publicItems = [];
-let myAnimes = [];
-
-function getRealImgPath(name) {
-    if (!name) return "img/logo.jpg";
-    const match = name.match(/\d+/);
-    const num = match ? match[0] : "0";
-    return `img/anime-${num}.jpg`;
-}
-
-function formatDate(ts) {
-    if (!ts) return "";
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
-}
-
-function statusLabel(s) {
-    if (s === "watching") return '<span class="status-badge status-watching">En cours</span>';
-    if (s === "completed") return '<span class="status-badge status-completed">Terminé</span>';
-    if (s === "waiting") return '<span class="status-badge status-waiting">En attente</span>';
-    return "";
-}
-
-function setRandomBackground() {
-    const isMobile = window.innerWidth <= 1000;
-    const num = isMobile ? Math.floor(Math.random() * 13) + 1 : Math.floor(Math.random() * 64) + 1;
-    const file = isMobile ? `mobile${num}.webp` : `fond${num}.webp`;
-    document.body.style.backgroundImage = `url('img/${file}')`;
-}
-
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-    });
-});
-
-onAuthStateChanged(auth, user => {
-    currentUser = user;
-    setRandomBackground();
-    if (user) {
-        loadMyPlaylists();
-        loadAllUsers();
-        loadInbox();
-        document.getElementById('send-not-logged').style.display = 'none';
-        document.getElementById('send-form').style.display = 'block';
-        document.getElementById('inbox-not-logged').style.display = 'none';
-        document.getElementById('inbox-list').style.display = 'block';
-    } else {
-        document.getElementById('send-not-logged').style.display = 'block';
-        document.getElementById('send-form').style.display = 'none';
-        document.getElementById('inbox-not-logged').style.display = 'block';
-        document.getElementById('inbox-list').style.display = 'none';
-    }
-    loadPublic();
-});
-
-function loadMyPlaylists() {
-    const q = query(collection(db, "playlists"), where("uid", "==", currentUser.uid));
-    onSnapshot(q, snap => {
-        myAnimes = [];
-        snap.forEach(d => myAnimes.push({ id: d.id, ...d.data() }));
-        renderMyPlaylists();
-    });
-}
-
-function renderMyPlaylists() {
-    const grid = document.getElementById('my-playlists-grid');
-    const groups = {};
-    ["watching", "completed", "waiting"].forEach(s => {
-        const animes = myAnimes.filter(a => a.status === s);
-        if (animes.length > 0) groups[`__status__${s}`] = { name: { watching: "En cours", completed: "Terminés", waiting: "En attente" }[s], animes, isStatus: true };
-    });
-    myAnimes.forEach(a => {
-        if (a.playlistTarget && a.playlistTarget !== "all" && !groups[a.playlistTarget]) {
-            groups[a.playlistTarget] = { name: a.playlistTarget, animes: [], isStatus: false };
+    <script>
+        (function(){ const isMobile=window.innerWidth<=1000; const n=isMobile?Math.floor(Math.random()*13)+1:Math.floor(Math.random()*64)+1; document.body.style.backgroundImage=`url('img/${isMobile?'mobile'+n:'fond'+n}.webp')`; })();
+        let allAnimes=[], currentStudio=null;
+        async function init(){ const resp=await fetch('animes.csv'); const text=await resp.text(); allAnimes=text.split(/\r?\n/).slice(1).map(line=>{ const c=line.split(';'); if(!c[0]||c.length<9)return null; const cl=s=>s?s.trim().replace(/^"|"$/g,''):''; return{ nom:cl(c[0]), pop:cl(c[1]), score:cl(c[2]), sortie:cl(c[3]), ep:cl(c[4]), censure:cl(c[5]), etat:cl(c[6]), img:cl(c[8]), editeur:cl(c[14]) }; }).filter(a=>a&&a.editeur);
+            const param=new URLSearchParams(window.location.search).get('studio'); if(param) showProducer(decodeURIComponent(param)); else renderList('');
+            document.getElementById('studio-search').addEventListener('input',e=>renderList(e.target.value));
         }
-        if (a.playlistTarget && a.playlistTarget !== "all") groups[a.playlistTarget].animes.push(a);
-    });
-
-    if (Object.keys(groups).length === 0) {
-        grid.innerHTML = '<div style="color:var(--muted); padding:10px 0;">Aucune playlist dans ta bibliothèque.</div>';
-        return;
-    }
-    const allCount = myAnimes.length;
-    const allCard = `<button class="pl-card ${selectedPlaylist?.key === '__all__' ? 'selected' : ''}" onclick="selectPlaylist('__all__')"><div class="pl-card-icon">🎬</div><div class="pl-card-info"><div class="pl-card-name">Toutes mes playlists</div><div class="pl-card-count">${allCount} anime${allCount > 1 ? 's' : ''}</div></div>${selectedPlaylist?.key === '__all__' ? '<span class="pl-check">✓</span>' : ''}</button>`;
-    grid.innerHTML = allCard + Object.entries(groups).map(([key, pl]) => `<button class="pl-card ${selectedPlaylist?.key === key ? 'selected' : ''}" onclick="selectPlaylist('${key}')"><div class="pl-card-icon">♫</div><div class="pl-card-info"><div class="pl-card-name">${pl.name}</div><div class="pl-card-count">${pl.animes.length} anime${pl.animes.length > 1 ? 's' : ''}</div></div>${selectedPlaylist?.key === key ? '<span class="pl-check">✓</span>' : ''}</button>`).join('');
-    window._playlistGroups = groups;
-}
-
-window.selectPlaylist = function(key) {
-    if (key === '__all__') {
-        selectedPlaylist = { key: '__all__', name: 'Toutes mes playlists', animes: myAnimes };
-    } else {
-        selectedPlaylist = { key, ...window._playlistGroups[key] };
-    }
-    renderMyPlaylists();
-};
-
-window.setVisibility = function(pub) {
-    isPublic = pub;
-    document.getElementById('btn-private').classList.toggle('active', !pub);
-    document.getElementById('btn-public').classList.toggle('active', pub);
-    document.getElementById('step-recipient').style.display = pub ? 'none' : 'block';
-    document.getElementById('send-btn').textContent = pub ? '🌍 Publier la playlist' : '↑ Envoyer la playlist';
-};
-
-let allUsers = [];
-async function loadAllUsers() {
-    const snap = await getDocs(collection(db, "users"));
-    allUsers = [];
-    snap.forEach(d => { if (d.id !== currentUser.uid) allUsers.push({ uid: d.id, ...d.data() }); });
-    renderUserList('');
-}
-
-function renderUserList(filter) {
-    const results = document.getElementById('user-results');
-    const filtered = filter.length < 1 ? allUsers : allUsers.filter(u => (u.email || '').toLowerCase().includes(filter.toLowerCase()) || (u.displayName || '').toLowerCase().includes(filter.toLowerCase()));
-    if (filtered.length === 0) { results.innerHTML = '<li style="padding:10px 0; color:var(--muted);">Aucun utilisateur trouvé.</li>'; return; }
-    results.innerHTML = filtered.map(u => `<li class="user-item" onclick="pickUser('${u.uid}', '${u.email}', '${(u.displayName||'').replace(/'/g,"\\'")}')"><div class="user-avatar sm">${(u.displayName||u.email||'?')[0].toUpperCase()}</div><div><div class="user-name">${u.displayName || '—'}</div><div class="user-email">${u.email}</div></div></li>`).join('');
-}
-
-window.handleUserSearch = function(value) { clearSelectedUser(); renderUserList(value); };
-window.pickUser = function(uid, email, displayName) {
-    selectedTarget = { uid, email, displayName };
-    document.getElementById('user-results').innerHTML = '';
-    document.getElementById('user-search').value = email;
-    const su = document.getElementById('selected-user');
-    document.getElementById('sel-avatar').textContent = (displayName || email || '?')[0].toUpperCase();
-    document.getElementById('sel-name').textContent = displayName || '—';
-    document.getElementById('sel-email').textContent = email;
-    su.style.display = 'flex';
-};
-window.clearSelectedUser = function() { selectedTarget = null; document.getElementById('selected-user').style.display = 'none'; document.getElementById('user-results').innerHTML = ''; };
-
-window.handleSend = async function() {
-    const errEl = document.getElementById('send-error');
-    const sucEl = document.getElementById('send-success');
-    errEl.style.display = 'none'; sucEl.style.display = 'none';
-    if (!selectedPlaylist) { errEl.textContent = "Sélectionne une playlist."; errEl.style.display = 'block'; return; }
-    if (!isPublic && !selectedTarget) { errEl.textContent = "Choisis un destinataire ou rends la playlist publique."; errEl.style.display = 'block'; return; }
-    const btn = document.getElementById('send-btn');
-    btn.disabled = true; btn.textContent = 'Envoi...';
-    try {
-        const animesData = selectedPlaylist.animes.map(a => ({ anime: a.anime || '', status: a.status || '', rating: a.rating || 0, epSeen: a.epSeen || 0, epMax: a.epMax || '?', img: a.img || '' }));
-        await addDoc(collection(db, "shared_playlists"), { fromUid: currentUser.uid, fromName: currentUser.displayName || currentUser.email, fromEmail: currentUser.email, toUid: isPublic ? null : selectedTarget.uid, toEmail: isPublic ? null : selectedTarget.email, isPublic: isPublic, playlist: { name: selectedPlaylist.name, animes: animesData }, createdAt: serverTimestamp(), importCount: 0, importedBy: [] });
-        sucEl.style.display = 'block';
-        selectedPlaylist = null;
-        renderMyPlaylists();
-        setTimeout(() => sucEl.style.display = 'none', 4000);
-    } catch(e) { errEl.textContent = 'Erreur : ' + e.message; errEl.style.display = 'block'; }
-    btn.disabled = false; btn.textContent = isPublic ? '🌍 Publier la playlist' : '↑ Envoyer la playlist';
-};
-
-function loadInbox() {
-    const q = query(collection(db, "shared_playlists"), where("toUid", "==", currentUser.uid), orderBy("createdAt", "desc"));
-    onSnapshot(q, snap => { const items = snap.docs.map(d => ({ id: d.id, ...d.data() })); const badge = document.getElementById('inbox-badge'); if (items.length > 0) { badge.textContent = items.length; badge.style.display = 'inline'; } else { badge.style.display = 'none'; } renderCardList('inbox-list', items, true); });
-}
-
-function loadPublic() {
-    const q = query(collection(db, "shared_playlists"), where("isPublic", "==", true), orderBy("createdAt", "desc"));
-    onSnapshot(q, snap => { publicItems = snap.docs.map(d => ({ id: d.id, ...d.data() })); filterPublic(document.getElementById('public-search').value); });
-}
-
-window.filterPublic = function(val) { const filtered = val.length < 2 ? publicItems : publicItems.filter(i => i.playlist?.name?.toLowerCase().includes(val.toLowerCase()) || i.fromName?.toLowerCase().includes(val.toLowerCase())); renderCardList('public-list', filtered, false); };
-
-function renderCardList(containerId, items, showFrom) {
-    const el = document.getElementById(containerId);
-    if (items.length === 0) { el.innerHTML = `<div class="empty-msg"><div class="empty-icon">📭</div>Aucune playlist ici pour l'instant.</div>`; return; }
-    el.innerHTML = items.map(item => buildCard(item, showFrom)).join('');
-}
-
-function buildCard(item, showFrom) {
-    const animes = item.playlist?.animes || [];
-    const alreadyImported = item.importedBy?.includes(currentUser?.uid);
-    const importBtn = currentUser ? `<button class="import-btn ${alreadyImported ? 'imported' : ''}" id="ibtn-${item.id}" onclick="handleImport('${item.id}')" ${alreadyImported ? 'disabled' : ''}>${alreadyImported ? '✓ Importé' : '↓ Importer'}</button>` : `<button class="import-btn" onclick="alert('Connecte-toi pour importer.')">↓ Importer</button>`;
-    return `<div class="shared-card" id="card-${item.id}"><div class="shared-card-header"><div class="shared-card-icon">♫</div><div class="shared-card-meta"><div class="shared-card-name">${item.playlist?.name || 'Playlist sans nom'}</div><div class="shared-card-sub">${showFrom ? `De <strong>${item.fromName || item.fromEmail}</strong> · ` : ''}${animes.length} anime${animes.length > 1 ? 's' : ''}${item.importCount > 0 ? ` <span class="import-count">· ↓ ${item.importCount}</span>` : ''} · ${formatDate(item.createdAt)}</div></div><div class="shared-card-actions">${animes.length > 0 ? `<button class="expand-btn" onclick="toggleExpand('${item.id}')">▼</button>` : ''}${importBtn}</div></div><ul class="track-list" id="tracks-${item.id}" style="display:none;">${animes.map((a, i) => `<li class="track-item"><span class="track-num">${String(i+1).padStart(2,'0')}</span><img src="${getRealImgPath(a.img)}" class="track-thumb" onerror="this.src='img/logo.jpg'"><span class="track-title">${a.anime}</span>${statusLabel(a.status)}<span class="track-rating">⭐ ${a.rating || 0}</span><span class="track-ep">Ep ${a.epSeen}/${a.epMax || '?'}</span></li>`).join('')}</ul></div>`;
-}
-
-window.toggleExpand = function(id) {
-    const card = document.getElementById('card-' + id);
-    const tracks = document.getElementById('tracks-' + id);
-    const btn = card.querySelector('.expand-btn');
-    const open = tracks.style.display === 'none';
-    tracks.style.display = open ? 'block' : 'none';
-    btn.textContent = open ? '▲' : '▼';
-    card.classList.toggle('open', open);
-};
-
-window.handleImport = async function(docId) {
-    if (!currentUser) { alert('Connecte-toi pour importer.'); return; }
-    const btn = document.getElementById('ibtn-' + docId);
-    btn.disabled = true; btn.textContent = '...';
-    try {
-        const sharedSnap = await getDoc(doc(db, "shared_playlists", docId));
-        if (!sharedSnap.exists()) throw new Error("Playlist introuvable.");
-        const shared = sharedSnap.data();
-        const animes = shared.playlist?.animes || [];
-        const sharedByName = shared.fromName || shared.fromEmail || 'quelqu\'un';
-        const playlistName = `${shared.playlist?.name || 'Partagée'} (partagée par ${sharedByName})`;
-        await addDoc(collection(db, "playlists_custom"), { uid: currentUser.uid, name: playlistName, shared: true, sharedBy: sharedByName });
-        const batch = animes.map(a => addDoc(collection(db, "playlists"), { uid: currentUser.uid, anime: a.anime, status: a.status || 'waiting', rating: a.rating || 0, epSeen: a.epSeen || 0, epMax: a.epMax || 0, img: a.img || '', playlistTarget: playlistName }));
-        await Promise.all(batch);
-        await updateDoc(doc(db, "shared_playlists", docId), { importCount: increment(1), importedBy: arrayUnion(currentUser.uid) });
-        btn.textContent = '✓ Importé'; btn.classList.add('imported');
-    } catch(e) { alert('Erreur import : ' + e.message); btn.disabled = false; btn.textContent = '↓ Importer'; }
-};
-
-window.toggleM = () => {
-    const menu = document.getElementById('menu');
-    const overlay = document.getElementById('overlay');
-    const isOpen = menu.classList.toggle('active');
-    overlay.classList.toggle('active');
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-};
-</script>
+        function buildStudioMap(){ const m={}; allAnimes.forEach(a=>{ a.editeur.split(',').map(e=>e.trim()).filter(Boolean).forEach(ed=>{ if(!m[ed]) m[ed]=[]; m[ed].push(a); }); }); return m; }
+        function renderList(f=''){ document.getElementById('view-list').style.display='block'; document.getElementById('view-producer').style.display='none'; document.title='Éditeurs & Studios - Le Malicieux'; history.replaceState(null,'','editeurs.html'); const map=buildStudioMap(), grid=document.getElementById('studios-grid'), q=f.toLowerCase(), sortMode=document.getElementById('studio-sort')?.value||'count'; let studios=Object.keys(map).filter(s=>!q||s.toLowerCase().includes(q));
+            studios.sort((a,b)=>{ if(sortMode==='nom')return a.localeCompare(b,'fr'); if(sortMode==='nom-desc')return b.localeCompare(a,'fr'); if(sortMode==='score'){ const avg=arr=>{ const sc=arr.map(x=>parseFloat(x.score.replace(',','.'))).filter(Boolean); return sc.length?sc.reduce((s,v)=>s+v,0)/sc.length:0; }; return avg(map[b])-avg(map[a]); } return map[b].length-map[a].length; });
+            if(studios.length===0){ grid.innerHTML='<div class="empty-state">Aucun éditeur trouvé.</div>'; return; }
+            grid.innerHTML=studios.map(studio=>{ const animes=map[studio], slug=studio.replace(/\s+/g,'-'), avgSc=(()=>{ const sc=animes.map(x=>parseFloat(x.score.replace(',','.'))).filter(Boolean); return sc.length?(sc.reduce((s,v)=>s+v,0)/sc.length).toFixed(1):null; })(); const previews=animes.slice(0,3).map(a=>`<img src="img/${a.img}" onerror="this.src='img/logo.jpg'" title="${a.nom}">`).join(''); return `<div class="studio-card" onclick="showProducer('${studio.replace(/'/g,"\\'")}')"><div class="studio-logo-wrap"><img class="studio-logo" src="img/${slug}.jpg" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="studio-logo-fallback" style="display:none;">${studio.split(/[\s\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase()}</div></div><div class="studio-card-body"><div class="studio-name">${studio}</div><div class="studio-count"><span>${animes.length}</span> titre${animes.length>1?'s':''}${avgSc?` · ⭐ ${avgSc}`:''}</div><div class="studio-preview">${previews}</div></div></div>`; }).join('');
+        }
+        document.getElementById('studio-sort').onchange=()=>renderList(document.getElementById('studio-search').value);
+        function showProducer(studio){ currentStudio=studio; document.getElementById('view-list').style.display='none'; document.getElementById('view-producer').style.display='block'; document.title=studio+' - Le Malicieux'; history.pushState({studio},'',`editeurs.html?studio=${encodeURIComponent(studio)}`); const slug=studio.replace(/\s+/g,'-'); const avatarEl=document.getElementById('prod-avatar'); avatarEl.innerHTML=`<img src="img/${slug}.jpg" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<span class=\'avatar-initials\' style=\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;\'>'+studio.split(/[\\s\\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase()+'</span>'">`; document.getElementById('prod-name').textContent=studio; renderProducerGrid(); }
+        function renderProducerGrid(){ const map=buildStudioMap(); let animes=map[currentStudio]||[]; const filterVal=document.getElementById('prod-filter').value; if(filterVal==='oui'||filterVal==='non') animes=animes.filter(a=>a.censure.toLowerCase()===filterVal); else if(filterVal==='terminé') animes=animes.filter(a=>a.etat.toLowerCase().includes('termin')||a.etat.toLowerCase().includes('fini')); else if(filterVal==='en cours') animes=animes.filter(a=>a.etat.toLowerCase().includes('cours')||a.etat.toLowerCase().includes('airing')); const sortVal=document.getElementById('prod-sort').value; animes=[...animes].sort((a,b)=>{ if(sortVal==='score')return parseFloat(b.score.replace(',','.')||0)-parseFloat(a.score.replace(',','.')||0); if(sortVal==='pop')return (parseInt(a.pop.replace('#',''))||99999)-(parseInt(b.pop.replace('#',''))||99999); if(sortVal==='année')return (b.sortie||'').localeCompare(a.sortie||''); if(sortVal==='nom')return a.nom.localeCompare(b.nom); return 0; }); const allForStudio=map[currentStudio]||[]; document.getElementById('prod-total').textContent=allForStudio.length; document.getElementById('prod-count').textContent=`${animes.length} titre${animes.length>1?'s':''} affiché${animes.length>1?'s':''}`; fetchStudioScoresFromMAL(allForStudio); const grid=document.getElementById('producer-grid'); if(animes.length===0){ grid.innerHTML='<div class="empty-state">Aucun anime pour ces critères.</div>'; return; } grid.innerHTML=animes.map(a=>{ const scoreNum=parseFloat(a.score.replace(',','.')); const scoreBadge=scoreNum?`<div class="score-badge">⭐ ${a.score}</div>`:''; return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card"><div class="img-wrap"><img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">${scoreBadge}</div><div class="ac-info"><div class="ac-title">${a.nom}</div><div class="ac-meta"><span>📅 ${a.sortie}</span><span>🎞️ ${a.ep}</span></div><div class="ac-meta"><span>🔞 ${a.censure}</span><span>🛠️ ${a.etat}</span></div></div></a>`; }).join(''); }
+        async function fetchStudioScoresFromMAL(animes){ const scores=[]; const sample=animes.slice(0,6); for(const a of sample){ try{ await new Promise(r=>setTimeout(r,400)); const q=a.nom.split('/')[0].trim(); const resp=await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`); if(!resp.ok)continue; const json=await resp.json(); const s=json.data?.[0]?.score; if(s) scores.push(parseFloat(s)); }catch(e){} } if(scores.length===0){ document.getElementById('prod-avg').textContent='—'; document.getElementById('prod-best').textContent='—'; return; } const avg=(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2); const best=Math.max(...scores).toFixed(2); document.getElementById('prod-avg').textContent='⭐ '+avg; document.getElementById('prod-best').textContent='⭐ '+best; }
+        function showList(){ currentStudio=null; renderList(document.getElementById('studio-search').value); }
+        document.getElementById('prod-sort').onchange=renderProducerGrid; document.getElementById('prod-filter').onchange=renderProducerGrid; init();
+        window.addEventListener('popstate',(e)=>{ if(e.state&&e.state.studio) showProducer(e.state.studio); else{ currentStudio=null; renderList(document.getElementById('studio-search').value); document.getElementById('view-list').style.display='block'; document.getElementById('view-producer').style.display='none'; document.title='Éditeurs & Studios - Le Malicieux'; } });
+        function toggleM(){ const m=document.getElementById('menu'), ov=document.getElementById('overlay'); const isOpen=m.classList.toggle('active'); ov.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }
+        window.toggleM=toggleM;
+    </script>
 </body>
 </html>

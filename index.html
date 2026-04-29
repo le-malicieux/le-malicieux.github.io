@@ -7,7 +7,8 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M65SBS3C');</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="stylesheet" href="mobile.css">
     <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --text-bright: #ffffff; --text-secondary: #ccc; --nav-bg: rgba(15, 15, 15, 0.85); }
@@ -21,82 +22,95 @@
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
-            will-change: transform; gap: 12px;
+            gap: 12px;
+            flex-wrap: wrap;
         }
-        .nav-left { display: flex; flex-direction: row; align-items: center; gap: 10px; flex-shrink: 0; }
-        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; cursor: pointer; }
-        .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+        .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; cursor: pointer; }
+        .nav-logo-small { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; white-space: nowrap; }
         
-        #back-home { font-size: 0.75em; color: #ff6b7a; text-decoration: none; display: none; cursor: pointer; margin-top: 2px; }
-        #back-home:hover { color: var(--primary); }
+        #back-home { font-size: 0.7em; color: #ff6b7a; text-decoration: none; display: none; cursor: pointer; margin-left: 5px; }
+        
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 5px; user-select: none; order: -1; }
 
-        .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 4px; user-select: none; }
-
-        /* Barre de recherche */
         .search-wrapper {
-            position: relative; flex: 1; max-width: 500px; min-width: 200px;
+            position: relative; flex: 1; min-width: 180px; max-width: 300px;
         }
         .search-wrapper input {
             width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; 
-            padding: 10px 40px 10px 15px; border-radius: 5px; font-size: 0.9em;
-            transition: 0.3s; box-sizing: border-box; outline: none;
+            padding: 6px 30px 6px 10px; border-radius: 5px; font-size: 0.85em;
+            box-sizing: border-box; outline: none;
         }
-        .search-wrapper input:focus {
-            border-color: var(--primary); box-shadow: 0 0 8px rgba(255,71,87,0.25);
-        }
-        .search-wrapper input::placeholder { color: #777; }
+        .search-wrapper input:focus { border-color: var(--primary); }
         .search-icon {
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            color: #888; font-size: 1.1em; pointer-events: none;
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            color: #888; font-size: 0.9em; pointer-events: none;
         }
         .search-suggestions {
             position: absolute; top: 100%; left: 0; right: 0;
             background: #1a1a1a; border: 1px solid #333; border-radius: 0 0 5px 5px;
-            max-height: 350px; overflow-y: auto; display: none; z-index: 2000;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.8);
+            max-height: 300px; overflow-y: auto; display: none; z-index: 2000;
         }
         .search-suggestions.active { display: block; }
         .search-suggestions .suggestion-item {
-            padding: 10px 15px; cursor: pointer; color: #ccc; font-size: 0.85em;
-            border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.15s;
+            padding: 8px 12px; cursor: pointer; color: #ccc; font-size: 0.85em;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             display: flex; align-items: center; gap: 10px;
         }
         .search-suggestions .suggestion-item:hover { background: #2a2a2a; color: white; }
         .search-suggestions .suggestion-item .sugg-img {
-            width: 32px; height: 45px; border-radius: 4px; object-fit: cover; flex-shrink: 0;
-            background: #111;
-        }
-        .search-suggestions .no-result {
-            padding: 15px; color: #888; text-align: center; font-size: 0.85em;
+            width: 28px; height: 40px; border-radius: 4px; object-fit: cover;
+            flex-shrink: 0;
         }
 
-        .nav-center { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
-        .nav-center a { 
-            background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none; white-space: nowrap;
+        .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .nav-links a, .nav-links button { 
+            background: var(--primary); border: none; color: white; 
+            padding: 5px 10px; border-radius: 4px; font-size: 0.8em; 
+            text-decoration: none; cursor: pointer; white-space: nowrap;
+            font-weight: bold;
         }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
 
-        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
+        
+        @media (max-width: 900px) {
+            .top-navbar { flex-wrap: wrap; }
+            .search-wrapper { order: 3; width: 100%; max-width: none; margin-top: 8px; }
+            .nav-links { order: 2; }
+            .burger { display: block; order: 1; }
+            .close-menu { display: block; }
+            .nav-links {
+                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
+                transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
+                overflow-y: auto;
+            }
+            .nav-links.active { left: 0; }
+            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
+            .mobile-overlay.active { display: block; }
+            .discord-btn { background: #5865F2; margin-top: 10px; }
+        }
 
         .hero-section {
-            height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 20px;
         }
-        .main-logo { width: 130px; height: 130px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px rgba(255,71,87,0.3); object-fit: cover; }
-        .main-title { font-size: 3em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
-        .main-slogan { font-size: 1.4em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
+        .main-logo { width: 120px; height: 120px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px rgba(255,71,87,0.3); object-fit: cover; }
+        .main-title { font-size: 2.8em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
+        .main-slogan { font-size: 1.3em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
 
         .content-area { padding: 20px 15px 40px; }
         
-        /* Titres de section : fond noir + rouge bien visible */
         .section-title {
             max-width: 1400px; margin: 30px auto 15px; padding: 10px 15px;
             font-size: 1.5em; font-weight: bold; 
@@ -104,36 +118,23 @@
             background: rgba(0, 0, 0, 0.75);
             border-radius: 6px;
             display: inline-block;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
         }
-        .section-title-wrapper {
-            max-width: 1400px; margin: 30px auto 15px; padding: 0 15px;
-        }
-        .section-subtitle { 
-            font-size: 0.55em; color: var(--text-secondary); font-weight: normal; display: block; margin-top: 4px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
-        }
+        .section-title-wrapper { max-width: 1400px; margin: 30px auto 15px; padding: 0 15px; }
 
         .carousel-wrapper {
             position: relative; max-width: 1400px; margin: 0 auto; padding: 0 35px;
         }
         .carousel-container { overflow: hidden; }
-        
-        .carousel-track {
-            display: flex; gap: 15px; transition: transform 0.4s ease;
-        }
-        
+        .carousel-track { display: flex; gap: 15px; transition: transform 0.4s ease; }
         .carousel-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
             background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2); color: white;
             font-size: 18px; width: 30px; height: 60px; cursor: pointer; z-index: 10; border-radius: 4px;
-            transition: 0.2s; display: flex; align-items: center; justify-content: center;
         }
         .carousel-btn:hover { background: var(--primary); border-color: var(--primary); }
         .carousel-btn.prev { left: 0; }
         .carousel-btn.next { right: 0; }
         .carousel-btn:disabled { opacity: 0.25; cursor: default; }
-        .carousel-btn:disabled:hover { background: rgba(0,0,0,0.7); border-color: rgba(255,255,255,0.2); }
 
         .card { 
             background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
@@ -144,65 +145,31 @@
         .card:hover { transform: translateY(-6px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
-
         .card-info { padding: 7px 8px; flex-grow: 1; display: flex; flex-direction: column; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
-        
+        .card-title .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; }
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #ddd; margin-top: 2px; }
-        .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; }
 
-        .mal-updated { color: #5dade2; }
-
-        /* Résultats de recherche */
         #search-results-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
             gap: 15px; max-width: 1400px; margin: 0 auto; padding: 0 15px;
         }
         #search-results-count { color: #aaa; margin: 5px 15px; font-size: 0.9em; }
-
-        .anime-count {
-            text-align: center; padding: 12px 20px; 
-            color: var(--primary); font-size: 1em; font-weight: bold;
-            background: rgba(0, 0, 0, 0.75);
-            display: inline-block; border-radius: 6px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
-        }
-        .anime-count-wrapper {
-            text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; margin-top: 40px;
-        }
-        .anime-count .count-number { color: var(--text-bright); font-weight: bold; }
-
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
-        .auth-status { font-size: 0.9em; color: #ccc; margin-right: 12px; }
-
+        .anime-count { text-align: center; padding: 12px 20px; color: var(--primary); font-size: 1em; font-weight: bold; background: rgba(0, 0, 0, 0.75); display: inline-block; border-radius: 6px; }
+        .anime-count-wrapper { text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; margin-top: 40px; }
+        
         @media (max-width: 1000px) {
-            .burger { display: block; }
-            .close-menu { display: block; }
-            .search-wrapper { max-width: none; }
-            .nav-center {
-                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
-                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
-                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1100; align-items: stretch;
-            }
-            .nav-center.active { left: 0; }
-            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
-            .mobile-overlay.active { display: block; }
-            .hero-section { height: 50vh; }
+            .card { width: 150px; }
+            .hero-section { height: 45vh; }
             .main-title { font-size: 2em; }
-            .section-title { font-size: 1.2em; padding: 8px 12px; }
+            .section-title { font-size: 1.2em; }
             .carousel-wrapper { padding: 0 28px; }
             .carousel-btn { width: 24px; height: 48px; font-size: 14px; }
-            .card { width: 150px; }
-            .card-info { padding: 5px; }
-            .card-title { font-size: 0.85em; height: 2.4em; }
-            .card-meta-row { font-size: 0.65em; gap: 2px; }
             .carousel-track { gap: 10px; }
-            #search-results-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
+            #search-results-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
         }
-
         @media (max-width: 480px) {
             .card { width: 140px; }
-            .carousel-wrapper { padding: 0 24px; }
             #search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
         }
     </style>
@@ -210,9 +177,10 @@
 <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    
     <div class="top-navbar">
+        <div class="burger" onclick="toggleM()">☰</div>
         <div class="nav-left">
-            <div class="burger" onclick="toggleM()">☰</div>
             <a class="nav-brand" onclick="resetToHome()" href="index.html">
                 <img src="img/logo.jpg" class="nav-logo-small">
                 <span class="nav-title">LE MALICIEUX</span>
@@ -228,20 +196,19 @@
 
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
 
-        <div class="nav-center" id="menu">
+        <div class="nav-links" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
-            <a href="tags.html" class="btn-red">🏷️ Tags</a>
-            <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
-            <a href="playlist.html" class="btn-red">📂 Playlist</a>
-            <a href="editeurs.html" class="btn-red">🏢 Studios</a>
-            <button onclick="randomAnime()" class="btn-red">🎲 Random</button>
+            <a href="tags.html">🏷️ Tags</a>
+            <a href="alphabetique.html">📖 A-Z</a>
+            <a href="playlist.html">📂 Playlist</a>
+            <a href="editeurs.html">🏢 Studios</a>
+            <button onclick="randomAnime()">🎲 Random</button>
+            <a href="index_old.html">🕰️ Ancien Index</a>
+            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
-
-        <div style="display:flex; align-items:center; flex-shrink: 0;">
-            <div id="auth-ui" style="display:flex; align-items:center;">
-                <button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>
-            </div>
-            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" style="margin-left:10px;">Discord</a>
+        
+        <div id="auth-ui" style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
+            <button id="login-btn" class="discord-btn" style="background:#5865F2; border:none;">Connexion</button>
         </div>
     </div>
 
@@ -255,18 +222,14 @@
         <div class="section-title-wrapper"><h2 class="section-title">🎲 Sélection aléatoire</h2></div>
         <div class="carousel-wrapper" id="carousel-random-wrapper">
             <button class="carousel-btn prev" id="carousel-random-prev">◀</button>
-            <div class="carousel-container">
-                <div class="carousel-track" id="carousel-random-track"></div>
-            </div>
+            <div class="carousel-container"><div class="carousel-track" id="carousel-random-track"></div></div>
             <button class="carousel-btn next" id="carousel-random-next">▶</button>
         </div>
 
         <div class="section-title-wrapper"><h2 class="section-title">🆕 Derniers ajouts</h2></div>
         <div class="carousel-wrapper" id="carousel-recent-wrapper">
             <button class="carousel-btn prev" id="carousel-recent-prev">◀</button>
-            <div class="carousel-container">
-                <div class="carousel-track" id="carousel-recent-track"></div>
-            </div>
+            <div class="carousel-container"><div class="carousel-track" id="carousel-recent-track"></div></div>
             <button class="carousel-btn next" id="carousel-recent-next">▶</button>
         </div>
 
@@ -275,18 +238,13 @@
         </div>
         <div class="carousel-wrapper" id="carousel-tag-wrapper">
             <button class="carousel-btn prev" id="carousel-tag-prev">◀</button>
-            <div class="carousel-container">
-                <div class="carousel-track" id="carousel-tag-track"></div>
-            </div>
+            <div class="carousel-container"><div class="carousel-track" id="carousel-tag-track"></div></div>
             <button class="carousel-btn next" id="carousel-tag-next">▶</button>
         </div>
     </div>
 
-    <!-- SECTION RÉSULTATS DE RECHERCHE -->
     <div id="search-results-section" style="display:none; padding: 20px 15px 40px;">
-        <div class="section-title-wrapper">
-            <h2 class="section-title" id="search-results-title">🔍 Résultats</h2>
-        </div>
+        <div class="section-title-wrapper"><h2 class="section-title" id="search-results-title">🔍 Résultats</h2></div>
         <p id="search-results-count" style="color:#aaa;margin:5px 15px;font-size:0.9em;"></p>
         <div id="search-results-grid"></div>
     </div>
@@ -309,37 +267,16 @@
 
         let allAnimes = [];
         let allTags = [];
+        let currentSearchQuery = '';
 
-        // ─── Cache MAL ────────────────────────────────────────────────────────
         const MAL_TTL = 60 * 60 * 1000;
-        function malCacheGet(nom) {
-            try {
-                const raw = sessionStorage.getItem('mal_cache_' + nom);
-                if (!raw) return null;
-                const obj = JSON.parse(raw);
-                if (Date.now() - obj.ts > MAL_TTL) { sessionStorage.removeItem('mal_cache_' + nom); return null; }
-                return obj;
-            } catch { return null; }
-        }
-        function malCacheSet(nom, data) {
-            try { sessionStorage.setItem('mal_cache_' + nom, JSON.stringify({ ...data, ts: Date.now() })); } catch {}
-        }
+        function malCacheGet(nom) { try { const raw = sessionStorage.getItem('mal_cache_' + nom); if (!raw) return null; const obj = JSON.parse(raw); if (Date.now() - obj.ts > MAL_TTL) { sessionStorage.removeItem('mal_cache_' + nom); return null; } return obj; } catch { return null; } }
+        function malCacheSet(nom, data) { try { sessionStorage.setItem('mal_cache_' + nom, JSON.stringify({ ...data, ts: Date.now() })); } catch {} }
 
-        let jikanQueue = [];
-        let jikanRunning = false;
-        function jikanEnqueue(task) {
-            jikanQueue.push(task);
-            if (!jikanRunning) jikanDrain();
-        }
-        async function jikanDrain() {
-            jikanRunning = true;
-            while (jikanQueue.length > 0) {
-                const task = jikanQueue.shift();
-                await task();
-                await new Promise(r => setTimeout(r, 400));
-            }
-            jikanRunning = false;
-        }
+        let jikanQueue = [], jikanRunning = false;
+        function jikanEnqueue(task) { jikanQueue.push(task); if (!jikanRunning) jikanDrain(); }
+        async function jikanDrain() { jikanRunning = true; while (jikanQueue.length > 0) { const task = jikanQueue.shift(); await task(); await new Promise(r => setTimeout(r, 400)); } jikanRunning = false; }
+        
         function fetchMALForCard(nom, malId, scoreEl, popEl) {
             const cached = malCacheGet(nom);
             if (cached) { applyCardMAL(scoreEl, popEl, cached); return; }
@@ -347,31 +284,21 @@
                 try {
                     let item = null;
                     if (malId && malId.trim() !== '') {
-                        const resp = await fetch('https://api.jikan.moe/v4/anime/' + malId.trim());
+                        const resp = await fetch(`https://api.jikan.moe/v4/anime/${malId.trim()}`);
                         if (resp.ok) { const j = await resp.json(); item = j.data || null; }
                     } else {
                         const q = nom.split('/')[0].trim();
-                        const resp = await fetch('https://api.jikan.moe/v4/anime?q=' + encodeURIComponent(q) + '&limit=1&sfw=false');
+                        const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`);
                         if (resp.ok) { const j = await resp.json(); item = j.data?.[0] || null; }
                     }
-                    if (item) {
-                        const data = { score: item.score, popularity: item.popularity };
-                        malCacheSet(nom, data);
-                        applyCardMAL(scoreEl, popEl, data);
-                    }
+                    if (item) { const data = { score: item.score, popularity: item.popularity }; malCacheSet(nom, data); applyCardMAL(scoreEl, popEl, data); }
                 } catch(e) {}
             });
         }
         function applyCardMAL(scoreEl, popEl, data) {
             if (!scoreEl || !popEl) return;
-            if (data.score != null) {
-                scoreEl.textContent = '⭐' + parseFloat(data.score).toFixed(2);
-                scoreEl.classList.add('mal-updated');
-            }
-            if (data.popularity != null) {
-                popEl.textContent = '📈#' + data.popularity.toLocaleString('fr-FR');
-                popEl.classList.add('mal-updated');
-            }
+            if (data.score != null) { scoreEl.textContent = '⭐' + parseFloat(data.score).toFixed(2); scoreEl.classList.add('mal-updated'); }
+            if (data.popularity != null) { popEl.textContent = '📈#' + data.popularity.toLocaleString('fr-FR'); popEl.classList.add('mal-updated'); }
         }
 
         const cardObserver = new IntersectionObserver((entries) => {
@@ -382,184 +309,91 @@
                     const malId = card.dataset.malid || '';
                     const scoreEl = card.querySelector('.mal-score');
                     const popEl = card.querySelector('.mal-pop');
-                    if (nom && scoreEl && popEl) {
-                        fetchMALForCard(nom, malId, scoreEl, popEl);
-                    }
+                    if (nom && scoreEl && popEl) { fetchMALForCard(nom, malId, scoreEl, popEl); }
                     cardObserver.unobserve(card);
                 }
             });
         }, { rootMargin: '200px' });
 
-        // ─── Firebase Auth ────────────────────────────────────────────────────
         onAuthStateChanged(auth, async (user) => {
             const authUi = document.getElementById('auth-ui');
             if (user) {
-                await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid, email: user.email, displayName: user.displayName || '',
-                    photoURL: user.photoURL || '', lastSeen: new Date().toISOString(),
-                }, { merge: true });
+                await setDoc(doc(db, "users", user.uid), { uid: user.uid, email: user.email, displayName: user.displayName || '', photoURL: user.photoURL || '', lastSeen: new Date().toISOString() }, { merge: true });
                 const cachedPseudo = sessionStorage.getItem('userPseudo');
                 let displayName = cachedPseudo || user.displayName;
                 if (!cachedPseudo) {
                     const uSnap = await getDoc(doc(db, "users", user.uid));
-                    if (uSnap.exists() && uSnap.data().pseudo) {
-                        displayName = uSnap.data().pseudo;
-                        sessionStorage.setItem('userPseudo', displayName);
-                    }
-                    if (uSnap.exists() && uSnap.data().photoURL) {
-                        sessionStorage.setItem('userAvatar', uSnap.data().photoURL);
-                    }
+                    if (uSnap.exists() && uSnap.data().pseudo) { displayName = uSnap.data().pseudo; sessionStorage.setItem('userPseudo', displayName); }
+                    if (uSnap.exists() && uSnap.data().photoURL) { sessionStorage.setItem('userAvatar', uSnap.data().photoURL); }
                 }
                 const avatarUrl = sessionStorage.getItem('userAvatar') || user.photoURL || 'img/logo.jpg';
-                authUi.innerHTML = '<a href="profil.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;margin-right:8px;"><img src="'+avatarUrl+'" style="width:30px;height:30px;border-radius:50%;border:2px solid var(--primary);object-fit:cover;" onerror="this.src=\'img/logo.jpg\'"><span class="auth-status" style="color:white;">'+displayName+'</span></a><button id="logout-btn" class="discord-btn" style="background:#333;border:none;cursor:pointer;">Quitter</button>';
+                authUi.innerHTML = `<a href="profil.html" style="display:flex;align-items:center;gap:6px;text-decoration:none;"><img src="${avatarUrl}" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--primary);object-fit:cover;" onerror="this.src='img/logo.jpg'"><span style="color:white;font-size:0.8em;">${displayName}</span></a><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer; padding:5px 8px;">Quitter</button>`;
                 document.getElementById('logout-btn').onclick = () => signOut(auth);
             } else {
-                authUi.innerHTML = '<button id="login-btn" class="btn-red" style="padding:7px 15px;">Connexion</button>';
+                authUi.innerHTML = `<button id="login-btn" class="discord-btn" style="background:#5865F2; border:none; padding:5px 10px;">Connexion</button>`;
                 document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
             }
         });
 
-        window.saveState = () => {
-            sessionStorage.setItem('indexSearch', document.getElementById('search').value);
-            sessionStorage.setItem('indexScroll', window.scrollY);
-        };
-
-        window.resetToHome = () => {
-            document.getElementById('search').value = '';
-            document.getElementById('search').placeholder = 'Rechercher un anime...';
-            sessionStorage.removeItem('indexSearch');
-            sessionStorage.removeItem('indexScroll');
-            document.getElementById('search-results-section').style.display = 'none';
-            document.getElementById('search-results-grid').innerHTML = '';
-            document.getElementById('main-content').style.display = '';
-            document.getElementById('back-home').style.display = 'none';
-            history.replaceState(null, '', window.location.pathname);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        window.handleImgError = function(img, fileNameFromCSV) {
-            if (!img.dataset.attempt) img.dataset.attempt = "1";
-            const lastDotIndex = fileNameFromCSV.lastIndexOf('.');
-            const base = lastDotIndex !== -1 ? fileNameFromCSV.substring(0, lastDotIndex) : fileNameFromCSV;
-            if (img.dataset.attempt === "1") { img.dataset.attempt = "2"; img.src = 'img/'+base+'.webp'; } 
-            else if (img.dataset.attempt === "2") { img.dataset.attempt = "3"; img.src = 'img/'+base+'.png'; } 
-            else if (img.dataset.attempt === "3") { img.dataset.attempt = "4"; img.src = 'img/'+base+'.jpg'; } 
-            else { img.onerror = null; img.src = 'img/logo.jpg'; }
-        };
-
-        function shuffle(arr) {
-            const a = [...arr];
-            for (let i = a.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [a[i], a[j]] = [a[j], a[i]];
-            }
-            return a;
+        function normalize(str) {
+            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[-_.:;,!?()'"&~#|]/g, ' ').replace(/\s+/g, ' ').trim();
         }
 
-        function createCardHTML(a) {
-            return '<a href="video.html?name='+encodeURIComponent(a.nom)+'" class="card" data-nom="'+a.nom.replace(/"/g,'&quot;')+'" data-malid="'+(a.malId||'')+'" onclick="saveState()"><div class="img-container"><img src="img/'+a.img+'" loading="lazy" onerror="handleImgError(this, \''+a.img+'\')"></div><div class="card-info"><div class="card-title">'+a.nom+'</div><div class="card-meta-row"><span>📅'+a.sortie+'</span><span class="mal-score">⭐'+a.score+'</span><span class="mal-pop">📈'+a.pop+'</span></div><div class="card-meta-row"><span>🎞️'+a.ep+'</span><span>🔞'+a.censure+'</span><span>🛠️'+a.etat+'</span></div>'+(a.editeur?'<div class="card-meta-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;">🏢'+a.editeur+'</span></div>':'')+'</div></a>';
+        function highlightTitle(title, query) {
+            if (!query) return title;
+            const normTitle = normalize(title);
+            const normQuery = normalize(query);
+            const index = normTitle.indexOf(normQuery);
+            if (index === -1) return title;
+            let charCount = 0, origIndex = -1;
+            for (let i = 0; i < title.length; i++) {
+                if (normalize(title[i]).length > 0) charCount++;
+                if (charCount > index && origIndex === -1) origIndex = i;
+            }
+            if (origIndex === -1) return title;
+            const endIndex = origIndex + query.length;
+            return title.substring(0, origIndex) + '<span class="highlight">' + title.substring(origIndex, Math.min(endIndex, title.length)) + '</span>' + title.substring(Math.min(endIndex, title.length));
+        }
+
+        function createCardHTML(a, highlight = false, query = '') {
+            const titleHtml = highlight ? highlightTitle(a.nom, query) : a.nom;
+            return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" data-nom="${a.nom.replace(/"/g,'&quot;')}" data-malid="${a.malId||''}">
+                <div class="img-container"><img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')"></div>
+                <div class="card-info">
+                    <div class="card-title">${titleHtml}</div>
+                    <div class="card-meta-row"><span>📅${a.sortie}</span><span class="mal-score">⭐${a.score}</span><span class="mal-pop">📈${a.pop}</span></div>
+                    <div class="card-meta-row"><span>🎞️${a.ep}</span><span>🔞${a.censure}</span><span>🛠️${a.etat}</span></div>
+                    ${a.editeur ? `<div class="card-meta-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🏢${a.editeur}</span></div>` : ''}
+                </div>
+            </a>`;
         }
 
         function buildCarousel(trackId, prevBtnId, nextBtnId, animeList) {
             const track = document.getElementById(trackId);
             const prevBtn = document.getElementById(prevBtnId);
             const nextBtn = document.getElementById(nextBtnId);
-            
-            if (!track || !prevBtn || !nextBtn) return;
-            
-            prevBtn.style.display = 'flex';
-            nextBtn.style.display = 'flex';
-            
-            if (animeList.length === 0) {
-                track.innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.7);border-radius:6px;display:inline-block;font-size:0.9em;">Aucun anime pour le moment.</p>';
-                prevBtn.style.display = 'none';
-                nextBtn.style.display = 'none';
-                return;
-            }
-
+            if (!track) return;
+            if (animeList.length === 0) { track.innerHTML = '<p style="color:#ff6b7a;padding:20px;">Aucun anime.</p>'; prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; return; }
             track.innerHTML = animeList.map(a => createCardHTML(a)).join('');
             track.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
-
             let currentIndex = 0;
-
-            function getCardsPerView() {
-                const w = window.innerWidth;
-                if (w <= 480) return 2;
-                if (w <= 1000) return 3;
-                return 5;
-            }
-
-            function getCardWidth() {
-                const card = track.querySelector('.card');
-                if (!card) return 180;
-                return card.offsetWidth + 15;
-            }
-
-            function getMaxIndex() {
-                return Math.max(0, track.children.length - getCardsPerView());
-            }
-
-            function updateButtons() {
-                const maxIdx = getMaxIndex();
-                prevBtn.disabled = currentIndex <= 0;
-                nextBtn.disabled = currentIndex >= maxIdx;
-            }
-
-            function scrollToIndex() {
-                track.style.transform = 'translateX(-' + (currentIndex * getCardWidth()) + 'px)';
-                updateButtons();
-            }
-
-            prevBtn.onclick = () => {
-                currentIndex = Math.max(0, currentIndex - getCardsPerView());
-                scrollToIndex();
-            };
-
-            nextBtn.onclick = () => {
-                currentIndex = Math.min(getMaxIndex(), currentIndex + getCardsPerView());
-                scrollToIndex();
-            };
-
-            let touchStartX = 0;
-            track.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
-            track.addEventListener('touchend', (e) => {
-                const diff = touchStartX - e.changedTouches[0].screenX;
-                if (Math.abs(diff) > 50) {
-                    if (diff > 0) nextBtn.click();
-                    else prevBtn.click();
-                }
-            });
-
-            let resizeTimeout;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
-                    currentIndex = Math.min(currentIndex, getMaxIndex());
-                    scrollToIndex();
-                }, 150);
-            });
-
+            function getCardsPerView() { const w = window.innerWidth; if (w <= 480) return 2; if (w <= 1000) return 3; return 5; }
+            function getCardWidth() { const card = track.querySelector('.card'); return card ? card.offsetWidth + 15 : 180; }
+            function getMaxIndex() { return Math.max(0, track.children.length - getCardsPerView()); }
+            function updateButtons() { const maxIdx = getMaxIndex(); prevBtn.disabled = currentIndex <= 0; nextBtn.disabled = currentIndex >= maxIdx; }
+            function scrollToIndex() { track.style.transform = 'translateX(-' + (currentIndex * getCardWidth()) + 'px)'; updateButtons(); }
+            prevBtn.onclick = () => { currentIndex = Math.max(0, currentIndex - getCardsPerView()); scrollToIndex(); };
+            nextBtn.onclick = () => { currentIndex = Math.min(getMaxIndex(), currentIndex + getCardsPerView()); scrollToIndex(); };
+            let resizeTimeout; window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => { currentIndex = Math.min(currentIndex, getMaxIndex()); scrollToIndex(); }, 150); });
             updateButtons();
         }
 
-        // ─── Recherche tolérante ──────────────────────────────────────────────
-        function normalize(str) {
-            return str
-                .toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/[-_.:;,!?()'"&~#|]/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-        }
-
-        function searchAnimes(query) {
-            const q = normalize(query);
-            if (q.length < 1) return [];
-            return allAnimes.filter(a => normalize(a.nom).includes(q));
-        }
+        function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
         function showSearchResults(query) {
-            const results = searchAnimes(query);
+            currentSearchQuery = query;
+            const results = allAnimes.filter(a => normalize(a.nom).includes(normalize(query)));
             const mainContent = document.getElementById('main-content');
             const resultsSection = document.getElementById('search-results-section');
             const resultsGrid = document.getElementById('search-results-grid');
@@ -573,72 +407,45 @@
             resultsCount.textContent = results.length + ' anime' + (results.length > 1 ? 's' : '') + ' trouvé' + (results.length > 1 ? 's' : '');
             
             if (results.length === 0) {
-                resultsGrid.style.display = 'block';
-                resultsGrid.innerHTML = '<p style="color:#ff6b7a;text-align:center;padding:40px;background:rgba(0,0,0,0.7);border-radius:6px;">Aucun anime trouvé pour "' + query + '"</p>';
+                resultsGrid.innerHTML = '<p style="color:#ff6b7a;text-align:center;padding:40px;">Aucun anime trouvé pour "' + query + '"</p>';
             } else if (results.length === 1) {
                 window.location.href = 'video.html?name=' + encodeURIComponent(results[0].nom);
                 return;
             } else {
-                resultsGrid.style.display = 'grid';
-                resultsGrid.innerHTML = results.map(a => createCardHTML(a)).join('');
+                resultsGrid.innerHTML = results.map(a => createCardHTML(a, true, query)).join('');
                 resultsGrid.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
             }
-
             backHome.style.display = 'block';
             window.scrollTo({ top: resultsSection.offsetTop - 80, behavior: 'smooth' });
+            history.pushState({}, '', `?search=${encodeURIComponent(query)}`);
         }
 
-        // ─── Events recherche ──────────────────────────────────────────────────
-        const searchInput = document.getElementById('search');
-        const searchSuggestions = document.getElementById('search-suggestions');
+        function resetToHome() {
+            document.getElementById('search').value = '';
+            currentSearchQuery = '';
+            sessionStorage.removeItem('indexSearch');
+            document.getElementById('search-results-section').style.display = 'none';
+            document.getElementById('main-content').style.display = '';
+            document.getElementById('back-home').style.display = 'none';
+            history.replaceState(null, '', window.location.pathname);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        window.resetToHome = resetToHome;
 
-        searchInput.addEventListener('input', function() {
-            const val = this.value.trim();
-            if (val.length < 1) {
-                searchSuggestions.classList.remove('active');
-                return;
-            }
-            const results = searchAnimes(val).slice(0, 8);
-            if (results.length === 0) {
-                searchSuggestions.innerHTML = '<div class="no-result">Aucun résultat</div>';
-            } else {
-                searchSuggestions.innerHTML = results.map(a => 
-                    '<div class="suggestion-item" data-name="'+a.nom.replace(/"/g,'&quot;')+'"><img src="img/'+a.img+'" class="sugg-img" onerror="this.src=\'img/logo.jpg\'"><span>'+a.nom+'</span></div>'
-                ).join('');
-            }
-            searchSuggestions.classList.add('active');
-        });
+        window.handleImgError = function(img, fileNameFromCSV) {
+            if (!img.dataset.attempt) img.dataset.attempt = "1";
+            const lastDotIndex = fileNameFromCSV.lastIndexOf('.');
+            const base = lastDotIndex !== -1 ? fileNameFromCSV.substring(0, lastDotIndex) : fileNameFromCSV;
+            if (img.dataset.attempt === "1") { img.dataset.attempt = "2"; img.src = `img/${base}.webp`; } 
+            else if (img.dataset.attempt === "2") { img.dataset.attempt = "3"; img.src = `img/${base}.png`; } 
+            else if (img.dataset.attempt === "3") { img.dataset.attempt = "4"; img.src = `img/${base}.jpg`; } 
+            else { img.onerror = null; img.src = 'img/logo.jpg'; }
+        };
 
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const val = this.value.trim();
-                if (!val) return;
-                showSearchResults(val);
-                searchSuggestions.classList.remove('active');
-                this.blur();
-            }
-        });
-
-        searchSuggestions.addEventListener('click', function(e) {
-            const item = e.target.closest('.suggestion-item');
-            if (item) {
-                const name = item.dataset.name;
-                window.location.href = 'video.html?name=' + encodeURIComponent(name);
-            }
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.search-wrapper')) {
-                searchSuggestions.classList.remove('active');
-            }
-        });
-
-        // ─── INIT ─────────────────────────────────────────────────────────────
         async function init() {
             const isMobile = window.innerWidth <= 1000;
-            let fileName = isMobile ? 'mobile' + Math.floor(Math.random() * 13 + 1) + '.webp' : 'fond' + Math.floor(Math.random() * 64 + 1) + '.webp';
-            document.body.style.backgroundImage = "url('img/" + fileName + "')";
+            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
+            document.body.style.backgroundImage = `url('img/${fileName}')`;
 
             try {
                 const resp = await fetch('animes.csv');
@@ -646,32 +453,20 @@
                 const lines = raw.split(/\r?\n/);
                 const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
                 const ordreAjoutIndex = headers.indexOf('ordre_ajout');
-                
-                console.log('Headers ('+headers.length+'):', headers);
-                console.log('ordre_ajout index:', ordreAjoutIndex);
-
                 allAnimes = lines.slice(1).map(line => {
                     const c = line.split(';');
                     if (!c[0] || c.length < 9) return null;
-                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : '';
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                     let ordreAjout = 0;
-                    if (ordreAjoutIndex >= 0 && ordreAjoutIndex < c.length) {
-                        ordreAjout = parseInt(clean(c[ordreAjoutIndex])) || 0;
-                    }
+                    if (ordreAjoutIndex >= 0 && ordreAjoutIndex < c.length) ordreAjout = parseInt(clean(c[ordreAjoutIndex])) || 0;
                     return { 
                         nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), 
                         sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), 
-                        etat: clean(c[6]), img: clean(c[8]),
-                        tags: clean(c[12]), malId: clean(c[13]), editeur: clean(c[14]),
-                        ordreAjout: ordreAjout
+                        etat: clean(c[6]), img: clean(c[8]), tags: clean(c[12]), 
+                        malId: clean(c[13]), editeur: clean(c[14]), ordreAjout
                     };
                 }).filter(a => a !== null);
 
-                console.log('Animes chargés: ' + allAnimes.length);
-                const avecOrdre = allAnimes.filter(a => a.ordreAjout > 0);
-                console.log('Avec ordre_ajout: ' + avecOrdre.length);
-
-                // Tags
                 try {
                     const tr = await fetch('tags_description.csv');
                     const trRaw = await tr.text();
@@ -680,67 +475,64 @@
                         if (!c[0]) return null;
                         return { nom: c[0].trim(), description: (c[1]||'').trim() };
                     }).filter(t => t !== null);
-                    console.log('Tags chargés: ' + allTags.length);
-                } catch(e) { 
-                    console.warn('tags_description.csv non trouvé');
-                    allTags = []; 
-                }
+                } catch(e) { allTags = []; }
 
-                // SECTIONS
                 buildCarousel('carousel-random-track', 'carousel-random-prev', 'carousel-random-next', shuffle(allAnimes).slice(0, 20));
-
-                const recents = [...avecOrdre].sort((a,b) => b.ordreAjout - a.ordreAjout).slice(0, 20);
+                const recents = [...allAnimes].filter(a => a.ordreAjout > 0).sort((a,b) => b.ordreAjout - a.ordreAjout).slice(0, 20);
                 buildCarousel('carousel-recent-track', 'carousel-recent-prev', 'carousel-recent-next', recents);
 
                 if (allTags.length > 0) {
                     const rTag = allTags[Math.floor(Math.random() * allTags.length)];
                     document.getElementById('tag-name').textContent = rTag.nom;
                     document.getElementById('tag-description').textContent = rTag.description;
-                    
                     const tagAnimes = allAnimes.filter(a => a.tags && a.tags.toLowerCase().includes(rTag.nom.toLowerCase()));
-                    console.log('Tag "' + rTag.nom + '" : ' + tagAnimes.length + ' animes');
-                    
-                    if (tagAnimes.length > 0) {
-                        buildCarousel('carousel-tag-track', 'carousel-tag-prev', 'carousel-tag-next', shuffle(tagAnimes).slice(0, 20));
-                    } else {
-                        document.getElementById('carousel-tag-track').innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.7);border-radius:6px;display:inline-block;font-size:0.9em;">Aucun anime avec ce tag.</p>';
-                        document.getElementById('carousel-tag-prev').style.display = 'none';
-                        document.getElementById('carousel-tag-next').style.display = 'none';
-                    }
+                    buildCarousel('carousel-tag-track', 'carousel-tag-prev', 'carousel-tag-next', shuffle(tagAnimes).slice(0, 20));
                 } else {
                     document.getElementById('tag-name').textContent = 'Tags non disponibles';
-                    document.getElementById('tag-description').textContent = 'Fichier tags_description.csv introuvable';
-                    document.getElementById('carousel-tag-track').innerHTML = '<p style="color:#ff6b7a;padding:20px;background:rgba(0,0,0,0.7);border-radius:6px;display:inline-block;font-size:0.9em;">Fichier tags_description.csv introuvable.</p>';
                     document.getElementById('carousel-tag-prev').style.display = 'none';
                     document.getElementById('carousel-tag-next').style.display = 'none';
                 }
-
                 document.getElementById('anime-count').innerHTML = '📊 <span class="count-number">' + allAnimes.length + '</span> animes dans le catalogue';
 
-                const savedSearch = sessionStorage.getItem('indexSearch');
-                const savedScroll = sessionStorage.getItem('indexScroll');
-                if (savedSearch !== null) document.getElementById('search').value = savedSearch;
-                if (savedScroll && parseInt(savedScroll) > 0) {
-                    requestAnimationFrame(() => requestAnimationFrame(() => {
-                        window.scrollTo({ top: parseInt(savedScroll), behavior: 'instant' });
-                    }));
+                const urlParams = new URLSearchParams(window.location.search);
+                const searchParam = urlParams.get('search');
+                if (searchParam) {
+                    document.getElementById('search').value = searchParam;
+                    showSearchResults(searchParam);
+                } else {
+                    const savedSearch = sessionStorage.getItem('indexSearch');
+                    if (savedSearch) document.getElementById('search').value = savedSearch;
                 }
-
-            } catch(e) { console.error('Erreur:', e); }
+            } catch(e) { console.error(e); }
         }
 
-        window.toggleM = () => {
-            document.getElementById('menu').classList.toggle('active');
-            document.getElementById('overlay').classList.toggle('active');
-        };
-
-        window.randomAnime = () => {
-            if(allAnimes.length > 0) {
-                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
-                window.location.href = 'video.html?name='+encodeURIComponent(a.nom);
+        const searchInput = document.getElementById('search');
+        const searchSuggestions = document.getElementById('search-suggestions');
+        searchInput.addEventListener('input', function() {
+            const val = this.value.trim();
+            if (val.length < 2) { searchSuggestions.classList.remove('active'); return; }
+            const results = allAnimes.filter(a => normalize(a.nom).includes(normalize(val))).slice(0, 8);
+            if (results.length === 0) { searchSuggestions.innerHTML = '<div class="no-result" style="padding:12px;color:#888;">Aucun résultat</div>'; } 
+            else { searchSuggestions.innerHTML = results.map(a => '<div class="suggestion-item" data-name="'+a.nom.replace(/"/g,'&quot;')+'"><img src="img/'+a.img+'" class="sugg-img" onerror="this.src=\'img/logo.jpg\'"><span>'+a.nom+'</span></div>').join(''); }
+            searchSuggestions.classList.add('active');
+        });
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = this.value.trim();
+                if (val) showSearchResults(val);
+                searchSuggestions.classList.remove('active');
+                this.blur();
             }
-        };
+        });
+        searchSuggestions.addEventListener('click', function(e) {
+            const item = e.target.closest('.suggestion-item');
+            if (item && item.dataset.name) window.location.href = 'video.html?name=' + encodeURIComponent(item.dataset.name);
+        });
+        document.addEventListener('click', function(e) { if (!e.target.closest('.search-wrapper')) searchSuggestions.classList.remove('active'); });
 
+        window.randomAnime = () => { if(allAnimes.length) { const a = allAnimes[Math.floor(Math.random()*allAnimes.length)]; window.location.href = 'video.html?name='+encodeURIComponent(a.nom); } };
+        window.toggleM = () => { const menu = document.getElementById('menu'); const overlay = document.getElementById('overlay'); const isOpen = menu.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow = isOpen ? 'hidden' : ''; };
         init();
     </script>
 </body>
