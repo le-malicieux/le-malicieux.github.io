@@ -7,7 +7,12 @@
     <title>Tags - Le Malicieux</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); background-size: cover; background-attachment: fixed; color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; }
+        #bg-layer {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background-size: cover; background-position: center center;
+            background-repeat: no-repeat; background-attachment: scroll;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; }
         .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); gap: 12px; flex-wrap: wrap; }
         .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
@@ -24,8 +29,10 @@
         .search-suggestions .suggestion-item:hover { background: #2a2a2a; }
         .search-suggestions .suggestion-item .sugg-img { width: 28px; height: 40px; border-radius: 4px; object-fit: cover; }
         .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .nav-links a, .nav-links button { background: var(--primary); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8em; text-decoration: none; cursor: pointer; white-space: nowrap; font-weight: bold; }
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
+        .nav-links a, .nav-links .nav-btn { background: var(--primary); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8em; text-decoration: none; cursor: pointer; white-space: nowrap; font-weight: bold; }
+        .nav-links .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; white-space: nowrap; border: 2px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; gap: 5px; }
+        .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
+        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
         @media (max-width: 900px) {
@@ -36,8 +43,9 @@
             .close-menu { display: block; }
             .nav-links { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s; z-index: 1100; align-items: stretch; overflow-y: auto; }
             .nav-links.active { left: 0; }
-            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
+            .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
+            .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
             .discord-btn { margin-top: 10px; }
         }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
@@ -62,6 +70,7 @@
     </style>
 </head>
 <body>
+    <div id="bg-layer"></div>
     <div class="top-navbar">
         <div class="burger" onclick="toggleM()">☰</div>
         <div class="nav-left">
@@ -79,6 +88,7 @@
         <div class="nav-links" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
             <a href="index.html">🏠 Accueil</a>
+            <a href="tags.html">🏷️ Tags</a>
             <a href="alphabetique.html">📖 A-Z</a>
             <a href="playlist.html">📂 Playlist</a>
             <a href="editeurs.html">🏢 Studios</a>
@@ -132,10 +142,14 @@
             return allAnimes.filter(a => normalize(a.nom).includes(q));
         }
 
-        async function init() {
+        function setBackground() {
             const isMobile = window.innerWidth <= 1000;
             const n = Math.floor(Math.random() * (isMobile ? 14 : 64)) + 1;
-            document.body.style.backgroundImage = `url('img/${isMobile ? 'mobile'+n : 'fond'+n}.webp')`;
+            document.getElementById('bg-layer').style.backgroundImage = `url('img/${isMobile ? 'mobile'+n : 'fond'+n}.webp')`;
+        }
+
+        async function init() {
+            setBackground();
 
             try {
                 const [csvResp, tagResp] = await Promise.all([fetch('animes.csv'), fetch('tags_description.csv').catch(() => null)]);

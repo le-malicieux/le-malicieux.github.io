@@ -12,15 +12,17 @@
     <title>Le Malicieux - Catalogue d'Animes</title>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --text-bright: #ffffff; --text-secondary: #ccc; --nav-bg: rgba(15, 15, 15, 0.85); }
-        
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: var(--bg); 
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            color: var(--text); 
-            margin: 0; 
+
+        #bg-layer {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background-size: cover; background-position: center center;
+            background-repeat: no-repeat; background-attachment: scroll;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -36,16 +38,16 @@
         .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; cursor: pointer; }
         .nav-logo-small { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; white-space: nowrap; }
-        
+
         #back-home { font-size: 0.7em; color: #ff6b7a; text-decoration: none; display: none; cursor: pointer; margin-left: 5px; }
-        
-        .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 5px; user-select: none; order: -1; }
+
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; user-select: none; order: -1; }
 
         .search-wrapper {
             position: relative; flex: 1; min-width: 180px; max-width: 300px;
         }
         .search-wrapper input {
-            width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; 
+            width: 100%; background: #1a1a1a; border: 2px solid #333; color: white;
             padding: 6px 30px 6px 10px; border-radius: 5px; font-size: 0.85em;
             box-sizing: border-box; outline: none;
         }
@@ -72,17 +74,25 @@
         }
 
         .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .nav-links a, .nav-links button { 
-            background: var(--primary); border: none; color: white; 
-            padding: 5px 10px; border-radius: 4px; font-size: 0.8em; 
+        .nav-links a, .nav-links .nav-btn {
+            background: var(--primary); border: none; color: white;
+            padding: 5px 10px; border-radius: 4px; font-size: 0.8em;
             text-decoration: none; cursor: pointer; white-space: nowrap;
             font-weight: bold;
         }
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
+        .nav-links .discord-btn {
+            background: #5865F2; color: white; text-decoration: none;
+            padding: 5px 10px; border-radius: 20px; font-size: 0.8em;
+            font-weight: bold; white-space: nowrap;
+            border: 2px solid rgba(255,255,255,0.15);
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
+        .nav-links .discord-btn:hover { background: #4752c4; border-color: rgba(255,255,255,0.3); }
 
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
-        
+
         @media (max-width: 900px) {
             .top-navbar { flex-wrap: wrap; }
             .search-wrapper { order: 3; width: 100%; max-width: none; margin-top: 8px; }
@@ -96,9 +106,9 @@
                 overflow-y: auto;
             }
             .nav-links.active { left: 0; }
-            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
+            .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
-            .discord-btn { margin-top: 10px; }
+            .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
         }
 
         .hero-section {
@@ -110,10 +120,10 @@
         .main-slogan { font-size: 1.3em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
 
         .content-area { padding: 20px 15px 40px; }
-        
+
         .section-title {
             max-width: 1400px; margin: 30px auto 15px; padding: 10px 15px;
-            font-size: 1.5em; font-weight: bold; 
+            font-size: 1.5em; font-weight: bold;
             color: var(--primary);
             background: rgba(0, 0, 0, 0.75);
             border-radius: 6px;
@@ -121,14 +131,32 @@
         }
         .section-title-wrapper { max-width: 1400px; margin: 30px auto 15px; padding: 0 15px; }
 
+        /* Tag section styled like tags.html */
+        .tag-section-box {
+            background: var(--card-bg); border: 1px solid #333; border-radius: 12px;
+            padding: 16px 20px; margin-bottom: 10px;
+            display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+        }
+        .tag-section-box .tag-pill-main {
+            padding: 8px 16px; background: var(--primary); border: 2px solid var(--primary);
+            border-radius: 20px; color: white; cursor: pointer; font-size: 0.9em;
+            font-weight: bold; transition: 0.3s; text-decoration: none;
+        }
+        .tag-section-box .tag-pill-main:hover { background: #e0313f; }
+        .tag-section-box .tag-description {
+            color: #ddd; font-size: 0.85em; line-height: 1.5; flex: 1; min-width: 200px;
+        }
+        .tag-section-box .tag-label {
+            font-size: 0.7em; color: var(--primary); font-weight: bold; text-transform: uppercase;
+            margin-right: 5px;
+        }
+
         .carousel-wrapper {
             position: relative; max-width: 1400px; margin: 0 auto; padding: 0 35px;
-            overflow: hidden;
         }
-        .carousel-container { overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
-        .carousel-track {
-            display: flex; gap: 15px; transition: transform 0.4s ease;
-        }
+        .carousel-container { overflow: hidden; touch-action: pan-y; }
+        .carousel-track { display: flex; gap: 15px; transition: transform 0.4s ease; cursor: grab; }
+        .carousel-track:active { cursor: grabbing; }
         .carousel-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
             background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2); color: white;
@@ -139,8 +167,8 @@
         .carousel-btn.next { right: 0; }
         .carousel-btn:disabled { opacity: 0.25; cursor: default; }
 
-        .card { 
-            background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
+        .card {
+            background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s;
             border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
             display: flex; flex-direction: column; flex-shrink: 0;
             width: 180px;
@@ -154,13 +182,13 @@
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #ddd; margin-top: 2px; }
 
         #search-results-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 15px; max-width: 1400px; margin: 0 auto; padding: 0 15px;
         }
         #search-results-count { color: #aaa; margin: 5px 15px; font-size: 0.9em; }
         .anime-count { text-align: center; padding: 12px 20px; color: var(--primary); font-size: 1em; font-weight: bold; background: rgba(0, 0, 0, 0.75); display: inline-block; border-radius: 6px; }
         .anime-count-wrapper { text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; margin-top: 40px; }
-        
+
         @media (max-width: 1000px) {
             .card { width: 150px; }
             .hero-section { height: 45vh; }
@@ -180,7 +208,9 @@
 <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    
+
+    <div id="bg-layer"></div>
+
     <div class="top-navbar">
         <div class="burger" onclick="toggleM()">☰</div>
         <div class="nav-left">
@@ -201,17 +231,18 @@
 
         <div class="nav-links" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
+            <a href="index.html">🏠 Accueil</a>
             <a href="tags.html">🏷️ Tags</a>
             <a href="alphabetique.html">📖 A-Z</a>
             <a href="playlist.html">📂 Playlist</a>
             <a href="editeurs.html">🏢 Studios</a>
-            <button onclick="randomAnime()">🎲 Random</button>
+            <button class="nav-btn" onclick="randomAnime()">🎲 Random</button>
             <a href="index_old.html">🕰️ Ancien Index</a>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
-        
+
         <div id="auth-ui" style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
-            <button id="login-btn" class="discord-btn" style="background:#5865F2; border:none;">Connexion</button>
+            <button id="login-btn" style="background:#5865F2; border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:0.8em;">Connexion</button>
         </div>
     </div>
 
@@ -237,7 +268,12 @@
         </div>
 
         <div class="section-title-wrapper" id="tag-section-title-wrapper">
-            <h2 class="section-title" id="tag-section-title">🏷️ <span id="tag-name"></span><span class="section-subtitle" id="tag-description"></span></h2>
+            <h2 class="section-title">🏷️ Tag aléatoire</h2>
+        </div>
+        <div class="tag-section-box" id="tag-section-box" style="max-width:1400px; margin:0 auto 10px;">
+            <span class="tag-label">Tag :</span>
+            <a class="tag-pill-main" id="tag-pill-link" href="#">—</a>
+            <span class="tag-description" id="tag-description-text">—</span>
         </div>
         <div class="carousel-wrapper" id="carousel-tag-wrapper">
             <button class="carousel-btn prev" id="carousel-tag-prev">◀</button>
@@ -279,7 +315,7 @@
         let jikanQueue = [], jikanRunning = false;
         function jikanEnqueue(task) { jikanQueue.push(task); if (!jikanRunning) jikanDrain(); }
         async function jikanDrain() { jikanRunning = true; while (jikanQueue.length > 0) { const task = jikanQueue.shift(); await task(); await new Promise(r => setTimeout(r, 400)); } jikanRunning = false; }
-        
+
         function fetchMALForCard(nom, malId, scoreEl, popEl) {
             const cached = malCacheGet(nom);
             if (cached) { applyCardMAL(scoreEl, popEl, cached); return; }
@@ -330,10 +366,10 @@
                     if (uSnap.exists() && uSnap.data().photoURL) { sessionStorage.setItem('userAvatar', uSnap.data().photoURL); }
                 }
                 const avatarUrl = sessionStorage.getItem('userAvatar') || user.photoURL || 'img/logo.jpg';
-                authUi.innerHTML = `<a href="profil.html" style="display:flex;align-items:center;gap:6px;text-decoration:none;"><img src="${avatarUrl}" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--primary);object-fit:cover;" onerror="this.src='img/logo.jpg'"><span style="color:white;font-size:0.8em;">${displayName}</span></a><button id="logout-btn" class="discord-btn" style="background:#333; border:none; cursor:pointer; padding:5px 8px;">Quitter</button>`;
+                authUi.innerHTML = `<a href="profil.html" style="display:flex;align-items:center;gap:6px;text-decoration:none;"><img src="${avatarUrl}" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--primary);object-fit:cover;" onerror="this.src='img/logo.jpg'"><span style="color:white;font-size:0.8em;">${displayName}</span></a><button id="logout-btn" style="background:#333; color:white; border:none; cursor:pointer; padding:5px 8px; border-radius:5px; font-size:0.75em;">Quitter</button>`;
                 document.getElementById('logout-btn').onclick = () => signOut(auth);
             } else {
-                authUi.innerHTML = `<button id="login-btn" class="discord-btn" style="background:#5865F2; border:none; padding:5px 10px;">Connexion</button>`;
+                authUi.innerHTML = `<button id="login-btn" style="background:#5865F2; border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:0.8em;">Connexion</button>`;
                 document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
             }
         });
@@ -372,22 +408,65 @@
             </a>`;
         }
 
+        function addTouchSwipe(trackId, prevBtnId, nextBtnId, getCurrentIndex, setCurrentIndex, getMaxIndex, getCardWidth, scrollFn) {
+            const track = document.getElementById(trackId);
+            if (!track) return;
+            let startX = 0, startY = 0, movedX = 0;
+            let isDragging = false;
+
+            track.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                movedX = 0;
+                isDragging = true;
+                track.style.transition = 'none';
+            }, { passive: true });
+
+            track.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const dx = e.touches[0].clientX - startX;
+                const dy = e.touches[0].clientY - startY;
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    e.preventDefault();
+                    movedX = dx;
+                    const offset = -getCurrentIndex() * getCardWidth() + dx;
+                    track.style.transform = `translateX(${offset}px)`;
+                }
+            }, { passive: false });
+
+            track.addEventListener('touchend', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                track.style.transition = 'transform 0.4s ease';
+                const threshold = getCardWidth() * 0.4;
+                if (movedX < -threshold) {
+                    setCurrentIndex(Math.min(getMaxIndex(), getCurrentIndex() + 1));
+                } else if (movedX > threshold) {
+                    setCurrentIndex(Math.max(0, getCurrentIndex() - 1));
+                }
+                scrollFn();
+            });
+        }
+
         function buildCarousel(trackId, prevBtnId, nextBtnId, animeList) {
             const track = document.getElementById(trackId);
             const prevBtn = document.getElementById(prevBtnId);
             const nextBtn = document.getElementById(nextBtnId);
             if (!track) return;
-            if (animeList.length === 0) { track.innerHTML = '<p style="color:#ff6b7a;padding:20px;">Aucun anime.</p>'; prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; return; }
+            if (animeList.length === 0) { track.innerHTML = '<p style="color:#ff6b7a;padding:20px;">Aucun anime.</p>'; if(prevBtn) prevBtn.style.display = 'none'; if(nextBtn) nextBtn.style.display = 'none'; return; }
             track.innerHTML = animeList.map(a => createCardHTML(a)).join('');
             track.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
             let currentIndex = 0;
             function getCardsPerView() { const w = window.innerWidth; if (w <= 480) return 2; if (w <= 1000) return 3; return 5; }
             function getCardWidth() { const card = track.querySelector('.card'); return card ? card.offsetWidth + 15 : 180; }
             function getMaxIndex() { return Math.max(0, track.children.length - getCardsPerView()); }
-            function updateButtons() { const maxIdx = getMaxIndex(); prevBtn.disabled = currentIndex <= 0; nextBtn.disabled = currentIndex >= maxIdx; }
+            function updateButtons() { const maxIdx = getMaxIndex(); if(prevBtn) prevBtn.disabled = currentIndex <= 0; if(nextBtn) nextBtn.disabled = currentIndex >= maxIdx; }
             function scrollToIndex() { track.style.transform = 'translateX(-' + (currentIndex * getCardWidth()) + 'px)'; updateButtons(); }
-            prevBtn.onclick = () => { currentIndex = Math.max(0, currentIndex - getCardsPerView()); scrollToIndex(); };
-            nextBtn.onclick = () => { currentIndex = Math.min(getMaxIndex(), currentIndex + getCardsPerView()); scrollToIndex(); };
+            const getCI = () => currentIndex;
+            const setCI = (v) => { currentIndex = v; };
+            if(prevBtn) prevBtn.onclick = () => { currentIndex = Math.max(0, currentIndex - getCardsPerView()); scrollToIndex(); };
+            if(nextBtn) nextBtn.onclick = () => { currentIndex = Math.min(getMaxIndex(), currentIndex + getCardsPerView()); scrollToIndex(); };
+            addTouchSwipe(trackId, prevBtnId, nextBtnId, getCI, setCI, getMaxIndex, getCardWidth, scrollToIndex);
             let resizeTimeout; window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => { currentIndex = Math.min(currentIndex, getMaxIndex()); scrollToIndex(); }, 150); });
             updateButtons();
         }
@@ -408,7 +487,7 @@
             resultsSection.style.display = 'block';
             resultsTitle.textContent = '🔍 ' + query;
             resultsCount.textContent = results.length + ' anime' + (results.length > 1 ? 's' : '') + ' trouvé' + (results.length > 1 ? 's' : '');
-            
+
             if (results.length === 0) {
                 resultsGrid.innerHTML = '<p style="color:#ff6b7a;text-align:center;padding:40px;">Aucun anime trouvé pour "' + query + '"</p>';
             } else if (results.length === 1) {
@@ -439,19 +518,25 @@
             if (!img.dataset.attempt) img.dataset.attempt = "1";
             const lastDotIndex = fileNameFromCSV.lastIndexOf('.');
             const base = lastDotIndex !== -1 ? fileNameFromCSV.substring(0, lastDotIndex) : fileNameFromCSV;
-            if (img.dataset.attempt === "1") { img.dataset.attempt = "2"; img.src = `img/${base}.webp`; } 
-            else if (img.dataset.attempt === "2") { img.dataset.attempt = "3"; img.src = `img/${base}.png`; } 
-            else if (img.dataset.attempt === "3") { img.dataset.attempt = "4"; img.src = `img/${base}.jpg`; } 
+            if (img.dataset.attempt === "1") { img.dataset.attempt = "2"; img.src = `img/${base}.webp`; }
+            else if (img.dataset.attempt === "2") { img.dataset.attempt = "3"; img.src = `img/${base}.png`; }
+            else if (img.dataset.attempt === "3") { img.dataset.attempt = "4"; img.src = `img/${base}.jpg`; }
             else { img.onerror = null; img.src = 'img/logo.jpg'; }
         };
 
-        async function init() {
+        function setBackground() {
             const isMobile = window.innerWidth <= 1000;
-            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
-            document.body.style.backgroundImage = `url('img/${fileName}')`;
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center';
-            document.body.style.backgroundAttachment = 'fixed';
+            const n = isMobile ? Math.floor(Math.random() * 13) + 1 : Math.floor(Math.random() * 64) + 1;
+            const fileName = isMobile ? `mobile${n}.webp` : `fond${n}.webp`;
+            document.getElementById('bg-layer').style.backgroundImage = `url('img/${fileName}')`;
+        }
+
+        async function init() {
+            setBackground();
+            window.addEventListener('resize', () => {
+                const bgLayer = document.getElementById('bg-layer');
+                if (bgLayer && !bgLayer.style.backgroundImage) setBackground();
+            });
 
             try {
                 const resp = await fetch('animes.csv');
@@ -465,10 +550,10 @@
                     const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
                     let ordreAjout = 0;
                     if (ordreAjoutIndex >= 0 && ordreAjoutIndex < c.length) ordreAjout = parseInt(clean(c[ordreAjoutIndex])) || 0;
-                    return { 
-                        nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), 
-                        sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), 
-                        etat: clean(c[6]), img: clean(c[8]), tags: clean(c[12]), 
+                    return {
+                        nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]),
+                        sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]),
+                        etat: clean(c[6]), img: clean(c[8]), tags: clean(c[12]),
                         malId: clean(c[13]), editeur: clean(c[14]), ordreAjout
                     };
                 }).filter(a => a !== null);
@@ -489,12 +574,14 @@
 
                 if (allTags.length > 0) {
                     const rTag = allTags[Math.floor(Math.random() * allTags.length)];
-                    document.getElementById('tag-name').textContent = rTag.nom;
-                    document.getElementById('tag-description').textContent = rTag.description;
+                    document.getElementById('tag-pill-link').textContent = rTag.nom;
+                    document.getElementById('tag-pill-link').href = `tags.html?tag=${encodeURIComponent(rTag.nom)}`;
+                    document.getElementById('tag-description-text').textContent = rTag.description || 'Découvrez les animes associés à ce tag.';
                     const tagAnimes = allAnimes.filter(a => a.tags && a.tags.toLowerCase().includes(rTag.nom.toLowerCase()));
                     buildCarousel('carousel-tag-track', 'carousel-tag-prev', 'carousel-tag-next', shuffle(tagAnimes).slice(0, 20));
                 } else {
-                    document.getElementById('tag-name').textContent = 'Tags non disponibles';
+                    document.getElementById('tag-pill-link').textContent = 'Tags indisponibles';
+                    document.getElementById('tag-description-text').textContent = 'Chargement des tags...';
                     document.getElementById('carousel-tag-prev').style.display = 'none';
                     document.getElementById('carousel-tag-next').style.display = 'none';
                 }
@@ -518,7 +605,7 @@
             const val = this.value.trim();
             if (val.length < 2) { searchSuggestions.classList.remove('active'); return; }
             const results = allAnimes.filter(a => normalize(a.nom).includes(normalize(val))).slice(0, 8);
-            if (results.length === 0) { searchSuggestions.innerHTML = '<div class="no-result" style="padding:12px;color:#888;">Aucun résultat</div>'; } 
+            if (results.length === 0) { searchSuggestions.innerHTML = '<div class="no-result" style="padding:12px;color:#888;">Aucun résultat</div>'; }
             else { searchSuggestions.innerHTML = results.map(a => '<div class="suggestion-item" data-name="'+a.nom.replace(/"/g,'&quot;')+'"><img src="img/'+a.img+'" class="sugg-img" onerror="this.src=\'img/logo.jpg\'"><span>'+a.nom+'</span></div>').join(''); }
             searchSuggestions.classList.add('active');
         });

@@ -13,12 +13,14 @@
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
 
+        #bg-layer {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background-size: cover; background-position: center center;
+            background-repeat: no-repeat; background-attachment: scroll;
+        }
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg);
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
             color: var(--text);
             margin: 0;
             min-height: 100vh;
@@ -38,7 +40,7 @@
         .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
         .nav-logo-small { width: 30px; height: 30px; border-radius: 4px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; white-space: nowrap; }
-        
+
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 5px; order: -1; }
 
         .search-bar-wrap {
@@ -66,19 +68,27 @@
             height: 30px;
             cursor: pointer;
         }
-        
+
         .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .nav-links a, .nav-links button { 
-            background: var(--primary); border: none; color: white; 
-            padding: 5px 10px; border-radius: 4px; font-size: 0.8em; 
+        .nav-links a, .nav-links .nav-btn {
+            background: var(--primary); border: none; color: white;
+            padding: 5px 10px; border-radius: 4px; font-size: 0.8em;
             text-decoration: none; cursor: pointer; white-space: nowrap;
             font-weight: bold;
         }
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
-        
+        .nav-links .discord-btn {
+            background: #5865F2; color: white; text-decoration: none;
+            padding: 5px 10px; border-radius: 20px; font-size: 0.8em;
+            font-weight: bold; white-space: nowrap;
+            border: 2px solid rgba(255,255,255,0.15);
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
+        .nav-links .discord-btn:hover { background: #4752c4; border-color: rgba(255,255,255,0.3); }
+
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
-        
+
         @media (max-width: 900px) {
             .top-navbar { flex-wrap: wrap; }
             .search-bar-wrap { order: 3; width: 100%; margin-top: 8px; }
@@ -92,28 +102,17 @@
                 overflow-y: auto;
             }
             .nav-links.active { left: 0; }
-            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
+            .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
+            .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
             body { padding-top: 106px; }
         }
 
-        body::before { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 0; pointer-events: none; }
         .content-area { position: relative; z-index: 1; padding: 20px 15px; min-height: 100vh; max-width: 1400px; margin: 0 auto; }
         .letter-anchor { display: flex; align-items: center; gap: 12px; margin: 30px 0 12px 0; }
         .letter-badge { font-size: 1.1em; font-weight: 900; color: var(--primary); min-width: 50px; height: 50px; padding: 0 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,71,87,0.1); border: 2px solid var(--primary); border-radius: 10px; flex-shrink: 0; white-space: nowrap; }
         .letter-line { flex: 1; height: 1px; background: linear-gradient(to right, rgba(255,71,87,0.4), transparent); }
-        
-        .view-controls { display: flex; justify-content: flex-end; margin-bottom: 15px; gap: 8px; }
-        .view-controls select { background: #1e1e1e; border: 1px solid #3a3a3a; color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; cursor: pointer; }
-        
         .anime-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 10px; }
-        .anime-list.list-mode { display: flex; flex-direction: column; gap: 4px; }
-        .anime-list.list-mode .card { display: flex; flex-direction: row; align-items: center; gap: 10px; }
-        .anime-list.list-mode .card .img-container { width: 60px; aspect-ratio: 2/3; }
-        .anime-list.list-mode .card-info { padding: 5px; }
-        .anime-list.list-mode .card-title { height: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .anime-list.list-mode .card-meta-row { display: none; }
-        
         .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
@@ -128,12 +127,35 @@
         .alpha-nav a:hover { color: white; border-color: var(--primary); background: rgba(255,71,87,0.1); }
         .alpha-nav a.disabled { color: #333; border-color: #1a1a1a; pointer-events: none; }
         #no-result { text-align: center; color: #ccc; padding: 40px; font-size: 1.1em; display: none; }
+
+        .display-mode-bar {
+            display: flex; align-items: center; gap: 8px; padding: 0 15px; max-width: 1400px; margin: 0 auto 15px;
+            flex-wrap: wrap;
+        }
+        .display-mode-bar select {
+            background: #1e1e1e; border: 1px solid #3a3a3a; color: white;
+            padding: 4px 8px; border-radius: 5px; font-size: 0.8em; height: 30px; cursor: pointer;
+        }
+        .display-mode-bar label { font-size: 0.75em; color: #888; }
+
+        .list-table-wrap { display: none; overflow-x: auto; max-width: 1400px; margin: 0 auto; padding: 0 15px; }
+        .list-table-wrap.active { display: block; }
+        .anime-list.table-hidden { display: none; }
+        .list-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; font-size: 0.8em; }
+        .list-table th, .list-table td { padding: 8px; border-bottom: 1px solid #222; text-align: left; }
+        .list-table th { color: var(--primary); font-size: 0.75em; text-transform: uppercase; }
+        .list-table a { color: white; text-decoration: none; }
+        .list-table a:hover { color: var(--primary); }
+        .list-table .table-img { width: 35px; height: 50px; object-fit: cover; border-radius: 3px; }
+
         @media (max-width: 1000px) { .anime-list { grid-template-columns: repeat(3, 1fr); gap: 8px; } .card-info { padding: 5px; } .card-title { font-size: 0.85em; } .card-meta-row { font-size: 0.65em; gap: 2px; } }
     </style>
 </head>
 <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <div id="bg-layer"></div>
 
     <div class="top-navbar">
         <div class="burger" onclick="toggleM()">☰</div>
@@ -165,10 +187,11 @@
             <div class="close-menu" onclick="toggleM()">← Retour</div>
             <a href="index.html">🏠 Accueil</a>
             <a href="tags.html">🏷️ Tags</a>
+            <a href="alphabetique.html">📖 A-Z</a>
             <a href="playlist.html">📂 Playlist</a>
             <a href="editeurs.html">🏢 Studios</a>
+            <button class="nav-btn" onclick="randomAnime()">🎲 Random</button>
             <a href="index_old.html">🕰️ Ancien Index</a>
-            <button onclick="randomAnime()">🎲 Random</button>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
     </div>
@@ -176,13 +199,20 @@
     <div class="alpha-nav" id="alpha-nav"></div>
 
     <div class="content-area">
-        <div class="view-controls">
-            <select id="view-mode">
-                <option value="cards">🖼️ Photos</option>
-                <option value="list">📋 Liste</option>
+        <div class="display-mode-bar">
+            <label>Affichage :</label>
+            <select id="display-mode" onchange="switchDisplayMode()">
+                <option value="grid">Icônes</option>
+                <option value="list">Liste</option>
             </select>
         </div>
         <div id="groups-container"></div>
+        <div class="list-table-wrap" id="list-table-wrap">
+            <table class="list-table" id="list-table">
+                <thead><tr><th>#</th><th>Image</th><th>Titre</th><th>Score</th><th>Pop.</th><th>Année</th><th>Épisodes</th><th>Censure</th><th>État</th><th>Éditeur</th></tr></thead>
+                <tbody id="list-body"></tbody>
+            </table>
+        </div>
         <div id="no-result">Aucun anime trouvé pour cette recherche.</div>
     </div>
 
@@ -199,6 +229,11 @@
 
         let allAnimes = [];
         let currentFiltered = [];
+        let currentDisplayMode = localStorage.getItem('alphaDisplayMode') || 'grid';
+
+        document.getElementById('display-mode').value = currentDisplayMode;
+
+        onAuthStateChanged(auth, async (user) => {});
 
         window.handleImgError = function(img, fileNameFromCSV) {
             if (!img.dataset.attempt) img.dataset.attempt = "1";
@@ -226,7 +261,7 @@
                 return `<a href="${hasContent ? '#group-' + k : '#'}" class="${hasContent ? '' : 'disabled'}">${k}</a>`;
             }).join('');
         }
-        
+
         function normalizeSearch(str) {
             return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                 .replace(/[-_.:;,!?()'"&~#|]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -263,18 +298,25 @@
             return sorted;
         }
 
+        function switchDisplayMode() {
+            currentDisplayMode = document.getElementById('display-mode').value;
+            localStorage.setItem('alphaDisplayMode', currentDisplayMode);
+            render(document.getElementById('search').value, document.getElementById('sort-select').value);
+        }
+        window.switchDisplayMode = switchDisplayMode;
+
         function render(searchVal = '', sortMode = '') {
             const container = document.getElementById('groups-container');
             const noResult = document.getElementById('no-result');
+            const tableWrap = document.getElementById('list-table-wrap');
+            const listBody = document.getElementById('list-body');
             const query = normalizeSearch(searchVal);
-            const viewMode = document.getElementById('view-mode').value;
-            const listClass = viewMode === 'list' ? ' list-mode' : '';
 
             let filtered = allAnimes;
             if (query) {
                 filtered = allAnimes.filter(a => normalizeSearch(a.nom).includes(query));
             }
-            
+
             filtered = sortAnimes(filtered, sortMode);
             currentFiltered = filtered;
 
@@ -294,41 +336,75 @@
 
             if (orderedKeys.length === 0) {
                 container.innerHTML = '';
+                tableWrap.classList.remove('active');
                 noResult.style.display = 'block';
                 return;
             }
             noResult.style.display = 'none';
 
-            container.innerHTML = orderedKeys.map(key => {
-                const label = key === '★' ? '★ Spéciaux' : key === '#' ? '# Chiffres' : key;
-                const cards = groups[key].map(a => `
-                    <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
-                        <div class="img-container">
-                            <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">${a.nom}</div>
-                            <div class="card-meta-row">
-                                <span ${hl('sortie')}>📅${a.sortie}</span>
-                                <span ${hl('score')}>⭐${a.score}</span>
-                                <span ${hl('popularite')}>📈${a.pop}</span>
-                            </div>
-                            <div class="card-meta-row">
-                                <span ${hl('episodes')}>🎞️${a.ep}</span>
-                                <span ${hl('censure')}>🔞${a.censure}</span>
-                                <span ${hl('etat')}>🛠️${a.etat}</span>
-                            </div>
-                            ${a.editeur ? `<div class="card-meta-row"><span ${hl('editeur')} style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🏢${a.editeur}</span></div>` : ''}
-                        </div>
-                    </a>`).join('');
+            const isGrid = currentDisplayMode === 'grid';
 
-                return `
-                    <div id="group-${key}" class="letter-anchor">
-                        <div class="letter-badge">${label}</div>
-                        <div class="letter-line"></div>
-                    </div>
-                    <div class="anime-list${listClass}">${cards}</div>`;
-            }).join('');
+            if (isGrid) {
+                tableWrap.classList.remove('active');
+                container.style.display = '';
+
+                container.innerHTML = orderedKeys.map(key => {
+                    const label = key === '★' ? '★ Spéciaux' : key === '#' ? '# Chiffres' : key;
+                    const cards = groups[key].map(a => `
+                        <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
+                            <div class="img-container">
+                                <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
+                            </div>
+                            <div class="card-info">
+                                <div class="card-title">${a.nom}</div>
+                                <div class="card-meta-row">
+                                    <span ${hl('sortie')}>📅${a.sortie}</span>
+                                    <span ${hl('score')}>⭐${a.score}</span>
+                                    <span ${hl('popularite')}>📈${a.pop}</span>
+                                </div>
+                                <div class="card-meta-row">
+                                    <span ${hl('episodes')}>🎞️${a.ep}</span>
+                                    <span ${hl('censure')}>🔞${a.censure}</span>
+                                    <span ${hl('etat')}>🛠️${a.etat}</span>
+                                </div>
+                                ${a.editeur ? `<div class="card-meta-row"><span ${hl('editeur')} style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🏢${a.editeur}</span></div>` : ''}
+                            </div>
+                        </a>`).join('');
+
+                    return `
+                        <div id="group-${key}" class="letter-anchor">
+                            <div class="letter-badge">${label}</div>
+                            <div class="letter-line"></div>
+                        </div>
+                        <div class="anime-list">${cards}</div>`;
+                }).join('');
+            } else {
+                container.innerHTML = '';
+                tableWrap.classList.add('active');
+
+                let globalIndex = 0;
+                let rows = '';
+                orderedKeys.forEach(key => {
+                    const label = key === '★' ? '★ Spéciaux' : key === '#' ? '# Chiffres' : key;
+                    rows += `<tr><td colspan="10" style="background:#1a1a1a; color:var(--primary); font-weight:bold; padding:10px 8px; font-size:1em;">${label}</td></tr>`;
+                    groups[key].forEach(a => {
+                        globalIndex++;
+                        rows += `<tr>
+                            <td>${globalIndex}</td>
+                            <td><img src="img/${a.img}" class="table-img" loading="lazy" onerror="handleImgError(this, '${a.img}')"></td>
+                            <td><a href="video.html?name=${encodeURIComponent(a.nom)}">${a.nom}</a></td>
+                            <td ${hl('score')}>⭐${a.score}</td>
+                            <td ${hl('popularite')}>📈${a.pop}</td>
+                            <td ${hl('sortie')}>📅${a.sortie}</td>
+                            <td ${hl('episodes')}>🎞️${a.ep}</td>
+                            <td ${hl('censure')}>🔞${a.censure}</td>
+                            <td ${hl('etat')}>🛠️${a.etat}</td>
+                            <td ${hl('editeur')}>${a.editeur||'—'}</td>
+                        </tr>`;
+                    });
+                });
+                listBody.innerHTML = rows;
+            }
 
             const navGroups = {};
             for (const a of filtered) {
@@ -339,13 +415,14 @@
             buildAlphaNav(navGroups);
         }
 
-        async function init() {
+        function setBackground() {
             const isMobile = window.innerWidth <= 1000;
-            let fileName = isMobile ? `mobile${Math.floor(Math.random() * 14) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
-            document.body.style.backgroundImage = `url('img/${fileName}')`;
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center';
-            document.body.style.backgroundAttachment = 'fixed';
+            const n = isMobile ? Math.floor(Math.random() * 14) + 1 : Math.floor(Math.random() * 64) + 1;
+            document.getElementById('bg-layer').style.backgroundImage = `url('img/${isMobile ? 'mobile' + n : 'fond' + n}.webp')`;
+        }
+
+        async function init() {
+            setBackground();
 
             try {
                 const response = await fetch('animes.csv');
@@ -375,7 +452,6 @@
 
         document.getElementById('search').oninput = (e) => render(e.target.value, document.getElementById('sort-select').value);
         document.getElementById('sort-select').onchange = () => render(document.getElementById('search').value, document.getElementById('sort-select').value);
-        document.getElementById('view-mode').onchange = () => render(document.getElementById('search').value, document.getElementById('sort-select').value);
 
         function toggleM() {
             const menu = document.getElementById('menu');
