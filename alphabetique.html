@@ -16,7 +16,8 @@
         #bg-layer {
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
-            background-repeat: no-repeat; background-attachment: scroll;
+            background-repeat: no-repeat;
+            will-change: transform;
         }
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -96,12 +97,14 @@
             .burger { display: block; order: 1; }
             .close-menu { display: block; }
             .nav-links {
-                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                position: fixed; top: 0; right: -100%; width: 280px; height: 100vh;
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
                 transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
                 overflow-y: auto;
+                left: auto;
+                right: -100%;
             }
-            .nav-links.active { left: 0; }
+            .nav-links.active { right: 0; left: auto; }
             .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
@@ -112,7 +115,7 @@
         .letter-anchor { display: flex; align-items: center; gap: 12px; margin: 30px 0 12px 0; }
         .letter-badge { font-size: 1.1em; font-weight: 900; color: var(--primary); min-width: 50px; height: 50px; padding: 0 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,71,87,0.1); border: 2px solid var(--primary); border-radius: 10px; flex-shrink: 0; white-space: nowrap; }
         .letter-line { flex: 1; height: 1px; background: linear-gradient(to right, rgba(255,71,87,0.4), transparent); }
-        .anime-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 10px; }
+        .anime-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 10px; }
         .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
@@ -148,7 +151,12 @@
         .list-table a:hover { color: var(--primary); }
         .list-table .table-img { width: 35px; height: 50px; object-fit: cover; border-radius: 3px; }
 
-        @media (max-width: 1000px) { .anime-list { grid-template-columns: repeat(3, 1fr); gap: 8px; } .card-info { padding: 5px; } .card-title { font-size: 0.85em; } .card-meta-row { font-size: 0.65em; gap: 2px; } }
+        @media (max-width: 1000px) { 
+            .anime-list { grid-template-columns: repeat(3, 1fr); gap: 8px; } 
+            .card-info { padding: 5px; } 
+            .card-title { font-size: 0.85em; } 
+            .card-meta-row { font-size: 0.65em; gap: 2px; } 
+        }
     </style>
 </head>
 <body>
@@ -191,6 +199,8 @@
             <a href="playlist.html">📂 Playlist</a>
             <a href="editeurs.html">🏢 Studios</a>
             <button class="nav-btn" onclick="randomAnime()">🎲 Random</button>
+            <a href="share.html">🔗 Partager</a>
+            <a href="profil.html">👤 Profil</a>
             <a href="index_old.html">🕰️ Ancien Index</a>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
@@ -421,8 +431,15 @@
             document.getElementById('bg-layer').style.backgroundImage = `url('img/${isMobile ? 'mobile' + n : 'fond' + n}.webp')`;
         }
 
+        function applyParallax() {
+            const scrollY = window.scrollY;
+            const translateY = scrollY * 0.2;
+            document.getElementById('bg-layer').style.transform = `translateY(${translateY}px)`;
+        }
+
         async function init() {
             setBackground();
+            window.addEventListener('scroll', applyParallax);
 
             try {
                 const response = await fetch('animes.csv');

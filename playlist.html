@@ -10,7 +10,8 @@
         #bg-layer {
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
-            background-repeat: no-repeat; background-attachment: scroll;
+            background-repeat: no-repeat;
+            will-change: transform;
         }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; }
         .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); gap: 12px; flex-wrap: wrap; }
@@ -37,15 +38,17 @@
             .burger { display: block; order: 1; }
             .close-menu { display: block; }
             .nav-links {
-                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                position: fixed; top: 0; right: -100%; width: 280px; height: 100vh;
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
                 transition: 0.4s; z-index: 1100; align-items: stretch; overflow-y: auto;
+                left: auto;
+                right: -100%;
             }
-            .nav-links.active { left: 0; }
+            .nav-links.active { right: 0; left: auto; }
             .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
-            .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
         }
         .playlist-header { padding: 20px 20px 10px; text-align: center; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
         .controls-row { display: flex; justify-content: center; gap: 8px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
@@ -105,8 +108,9 @@
             <a href="alphabetique.html">📖 A-Z</a>
             <a href="playlist.html">📂 Playlist</a>
             <a href="editeurs.html">🏢 Studios</a>
-            <a href="index_old.html">🕰️ Ancien Index</a>
             <a href="share.html">🔗 Partager</a>
+            <a href="profil.html">👤 Profil</a>
+            <a href="index_old.html">🕰️ Ancien Index</a>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
         <a href="profil.html" id="nav-profil-link" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:#ccc; font-size:0.75em; flex-shrink:0;">
@@ -159,6 +163,14 @@
         function restoreScroll(){ const p=sessionStorage.getItem('playlistScrollPos'); if(p){ window.scrollTo(0,parseInt(p)); sessionStorage.removeItem('playlistScrollPos'); } }
         function setBackground(){ const isMobile=window.innerWidth<=1000; const n=isMobile?Math.floor(Math.random()*13)+1:Math.floor(Math.random()*64)+1; document.getElementById('bg-layer').style.backgroundImage=`url('img/${isMobile?'mobile'+n:'fond'+n}.webp')`; }
         setBackground();
+        
+        function applyParallaxZoom() {
+            const scrollY = window.scrollY;
+            const scale = 1 + scrollY / 4000;
+            document.getElementById('bg-layer').style.transform = `scale(${scale})`;
+        }
+        window.addEventListener('scroll', applyParallaxZoom);
+        
         async function loadCSV(){ const r=await fetch('animes.csv'); const t=await r.text(); t.split(/\r?\n/).slice(1).forEach(l=>{ const c=l.split(';'); const cl=s=>s?s.trim().replace(/^"|"$/g,''):""; if(c[0]) csvDataMap[cl(c[0])]={ pop:cl(c[1]), score:cl(c[2]), sortie:cl(c[3]), epMax:cl(c[4]), censure:cl(c[5]), editeur:cl(c[14]) }; }); }
         onAuthStateChanged(auth,async(u)=>{ if(u){ currentUser=u; await loadCSV(); updateTabUI(); const cp=sessionStorage.getItem('userPseudo'), ca=sessionStorage.getItem('userAvatar'); if(cp) document.getElementById('nav-pseudo').textContent=cp, document.getElementById('nav-pseudo').style.display='inline'; if(ca||u.photoURL) document.getElementById('nav-avatar').src=ca||u.photoURL, document.getElementById('nav-avatar').style.display='inline-block';
             onSnapshot(query(collection(db,"playlists_custom"),where("uid","==",u.uid)),(snap)=>{ const sel=document.getElementById('custom-selector'), cur=sel.value; let my='', shared=''; snap.forEach(d=>{ const opt=`<option value="${d.data().name}">${d.data().name}</option>`; d.data().shared?shared+=opt:my+=opt; }); let html='<option value="all">Toutes mes playlists</option>'; if(my) html+=my; if(shared) html+=`<optgroup label="── Playlists reçues ──">${shared}</optgroup>`; sel.innerHTML=html; sel.value=cur||'all'; toggleDeleteBtn(); });

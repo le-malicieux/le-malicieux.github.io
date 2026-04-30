@@ -13,12 +13,15 @@
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --nav-bg: rgba(15, 15, 15, 0.85); }
         
+        #bg-layer {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background-size: cover; background-position: center center;
+            background-repeat: no-repeat;
+            will-change: transform;
+        }
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background-color: var(--bg); 
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
@@ -88,12 +91,14 @@
             .burger { display: block; order: 1; }
             .close-menu { display: block; }
             .nav-links {
-                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                position: fixed; top: 0; right: -100%; width: 280px; height: 100vh;
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
                 transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
                 overflow-y: auto;
+                left: auto;
+                right: -100%;
             }
-            .nav-links.active { left: 0; }
+            .nav-links.active { right: 0; left: auto; }
             .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -110,7 +115,7 @@
         .main-slogan { font-size: 1.2em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
 
         .content-area { padding: 20px 15px; min-height: 500px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; max-width: 1400px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; max-width: 1400px; margin: 0 auto; }
         
         .card { 
             background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
@@ -136,6 +141,8 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
+    <div id="bg-layer"></div>
+    
     <div class="top-navbar">
         <div class="burger" onclick="toggleM()">☰</div>
         <div class="nav-left">
@@ -160,6 +167,8 @@
             <a href="alphabetique.html">📖 A-Z</a>
             <a href="playlist.html">📂 Playlist</a>
             <a href="editeurs.html">🏢 Studios</a>
+            <a href="share.html">🔗 Partager</a>
+            <a href="profil.html">👤 Profil</a>
             <button onclick="randomAnime()">🎲 Random</button>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
@@ -277,13 +286,21 @@
             return title.substring(0, origIndex) + '<span class="highlight">' + title.substring(origIndex, Math.min(endIndex, title.length)) + '</span>' + title.substring(Math.min(endIndex, title.length));
         }
 
-        async function init() {
+        function setBackground() {
             const isMobile = window.innerWidth <= 1000;
             let fileName = isMobile ? `mobile${Math.floor(Math.random() * 13) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
-            document.body.style.backgroundImage = `url('img/${fileName}')`;
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center';
-            document.body.style.backgroundAttachment = 'fixed';
+            document.getElementById('bg-layer').style.backgroundImage = `url('img/${fileName}')`;
+        }
+
+        function applyParallaxZoom() {
+            const scrollY = window.scrollY;
+            const scale = 1 + scrollY / 4000;
+            document.getElementById('bg-layer').style.transform = `scale(${scale})`;
+        }
+
+        async function init() {
+            setBackground();
+            window.addEventListener('scroll', applyParallaxZoom);
 
             try {
                 const response = await fetch('animes.csv');

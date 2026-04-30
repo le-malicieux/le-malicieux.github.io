@@ -10,7 +10,8 @@
         #bg-layer {
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
-            background-repeat: no-repeat; background-attachment: scroll;
+            background-repeat: no-repeat;
+            will-change: transform;
         }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; }
         .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); gap: 12px; flex-wrap: wrap; }
@@ -41,18 +42,19 @@
             .nav-links { order: 2; }
             .burger { display: block; order: 1; }
             .close-menu { display: block; }
-            .nav-links { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s; z-index: 1100; align-items: stretch; overflow-y: auto; }
-            .nav-links.active { left: 0; }
+            .nav-links { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s; z-index: 1100; align-items: stretch; overflow-y: auto; left: auto; right: -100%; }
+            .nav-links.active { right: 0; left: auto; }
             .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
             .discord-btn { margin-top: 10px; }
+            .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
         }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         .tags-container { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
         .tag-pill { padding: 8px 16px; background: #222; border: 1px solid #444; border-radius: 20px; color: #ccc; cursor: pointer; font-size: 0.9em; transition: 0.3s; }
         .tag-pill:hover, .tag-pill.active { background: var(--primary); border-color: var(--primary); color: white; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
         .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-8px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
@@ -92,6 +94,8 @@
             <a href="alphabetique.html">📖 A-Z</a>
             <a href="playlist.html">📂 Playlist</a>
             <a href="editeurs.html">🏢 Studios</a>
+            <a href="share.html">🔗 Partager</a>
+            <a href="profil.html">👤 Profil</a>
             <a href="index_old.html">🕰️ Ancien Index</a>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
@@ -148,8 +152,16 @@
             document.getElementById('bg-layer').style.backgroundImage = `url('img/${isMobile ? 'mobile'+n : 'fond'+n}.webp')`;
         }
 
+        // Parallax léger (déplacement vertical)
+        function applyParallax() {
+            const scrollY = window.scrollY;
+            const translateY = scrollY * 0.2;
+            document.getElementById('bg-layer').style.transform = `translateY(${translateY}px)`;
+        }
+
         async function init() {
             setBackground();
+            window.addEventListener('scroll', applyParallax);
 
             try {
                 const [csvResp, tagResp] = await Promise.all([fetch('animes.csv'), fetch('tags_description.csv').catch(() => null)]);

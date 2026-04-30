@@ -8,6 +8,12 @@
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.9); --text: #eee; --nav-bg: rgba(15,15,15,0.85); --blue: #2e86de; }
         * { box-sizing: border-box; }
+        #bg-layer {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background-size: cover; background-position: center center;
+            background-repeat: no-repeat;
+            will-change: transform;
+        }
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg);
@@ -52,8 +58,8 @@
             .nav-links { order: 2; }
             .burger { display: block; order: 1; }
             .close-menu { display: block; }
-            .nav-links { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s; z-index: 1100; align-items: stretch; overflow-y: auto; }
-            .nav-links.active { left: 0; }
+            .nav-links { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s; z-index: 1100; align-items: stretch; overflow-y: auto; left: auto; right: -100%; }
+            .nav-links.active { right: 0; left: auto; }
             .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .studios-grid { grid-template-columns: 1fr 1fr; }
@@ -106,6 +112,7 @@
     </style>
 </head>
 <body>
+    <div id="bg-layer"></div>
     <nav class="top-navbar">
         <div class="burger" onclick="toggleM()">☰</div>
         <div class="nav-left">
@@ -125,6 +132,9 @@
             <a href="tags.html">🏷️ Tags</a>
             <a href="alphabetique.html">📖 A-Z</a>
             <a href="playlist.html">📂 Playlist</a>
+            <a href="editeurs.html">🏢 Studios</a>
+            <a href="share.html">🔗 Partager</a>
+            <a href="profil.html">👤 Profil</a>
             <a href="index_old.html">🕰️ Ancien Index</a>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
@@ -169,7 +179,19 @@
     </div>
 
     <script>
-        (function(){ const isMobile=window.innerWidth<=1000; const n=isMobile?Math.floor(Math.random()*13)+1:Math.floor(Math.random()*64)+1; document.body.style.backgroundImage=`url('img/${isMobile?'mobile'+n:'fond'+n}.webp')`; })();
+        (function(){ 
+            const isMobile = window.innerWidth <= 1000;
+            const n = isMobile ? Math.floor(Math.random() * 13) + 1 : Math.floor(Math.random() * 64) + 1;
+            document.getElementById('bg-layer').style.backgroundImage = `url('img/${isMobile?'mobile'+n:'fond'+n}.webp')`;
+        })();
+        
+        function applyParallax() {
+            const scrollY = window.scrollY;
+            const translateY = scrollY * 0.2;
+            document.getElementById('bg-layer').style.transform = `translateY(${translateY}px)`;
+        }
+        window.addEventListener('scroll', applyParallax);
+        
         let allAnimes=[], currentStudio=null;
         async function init(){ const resp=await fetch('animes.csv'); const text=await resp.text(); allAnimes=text.split(/\r?\n/).slice(1).map(line=>{ const c=line.split(';'); if(!c[0]||c.length<9)return null; const cl=s=>s?s.trim().replace(/^"|"$/g,''):''; return{ nom:cl(c[0]), pop:cl(c[1]), score:cl(c[2]), sortie:cl(c[3]), ep:cl(c[4]), censure:cl(c[5]), etat:cl(c[6]), img:cl(c[8]), editeur:cl(c[14]) }; }).filter(a=>a&&a.editeur);
             const param=new URLSearchParams(window.location.search).get('studio'); if(param) showProducer(decodeURIComponent(param)); else renderList('');

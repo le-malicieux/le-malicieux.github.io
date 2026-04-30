@@ -20,21 +20,34 @@
 
         * { box-sizing: border-box; }
 
+        #bg-layer {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background-size: cover; background-position: center center;
+            background-repeat: no-repeat;
+            will-change: transform;
+        }
+
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg);
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
             color: var(--text);
             margin: 0;
             min-height: 100vh;
         }
 
         .top-navbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; background: var(--nav-bg); backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            gap: 12px;
+            flex-wrap: wrap;
         }
         .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
@@ -70,26 +83,46 @@
             width: 28px; height: 40px; border-radius: 4px; object-fit: cover;
         }
         
-        .nav-center { display: flex; gap: 8px; align-items: center; }
-        .nav-center a, .nav-center button { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.85em; text-decoration: none; cursor: pointer; font-weight: bold; }
-        .btn-red { background: var(--primary) !important; border: none !important; font-weight: bold; cursor: pointer; color: white !important; }
-        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; }
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 7px 14px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
-        .burger { display: none; font-size: 28px; cursor: pointer; color: white; }
+        .nav-links {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-links a, .nav-links button { 
+            background: var(--primary); border: none; color: white; 
+            padding: 5px 10px; border-radius: 4px; font-size: 0.8em; 
+            text-decoration: none; cursor: pointer;
+            font-weight: bold;
+        }
+        .discord-btn { 
+            background: #5865F2; color: white; text-decoration: none; 
+            padding: 5px 10px; border-radius: 5px; font-size: 0.8em; 
+            font-weight: bold; 
+        }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; order: -1; }
         
         @media (max-width: 1000px) {
             .burger { display: block; }
             .close-menu { display: block; }
-            .search-wrapper { max-width: none; }
-            .nav-center {
-                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+            .search-wrapper { order: 2; width: 100%; max-width: none; margin-top: 8px; }
+            .nav-links { order: 3; }
+            .top-navbar { flex-direction: column; align-items: stretch; }
+            .nav-left { order: 1; display: flex; justify-content: space-between; width: 100%; }
+            .nav-links {
+                position: fixed; top: 0; right: -100%; width: 280px; height: 100vh;
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
                 transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
+                order: initial;
+                left: auto;
+                right: -100%;
             }
-            .nav-center.active { left: 0; }
-            .nav-center * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; }
+            .nav-links.active { right: 0; left: auto; }
+            .nav-links * { margin: 8px 0; font-size: 1em !important; padding: 12px !important; text-align: center; }
             .mobile-overlay.active { display: block; }
+            .discord-btn { margin-top: 10px; }
         }
 
         .profile-layout { max-width: 1100px; margin: 0 auto; padding: 30px 20px 40px; display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
@@ -187,13 +220,6 @@
         #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(60px); background: #222; color: white; padding: 10px 22px; border-radius: 8px; font-size: 0.88em; border: 1px solid #444; transition: transform 0.3s, opacity 0.3s; opacity: 0; z-index: 9999; pointer-events: none; }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         
-        .btn-old-index {
-            background: #222; border: 1px solid #ff4757; color: #ff4757;
-            padding: 6px 12px; border-radius: 6px; font-size: 0.8em;
-            text-decoration: none; transition: 0.2s;
-        }
-        .btn-old-index:hover { background: #ff4757; color: white; }
-        
         @media (max-width: 800px) {
             .profile-layout { grid-template-columns: 1fr; padding: 16px 10px 30px; }
             .avatar-img { width: 85px; height: 85px; }
@@ -202,12 +228,16 @@
     </style>
 </head>
 <body>
+    <div id="bg-layer"></div>
 
     <nav class="top-navbar">
-        <a href="index.html" class="nav-brand">
-            <img src="img/logo.jpg" class="nav-logo-small">
-            <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Profil</small></span>
-        </a>
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand">
+                <img src="img/logo.jpg" class="nav-logo-small">
+                <span class="nav-title">LE MALICIEUX <small style="color:white; margin-left:10px;">• Profil</small></span>
+            </a>
+            <div class="burger" onclick="toggleM()">☰</div>
+        </div>
         
         <div class="search-wrapper" id="search-wrapper">
             <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
@@ -216,17 +246,15 @@
         </div>
 
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
-        <div class="nav-center" id="menu">
+        <div class="nav-links" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
             <a href="index.html" class="btn-red">🏠 Accueil</a>
             <a href="tags.html" class="btn-red">🏷️ Tags</a>
             <a href="alphabetique.html" class="btn-red">📖 A-Z</a>
             <a href="playlist.html" class="btn-red">📂 Playlist</a>
             <a href="editeurs.html" class="btn-red">🏢 Studios</a>
+            <a href="share.html" class="btn-red">🔗 Partager</a>
             <a href="index_old.html" class="btn-red">🕰️ Ancien index</a>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px;">
-            <div class="burger" onclick="toggleM()">☰</div>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
     </nav>
@@ -246,15 +274,15 @@
         (function() {
             const isMobile = window.innerWidth <= 1000;
             const fileName = isMobile ? `mobile${Math.floor(Math.random() * 14) + 1}.webp` : `fond${Math.floor(Math.random() * 64) + 1}.webp`;
-            if (isMobile) {
-                let _mbg = document.getElementById('mobile-bg-layer');
-                if (!_mbg) { _mbg = document.createElement('div'); _mbg.id = 'mobile-bg-layer'; document.body.insertBefore(_mbg, document.body.firstChild); }
-                _mbg.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center top;background-repeat:no-repeat;';
-                _mbg.style.backgroundImage = `url('img/${fileName}')`;
-            } else {
-                document.body.style.backgroundImage = `url('img/${fileName}')`;
-            }
+            document.getElementById('bg-layer').style.backgroundImage = `url('img/${fileName}')`;
         })();
+        
+        function applyParallaxZoom() {
+            const scrollY = window.scrollY;
+            const scale = 1 + scrollY / 4000;
+            document.getElementById('bg-layer').style.transform = `scale(${scale})`;
+        }
+        window.addEventListener('scroll', applyParallaxZoom);
     </script>
 
     <script type="module">

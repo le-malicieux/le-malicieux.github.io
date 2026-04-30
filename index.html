@@ -16,7 +16,8 @@
         #bg-layer {
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
-            background-repeat: no-repeat; background-attachment: scroll;
+            background-repeat: no-repeat;
+            will-change: transform;
         }
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -100,15 +101,18 @@
             .burger { display: block; order: 1; }
             .close-menu { display: block; }
             .nav-links {
-                position: fixed; top: 0; left: -100%; width: 280px; height: 100vh;
+                position: fixed; top: 0; right: -100%; width: 280px; height: 100vh;
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
                 transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
                 overflow-y: auto;
+                left: auto;
+                right: -100%;
             }
-            .nav-links.active { left: 0; }
+            .nav-links.active { right: 0; left: auto; }
             .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
+            body { padding-top: 106px; }
         }
 
         .hero-section {
@@ -119,7 +123,7 @@
         .main-title { font-size: 2.8em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
         .main-slogan { font-size: 1.3em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
 
-        .content-area { padding: 20px 15px 40px; }
+        .content-area { padding: 20px 8px 40px; }
 
         .section-title {
             max-width: 1400px; margin: 30px auto 15px; padding: 10px 15px;
@@ -131,7 +135,6 @@
         }
         .section-title-wrapper { max-width: 1400px; margin: 30px auto 15px; padding: 0 15px; }
 
-        /* Tag section styled like tags.html */
         .tag-section-box {
             background: var(--card-bg); border: 1px solid #333; border-radius: 12px;
             padding: 16px 20px; margin-bottom: 10px;
@@ -152,26 +155,20 @@
         }
 
         .carousel-wrapper {
-            position: relative; max-width: 1400px; margin: 0 auto; padding: 0 35px;
+            position: relative; max-width: 1400px; margin: 0 auto; padding: 0 5px;
         }
         .carousel-container { overflow: hidden; touch-action: pan-y; }
-        .carousel-track { display: flex; gap: 15px; transition: transform 0.4s ease; cursor: grab; }
+        .carousel-track { display: flex; gap: 10px; transition: transform 0.4s ease; cursor: grab; }
         .carousel-track:active { cursor: grabbing; }
         .carousel-btn {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2); color: white;
-            font-size: 18px; width: 30px; height: 60px; cursor: pointer; z-index: 10; border-radius: 4px;
+            display: none; /* flèches masquées */
         }
-        .carousel-btn:hover { background: var(--primary); border-color: var(--primary); }
-        .carousel-btn.prev { left: 0; }
-        .carousel-btn.next { right: 0; }
-        .carousel-btn:disabled { opacity: 0.25; cursor: default; }
 
         .card {
             background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s;
             border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
             display: flex; flex-direction: column; flex-shrink: 0;
-            width: 180px;
+            width: 160px;
         }
         .card:hover { transform: translateY(-6px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
@@ -182,25 +179,26 @@
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #ddd; margin-top: 2px; }
 
         #search-results-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px; max-width: 1400px; margin: 0 auto; padding: 0 15px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px; max-width: 1400px; margin: 0 auto; padding: 0 8px;
         }
         #search-results-count { color: #aaa; margin: 5px 15px; font-size: 0.9em; }
         .anime-count { text-align: center; padding: 12px 20px; color: var(--primary); font-size: 1em; font-weight: bold; background: rgba(0, 0, 0, 0.75); display: inline-block; border-radius: 6px; }
-        .anime-count-wrapper { text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; margin-top: 40px; }
+        .anime-count-wrapper { text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; margin-top: 40px; display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .discord-footer-link { background: #5865F2; color: white; text-decoration: none; padding: 8px 18px; border-radius: 30px; font-size: 0.9em; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
+        .discord-footer-link::before { content: '💬'; font-size: 1em; }
 
         @media (max-width: 1000px) {
-            .card { width: 150px; }
+            .card { width: 140px; }
             .hero-section { height: 45vh; }
             .main-title { font-size: 2em; }
             .section-title { font-size: 1.2em; }
-            .carousel-wrapper { padding: 0 28px; }
-            .carousel-btn { width: 24px; height: 48px; font-size: 14px; }
-            .carousel-track { gap: 10px; }
+            .carousel-wrapper { padding: 0 5px; }
+            .carousel-track { gap: 8px; }
             #search-results-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
         }
         @media (max-width: 480px) {
-            .card { width: 140px; }
+            .card { width: 120px; }
             #search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
         }
     </style>
@@ -237,6 +235,8 @@
             <a href="playlist.html">📂 Playlist</a>
             <a href="editeurs.html">🏢 Studios</a>
             <button class="nav-btn" onclick="randomAnime()">🎲 Random</button>
+            <a href="share.html">🔗 Partager</a>
+            <a href="profil.html">👤 Profil</a>
             <a href="index_old.html">🕰️ Ancien Index</a>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
@@ -255,16 +255,12 @@
     <div class="content-area" id="main-content">
         <div class="section-title-wrapper"><h2 class="section-title">🎲 Sélection aléatoire</h2></div>
         <div class="carousel-wrapper" id="carousel-random-wrapper">
-            <button class="carousel-btn prev" id="carousel-random-prev">◀</button>
             <div class="carousel-container"><div class="carousel-track" id="carousel-random-track"></div></div>
-            <button class="carousel-btn next" id="carousel-random-next">▶</button>
         </div>
 
         <div class="section-title-wrapper"><h2 class="section-title">🆕 Derniers ajouts</h2></div>
         <div class="carousel-wrapper" id="carousel-recent-wrapper">
-            <button class="carousel-btn prev" id="carousel-recent-prev">◀</button>
             <div class="carousel-container"><div class="carousel-track" id="carousel-recent-track"></div></div>
-            <button class="carousel-btn next" id="carousel-recent-next">▶</button>
         </div>
 
         <div class="section-title-wrapper" id="tag-section-title-wrapper">
@@ -276,13 +272,11 @@
             <span class="tag-description" id="tag-description-text">—</span>
         </div>
         <div class="carousel-wrapper" id="carousel-tag-wrapper">
-            <button class="carousel-btn prev" id="carousel-tag-prev">◀</button>
             <div class="carousel-container"><div class="carousel-track" id="carousel-tag-track"></div></div>
-            <button class="carousel-btn next" id="carousel-tag-next">▶</button>
         </div>
     </div>
 
-    <div id="search-results-section" style="display:none; padding: 20px 15px 40px;">
+    <div id="search-results-section" style="display:none; padding: 20px 8px 40px;">
         <div class="section-title-wrapper"><h2 class="section-title" id="search-results-title">🔍 Résultats</h2></div>
         <p id="search-results-count" style="color:#aaa;margin:5px 15px;font-size:0.9em;"></p>
         <div id="search-results-grid"></div>
@@ -290,6 +284,7 @@
 
     <div class="anime-count-wrapper">
         <div class="anime-count" id="anime-count"></div>
+        <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-footer-link">Discord</a>
     </div>
 
     <script type="module">
@@ -408,7 +403,7 @@
             </a>`;
         }
 
-        function addTouchSwipe(trackId, prevBtnId, nextBtnId, getCurrentIndex, setCurrentIndex, getMaxIndex, getCardWidth, scrollFn) {
+        function addTouchSwipe(trackId, getCurrentIndex, setCurrentIndex, getMaxIndex, getCardWidth, scrollFn) {
             const track = document.getElementById(trackId);
             if (!track) return;
             let startX = 0, startY = 0, movedX = 0;
@@ -448,27 +443,21 @@
             });
         }
 
-        function buildCarousel(trackId, prevBtnId, nextBtnId, animeList) {
+        function buildCarousel(trackId, animeList) {
             const track = document.getElementById(trackId);
-            const prevBtn = document.getElementById(prevBtnId);
-            const nextBtn = document.getElementById(nextBtnId);
             if (!track) return;
-            if (animeList.length === 0) { track.innerHTML = '<p style="color:#ff6b7a;padding:20px;">Aucun anime.</p>'; if(prevBtn) prevBtn.style.display = 'none'; if(nextBtn) nextBtn.style.display = 'none'; return; }
+            if (animeList.length === 0) { track.innerHTML = '<p style="color:#ff6b7a;padding:20px;">Aucun anime.</p>'; return; }
             track.innerHTML = animeList.map(a => createCardHTML(a)).join('');
             track.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
             let currentIndex = 0;
             function getCardsPerView() { const w = window.innerWidth; if (w <= 480) return 2; if (w <= 1000) return 3; return 5; }
-            function getCardWidth() { const card = track.querySelector('.card'); return card ? card.offsetWidth + 15 : 180; }
+            function getCardWidth() { const card = track.querySelector('.card'); return card ? card.offsetWidth + 10 : 160; }
             function getMaxIndex() { return Math.max(0, track.children.length - getCardsPerView()); }
-            function updateButtons() { const maxIdx = getMaxIndex(); if(prevBtn) prevBtn.disabled = currentIndex <= 0; if(nextBtn) nextBtn.disabled = currentIndex >= maxIdx; }
-            function scrollToIndex() { track.style.transform = 'translateX(-' + (currentIndex * getCardWidth()) + 'px)'; updateButtons(); }
+            function scrollToIndex() { track.style.transform = 'translateX(-' + (currentIndex * getCardWidth()) + 'px)'; }
             const getCI = () => currentIndex;
             const setCI = (v) => { currentIndex = v; };
-            if(prevBtn) prevBtn.onclick = () => { currentIndex = Math.max(0, currentIndex - getCardsPerView()); scrollToIndex(); };
-            if(nextBtn) nextBtn.onclick = () => { currentIndex = Math.min(getMaxIndex(), currentIndex + getCardsPerView()); scrollToIndex(); };
-            addTouchSwipe(trackId, prevBtnId, nextBtnId, getCI, setCI, getMaxIndex, getCardWidth, scrollToIndex);
+            addTouchSwipe(trackId, getCI, setCI, getMaxIndex, getCardWidth, scrollToIndex);
             let resizeTimeout; window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => { currentIndex = Math.min(currentIndex, getMaxIndex()); scrollToIndex(); }, 150); });
-            updateButtons();
         }
 
         function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -531,8 +520,16 @@
             document.getElementById('bg-layer').style.backgroundImage = `url('img/${fileName}')`;
         }
 
+        // Effet de zoom/dézoom au scroll
+        function applyParallaxZoom() {
+            const scrollY = window.scrollY;
+            const scale = 1 + scrollY / 4000;
+            document.getElementById('bg-layer').style.transform = `scale(${scale})`;
+        }
+
         async function init() {
             setBackground();
+            window.addEventListener('scroll', applyParallaxZoom);
             window.addEventListener('resize', () => {
                 const bgLayer = document.getElementById('bg-layer');
                 if (bgLayer && !bgLayer.style.backgroundImage) setBackground();
@@ -568,9 +565,9 @@
                     }).filter(t => t !== null);
                 } catch(e) { allTags = []; }
 
-                buildCarousel('carousel-random-track', 'carousel-random-prev', 'carousel-random-next', shuffle(allAnimes).slice(0, 20));
+                buildCarousel('carousel-random-track', shuffle(allAnimes).slice(0, 20));
                 const recents = [...allAnimes].filter(a => a.ordreAjout > 0).sort((a,b) => b.ordreAjout - a.ordreAjout).slice(0, 20);
-                buildCarousel('carousel-recent-track', 'carousel-recent-prev', 'carousel-recent-next', recents);
+                buildCarousel('carousel-recent-track', recents);
 
                 if (allTags.length > 0) {
                     const rTag = allTags[Math.floor(Math.random() * allTags.length)];
@@ -578,12 +575,10 @@
                     document.getElementById('tag-pill-link').href = `tags.html?tag=${encodeURIComponent(rTag.nom)}`;
                     document.getElementById('tag-description-text').textContent = rTag.description || 'Découvrez les animes associés à ce tag.';
                     const tagAnimes = allAnimes.filter(a => a.tags && a.tags.toLowerCase().includes(rTag.nom.toLowerCase()));
-                    buildCarousel('carousel-tag-track', 'carousel-tag-prev', 'carousel-tag-next', shuffle(tagAnimes).slice(0, 20));
+                    buildCarousel('carousel-tag-track', shuffle(tagAnimes).slice(0, 20));
                 } else {
                     document.getElementById('tag-pill-link').textContent = 'Tags indisponibles';
                     document.getElementById('tag-description-text').textContent = 'Chargement des tags...';
-                    document.getElementById('carousel-tag-prev').style.display = 'none';
-                    document.getElementById('carousel-tag-next').style.display = 'none';
                 }
                 document.getElementById('anime-count').innerHTML = '📊 <span class="count-number">' + allAnimes.length + '</span> animes dans le catalogue';
 
