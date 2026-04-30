@@ -17,7 +17,10 @@
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
-            will-change: transform;
+        }
+        #bg-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background: black; opacity: 0;
         }
         body { 
             font-family: 'Segoe UI', sans-serif; 
@@ -79,7 +82,15 @@
             text-decoration: none; cursor: pointer; white-space: nowrap;
             font-weight: bold;
         }
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
+        .nav-links .discord-btn {
+            background: #5865F2; color: white; text-decoration: none;
+            padding: 5px 10px; border-radius: 20px; font-size: 0.8em;
+            font-weight: bold; white-space: nowrap;
+            border: 2px solid rgba(255,255,255,0.15);
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
+        .nav-links .discord-btn:hover { background: #4752c4; border-color: rgba(255,255,255,0.3); }
 
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
@@ -142,6 +153,7 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <div id="bg-layer"></div>
+    <div id="bg-overlay"></div>
     
     <div class="top-navbar">
         <div class="burger" onclick="toggleM()">☰</div>
@@ -169,6 +181,7 @@
             <a href="editeurs.html">🏢 Studios</a>
             <a href="share.html">🔗 Partager</a>
             <a href="profil.html">👤 Profil</a>
+            <a href="index_old.html">🕰️ Ancien Index</a>
             <button onclick="randomAnime()">🎲 Random</button>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
@@ -292,15 +305,16 @@
             document.getElementById('bg-layer').style.backgroundImage = `url('img/${fileName}')`;
         }
 
-        function applyParallaxZoom() {
+        function updateOverlayOpacity() {
             const scrollY = window.scrollY;
-            const scale = 1 + scrollY / 4000;
-            document.getElementById('bg-layer').style.transform = `scale(${scale})`;
+            const maxScroll = document.body.scrollHeight - window.innerHeight || 1;
+            const opacity = Math.min(scrollY / 600, 0.65);
+            document.getElementById('bg-overlay').style.opacity = opacity;
         }
 
         async function init() {
             setBackground();
-            window.addEventListener('scroll', applyParallaxZoom);
+            window.addEventListener('scroll', updateOverlayOpacity);
 
             try {
                 const response = await fetch('animes.csv');

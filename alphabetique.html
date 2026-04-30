@@ -17,7 +17,11 @@
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
-            will-change: transform;
+        }
+        /* Overlay sombre pour lisibilité */
+        body::after {
+            content: ''; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); z-index: -1; pointer-events: none;
         }
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -227,6 +231,10 @@
     </div>
 
     <script type="module">
+        // Le script original intégral, avec la fonction setBackground() et sans applyParallax().
+        // On garde le script intact, seule la partie setBackground est modifiée pour ne plus faire de parallax.
+        // Nous avons aussi retiré l'appel à applyParallax() dans init().
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -431,15 +439,10 @@
             document.getElementById('bg-layer').style.backgroundImage = `url('img/${isMobile ? 'mobile' + n : 'fond' + n}.webp')`;
         }
 
-        function applyParallax() {
-            const scrollY = window.scrollY;
-            const translateY = scrollY * 0.2;
-            document.getElementById('bg-layer').style.transform = `translateY(${translateY}px)`;
-        }
+        // Pas de parallax
 
         async function init() {
             setBackground();
-            window.addEventListener('scroll', applyParallax);
 
             try {
                 const response = await fetch('animes.csv');

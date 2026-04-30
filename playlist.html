@@ -11,7 +11,11 @@
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
-            will-change: transform;
+        }
+        /* Overlay sombre */
+        body::after {
+            content: ''; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); z-index: -1; pointer-events: none;
         }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; }
         .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); gap: 12px; flex-wrap: wrap; }
@@ -28,7 +32,6 @@
         .nav-links a, .nav-links .nav-btn { background: var(--primary); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8em; text-decoration: none; cursor: pointer; white-space: nowrap; font-weight: bold; }
         .nav-links .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; white-space: nowrap; border: 2px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; gap: 5px; }
         .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
-        .nav-links .discord-btn:hover { background: #4752c4; border-color: rgba(255,255,255,0.3); }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
         @media (max-width: 900px) {
@@ -164,13 +167,8 @@
         function setBackground(){ const isMobile=window.innerWidth<=1000; const n=isMobile?Math.floor(Math.random()*13)+1:Math.floor(Math.random()*64)+1; document.getElementById('bg-layer').style.backgroundImage=`url('img/${isMobile?'mobile'+n:'fond'+n}.webp')`; }
         setBackground();
         
-        function applyParallaxZoom() {
-            const scrollY = window.scrollY;
-            const scale = 1 + scrollY / 4000;
-            document.getElementById('bg-layer').style.transform = `scale(${scale})`;
-        }
-        window.addEventListener('scroll', applyParallaxZoom);
-        
+        // Pas de applyParallaxZoom, on a retiré l'écouteur
+
         async function loadCSV(){ const r=await fetch('animes.csv'); const t=await r.text(); t.split(/\r?\n/).slice(1).forEach(l=>{ const c=l.split(';'); const cl=s=>s?s.trim().replace(/^"|"$/g,''):""; if(c[0]) csvDataMap[cl(c[0])]={ pop:cl(c[1]), score:cl(c[2]), sortie:cl(c[3]), epMax:cl(c[4]), censure:cl(c[5]), editeur:cl(c[14]) }; }); }
         onAuthStateChanged(auth,async(u)=>{ if(u){ currentUser=u; await loadCSV(); updateTabUI(); const cp=sessionStorage.getItem('userPseudo'), ca=sessionStorage.getItem('userAvatar'); if(cp) document.getElementById('nav-pseudo').textContent=cp, document.getElementById('nav-pseudo').style.display='inline'; if(ca||u.photoURL) document.getElementById('nav-avatar').src=ca||u.photoURL, document.getElementById('nav-avatar').style.display='inline-block';
             onSnapshot(query(collection(db,"playlists_custom"),where("uid","==",u.uid)),(snap)=>{ const sel=document.getElementById('custom-selector'), cur=sel.value; let my='', shared=''; snap.forEach(d=>{ const opt=`<option value="${d.data().name}">${d.data().name}</option>`; d.data().shared?shared+=opt:my+=opt; }); let html='<option value="all">Toutes mes playlists</option>'; if(my) html+=my; if(shared) html+=`<optgroup label="── Playlists reçues ──">${shared}</optgroup>`; sel.innerHTML=html; sel.value=cur||'all'; toggleDeleteBtn(); });

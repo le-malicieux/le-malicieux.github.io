@@ -17,7 +17,12 @@
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
-            will-change: transform;
+            /* plus de transformation, fond fixe */
+        }
+        #bg-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background: black; opacity: 0; /* sera animée au scroll */
+            transition: none;
         }
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -155,14 +160,22 @@
         }
 
         .carousel-wrapper {
-            position: relative; max-width: 1400px; margin: 0 auto; padding: 0 5px;
+            position: relative; max-width: 1400px; margin: 0 auto; padding: 0 40px; /* espace pour les flèches */
         }
         .carousel-container { overflow: hidden; touch-action: pan-y; }
         .carousel-track { display: flex; gap: 10px; transition: transform 0.4s ease; cursor: grab; }
         .carousel-track:active { cursor: grabbing; }
         .carousel-btn {
-            display: none; /* flèches masquées */
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(0,0,0,0.7); border: 1px solid #444; color: white;
+            font-size: 2em; width: 40px; height: 40px; line-height: 1;
+            border-radius: 50%; cursor: pointer; z-index: 5;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.3s;
         }
+        .carousel-btn:hover { background: var(--primary); }
+        .carousel-prev { left: 0; }
+        .carousel-next { right: 0; }
 
         .card {
             background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s;
@@ -194,6 +207,7 @@
             .main-title { font-size: 2em; }
             .section-title { font-size: 1.2em; }
             .carousel-wrapper { padding: 0 5px; }
+            .carousel-btn { display: none; } /* masquer les flèches sur mobile */
             .carousel-track { gap: 8px; }
             #search-results-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
         }
@@ -208,6 +222,7 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <div id="bg-layer"></div>
+    <div id="bg-overlay"></div>
 
     <div class="top-navbar">
         <div class="burger" onclick="toggleM()">☰</div>
@@ -255,12 +270,16 @@
     <div class="content-area" id="main-content">
         <div class="section-title-wrapper"><h2 class="section-title">🎲 Sélection aléatoire</h2></div>
         <div class="carousel-wrapper" id="carousel-random-wrapper">
+            <button class="carousel-btn carousel-prev" data-target="carousel-random-track">‹</button>
             <div class="carousel-container"><div class="carousel-track" id="carousel-random-track"></div></div>
+            <button class="carousel-btn carousel-next" data-target="carousel-random-track">›</button>
         </div>
 
         <div class="section-title-wrapper"><h2 class="section-title">🆕 Derniers ajouts</h2></div>
         <div class="carousel-wrapper" id="carousel-recent-wrapper">
+            <button class="carousel-btn carousel-prev" data-target="carousel-recent-track">‹</button>
             <div class="carousel-container"><div class="carousel-track" id="carousel-recent-track"></div></div>
+            <button class="carousel-btn carousel-next" data-target="carousel-recent-track">›</button>
         </div>
 
         <div class="section-title-wrapper" id="tag-section-title-wrapper">
@@ -272,7 +291,9 @@
             <span class="tag-description" id="tag-description-text">—</span>
         </div>
         <div class="carousel-wrapper" id="carousel-tag-wrapper">
+            <button class="carousel-btn carousel-prev" data-target="carousel-tag-track">‹</button>
             <div class="carousel-container"><div class="carousel-track" id="carousel-tag-track"></div></div>
+            <button class="carousel-btn carousel-next" data-target="carousel-tag-track">›</button>
         </div>
     </div>
 
@@ -457,6 +478,14 @@
             const getCI = () => currentIndex;
             const setCI = (v) => { currentIndex = v; };
             addTouchSwipe(trackId, getCI, setCI, getMaxIndex, getCardWidth, scrollToIndex);
+            
+            // Flèches de navigation
+            const wrapper = track.closest('.carousel-wrapper');
+            const prevBtn = wrapper?.querySelector('.carousel-prev');
+            const nextBtn = wrapper?.querySelector('.carousel-next');
+            if (prevBtn) prevBtn.onclick = () => { if (currentIndex > 0) { currentIndex--; scrollToIndex(); } };
+            if (nextBtn) nextBtn.onclick = () => { if (currentIndex < getMaxIndex()) { currentIndex++; scrollToIndex(); } };
+
             let resizeTimeout; window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => { currentIndex = Math.min(currentIndex, getMaxIndex()); scrollToIndex(); }, 150); });
         }
 
@@ -520,16 +549,17 @@
             document.getElementById('bg-layer').style.backgroundImage = `url('img/${fileName}')`;
         }
 
-        // Effet de zoom/dézoom au scroll
-        function applyParallaxZoom() {
+        // Assombrissement progressif au scroll
+        function updateOverlayOpacity() {
             const scrollY = window.scrollY;
-            const scale = 1 + scrollY / 4000;
-            document.getElementById('bg-layer').style.transform = `scale(${scale})`;
+            const maxScroll = document.body.scrollHeight - window.innerHeight || 1;
+            const opacity = Math.min(scrollY / 600, 0.65); // s'assombrit jusqu'à 0.65
+            document.getElementById('bg-overlay').style.opacity = opacity;
         }
 
         async function init() {
             setBackground();
-            window.addEventListener('scroll', applyParallaxZoom);
+            window.addEventListener('scroll', updateOverlayOpacity);
             window.addEventListener('resize', () => {
                 const bgLayer = document.getElementById('bg-layer');
                 if (bgLayer && !bgLayer.style.backgroundImage) setBackground();
