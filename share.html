@@ -12,10 +12,7 @@
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
-        }
-        body::after {
-            content: ''; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.5); z-index: -1; pointer-events: none;
+            will-change: transform;
         }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; }
         .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); gap: 12px; flex-wrap: wrap; }
@@ -50,7 +47,48 @@
         .tab-btn.active { border-color: var(--primary); background: rgba(255,71,87,0.15); color: var(--primary); }
         .container { max-width: 800px; margin: 0 auto; padding: 20px 20px 40px; position: relative; z-index: 1; }
         .tab-panel { display: none; } .tab-panel.active { display: block; }
-        /* ... reste du style identique ... */
+        .section-title { font-size: 1.1em; font-weight: bold; margin: 0 0 15px; padding-bottom: 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+        .section-title span { color: var(--primary); }
+        .step { margin-bottom: 20px; }
+        .step-label { font-size: 0.75em; font-weight: 700; text-transform: uppercase; color: #ddd; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .step-num { width: 18px; height: 18px; border-radius: 50%; background: var(--primary); display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: #fff; }
+        .playlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+        .pl-card { background: rgba(30,30,30,0.92); border: 1px solid rgba(255,255,255,0.13); border-radius: 8px; padding: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; position: relative; color: white; }
+        .pl-card:hover { border-color: var(--primary); background: rgba(255,71,87,0.07); }
+        .pl-card.selected { border-color: var(--primary); background: rgba(255,71,87,0.12); }
+        .pl-card-name { font-weight: 600; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pl-card-count { font-size: 0.7em; color: #bbb; }
+        .pl-check { position: absolute; top: 5px; right: 5px; width: 14px; height: 14px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 8px; color: #fff; }
+        .toggle-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .toggle-btn { flex: 1; min-width: 150px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; cursor: pointer; color: var(--muted); font-size: 0.85em; font-weight: 600; text-align: left; }
+        .toggle-btn:hover { border-color: var(--primary); color: var(--text); }
+        .toggle-btn.active { border-color: var(--primary); color: var(--text); background: rgba(255,71,87,0.12); }
+        .sp-input { width: 100%; background: #1a1a1a; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 0.85em; color: var(--text); outline: none; }
+        .sp-input:focus { border-color: var(--primary); }
+        .send-btn { display: block; width: 100%; margin-top: 20px; padding: 10px; border-radius: 8px; background: var(--primary); border: none; font-size: 0.9em; font-weight: 700; color: #fff; cursor: pointer; }
+        .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .msg-error, .msg-success { padding: 8px 12px; border-radius: 6px; font-size: 0.8em; margin-top: 12px; }
+        .msg-error { background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.35); color: #ff8090; }
+        .msg-success { background: rgba(46,213,115,0.1); border: 1px solid rgba(46,213,115,0.35); color: #2ed573; }
+        .cards-list { display: flex; flex-direction: column; gap: 8px; }
+        .shared-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+        .shared-card-header { display: flex; align-items: center; gap: 12px; padding: 12px 15px; }
+        .shared-card-name { font-weight: 700; font-size: 0.9em; color: #fff; }
+        .shared-card-sub { font-size: 0.7em; color: var(--muted); }
+        .import-btn { background: var(--primary); border: none; border-radius: 6px; padding: 5px 12px; font-size: 0.75em; font-weight: 700; color: #fff; cursor: pointer; }
+        .import-btn.imported { background: #222; border: 1px solid var(--border); color: var(--muted); cursor: default; }
+        .expand-btn { background: #222; border: 1px solid var(--border); border-radius: 5px; padding: 4px 8px; cursor: pointer; font-size: 0.7em; color: white; }
+        .track-list { list-style: none; margin: 0; padding: 0 15px 12px; border-top: 1px solid var(--border); }
+        .track-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 0.75em; color: #ccc; }
+        .track-thumb { width: 28px; height: 40px; object-fit: cover; border-radius: 3px; }
+        .status-badge { font-size: 0.65em; padding: 2px 5px; border-radius: 4px; }
+        .status-watching { background: rgba(46,204,113,0.2); color: #2ecc71; }
+        .empty-msg { text-align: center; color: var(--muted); padding: 40px; }
+        .login-wall { text-align: center; padding: 40px; color: var(--muted); background: rgba(0,0,0,0.6); border-radius: 12px; }
+        .login-wall a { color: var(--primary); text-decoration: none; }
+        .loading { text-align: center; padding: 40px; color: var(--muted); }
+        .user-list .user-item { background: rgba(30,30,30,0.92); border-radius: 8px; margin-bottom: 4px; cursor: pointer; color: white; }
+        .user-list .user-item:hover { background: rgba(255,71,87,0.2); }
     </style>
 </head>
 <body>
@@ -108,8 +146,31 @@ let currentUser=null, selectedPlaylist=null, isPublic=false, selectedTarget=null
 
 function setBackground(){ const isMobile=window.innerWidth<=1000; const n=isMobile?Math.floor(Math.random()*13)+1:Math.floor(Math.random()*64)+1; document.getElementById('bg-layer').style.backgroundImage=`url('img/${isMobile?'mobile'+n:'fond'+n}.webp')`; }
 setBackground();
-// Pas de parallax
+function applyParallaxZoom() { const scrollY=window.scrollY; const scale=1+scrollY/4000; document.getElementById('bg-layer').style.transform=`scale(${scale})`; }
+window.addEventListener('scroll', applyParallaxZoom);
 
+function getRealImgPath(n){ if(!n) return "img/logo.jpg"; const m=n.match(/\d+/); return m?`img/anime-${m[0]}.jpg`:"img/logo.jpg"; }
+function formatDate(ts){ if(!ts) return ""; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString("fr-FR"); }
+function statusLabel(s){ if(s==="watching") return '<span class="status-badge status-watching">En cours</span>'; if(s==="completed") return '<span class="status-badge status-completed">Terminé</span>'; if(s==="waiting") return '<span class="status-badge status-waiting">En attente</span>'; return ""; }
+document.querySelectorAll('.tab-btn').forEach(btn=>{ btn.addEventListener('click',()=>{ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active')); btn.classList.add('active'); document.getElementById('tab-'+btn.dataset.tab).classList.add('active'); }); });
+onAuthStateChanged(auth,user=>{ currentUser=user; if(user){ loadMyPlaylists(); loadAllUsers(); loadInbox(); document.getElementById('send-not-logged').style.display='none'; document.getElementById('send-form').style.display='block'; document.getElementById('inbox-not-logged').style.display='none'; document.getElementById('inbox-list').style.display='block'; }else{ document.getElementById('send-not-logged').style.display='block'; document.getElementById('send-form').style.display='none'; document.getElementById('inbox-not-logged').style.display='block'; document.getElementById('inbox-list').style.display='none'; } loadPublic(); });
+function loadMyPlaylists(){ const q=query(collection(db,"playlists"),where("uid","==",currentUser.uid)); onSnapshot(q,snap=>{ myAnimes=[]; snap.forEach(d=>myAnimes.push({id:d.id,...d.data()})); renderMyPlaylists(); }); }
+function renderMyPlaylists(){ const grid=document.getElementById('my-playlists-grid'); const groups={}; ["watching","completed","waiting"].forEach(s=>{ const animes=myAnimes.filter(a=>a.status===s); if(animes.length) groups[`__status__${s}`]={ name:{watching:"En cours",completed:"Terminés",waiting:"En attente"}[s], animes, isStatus:true }; }); myAnimes.forEach(a=>{ if(a.playlistTarget && a.playlistTarget!=="all"){ if(!groups[a.playlistTarget]) groups[a.playlistTarget]={ name:a.playlistTarget, animes:[] }; groups[a.playlistTarget].animes.push(a); } }); if(Object.keys(groups).length===0){ grid.innerHTML='<div style="color:var(--muted); padding:10px;">Aucune playlist.</div>'; return; } const allCount=myAnimes.length; const allCard=`<button class="pl-card ${selectedPlaylist?.key==='__all__'?'selected':''}" onclick="selectPlaylist('__all__')"><div class="pl-card-name">Toutes mes playlists</div><div class="pl-card-count">${allCount} anime${allCount>1?'s':''}</div>${selectedPlaylist?.key==='__all__'?'<span class="pl-check">✓</span>':''}</button>`; grid.innerHTML=allCard+Object.entries(groups).map(([key,pl])=>`<button class="pl-card ${selectedPlaylist?.key===key?'selected':''}" onclick="selectPlaylist('${key}')"><div class="pl-card-name">${pl.name}</div><div class="pl-card-count">${pl.animes.length} anime${pl.animes.length>1?'s':''}</div>${selectedPlaylist?.key===key?'<span class="pl-check">✓</span>':''}</button>`).join(''); window._playlistGroups=groups; }
+window.selectPlaylist=function(key){ if(key==='__all__') selectedPlaylist={ key:'__all__', name:'Toutes mes playlists', animes:myAnimes }; else selectedPlaylist={ key, ...window._playlistGroups[key] }; renderMyPlaylists(); };
+window.setVisibility=function(pub){ isPublic=pub; document.getElementById('btn-private').classList.toggle('active',!pub); document.getElementById('btn-public').classList.toggle('active',pub); document.getElementById('step-recipient').style.display=pub?'none':'block'; document.getElementById('send-btn').textContent=pub?'🌍 Publier la playlist':'↑ Envoyer la playlist'; };
+let allUsers=[]; async function loadAllUsers(){ const snap=await getDocs(collection(db,"users")); allUsers=[]; snap.forEach(d=>{ if(d.id!==currentUser.uid) allUsers.push({uid:d.id,...d.data()}); }); renderUserList(''); }
+function renderUserList(filter){ const results=document.getElementById('user-results'); const filtered=filter.length<1?allUsers:allUsers.filter(u=>(u.email||'').toLowerCase().includes(filter.toLowerCase())||(u.displayName||'').toLowerCase().includes(filter.toLowerCase())); if(filtered.length===0){ results.innerHTML='<li style="padding:8px 0; color:var(--muted);">Aucun utilisateur.</li>'; return; } results.innerHTML=filtered.map(u=>`<li class="user-item" style="display:flex; align-items:center; gap:10px; padding:8px 12px; background:rgba(30,30,30,0.92); border-radius:8px; margin-bottom:4px; cursor:pointer;" onclick="pickUser('${u.uid}','${u.email}','${(u.displayName||'').replace(/'/g,"\\'")}')"><div style="width:28px;height:28px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:12px;">${(u.displayName||u.email||'?')[0].toUpperCase()}</div><div><div class="user-name">${u.displayName||'—'}</div><div class="user-email" style="font-size:0.7em;color:var(--muted);">${u.email}</div></div></li>`).join(''); }
+window.handleUserSearch=function(v){ clearSelectedUser(); renderUserList(v); };
+window.pickUser=function(uid,email,displayName){ selectedTarget={uid,email,displayName}; document.getElementById('user-results').innerHTML=''; document.getElementById('user-search').value=email; const su=document.getElementById('selected-user'); document.getElementById('sel-name').textContent=displayName||email; su.style.display='flex'; };
+window.clearSelectedUser=function(){ selectedTarget=null; document.getElementById('selected-user').style.display='none'; document.getElementById('user-results').innerHTML=''; };
+window.handleSend=async function(){ const errEl=document.getElementById('send-error'), sucEl=document.getElementById('send-success'); errEl.style.display='none'; sucEl.style.display='none'; if(!selectedPlaylist){ errEl.textContent="Sélectionne une playlist."; errEl.style.display='block'; return; } if(!isPublic&&!selectedTarget){ errEl.textContent="Choisis un destinataire ou rends la playlist publique."; errEl.style.display='block'; return; } const btn=document.getElementById('send-btn'); btn.disabled=true; btn.textContent='Envoi...'; try{ const animesData=selectedPlaylist.animes.map(a=>({ anime:a.anime||'', status:a.status||'', rating:a.rating||0, epSeen:a.epSeen||0, epMax:a.epMax||'?', img:a.img||'' })); await addDoc(collection(db,"shared_playlists"),{ fromUid:currentUser.uid, fromName:currentUser.displayName||currentUser.email, fromEmail:currentUser.email, toUid:isPublic?null:selectedTarget.uid, toEmail:isPublic?null:selectedTarget.email, isPublic:isPublic, playlist:{ name:selectedPlaylist.name, animes:animesData }, createdAt:serverTimestamp(), importCount:0, importedBy:[] }); sucEl.style.display='block'; selectedPlaylist=null; renderMyPlaylists(); setTimeout(()=>sucEl.style.display='none',3000); }catch(e){ errEl.textContent='Erreur: '+e.message; errEl.style.display='block'; } btn.disabled=false; btn.textContent=isPublic?'🌍 Publier':'↑ Envoyer'; };
+function loadInbox(){ const q=query(collection(db,"shared_playlists"),where("toUid","==",currentUser.uid),orderBy("createdAt","desc")); onSnapshot(q,snap=>{ const items=snap.docs.map(d=>({id:d.id,...d.data()})); const badge=document.getElementById('inbox-badge'); if(items.length){ badge.textContent=items.length; badge.style.display='inline'; }else badge.style.display='none'; renderCardList('inbox-list',items,true); }); }
+function loadPublic(){ const q=query(collection(db,"shared_playlists"),where("isPublic","==",true),orderBy("createdAt","desc")); onSnapshot(q,snap=>{ publicItems=snap.docs.map(d=>({id:d.id,...d.data()})); filterPublic(document.getElementById('public-search').value); }); }
+window.filterPublic=function(val){ const filtered=val.length<2?publicItems:publicItems.filter(i=>i.playlist?.name?.toLowerCase().includes(val.toLowerCase())||i.fromName?.toLowerCase().includes(val.toLowerCase())); renderCardList('public-list',filtered,false); };
+function renderCardList(containerId,items,showFrom){ const el=document.getElementById(containerId); if(items.length===0){ el.innerHTML='<div class="empty-msg">Aucune playlist.</div>'; return; } el.innerHTML=items.map(item=>buildCard(item,showFrom)).join(''); }
+function buildCard(item,showFrom){ const animes=item.playlist?.animes||[]; const alreadyImported=item.importedBy?.includes(currentUser?.uid); const importBtn=currentUser?`<button class="import-btn ${alreadyImported?'imported':''}" id="ibtn-${item.id}" onclick="handleImport('${item.id}')" ${alreadyImported?'disabled':''}>${alreadyImported?'✓ Importé':'↓ Importer'}</button>`:`<button class="import-btn" onclick="alert('Connecte-toi.')">↓ Importer</button>`; return `<div class="shared-card" id="card-${item.id}"><div class="shared-card-header"><div class="shared-card-meta"><div class="shared-card-name">${item.playlist?.name||'Playlist'}</div><div class="shared-card-sub">${showFrom?`De <strong>${item.fromName||item.fromEmail}</strong> · `:''}${animes.length} anime${animes.length>1?'s':''}${item.importCount?` · ↓ ${item.importCount}`:''} · ${formatDate(item.createdAt)}</div></div><div class="shared-card-actions">${animes.length?`<button class="expand-btn" onclick="toggleExpand('${item.id}')">▼</button>`:''}${importBtn}</div></div><ul class="track-list" id="tracks-${item.id}" style="display:none;">${animes.map((a,i)=>`<li class="track-item"><span>${String(i+1).padStart(2,'0')}</span><img src="${getRealImgPath(a.img)}" class="track-thumb" onerror="this.src='img/logo.jpg'"><span class="track-title">${a.anime}</span>${statusLabel(a.status)}<span>⭐ ${a.rating||0}</span><span>Ep ${a.epSeen}/${a.epMax||'?'}</span></li>`).join('')}</ul></div>`; }
+window.toggleExpand=function(id){ const card=document.getElementById('card-'+id); const tracks=document.getElementById('tracks-'+id); const btn=card.querySelector('.expand-btn'); const open=tracks.style.display==='none'; tracks.style.display=open?'block':'none'; btn.textContent=open?'▲':'▼'; };
+window.handleImport=async function(docId){ if(!currentUser){ alert('Connecte-toi.'); return; } const btn=document.getElementById('ibtn-'+docId); btn.disabled=true; btn.textContent='...'; try{ const sharedSnap=await getDoc(doc(db,"shared_playlists",docId)); if(!sharedSnap.exists()) throw new Error("Playlist introuvable."); const shared=sharedSnap.data(); const animes=shared.playlist?.animes||[]; const sharedByName=shared.fromName||shared.fromEmail||'quelqu\'un'; const playlistName=`${shared.playlist?.name||'Partagée'} (partagée par ${sharedByName})`; await addDoc(collection(db,"playlists_custom"),{ uid:currentUser.uid, name:playlistName, shared:true, sharedBy:sharedByName }); const batch=animes.map(a=>addDoc(collection(db,"playlists"),{ uid:currentUser.uid, anime:a.anime, status:a.status||'waiting', rating:a.rating||0, epSeen:a.epSeen||0, epMax:a.epMax||0, img:a.img||'', playlistTarget:playlistName })); await Promise.all(batch); await updateDoc(doc(db,"shared_playlists",docId),{ importCount:increment(1), importedBy:arrayUnion(currentUser.uid) }); btn.textContent='✓ Importé'; btn.classList.add('imported'); }catch(e){ alert('Erreur: '+e.message); btn.disabled=false; btn.textContent='↓ Importer'; } };
 function toggleM(){ const m=document.getElementById('menu'), ov=document.getElementById('overlay'); const isOpen=m.classList.toggle('active'); ov.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }
 window.toggleM=toggleM;
 </script>
