@@ -141,6 +141,7 @@
             <a href="share.html">🔗 Partager</a>
             <a href="profil.html">👤 Profil</a>
             <a href="index_old.html">🕰️ Ancien Index</a>
+            <button onclick="studioRandom()">🎲 Studio Random</button>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
     </nav>
@@ -175,7 +176,15 @@
                 </div>
             </div>
             <div class="producer-controls">
-                <select class="ctrl-select" id="prod-sort"><option value="score">Trier : Score</option><option value="pop">Trier : Popularité</option><option value="année">Trier : Année</option><option value="nom">Trier : Nom (A-Z)</option></select>
+                <select class="ctrl-select" id="prod-sort">
+                    <option value="score">⭐ Score</option>
+                    <option value="pop">📈 Popularité</option>
+                    <option value="année">📅 Année</option>
+                    <option value="nom">📝 Nom (A-Z)</option>
+                    <option value="episodes">🎞️ Épisodes</option>
+                    <option value="censure">🔞 Censure</option>
+                    <option value="etat">🛠️ État</option>
+                </select>
                 <select class="ctrl-select" id="prod-filter"><option value="">Tout afficher</option><option value="en cours">🟢 En cours</option><option value="terminé">✅ Terminés</option><option value="oui">🔞 Censuré</option><option value="non">✔️ Non censuré</option></select>
                 <span class="result-count" id="prod-count"></span>
             </div>
@@ -206,9 +215,43 @@
         }
         document.getElementById('studio-sort').onchange=()=>renderList(document.getElementById('studio-search').value);
         function showProducer(studio){ currentStudio=studio; document.getElementById('view-list').style.display='none'; document.getElementById('view-producer').style.display='block'; document.title=studio+' - Le Malicieux'; history.pushState({studio},'',`editeurs.html?studio=${encodeURIComponent(studio)}`); const slug=studio.replace(/\s+/g,'-'); const avatarEl=document.getElementById('prod-avatar'); avatarEl.innerHTML=`<img src="img/${slug}.jpg" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<span class=\'avatar-initials\' style=\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;\'>'+studio.split(/[\\s\\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase()+'</span>'">`; document.getElementById('prod-name').textContent=studio; renderProducerGrid(); }
-        function renderProducerGrid(){ const map=buildStudioMap(); let animes=map[currentStudio]||[]; const filterVal=document.getElementById('prod-filter').value; if(filterVal==='oui'||filterVal==='non') animes=animes.filter(a=>a.censure.toLowerCase()===filterVal); else if(filterVal==='terminé') animes=animes.filter(a=>a.etat.toLowerCase().includes('termin')||a.etat.toLowerCase().includes('fini')); else if(filterVal==='en cours') animes=animes.filter(a=>a.etat.toLowerCase().includes('cours')||a.etat.toLowerCase().includes('airing')); const sortVal=document.getElementById('prod-sort').value; animes=[...animes].sort((a,b)=>{ if(sortVal==='score')return parseFloat(b.score.replace(',','.')||0)-parseFloat(a.score.replace(',','.')||0); if(sortVal==='pop')return (parseInt(a.pop.replace('#',''))||99999)-(parseInt(b.pop.replace('#',''))||99999); if(sortVal==='année')return (b.sortie||'').localeCompare(a.sortie||''); if(sortVal==='nom')return a.nom.localeCompare(b.nom); return 0; }); const allForStudio=map[currentStudio]||[]; document.getElementById('prod-total').textContent=allForStudio.length; document.getElementById('prod-count').textContent=`${animes.length} titre${animes.length>1?'s':''} affiché${animes.length>1?'s':''}`; fetchStudioScoresFromMAL(allForStudio); const grid=document.getElementById('producer-grid'); if(animes.length===0){ grid.innerHTML='<div class="empty-state">Aucun anime pour ces critères.</div>'; return; } grid.innerHTML=animes.map(a=>{ const scoreNum=parseFloat(a.score.replace(',','.')); const scoreBadge=scoreNum?`<div class="score-badge">⭐ ${a.score}</div>`:''; return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card"><div class="img-wrap"><img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">${scoreBadge}</div><div class="ac-info"><div class="ac-title">${a.nom}</div><div class="ac-meta"><span>📅 ${a.sortie}</span><span>🎞️ ${a.ep}</span></div><div class="ac-meta"><span>🔞 ${a.censure}</span><span>🛠️ ${a.etat}</span></div></div></a>`; }).join(''); }
+        function renderProducerGrid(){ 
+            const map=buildStudioMap(); let animes=map[currentStudio]||[]; 
+            const filterVal=document.getElementById('prod-filter').value; 
+            if(filterVal==='oui'||filterVal==='non') animes=animes.filter(a=>a.censure.toLowerCase()===filterVal); 
+            else if(filterVal==='terminé') animes=animes.filter(a=>a.etat.toLowerCase().includes('termin')||a.etat.toLowerCase().includes('fini')); 
+            else if(filterVal==='en cours') animes=animes.filter(a=>a.etat.toLowerCase().includes('cours')||a.etat.toLowerCase().includes('airing')); 
+            const sortVal=document.getElementById('prod-sort').value; 
+            animes=[...animes].sort((a,b)=>{ 
+                if(sortVal==='score')return parseFloat(b.score.replace(',','.')||0)-parseFloat(a.score.replace(',','.')||0); 
+                if(sortVal==='pop')return (parseInt(a.pop.replace('#',''))||99999)-(parseInt(b.pop.replace('#',''))||99999); 
+                if(sortVal==='année')return (b.sortie||'').localeCompare(a.sortie||''); 
+                if(sortVal==='nom')return a.nom.localeCompare(b.nom); 
+                if(sortVal==='episodes'){ const na=parseInt((a.ep||'').match(/\d+/g)?.pop()||0), nb=parseInt((b.ep||'').match(/\d+/g)?.pop()||0); return nb-na; }
+                if(sortVal==='censure')return (a.censure||'').localeCompare(b.censure||'');
+                if(sortVal==='etat')return (a.etat||'').localeCompare(b.etat||'');
+                return 0; 
+            }); 
+            const allForStudio=map[currentStudio]||[]; 
+            document.getElementById('prod-total').textContent=allForStudio.length; 
+            document.getElementById('prod-count').textContent=`${animes.length} titre${animes.length>1?'s':''} affiché${animes.length>1?'s':''}`; 
+            fetchStudioScoresFromMAL(allForStudio); 
+            const grid=document.getElementById('producer-grid'); 
+            if(animes.length===0){ grid.innerHTML='<div class="empty-state">Aucun anime pour ces critères.</div>'; return; } 
+            // Highlight helper
+            const hl=(field)=>`style="background:rgba(255,71,87,0.18);color:#ff8090;padding:0 2px;border-radius:3px;"`;
+            const isHl=(field)=>sortVal===field;
+            grid.innerHTML=animes.map(a=>{ 
+                const scoreNum=parseFloat(a.score.replace(',','.')); 
+                const scoreBadge=scoreNum?`<div class="score-badge">⭐ ${a.score}</div>`:''; 
+                const metaExtra=isHl('pop')?`<div class="ac-hl">📈 ${a.pop||'—'}</div>`:isHl('année')?`<div class="ac-hl">📅 ${a.sortie||'—'}</div>`:isHl('episodes')?`<div class="ac-hl">🎞️ ${a.ep||'—'}</div>`:isHl('censure')?`<div class="ac-hl">🔞 ${a.censure||'—'}</div>`:isHl('etat')?`<div class="ac-hl">🛠️ ${a.etat||'—'}</div>`:'';
+                return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card"><div class="img-wrap"><img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">${scoreBadge}</div><div class="ac-info"><div class="ac-title">${a.nom}</div><div class="ac-meta"><span${isHl('année')?' style="color:var(--primary);font-weight:bold;"':''}>📅 ${a.sortie}</span><span${isHl('episodes')?' style="color:var(--primary);font-weight:bold;"':''}>🎞️ ${a.ep}</span></div><div class="ac-meta"><span${isHl('censure')?' style="color:var(--primary);font-weight:bold;"':''}>🔞 ${a.censure}</span><span${isHl('etat')?' style="color:var(--primary);font-weight:bold;"':''}>🛠️ ${a.etat}</span></div>${isHl('score')?`<div class="ac-meta"><span style="color:var(--primary);font-weight:bold;">⭐ ${a.score||'—'}</span></div>`:''}${isHl('pop')?`<div class="ac-meta"><span style="color:var(--primary);font-weight:bold;">📈 ${a.pop||'—'}</span></div>`:''}</div></a>`; 
+            }).join(''); 
+        }
         async function fetchStudioScoresFromMAL(animes){ const scores=[]; const sample=animes.slice(0,6); for(const a of sample){ try{ await new Promise(r=>setTimeout(r,400)); const q=a.nom.split('/')[0].trim(); const resp=await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`); if(!resp.ok)continue; const json=await resp.json(); const s=json.data?.[0]?.score; if(s) scores.push(parseFloat(s)); }catch(e){} } if(scores.length===0){ document.getElementById('prod-avg').textContent='—'; document.getElementById('prod-best').textContent='—'; return; } const avg=(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2); const best=Math.max(...scores).toFixed(2); document.getElementById('prod-avg').textContent='⭐ '+avg; document.getElementById('prod-best').textContent='⭐ '+best; }
         function showList(){ currentStudio=null; renderList(document.getElementById('studio-search').value); }
+        function studioRandom(){ const map=buildStudioMap(); const studios=Object.keys(map); if(studios.length) showProducer(studios[Math.floor(Math.random()*studios.length)]); }
+        window.studioRandom=studioRandom;
         document.getElementById('prod-sort').onchange=renderProducerGrid; document.getElementById('prod-filter').onchange=renderProducerGrid; init();
         window.addEventListener('popstate',(e)=>{ if(e.state&&e.state.studio) showProducer(e.state.studio); else{ currentStudio=null; renderList(document.getElementById('studio-search').value); document.getElementById('view-list').style.display='block'; document.getElementById('view-producer').style.display='none'; document.title='Éditeurs & Studios - Le Malicieux'; } });
         function toggleM(){ const m=document.getElementById('menu'), ov=document.getElementById('overlay'); const isOpen=m.classList.toggle('active'); ov.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }

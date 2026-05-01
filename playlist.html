@@ -124,15 +124,25 @@
 
     <div class="playlist-header">
         <div class="controls-row">
-            <select id="custom-selector" class="playlist-select"><option value="all">Toutes mes playlists</option></select>
+        <div class="controls-row">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+                <label style="font-size:0.65em;color:#888;text-transform:uppercase;letter-spacing:0.05em;">Playlist</label>
+                <select id="custom-selector" class="playlist-select"><option value="all">Toutes mes playlists</option></select>
+            </div>
             <button id="btn-del-playlist" class="btn-delete-list">🗑️</button>
-            <select id="display-mode" class="playlist-select"><option value="grid">Icônes</option><option value="list">Liste</option></select>
-            <select id="sort-selector" class="playlist-select">
-                <option value="date">Ajout</option><option value="nom">Nom (A-Z)</option>
-                <option value="score_mal">Score MAL</option><option value="popularite">Popularité</option>
-                <option value="sortie">Année</option><option value="episodes">Épisodes</option>
-                <option value="note_perso">Ma Note</option><option value="editeur">Éditeur</option>
-            </select>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+                <label style="font-size:0.65em;color:#888;text-transform:uppercase;letter-spacing:0.05em;">Affichage</label>
+                <select id="display-mode" class="playlist-select"><option value="grid">Icônes</option><option value="list">Liste</option></select>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+                <label style="font-size:0.65em;color:#888;text-transform:uppercase;letter-spacing:0.05em;">Trier par</label>
+                <select id="sort-selector" class="playlist-select">
+                    <option value="date">Ajout</option><option value="nom">Nom (A-Z)</option>
+                    <option value="score_mal">Score MAL</option><option value="popularite">Popularité</option>
+                    <option value="sortie">Année</option><option value="episodes">Épisodes</option>
+                    <option value="note_perso">Ma Note</option><option value="editeur">Éditeur</option>
+                </select>
+            </div>
         </div>
         <div class="playlist-selector">
             <div class="select-card" data-status="watching"><h3>En cours</h3></div>
@@ -209,12 +219,12 @@
             }
             const hl=v=>sortVal===v?'style="color:var(--primary);font-weight:bold;"':'';
             if(mode==="grid"){
-                grid.style.display="grid"; table.classList.remove('active');
+                grid.style.display="grid"; table.classList.remove('active'); listBody.innerHTML='';
                 grid.innerHTML=filtered.map(a=>{ let hlLine=''; if(sortVal==='score_mal') hlLine=`<div style="font-size:0.7em;color:var(--primary);">⭐ ${a.score||'N/A'}</div>`; else if(sortVal==='popularite') hlLine=`<div style="font-size:0.7em;color:var(--primary);">📈 ${a.pop||'N/A'}</div>`; else if(sortVal==='sortie') hlLine=`<div style="font-size:0.7em;color:var(--primary);">📅 ${a.sortie||'?'}</div>`; else if(sortVal==='episodes') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🎞️ ${a.epMax||'?'}</div>`; else if(sortVal==='editeur') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🏢 ${a.editeur||'—'}</div>`;
                     return `<div class="card"><button class="delete-btn-overlay" onclick="removeAnime(event,'${a.id}')">🗑️</button><a href="video.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;"><img src="${getRealImgPath(a.img)}" onerror="handleImgErr(this,'${a.img}')"><div class="card-info"><div class="card-title">${a.anime}</div><div style="font-size:0.75em; color:#ccc;">⭐ ${a.rating}/10 • Ep: ${a.epSeen}</div>${hlLine}</div></a></div>`;
                 }).join('');
             }else{
-                grid.style.display="none"; table.classList.add('active');
+                grid.style.display="none"; grid.innerHTML=''; table.classList.add('active');
                 listBody.innerHTML=filtered.map((a,i)=>`<tr><td class="status-bar status-${a.status}-bg"></td><td>${i+1}</td><td><img src="${getRealImgPath(a.img)}" class="list-img" onerror="handleImgErr(this,'${a.img}')"></td><td><a href="video.html?name=${encodeURIComponent(a.anime)}" style="color:white; text-decoration:none;">${a.anime}</a></td><td>⭐ ${a.rating||0}</td><td ${hl('episodes')}>${a.epSeen}/${a.epMax||'?'}</td><td ${hl('score_mal')}>${a.score||'N/A'}</td><td ${hl('popularite')}>${a.pop||'N/A'}</td><td ${hl('sortie')}>${a.sortie||'?'}</td><td>${a.censure||''}</td><td ${hl('editeur')}>${a.editeur||'—'}</td><td><button onclick="removeAnime(event,'${a.id}')" style="background:none;border:none;color:#ff4757;cursor:pointer;">🗑️</button></td></tr>`).join('');
             }
             requestAnimationFrame(restoreScroll);
