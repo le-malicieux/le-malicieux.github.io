@@ -30,11 +30,6 @@
             min-height: 100vh;
             overflow-x: hidden;
         }
-        body.menu-open {
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-        }
 
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
@@ -95,6 +90,7 @@
             display: inline-flex; align-items: center; gap: 5px;
         }
         .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
+        .nav-links .discord-btn:hover { background: #4752c4; border-color: rgba(255,255,255,0.3); }
 
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
@@ -477,7 +473,7 @@
             const overlay = document.getElementById('overlay');
             const isOpen = menu.classList.toggle('active');
             overlay.classList.toggle('active');
-            document.body.classList.toggle('menu-open', isOpen);
+            document.body.style.overflow = isOpen ? 'hidden' : '';
         }
         window.toggleM = toggleM;
         

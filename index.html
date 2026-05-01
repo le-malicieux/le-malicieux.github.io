@@ -17,10 +17,11 @@
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
+            /* plus de transformation, fond fixe */
         }
         #bg-overlay {
             position: fixed; inset: 0; z-index: -1; pointer-events: none;
-            background: black; opacity: 0;
+            background: black; opacity: 0; /* sera animée au scroll */
             transition: none;
         }
         body {
@@ -30,12 +31,6 @@
             margin: 0;
             min-height: 100vh;
             overflow-x: hidden;
-        }
-        /* Verrouillage du scroll quand le menu burger est ouvert */
-        body.menu-open {
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
         }
 
         .top-navbar {
@@ -114,7 +109,7 @@
                 position: fixed; top: 0; right: -100%; width: 280px; height: 100vh;
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
                 transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
-                overflow-y: auto; -webkit-overflow-scrolling: touch;
+                overflow-y: auto;
                 left: auto;
                 right: -100%;
             }
@@ -122,8 +117,7 @@
             .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
-            /* Correction : navbar collée, sans padding-top */
-            body { padding-top: 0; }
+            body { padding-top: 106px; }
         }
 
         .hero-section {
@@ -166,7 +160,7 @@
         }
 
         .carousel-wrapper {
-            position: relative; max-width: 1400px; margin: 0 auto; padding: 0 40px;
+            position: relative; max-width: 1400px; margin: 0 auto; padding: 0 40px; /* espace pour les flèches */
         }
         .carousel-container { overflow: hidden; touch-action: pan-y; }
         .carousel-track { display: flex; gap: 10px; transition: transform 0.4s ease; cursor: grab; }
@@ -213,7 +207,7 @@
             .main-title { font-size: 2em; }
             .section-title { font-size: 1.2em; }
             .carousel-wrapper { padding: 0 5px; }
-            .carousel-btn { display: none; }
+            .carousel-btn { display: none; } /* masquer les flèches sur mobile */
             .carousel-track { gap: 8px; }
             #search-results-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
         }
@@ -430,16 +424,234 @@
             </a>`;
         }
 
-        // ... reste du script (carrousels, etc.) identique à la version précédente, mais avec toggleM corrigé
-        window.toggleM = () => {
-            const menu = document.getElementById('menu');
-            const overlay = document.getElementById('overlay');
-            const isOpen = menu.classList.toggle('active');
-            overlay.classList.toggle('active');
-            document.body.classList.toggle('menu-open', isOpen);
+        function addTouchSwipe(trackId, getCurrentIndex, setCurrentIndex, getMaxIndex, getCardWidth, scrollFn) {
+            const track = document.getElementById(trackId);
+            if (!track) return;
+            let startX = 0, startY = 0, movedX = 0;
+            let isDragging = false;
+
+            track.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                movedX = 0;
+                isDragging = true;
+                track.style.transition = 'none';
+            }, { passive: true });
+
+            track.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const dx = e.touches[0].clientX - startX;
+                const dy = e.touches[0].clientY - startY;
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    e.preventDefault();
+                    movedX = dx;
+                    const offset = -getCurrentIndex() * getCardWidth() + dx;
+                    track.style.transform = `translateX(${offset}px)`;
+                }
+            }, { passive: false });
+
+            track.addEventListener('touchend', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                track.style.transition = 'transform 0.4s ease';
+                const threshold = getCardWidth() * 0.4;
+                if (movedX < -threshold) {
+                    setCurrentIndex(Math.min(getMaxIndex(), getCurrentIndex() + 1));
+                } else if (movedX > threshold) {
+                    setCurrentIndex(Math.max(0, getCurrentIndex() - 1));
+                }
+                scrollFn();
+            });
+        }
+
+        function buildCarousel(trackId, animeList) {
+            const track = document.getElementById(trackId);
+            if (!track) return;
+            if (animeList.length === 0) { track.innerHTML = '<p style="color:#ff6b7a;padding:20px;">Aucun anime.</p>'; return; }
+            track.innerHTML = animeList.map(a => createCardHTML(a)).join('');
+            track.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
+            let currentIndex = 0;
+            function getCardsPerView() { const w = window.innerWidth; if (w <= 480) return 2; if (w <= 1000) return 3; return 5; }
+            function getCardWidth() { const card = track.querySelector('.card'); return card ? card.offsetWidth + 10 : 160; }
+            function getMaxIndex() { return Math.max(0, track.children.length - getCardsPerView()); }
+            function scrollToIndex() { track.style.transform = 'translateX(-' + (currentIndex * getCardWidth()) + 'px)'; }
+            const getCI = () => currentIndex;
+            const setCI = (v) => { currentIndex = v; };
+            addTouchSwipe(trackId, getCI, setCI, getMaxIndex, getCardWidth, scrollToIndex);
+            
+            // Flèches de navigation
+            const wrapper = track.closest('.carousel-wrapper');
+            const prevBtn = wrapper?.querySelector('.carousel-prev');
+            const nextBtn = wrapper?.querySelector('.carousel-next');
+            if (prevBtn) prevBtn.onclick = () => { if (currentIndex > 0) { currentIndex--; scrollToIndex(); } };
+            if (nextBtn) nextBtn.onclick = () => { if (currentIndex < getMaxIndex()) { currentIndex++; scrollToIndex(); } };
+
+            let resizeTimeout; window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => { currentIndex = Math.min(currentIndex, getMaxIndex()); scrollToIndex(); }, 150); });
+        }
+
+        function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+        function showSearchResults(query) {
+            currentSearchQuery = query;
+            const results = allAnimes.filter(a => normalize(a.nom).includes(normalize(query)));
+            const mainContent = document.getElementById('main-content');
+            const resultsSection = document.getElementById('search-results-section');
+            const resultsGrid = document.getElementById('search-results-grid');
+            const resultsTitle = document.getElementById('search-results-title');
+            const resultsCount = document.getElementById('search-results-count');
+            const backHome = document.getElementById('back-home');
+
+            mainContent.style.display = 'none';
+            resultsSection.style.display = 'block';
+            resultsTitle.textContent = '🔍 ' + query;
+            resultsCount.textContent = results.length + ' anime' + (results.length > 1 ? 's' : '') + ' trouvé' + (results.length > 1 ? 's' : '');
+
+            if (results.length === 0) {
+                resultsGrid.innerHTML = '<p style="color:#ff6b7a;text-align:center;padding:40px;">Aucun anime trouvé pour "' + query + '"</p>';
+            } else if (results.length === 1) {
+                window.location.href = 'video.html?name=' + encodeURIComponent(results[0].nom);
+                return;
+            } else {
+                resultsGrid.innerHTML = results.map(a => createCardHTML(a, true, query)).join('');
+                resultsGrid.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
+            }
+            backHome.style.display = 'block';
+            window.scrollTo({ top: resultsSection.offsetTop - 80, behavior: 'smooth' });
+            history.pushState({}, '', `?search=${encodeURIComponent(query)}`);
+        }
+
+        function resetToHome() {
+            document.getElementById('search').value = '';
+            currentSearchQuery = '';
+            sessionStorage.removeItem('indexSearch');
+            document.getElementById('search-results-section').style.display = 'none';
+            document.getElementById('main-content').style.display = '';
+            document.getElementById('back-home').style.display = 'none';
+            history.replaceState(null, '', window.location.pathname);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        window.resetToHome = resetToHome;
+
+        window.handleImgError = function(img, fileNameFromCSV) {
+            if (!img.dataset.attempt) img.dataset.attempt = "1";
+            const lastDotIndex = fileNameFromCSV.lastIndexOf('.');
+            const base = lastDotIndex !== -1 ? fileNameFromCSV.substring(0, lastDotIndex) : fileNameFromCSV;
+            if (img.dataset.attempt === "1") { img.dataset.attempt = "2"; img.src = `img/${base}.webp`; }
+            else if (img.dataset.attempt === "2") { img.dataset.attempt = "3"; img.src = `img/${base}.png`; }
+            else if (img.dataset.attempt === "3") { img.dataset.attempt = "4"; img.src = `img/${base}.jpg`; }
+            else { img.onerror = null; img.src = 'img/logo.jpg'; }
         };
 
-        // ... suite du script (init, etc.) inchangée ...
+        function setBackground() {
+            const isMobile = window.innerWidth <= 1000;
+            const n = isMobile ? Math.floor(Math.random() * 13) + 1 : Math.floor(Math.random() * 64) + 1;
+            const fileName = isMobile ? `mobile${n}.webp` : `fond${n}.webp`;
+            document.getElementById('bg-layer').style.backgroundImage = `url('img/${fileName}')`;
+        }
+
+        // Assombrissement progressif au scroll
+        function updateOverlayOpacity() {
+            const scrollY = window.scrollY;
+            const maxScroll = document.body.scrollHeight - window.innerHeight || 1;
+            const opacity = Math.min(scrollY / 600, 0.65); // s'assombrit jusqu'à 0.65
+            document.getElementById('bg-overlay').style.opacity = opacity;
+        }
+
+        async function init() {
+            setBackground();
+            window.addEventListener('scroll', updateOverlayOpacity);
+            window.addEventListener('resize', () => {
+                const bgLayer = document.getElementById('bg-layer');
+                if (bgLayer && !bgLayer.style.backgroundImage) setBackground();
+            });
+
+            try {
+                const resp = await fetch('animes.csv');
+                const raw = await resp.text();
+                const lines = raw.split(/\r?\n/);
+                const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
+                const ordreAjoutIndex = headers.indexOf('ordre_ajout');
+                allAnimes = lines.slice(1).map(line => {
+                    const c = line.split(';');
+                    if (!c[0] || c.length < 9) return null;
+                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
+                    let ordreAjout = 0;
+                    if (ordreAjoutIndex >= 0 && ordreAjoutIndex < c.length) ordreAjout = parseInt(clean(c[ordreAjoutIndex])) || 0;
+                    return {
+                        nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]),
+                        sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]),
+                        etat: clean(c[6]), img: clean(c[8]), tags: clean(c[12]),
+                        malId: clean(c[13]), editeur: clean(c[14]), ordreAjout
+                    };
+                }).filter(a => a !== null);
+
+                try {
+                    const tr = await fetch('tags_description.csv');
+                    const trRaw = await tr.text();
+                    allTags = trRaw.split(/\r?\n/).slice(1).map(line => {
+                        const c = line.split(';');
+                        if (!c[0]) return null;
+                        return { nom: c[0].trim(), description: (c[1]||'').trim() };
+                    }).filter(t => t !== null);
+                } catch(e) { allTags = []; }
+
+                buildCarousel('carousel-random-track', shuffle(allAnimes).slice(0, 20));
+                const recents = [...allAnimes].filter(a => a.ordreAjout > 0).sort((a,b) => b.ordreAjout - a.ordreAjout).slice(0, 20);
+                buildCarousel('carousel-recent-track', recents);
+
+                if (allTags.length > 0) {
+                    const rTag = allTags[Math.floor(Math.random() * allTags.length)];
+                    document.getElementById('tag-pill-link').textContent = rTag.nom;
+                    document.getElementById('tag-pill-link').href = `tags.html?tag=${encodeURIComponent(rTag.nom)}`;
+                    document.getElementById('tag-description-text').textContent = rTag.description || 'Découvrez les animes associés à ce tag.';
+                    const tagAnimes = allAnimes.filter(a => a.tags && a.tags.toLowerCase().includes(rTag.nom.toLowerCase()));
+                    buildCarousel('carousel-tag-track', shuffle(tagAnimes).slice(0, 20));
+                } else {
+                    document.getElementById('tag-pill-link').textContent = 'Tags indisponibles';
+                    document.getElementById('tag-description-text').textContent = 'Chargement des tags...';
+                }
+                document.getElementById('anime-count').innerHTML = '📊 <span class="count-number">' + allAnimes.length + '</span> animes dans le catalogue';
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const searchParam = urlParams.get('search');
+                if (searchParam) {
+                    document.getElementById('search').value = searchParam;
+                    showSearchResults(searchParam);
+                } else {
+                    const savedSearch = sessionStorage.getItem('indexSearch');
+                    if (savedSearch) document.getElementById('search').value = savedSearch;
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        const searchInput = document.getElementById('search');
+        const searchSuggestions = document.getElementById('search-suggestions');
+        searchInput.addEventListener('input', function() {
+            const val = this.value.trim();
+            if (val.length < 2) { searchSuggestions.classList.remove('active'); return; }
+            const results = allAnimes.filter(a => normalize(a.nom).includes(normalize(val))).slice(0, 8);
+            if (results.length === 0) { searchSuggestions.innerHTML = '<div class="no-result" style="padding:12px;color:#888;">Aucun résultat</div>'; }
+            else { searchSuggestions.innerHTML = results.map(a => '<div class="suggestion-item" data-name="'+a.nom.replace(/"/g,'&quot;')+'"><img src="img/'+a.img+'" class="sugg-img" onerror="this.src=\'img/logo.jpg\'"><span>'+a.nom+'</span></div>').join(''); }
+            searchSuggestions.classList.add('active');
+        });
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = this.value.trim();
+                if (val) showSearchResults(val);
+                searchSuggestions.classList.remove('active');
+                this.blur();
+            }
+        });
+        searchSuggestions.addEventListener('click', function(e) {
+            const item = e.target.closest('.suggestion-item');
+            if (item && item.dataset.name) window.location.href = 'video.html?name=' + encodeURIComponent(item.dataset.name);
+        });
+        document.addEventListener('click', function(e) { if (!e.target.closest('.search-wrapper')) searchSuggestions.classList.remove('active'); });
+
+        window.randomAnime = () => { if(allAnimes.length) { const a = allAnimes[Math.floor(Math.random()*allAnimes.length)]; window.location.href = 'video.html?name='+encodeURIComponent(a.nom); } };
+        window.toggleM = () => { const menu = document.getElementById('menu'); const overlay = document.getElementById('overlay'); const isOpen = menu.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow = isOpen ? 'hidden' : ''; };
+        init();
     </script>
 </body>
 </html>
