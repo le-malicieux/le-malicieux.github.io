@@ -284,12 +284,21 @@
                             <button class="btn-delete" id="delete-btn">Retirer de ma liste</button></div>
                             <div class="link-box"><div class="link-title">📥 Téléchargement</div><div id="dl-area" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
                             <div class="link-title">🎬 Visionnage</div><div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px;"></div>
-                            ${anime.infoV ? `<div class="link-title">ℹ️ Infos de visionnage</div><div style="background:rgba(255,255,255,0.04); border:1px solid #333; border-radius:6px; padding:8px 10px; font-size:0.8em; color:#ccc; line-height:1.6; white-space:pre-line;">${anime.infoV}</div>` : ''}</div>
+                            <div id="infov-area"></div></div>
                         </div>
                     </div>`;
                 const dlLabels=['⬇️ Terabox','⬇️ Mega','⬇️ Lien 3','⬇️ Lien 4'];
                 anime.dl.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('dl-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link" style="flex:1;">${dlLabels[i]||'⬇️ Lien '+(i+1)}</a>`);
                 anime.stream.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('stream-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link">Lien ${i+1} ↗</a>`);
+                if(anime.infoV && anime.infoV.trim()){
+                    const infovArea=document.getElementById('infov-area');
+                    if(infovArea){
+                        const title=document.createElement('div'); title.className='link-title'; title.textContent='ℹ️ Informations de visionnage';
+                        const box=document.createElement('div'); box.style.cssText='background:rgba(255,255,255,0.04);border:1px solid #333;border-radius:6px;padding:8px 10px;font-size:0.8em;color:#ccc;line-height:1.6;white-space:pre-line;margin-top:4px;';
+                        box.textContent=anime.infoV;
+                        infovArea.appendChild(title); infovArea.appendChild(box);
+                    }
+                }
                 fetchMALData(anime.nom,anime.malId).then(md=>{ applyMALStats(md); if(!md){ const badge=document.getElementById('mal-badge'); if(badge) badge.innerHTML='<span style="font-size:0.7em;color:#555;">Données MAL indisponibles</span>'; } });
                 const _ref=document.referrer, _bl=document.getElementById('back-link');
                 if(_ref.includes('playlist.html')) _bl.innerText='← Retour à la playlist';
