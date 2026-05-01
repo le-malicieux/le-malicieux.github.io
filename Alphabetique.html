@@ -18,7 +18,12 @@
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
         }
-        body{
+        /* Overlay sombre pour lisibilité */
+        body::after {
+            content: ''; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); z-index: -1; pointer-events: none;
+        }
+        body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg);
             color: var(--text);
@@ -26,11 +31,6 @@
             min-height: 100vh;
             padding-top: 116px;
             overflow-x: hidden;
-        }
-        body.menu-open {
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
         }
 
         .top-navbar {
@@ -145,15 +145,16 @@
         }
         .display-mode-bar label { font-size: 0.75em; color: #888; }
 
-        .list-table-wrap { display: none; overflow-x: auto; max-width: 1400px; margin: 0 auto; padding: 0 15px; }
+        .list-table-wrap { display: none; max-width: 1400px; margin: 0 auto; padding: 0 15px; }
         .list-table-wrap.active { display: block; }
         .anime-list.table-hidden { display: none; }
-        .list-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; font-size: 0.8em; }
-        .list-table th, .list-table td { padding: 8px; border-bottom: 1px solid #222; text-align: left; }
-        .list-table th { color: var(--primary); font-size: 0.75em; text-transform: uppercase; }
-        .list-table a { color: white; text-decoration: none; }
-        .list-table a:hover { color: var(--primary); }
-        .list-table .table-img { width: 35px; height: 50px; object-fit: cover; border-radius: 3px; }
+        /* Vue liste compacte : image + titre */
+        .compact-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+        .compact-card { display: flex; flex-direction: column; text-decoration: none; color: inherit; border-radius: 8px; overflow: hidden; border: 1px solid #2a2a2a; background: var(--card-bg); transition: 0.2s; }
+        .compact-card:hover { border-color: var(--primary); transform: translateY(-4px); }
+        .compact-card .cc-img { width: 100%; aspect-ratio: 2/3; background: #111; }
+        .compact-card .cc-img img { width: 100%; height: 100%; object-fit: cover; }
+        .compact-card .cc-title { padding: 5px 6px; font-size: 0.72em; font-weight: bold; color: var(--primary); line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
         @media (max-width: 1000px) { 
             .anime-list { grid-template-columns: repeat(3, 1fr); gap: 8px; } 
@@ -222,15 +223,16 @@
         </div>
         <div id="groups-container"></div>
         <div class="list-table-wrap" id="list-table-wrap">
-            <table class="list-table" id="list-table">
-                <thead><tr><th>#</th><th>Image</th><th>Titre</th><th>Score</th><th>Pop.</th><th>Année</th><th>Épisodes</th><th>Censure</th><th>État</th><th>Éditeur</th></tr></thead>
-                <tbody id="list-body"></tbody>
-            </table>
+            <div id="compact-list-container"></div>
         </div>
         <div id="no-result">Aucun anime trouvé pour cette recherche.</div>
     </div>
 
     <script type="module">
+        // Le script original intégral, avec la fonction setBackground() et sans applyParallax().
+        // On garde le script intact, seule la partie setBackground est modifiée pour ne plus faire de parallax.
+        // Nous avons aussi retiré l'appel à applyParallax() dans init().
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -323,7 +325,6 @@
             const container = document.getElementById('groups-container');
             const noResult = document.getElementById('no-result');
             const tableWrap = document.getElementById('list-table-wrap');
-            const listBody = document.getElementById('list-body');
             const query = normalizeSearch(searchVal);
 
             let filtered = allAnimes;
@@ -396,18 +397,23 @@
                 container.innerHTML = '';
                 tableWrap.classList.add('active');
 
-                let rows = '';
-                orderedKeys.forEach(key => {
+                const compactContainer = document.getElementById('compact-list-container');
+                compactContainer.innerHTML = orderedKeys.map(key => {
                     const label = key === '★' ? '★ Spéciaux' : key === '#' ? '# Chiffres' : key;
-                    rows += `<tr><td colspan="2" style="background:#1a1a1a; color:var(--primary); font-weight:bold; padding:10px 8px; font-size:1em;">${label}</td></tr>`;
-                    groups[key].forEach(a => {
-                        rows += `<tr>
-                            <td style="width:60px;"><img src="img/${a.img}" class="table-img" loading="lazy" onerror="handleImgError(this, '${a.img}')"></td>
-                            <td><a href="video.html?name=${encodeURIComponent(a.nom)}">${a.nom}</a></td>
-                        </tr>`;
-                    });
-                });
-                listBody.innerHTML = rows;
+                    const cards = groups[key].map(a => `
+                        <a href="video.html?name=${encodeURIComponent(a.nom)}" class="compact-card">
+                            <div class="cc-img">
+                                <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
+                            </div>
+                            <div class="cc-title">${a.nom}</div>
+                        </a>`).join('');
+                    return `
+                        <div id="group-${key}" class="letter-anchor">
+                            <div class="letter-badge">${label}</div>
+                            <div class="letter-line"></div>
+                        </div>
+                        <div class="compact-list">${cards}</div>`;
+                }).join('');
             }
 
             const navGroups = {};
@@ -424,6 +430,8 @@
             const n = isMobile ? Math.floor(Math.random() * 14) + 1 : Math.floor(Math.random() * 64) + 1;
             document.getElementById('bg-layer').style.backgroundImage = `url('img/${isMobile ? 'mobile' + n : 'fond' + n}.webp')`;
         }
+
+        // Pas de parallax
 
         async function init() {
             setBackground();
@@ -462,7 +470,7 @@
             const overlay = document.getElementById('overlay');
             const isOpen = menu.classList.toggle('active');
             overlay.classList.toggle('active');
-            document.body.classList.toggle('menu-open', isOpen);
+            document.body.style.overflow = isOpen ? 'hidden' : '';
         }
         window.toggleM = toggleM;
 
