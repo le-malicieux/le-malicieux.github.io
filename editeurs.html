@@ -47,7 +47,15 @@
         
         .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
         .nav-links a, .nav-links button { background: var(--primary); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8em; text-decoration: none; cursor: pointer; white-space: nowrap; font-weight: bold; }
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; white-space: nowrap; }
+        .nav-links .discord-btn {
+            background: #5865F2; color: white; text-decoration: none;
+            padding: 5px 10px; border-radius: 20px; font-size: 0.8em;
+            font-weight: bold; white-space: nowrap;
+            border: 2px solid rgba(255,255,255,0.15);
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
+        .nav-links .discord-btn:hover { background: #4752c4; border-color: rgba(255,255,255,0.3); }
         
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
@@ -58,10 +66,11 @@
             .nav-links { order: 2; }
             .burger { display: block; order: 1; }
             .close-menu { display: block; }
-            .nav-links { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s; z-index: 1100; align-items: stretch; overflow-y: auto; left: auto; right: -100%; }
+            .nav-links { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch; overflow-y: auto; left: auto; right: -100%; }
             .nav-links.active { right: 0; left: auto; }
-            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
+            .nav-links a, .nav-links button, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
+            .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
             .studios-grid { grid-template-columns: 1fr 1fr; }
             /* Fix chevauchement producteur */
             .producer-banner { height: auto; padding: 0; flex-direction: column; align-items: flex-start; }

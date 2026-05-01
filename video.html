@@ -13,6 +13,11 @@
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
         }
+        /* Overlay sombre pour lisibilité */
+        body::after {
+            content: ''; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); z-index: -1; pointer-events: none;
+        }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding-top: 60px; overflow-x: hidden; }
         .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
         .top-navbar {
@@ -26,7 +31,7 @@
         .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
         .nav-logo-small { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; white-space: nowrap; }
-        .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-right: 5px; order: -1; }
+        .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-left: 5px; flex-shrink: 0; }
         .search-wrapper { position: relative; flex: 1; min-width: 180px; max-width: 280px; }
         .search-wrapper input { width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; padding: 6px 30px 6px 10px; border-radius: 5px; font-size: 0.8em; outline: none; }
         .search-wrapper input:focus { border-color: var(--primary); }
@@ -48,12 +53,13 @@
             .top-navbar { flex-wrap: wrap; }
             .search-wrapper { order: 3; width: 100%; max-width: none; margin-top: 8px; }
             .nav-links { order: 2; }
-            .burger { display: block; order: 1; }
+            .burger { display: block; }
             .close-menu { display: block; }
-            .nav-links { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s; z-index: 1100; align-items: stretch; overflow-y: auto; left: auto; right: -100%; }
+            .nav-links { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch; overflow-y: auto; left: auto; right: -100%; }
             .nav-links.active { right: 0; left: auto; }
-            .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
+            .nav-links a, .nav-links button, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
+            .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
         }
         .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; font-size: 0.85em; }
         .back-btn:hover { background: var(--primary); color: white; }
@@ -110,7 +116,6 @@
 <body>
     <div id="bg-layer"></div>
     <div class="top-navbar">
-        <div class="burger" onclick="toggleM()">☰</div>
         <div class="nav-left">
             <a href="index.html" class="nav-brand">
                 <img src="img/logo.jpg" class="nav-logo-small">
@@ -136,6 +141,7 @@
             <button onclick="randomAnime()">🎲 Random</button>
             <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
         </div>
+        <div class="burger" onclick="toggleM()">☰</div>
     </div>
 
     <div class="container">
@@ -277,7 +283,8 @@
                             <div class="star-rating" id="stars">${Array.from({length:10},(_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
                             <button class="btn-delete" id="delete-btn">Retirer de ma liste</button></div>
                             <div class="link-box"><div class="link-title">📥 Téléchargement</div><div id="dl-area" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
-                            <div class="link-title">🎬 Visionnage</div><div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;"></div></div>
+                            <div class="link-title">🎬 Visionnage</div><div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px;"></div>
+                            ${anime.infoV ? `<div class="link-title">ℹ️ Infos de visionnage</div><div style="background:rgba(255,255,255,0.04); border:1px solid #333; border-radius:6px; padding:8px 10px; font-size:0.8em; color:#ccc; line-height:1.6; white-space:pre-line;">${anime.infoV}</div>` : ''}</div>
                         </div>
                     </div>`;
                 const dlLabels=['⬇️ Terabox','⬇️ Mega','⬇️ Lien 3','⬇️ Lien 4'];
