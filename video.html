@@ -13,7 +13,6 @@
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
         }
-        /* Overlay sombre pour lisibilité */
         body::after {
             content: ''; position: fixed; inset: 0;
             background: rgba(0,0,0,0.5); z-index: -1; pointer-events: none;
@@ -43,9 +42,9 @@
         .search-suggestions .suggestion-item .sugg-img { width: 22px; height: 32px; border-radius: 3px; object-fit: cover; }
         .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
         .nav-links a, .nav-links button { background: var(--primary); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75em; text-decoration: none; cursor: pointer; white-space: nowrap; font-weight: bold; }
-        .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; white-space: nowrap; border: 2px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; gap: 5px; }
-        .discord-btn::before { content: '💬'; font-size: 0.9em; }
-        .discord-btn:hover { background: #4752c4; border-color: rgba(255,255,255,0.3); }
+        .nav-links .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; white-space: nowrap; border: 2px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; gap: 5px; }
+        .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
+        .nav-links .discord-btn:hover { background: #4752c4; border-color: rgba(255,255,255,0.3); }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
         @media (max-width: 900px) {
@@ -293,10 +292,10 @@
                 if(anime.infoV && anime.infoV.trim()){
                     const infovArea=document.getElementById('infov-area');
                     if(infovArea){
-                        const title=document.createElement('div'); title.className='link-title'; title.textContent='ℹ️ Informations de visionnage';
-                        const box=document.createElement('div'); box.style.cssText='background:rgba(255,255,255,0.04);border:1px solid #333;border-radius:6px;padding:8px 10px;font-size:0.8em;color:#ccc;line-height:1.6;white-space:pre-line;margin-top:4px;';
-                        box.textContent=anime.infoV;
-                        infovArea.appendChild(title); infovArea.appendChild(box);
+                        const t=document.createElement('div'); t.className='link-title'; t.textContent='ℹ️ Informations de visionnage';
+                        const b=document.createElement('div'); b.style.cssText='background:rgba(255,255,255,0.04);border:1px solid #333;border-radius:6px;padding:8px 10px;font-size:0.8em;color:#ccc;line-height:1.6;white-space:pre-line;margin-top:4px;';
+                        b.textContent=anime.infoV;
+                        infovArea.appendChild(t); infovArea.appendChild(b);
                     }
                 }
                 fetchMALData(anime.nom,anime.malId).then(md=>{ applyMALStats(md); if(!md){ const badge=document.getElementById('mal-badge'); if(badge) badge.innerHTML='<span style="font-size:0.7em;color:#555;">Données MAL indisponibles</span>'; } });
