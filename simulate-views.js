@@ -26,11 +26,9 @@ function extractURLs(csvText) {
 
 (async () => {
   console.log('Lancement du navigateur...');
-
-  // Utilise le Chromium installé dans l'environnement GitHub Actions
   const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/google-chrome-stable',  // chemin par défaut dans ubuntu-22.04
-    args: ['--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'],
+    executablePath: '/usr/bin/google-chrome-stable',
+    args: ['--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox', '--autoplay-policy=no-user-gesture-required'],
     headless: 'new'
   });
 
@@ -45,18 +43,34 @@ function extractURLs(csvText) {
       const page = await browser.newPage();
       try {
         console.log(`⏳ Ouverture : ${url}`);
-        // Aller à l'URL (le fragment #... sera bien envoyé au navigateur)
+        // Aller à l'URL
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
-        // Attendre 5 secondes pour laisser le lecteur compter la vue
-        await new Promise(r => setTimeout(r, 5000));
-        console.log(`✅ Vue simulée : ${url}`);
+
+        // Attendre que le player soit chargé (le plus souvent un <video>)
+        await page.waitForSelector('video, iframe', { timeout: 15000 }).catch(() => console.log('  ℹ️ Aucun <video> ou <iframe> trouvé.'));
+
+        // Forcer la lecture de la vidéo (peu importe l'interface)
+        await page.evaluate(() => {
+          // Essayer de jouer tous les éléments <video>
+          document.querySelectorAll('video').forEach(v => {
+            v.muted = true;       // important pour l'autoplay
+            v.play().catch(() => {});
+          });
+          // Si c'est un iframe, on ne peut pas toujours accéder à l'intérieur,
+          // mais on laisse le temps de chargement quand même.
+        });
+
+        // Laisser le temps au compteur de vues de s'incrémenter (15 sec)
+        console.log('  ⏳ Attente 15 secondes pour comptabilisation...');
+        await new Promise(r => setTimeout(r, 15000));
+
+        console.log(`  ✅ Vue simulée : ${url}`);
         successCount++;
       } catch (err) {
         console.error(`❌ Erreur sur ${url} : ${err.message}`);
       } finally {
         await page.close();
-        // Petite pause entre chaque vidéo
-        await new Promise(r => setTimeout(r, 1500));
+        await new Promise(r => setTimeout(r, 2000)); // pause entre les vidéos
       }
     }
     console.log(`Fini : ${successCount}/${urls.length} OK`);
