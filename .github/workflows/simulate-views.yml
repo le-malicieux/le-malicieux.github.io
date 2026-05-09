@@ -1,0 +1,21 @@
+name: Simulation de vues (tous les 29 jours)
+
+on:
+  schedule:
+    - cron: '0 3 1,29 * *'
+  workflow_dispatch:
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+      
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Exécuter le script
+        run: node simulate-views.js
