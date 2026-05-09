@@ -1,8 +1,7 @@
 const https = require('https');
 const http = require('http');
 
-// URLs de TES fichiers CSV (ne rien changer)
-const ANIMES_CSV_URL = 'https://raw.githubusercontent.com/le-malicieux/le-malicieux.github.io/main/animes.csv';
+// ⚠️ URL de TON fichier stream.csv
 const STREAM_CSV_URL = 'https://raw.githubusercontent.com/le-malicieux/le-malicieux.github.io/main/stream.csv';
 
 function fetchCSV(url) {
@@ -16,26 +15,17 @@ function fetchCSV(url) {
   });
 }
 
-function extractURLs(csvText, type) {
+function extractURLsFromStream(csvText) {
   const urls = [];
   const lines = csvText.split(/\r?\n/).slice(1).filter(l => l.trim());
-  if (type === 'animes') {
-    for (const line of lines) {
-      const cols = line.split(';');
-      const clean = s => s ? s.trim().replace(/^"|"$/g, '') : '';
-      const streamCol = clean(cols[9]);
-      const dlCol = clean(cols[10]);
-      if (streamCol) streamCol.split(',').forEach(u => u && urls.push(u.trim()));
-      if (dlCol) dlCol.split(',').forEach(u => u && urls.push(u.trim()));
-    }
-  } else if (type === 'stream') {
-    for (const line of lines) {
-      const parts = line.split(',');
-      const watchURL = parts[parts.length - 1].trim();
-      if (watchURL.startsWith('http')) urls.push(watchURL);
+  for (const line of lines) {
+    const parts = line.split(',');
+    const watchURL = parts[parts.length - 1].trim(); // dernière colonne
+    if (watchURL.startsWith('http')) {
+      urls.push(watchURL);
     }
   }
-  return [...new Set(urls)];
+  return [...new Set(urls)]; // supprime les doublons
 }
 
 function simulateVisit(url) {
@@ -51,17 +41,10 @@ function simulateVisit(url) {
 }
 
 (async () => {
-  console.log('Début de la simulation de vues…');
+  console.log('Début de la simulation de vues (stream.csv uniquement)…');
   try {
-    const [animesCSV, streamCSV] = await Promise.all([
-      fetchCSV(ANIMES_CSV_URL),
-      fetchCSV(STREAM_CSV_URL)
-    ]);
-
-    const urls = [
-      ...extractURLs(animesCSV, 'animes'),
-      ...extractURLs(streamCSV, 'stream')
-    ];
+    const streamCSV = await fetchCSV(STREAM_CSV_URL);
+    const urls = extractURLsFromStream(streamCSV);
 
     console.log(`Nombre d'URLs à visiter : ${urls.length}`);
 
@@ -70,7 +53,7 @@ function simulateVisit(url) {
       const result = await simulateVisit(url);
       results.push(result);
       console.log(result.status === 'success' ? `✅ ${url}` : `❌ ${url} - ${result.message || ''}`);
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 500)); // petite pause
     }
 
     const successful = results.filter(r => r.status === 'success').length;
