@@ -7,23 +7,21 @@ on:
 
 jobs:
   simulate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Récupérer le code
         uses: actions/checkout@v4
 
-      - name: Installer yt-dlp et curl
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y curl python3 python3-pip
-          pip3 install yt-dlp
-          sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
-          sudo chmod a+rx /usr/local/bin/yt-dlp
+      - name: Installer Chromium
+        run: sudo apt-get update && sudo apt-get install -y chromium-browser
 
-      - name: Exécuter la simulation de vues
-        run: |
-          # Télécharger le fichier stream.csv depuis le dépôt (il est déjà checkout)
-          cp stream.csv /tmp/stream.csv
-          chmod +x simulate-views.sh
-          ./simulate-views.sh
-        shell: bash
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer puppeteer-core
+        run: npm install puppeteer-core
+
+      - name: Exécuter le script
+        run: node simulate-views.js
