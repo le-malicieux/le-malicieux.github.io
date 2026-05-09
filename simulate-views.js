@@ -28,14 +28,15 @@ function extractURLs(csvText) {
   console.log('Lancement du navigateur...');
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/google-chrome-stable',
+    headless: 'new',
     args: [
       '--no-sandbox',
       '--disable-gpu',
       '--disable-setuid-sandbox',
       '--autoplay-policy=no-user-gesture-required',
-      '--disable-blink-features=AutomationControlled'
+      '--disable-blink-features=AutomationControlled',
+      '--window-size=1920,1080'
     ],
-    headless: 'new',
     ignoreDefaultArgs: ['--enable-automation']
   });
 
@@ -48,8 +49,21 @@ function extractURLs(csvText) {
 
     for (const url of urls) {
       const page = await browser.newPage();
+      await page.setViewport({ width: 1920, height: 1080 });
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36');
       await page.setExtraHTTPHeaders({ 'Accept-Language': 'fr,fr-FR;q=0.9,en;q=0.8' });
+
+      // Activer l'interception réseau pour voir TOUTES les requêtes (y compris iframe)
+      const cdpSession = await page.target().createCDPSession();
+      await cdpSession.send('Network.enable');
+      let videoDataLoaded = false;
+      cdpSession.on('Network.responseReceived', (params) => {
+        const url = params.response.url;
+        if (url.includes('.ts') || url.includes('.mp4') || url.includes('.m3u8') || url.includes('video')) {
+          videoDataLoaded = true;
+          console.log(`   📡 Donnée vidéo détectée : ${url.substring(0, 80)}...`);
+        }
+      });
 
       try {
         console.log(`\n⏳ ${url}`);
@@ -60,57 +74,34 @@ function extractURLs(csvText) {
           console.log('   ℹ️ Pas de <video> ou <iframe> trouvé.');
         });
 
-        // Essayer de cliquer sur le bouton Play
-        const playButtonClicked = await page.evaluate(() => {
-          const selectors = [
-            'button[aria-label="Play"]',
-            'button[title="Play"]',
-            '.play-button',
-            '.vjs-big-play-button',
-            '[class*="play"]',
-            'video'
-          ];
-          for (const sel of selectors) {
-            const el = document.querySelector(sel);
-            if (el) {
-              el.click();
-              return true;
-            }
-          }
-          return false;
-        });
+        // Attendre 3 secondes de stabilisation
+        await new Promise(r => setTimeout(r, 3000));
 
-        if (playButtonClicked) {
-          console.log('   ▶️ Clic sur le bouton Play effectué.');
-        } else {
-          console.log('   ⚠️ Aucun bouton Play trouvé, clic au centre de la page.');
-          await page.mouse.click(400, 300);
-        }
+        // Cliquer au centre de l'écran (bouton Play typique)
+        console.log('   ▶️ Clic au centre de l\'écran (960, 540)...');
+        await page.mouse.click(960, 540);
 
-        // Surveiller le trafic réseau pour détecter des données vidéo
-        let videoDataLoaded = false;
-        page.on('response', (response) => {
-          const url = response.url();
-          if (url.includes('.ts') || url.includes('.mp4') || url.includes('.m3u8') || url.includes('video')) {
-            videoDataLoaded = true;
-          }
-        });
+        // Puis appuyer sur Espace (raccourci universel pour Play/Pause)
+        await new Promise(r => setTimeout(r, 1500));
+        await page.keyboard.press('Space');
+        console.log('   ⌨️ Touche Espace pressée.');
 
-        console.log('   ⏳ Attente de 25 secondes pour lecture...');
-        await new Promise(r => setTimeout(r, 25000)); // CORRECTION ICI
+        // Attendre 45 secondes pour que la vue soit comptabilisée
+        console.log('   ⏳ Attente de 45 secondes pour lecture...');
+        await new Promise(r => setTimeout(r, 45000));
 
         if (videoDataLoaded) {
-          console.log('   ✅ Données vidéo chargées, vue probablement comptée.');
+          console.log('   ✅ Données vidéo chargées, vue comptée.');
         } else {
           console.log('   ⚠️ Aucune donnée vidéo détectée.');
         }
-
         successCount++;
       } catch (err) {
         console.log(`   ❌ Erreur : ${err.message}`);
       } finally {
+        await cdpSession.detach();
         await page.close();
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 2000)); // pause
       }
     }
 
