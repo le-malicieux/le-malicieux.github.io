@@ -32,11 +32,11 @@ function extractURLs(csvText) {
       '--no-sandbox',
       '--disable-gpu',
       '--disable-setuid-sandbox',
-      '--autoplay-policy=no-user-gesture-required', // autorise la lecture sans geste
-      '--disable-blink-features=AutomationControlled' // masque l'automatisation
+      '--autoplay-policy=no-user-gesture-required',
+      '--disable-blink-features=AutomationControlled'
     ],
     headless: 'new',
-    ignoreDefaultArgs: ['--enable-automation'] // supprime la bannière "Chrome is being controlled"
+    ignoreDefaultArgs: ['--enable-automation']
   });
 
   try {
@@ -48,7 +48,6 @@ function extractURLs(csvText) {
 
     for (const url of urls) {
       const page = await browser.newPage();
-      // User-agent réaliste
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36');
       await page.setExtraHTTPHeaders({ 'Accept-Language': 'fr,fr-FR;q=0.9,en;q=0.8' });
 
@@ -56,12 +55,12 @@ function extractURLs(csvText) {
         console.log(`\n⏳ ${url}`);
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
-        // Attendre que le player apparaisse (peut être un <video> ou un <iframe>)
+        // Attendre que le player apparaisse
         await page.waitForSelector('video, iframe', { timeout: 15000 }).catch(() => {
-          console.log('   ℹ️ Pas de <video> ou <iframe> trouvé, on essaie un clic global.');
+          console.log('   ℹ️ Pas de <video> ou <iframe> trouvé.');
         });
 
-        // 1. Essayer de cliquer sur le bouton "Play" s'il existe
+        // Essayer de cliquer sur le bouton Play
         const playButtonClicked = await page.evaluate(() => {
           const selectors = [
             'button[aria-label="Play"]',
@@ -88,7 +87,7 @@ function extractURLs(csvText) {
           await page.mouse.click(400, 300);
         }
 
-        // 2. Surveiller le trafic réseau pour détecter le chargement d'un segment vidéo
+        // Surveiller le trafic réseau pour détecter des données vidéo
         let videoDataLoaded = false;
         page.on('response', (response) => {
           const url = response.url();
@@ -97,14 +96,13 @@ function extractURLs(csvText) {
           }
         });
 
-        // Attendre max 25 secondes que la vidéo démarre vraiment
         console.log('   ⏳ Attente de 25 secondes pour lecture...');
-        await page.waitForTimeout(25000);
+        await new Promise(r => setTimeout(r, 25000)); // CORRECTION ICI
 
         if (videoDataLoaded) {
           console.log('   ✅ Données vidéo chargées, vue probablement comptée.');
         } else {
-          console.log('   ⚠️ Aucune donnée vidéo détectée, la vue risque de ne pas compter.');
+          console.log('   ⚠️ Aucune donnée vidéo détectée.');
         }
 
         successCount++;
@@ -112,7 +110,7 @@ function extractURLs(csvText) {
         console.log(`   ❌ Erreur : ${err.message}`);
       } finally {
         await page.close();
-        await new Promise(r => setTimeout(r, 2000)); // pause entre chaque vidéo
+        await new Promise(r => setTimeout(r, 2000));
       }
     }
 
