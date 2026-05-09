@@ -28,12 +28,11 @@ function extractURLs(csvText) {
   console.log('Lancement du navigateur...');
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/google-chrome-stable',
-    args: ['--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox', '--autoplay-policy=no-user-gesture-required'],
+    args: ['--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'],
     headless: 'new'
   });
 
   try {
-    console.log('Lecture du fichier stream.csv...');
     const csvText = await fetchCSV(STREAM_CSV_URL);
     const urls = extractURLs(csvText);
     console.log(`${urls.length} URLs à visiter.`);
@@ -42,35 +41,27 @@ function extractURLs(csvText) {
     for (const url of urls) {
       const page = await browser.newPage();
       try {
-        console.log(`⏳ Ouverture : ${url}`);
-        // Aller à l'URL
+        console.log(`⏳ ${url}`);
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
-        // Attendre que le player soit chargé (le plus souvent un <video>)
-        await page.waitForSelector('video, iframe', { timeout: 15000 }).catch(() => console.log('  ℹ️ Aucun <video> ou <iframe> trouvé.'));
+        // 1. Attendre un peu que la page soit complètement chargée
+        await new Promise(r => setTimeout(r, 3000));
 
-        // Forcer la lecture de la vidéo (peu importe l'interface)
-        await page.evaluate(() => {
-          // Essayer de jouer tous les éléments <video>
-          document.querySelectorAll('video').forEach(v => {
-            v.muted = true;       // important pour l'autoplay
-            v.play().catch(() => {});
-          });
-          // Si c'est un iframe, on ne peut pas toujours accéder à l'intérieur,
-          // mais on laisse le temps de chargement quand même.
-        });
+        // 2. Essayer de cliquer au centre de la page pour lancer la vidéo
+        //    (c’est l’endroit le plus probable pour le bouton "Play")
+        await page.mouse.click(400, 300); // clic vers le centre
 
-        // Laisser le temps au compteur de vues de s'incrémenter (15 sec)
-        console.log('  ⏳ Attente 15 secondes pour comptabilisation...');
-        await new Promise(r => setTimeout(r, 15000));
+        // 3. Laisser du temps pour que la lecture démarre et soit comptabilisée
+        console.log('   ⏳ Pause 20 secondes pour comptabilisation...');
+        await new Promise(r => setTimeout(r, 20000));
 
-        console.log(`  ✅ Vue simulée : ${url}`);
+        console.log(`   ✅ Terminé : ${url}`);
         successCount++;
       } catch (err) {
-        console.error(`❌ Erreur sur ${url} : ${err.message}`);
+        console.log(`   ❌ Erreur : ${err.message}`);
       } finally {
         await page.close();
-        await new Promise(r => setTimeout(r, 2000)); // pause entre les vidéos
+        await new Promise(r => setTimeout(r, 2000));
       }
     }
     console.log(`Fini : ${successCount}/${urls.length} OK`);
