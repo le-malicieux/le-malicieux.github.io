@@ -106,11 +106,14 @@
         .seekstreaming-section { margin-top: 20px; background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; }
         .seekstreaming-section h3 { font-size: 1.1em; margin: 0 0 15px; color: var(--text); }
         .seek-episode-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-        .seek-ep-btn { background: #222; border: 1px solid #444; color: #ccc; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.82em; transition: all 0.2s; }
-        .seek-ep-btn:hover { border-color: var(--primary); color: white; }
-        .seek-ep-btn.active { background: var(--primary); border-color: var(--primary); color: white; font-weight: bold; }
-        .seek-player-wrap { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 10px; overflow: hidden; background: #000; border: 1px solid #333; }
+        .seek-ep-btn { background: #222; border: 2px solid #444; color: #ccc; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.95em; font-weight: 600; transition: all 0.2s; letter-spacing: 0.02em; }
+        .seek-ep-btn:hover { border-color: var(--primary); color: white; background: rgba(255,71,87,0.12); transform: translateY(-1px); }
+        .seek-ep-btn.active { background: var(--primary); border-color: var(--primary); color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(255,71,87,0.4); transform: translateY(-1px); }
+        .seek-player-wrap { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 10px; overflow: hidden; background: #000; border: 1px solid #333; margin-top: 12px; }
         .seek-player-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+        .seek-toggle-btn { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--primary), #c0392b); color: white; border: none; padding: 10px 22px; border-radius: 8px; font-size: 0.92em; font-weight: bold; cursor: pointer; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(255,71,87,0.35); transition: all 0.2s; }
+        .seek-toggle-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(255,71,87,0.5); }
+        .seek-toggle-btn.open { background: linear-gradient(135deg, #444, #222); box-shadow: none; }
         @media (max-width: 800px) {
             .top-info { flex-direction: column; gap: 15px; }
             .poster { width: 100%; max-width: 200px; margin: 0 auto; }
@@ -157,6 +160,7 @@
         <div id="seekstreaming-section" class="seekstreaming-section" style="display:none;">
             <h3>🎬 Regarder en streaming</h3>
             <div class="seek-episode-list" id="seek-episode-list"></div>
+            <button class="seek-toggle-btn" id="seek-toggle-btn" style="display:none;" onclick="toggleSeekPlayer()">▶ Ouvrir le lecteur</button>
             <div class="seek-player-wrap" id="seek-player-wrap" style="display:none;">
                 <iframe id="seek-iframe" allowfullscreen allow="autoplay; fullscreen"></iframe>
             </div>
@@ -301,9 +305,16 @@
                             <div id="infov-area"></div></div>
                         </div>
                     </div>`;
-                const dlLabels=['⬇️ Terabox','⬇️ Mega','⬇️ Lien 3','⬇️ Lien 4'];
-                anime.dl.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('dl-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link" style="flex:1;">${dlLabels[i]||'⬇️ Lien '+(i+1)}</a>`);
-                anime.stream.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('stream-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link">Lien ${i+1} ↗</a>`);
+                function getDomainLabel(url, prefix) {
+                    try {
+                        const hostname = new URL(url).hostname.replace('www.', '');
+                        return `${prefix} ${hostname}`;
+                    } catch(e) {
+                        return `${prefix} Lien`;
+                    }
+                }
+                anime.dl.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('dl-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link" style="flex:1;">${getDomainLabel(l,'⬇️')}</a>`);
+                anime.stream.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('stream-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link">${getDomainLabel(l,'▶')} ↗</a>`);
                 if(anime.infoV && anime.infoV.trim()){
                     const infovArea=document.getElementById('infov-area');
                     if(infovArea){
@@ -439,16 +450,23 @@
                     btn.addEventListener('click', () => {
                         document.querySelectorAll('.seek-ep-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
-                        iframe.src = row.watch;
-                        wrap.style.display = '';
-                        wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Met à jour le src de l'iframe sans ouvrir ni scroller
+                        document.getElementById('seek-iframe').src = row.watch;
+                        // Si le lecteur est déjà ouvert, on ne fait rien de plus
+                        // Si fermé, on met juste à jour le lien en attente
                     });
                     list.appendChild(btn);
                 });
 
-                // Auto-load first episode
-                if (matched.length === 1) {
-                    list.querySelector('.seek-ep-btn').click();
+                // Afficher le bouton toggle une fois les épisodes chargés
+                if (matched.length > 0) {
+                    document.getElementById('seek-toggle-btn').style.display = '';
+                }
+
+                // Sélectionner le premier épisode par défaut (sans ouvrir le lecteur)
+                if (matched.length >= 1) {
+                    list.querySelector('.seek-ep-btn').classList.add('active');
+                    document.getElementById('seek-iframe').src = matched[0].watch;
                 }
 
             } catch (e) {
@@ -457,6 +475,22 @@
         }
         loadSeekstreaming();
         // ──────────────────────────────────────────────────────────────────
+
+        function toggleSeekPlayer(){
+            const wrap = document.getElementById('seek-player-wrap');
+            const btn = document.getElementById('seek-toggle-btn');
+            const isOpen = wrap.style.display !== 'none';
+            if (isOpen) {
+                wrap.style.display = 'none';
+                btn.textContent = '▶ Ouvrir le lecteur';
+                btn.classList.remove('open');
+            } else {
+                wrap.style.display = '';
+                btn.textContent = '✕ Fermer le lecteur';
+                btn.classList.add('open');
+            }
+        }
+        window.toggleSeekPlayer = toggleSeekPlayer;
 
         function toggleM(){ const menu=document.getElementById('menu'), overlay=document.getElementById('overlay'); const isOpen=menu.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }
         window.toggleM=toggleM;
