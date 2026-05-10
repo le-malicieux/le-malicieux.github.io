@@ -433,7 +433,9 @@
                         };
                     }
                     // Sinon cherche "NN (vostfr|vf|sub|vo)" — le nombre juste avant le tag langue
-                    const mE = raw.match(/^(.*?)\s+(\d+)\s*(vostfr|vf|sub|vo)/i);
+                    // Regex greedy (.*) : capture le plus long titre possible, donc prend
+                    // le DERNIER nombre avant vostfr/vf/… (et non le premier chiffre du titre)
+                    const mE = raw.match(/^(.*)\s+(\d+)\s*(vostfr|vf|sub|vo)/i);
                     if (mE) {
                         return {
                             animeTitle: cleanBaseTitle(mE[1].trim()),
