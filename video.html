@@ -413,12 +413,21 @@
                 //  Règle : le numéro d'épisode est TOUJOURS le nombre juste avant vostfr/vf/sub/vo.
                 //  S'il y a un "sN", tout ce qui précède est le titre de l'anime.
                 //  S'il n'y a pas de "sN", tout ce qui précède le numéro d'épisode est le titre.
+                //
+                //  Nettoyage du titre de base :
+                //    • "Titre/Autre Nom" → on garde uniquement "Titre" (avant le /)
+                //    • "Titre 1-2"       → on supprime le "1-2" final (saisons regroupées)
+                const cleanBaseTitle = t => t
+                    .split('/')[0]                          // prendre avant le "/"
+                    .replace(/\s+\d+-\d+\s*$/, '')         // supprimer "1-2" en fin
+                    .trim();
+
                 const parseTitle = raw => {
                     // Cherche d'abord "sN NN (vostfr|vf|sub|vo)"
                     const mS = raw.match(/^(.*?)\s+s(\d+)\s+(\d+)\s*(vostfr|vf|sub|vo)?/i);
                     if (mS) {
                         return {
-                            animeTitle: mS[1].trim(),
+                            animeTitle: cleanBaseTitle(mS[1].trim()),
                             season: parseInt(mS[2], 10),
                             ep: parseInt(mS[3], 10)
                         };
@@ -427,20 +436,21 @@
                     const mE = raw.match(/^(.*?)\s+(\d+)\s*(vostfr|vf|sub|vo)/i);
                     if (mE) {
                         return {
-                            animeTitle: mE[1].trim(),
+                            animeTitle: cleanBaseTitle(mE[1].trim()),
                             season: 1,
                             ep: parseInt(mE[2], 10)
                         };
                     }
                     // Fallback : pas d'épisode détectable
-                    return { animeTitle: raw.trim(), season: 1, ep: null };
+                    return { animeTitle: cleanBaseTitle(raw.trim()), season: 1, ep: null };
                 };
 
                 // Enrichir chaque row
                 rows.forEach(r => Object.assign(r, parseTitle(r.title)));
 
                 // ── Correspondance exacte normalisée entre animeName (URL) et animeTitle (CSV)
-                const normAnime = norm(animeName);
+                // animeName peut aussi contenir un "/" ou un "1-2", on applique le même nettoyage
+                const normAnime = norm(cleanBaseTitle(animeName));
                 const matched = rows.filter(r => norm(r.animeTitle) === normAnime);
 
                 if (matched.length === 0) return;
