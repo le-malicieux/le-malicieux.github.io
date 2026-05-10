@@ -396,14 +396,10 @@
 
                 // Parse CSV rows
                 const rows = lines.map(line => {
-                    // Handle simple comma-separated (title,poster,resolution,watch)
                     const parts = line.split(',');
                     if (parts.length < 4) return null;
-                    // title may not contain commas, watch URL is last meaningful chunk
-                    // Rebuild: last element is watch, second-to-last is resolution, then poster, rest is title
                     const watch = parts[parts.length - 1].trim();
                     const resolution = parts[parts.length - 2].trim();
-                    // Poster URL may contain commas if it has query params — join the middle
                     const title = parts[0].trim();
                     const poster = parts.slice(1, parts.length - 2).join(',').trim();
                     return { title, poster, resolution, watch };
@@ -418,56 +414,97 @@
 
                 if (matched.length === 0) return;
 
-                // Extract episode number from title
-                const getEp = title => {
-                    const m = title.match(/[-\s](\d{2})\s+(vostfr|vf|sub|vo)/i)
-                                || title.match(/[-\s](\d{2})[^a-z]/i)
-                                || title.match(/\s(\d{2})\s/);
-                    return m ? parseInt(m[1], 10) : null;
+                // ── Extraction saison + épisode depuis le schéma "Titre s1 01" ──
+                // Priorité : pattern "sN NN" → sinon fallback ancienne méthode
+                const getSeasonEp = title => {
+                    // Schéma principal : "s1 01" ou "s2 03" etc. (insensible à la casse)
+                    const m1 = title.match(/\bs(\d+)\s+(\d+)\b/i);
+                    if (m1) return { season: parseInt(m1[1], 10), ep: parseInt(m1[2], 10) };
+                    // Fallback : ancien schéma sans saison explicite
+                    const m2 = title.match(/[-\s](\d{2})\s*(vostfr|vf|sub|vo)?$/i)
+                             || title.match(/[-\s](\d{2})\b/i)
+                             || title.match(/\s(\d{2})\s/);
+                    if (m2) return { season: 1, ep: parseInt(m2[1], 10) };
+                    return { season: 1, ep: null };
                 };
 
-                // Sort by episode number
-                matched.sort((a, b) => {
-                    const ea = getEp(a.title), eb = getEp(b.title);
-                    return (ea ?? 999) - (eb ?? 999);
-                });
+                // Enrichir chaque row avec saison/ep
+                matched.forEach(r => Object.assign(r, getSeasonEp(r.title)));
+
+                // Trier : saison croissante, puis épisode croissant
+                matched.sort((a, b) => (a.season - b.season) || ((a.ep ?? 999) - (b.ep ?? 999)));
+
+                // Détecter si plusieurs saisons
+                const seasons = [...new Set(matched.map(r => r.season))].sort((a,b) => a-b);
+                const multiSeason = seasons.length > 1;
 
                 // Build UI
                 const section = document.getElementById('seekstreaming-section');
                 const list = document.getElementById('seek-episode-list');
                 const wrap = document.getElementById('seek-player-wrap');
                 const iframe = document.getElementById('seek-iframe');
+                const toggleBtn = document.getElementById('seek-toggle-btn');
 
                 section.style.display = '';
+                list.innerHTML = '';
 
-                matched.forEach((row, idx) => {
-                    const ep = getEp(row.title);
-                    const label = ep !== null ? `Épisode ${String(ep).padStart(2, '0')}` : `Épisode ${idx + 1}`;
-                    const btn = document.createElement('button');
-                    btn.className = 'seek-ep-btn';
-                    btn.textContent = label;
-                    btn.title = row.title;
-                    btn.addEventListener('click', () => {
-                        document.querySelectorAll('.seek-ep-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        // Met à jour le src de l'iframe sans ouvrir ni scroller
-                        document.getElementById('seek-iframe').src = row.watch;
-                        // Si le lecteur est déjà ouvert, on ne fait rien de plus
-                        // Si fermé, on met juste à jour le lien en attente
+                // Fonction : charger un épisode dans le lecteur (ouvrir si fermé)
+                function loadEpisode(row, btn) {
+                    document.querySelectorAll('.seek-ep-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    iframe.src = row.watch;
+                    // Ouvrir le lecteur s'il est fermé
+                    if (wrap.style.display === 'none') {
+                        wrap.style.display = '';
+                        toggleBtn.textContent = '✕ Fermer le lecteur';
+                        toggleBtn.classList.add('open');
+                    }
+                }
+
+                if (multiSeason) {
+                    // ── Affichage multi-saisons : onglets saison + boutons épisodes ──
+                    list.style.flexDirection = 'column';
+                    list.style.gap = '16px';
+
+                    seasons.forEach(s => {
+                        const seasonRows = matched.filter(r => r.season === s);
+                        // Titre de saison
+                        const seasonLabel = document.createElement('div');
+                        seasonLabel.style.cssText = 'font-size:0.8em; font-weight:bold; color:var(--primary); text-transform:uppercase; letter-spacing:0.05em; padding-bottom:4px; border-bottom:1px solid rgba(255,71,87,0.3); width:100%;';
+                        seasonLabel.textContent = `Saison ${s}`;
+                        list.appendChild(seasonLabel);
+
+                        const epGroup = document.createElement('div');
+                        epGroup.style.cssText = 'display:flex; flex-wrap:wrap; gap:8px;';
+
+                        seasonRows.forEach((row, idx) => {
+                            const label = row.ep !== null ? `Ep. ${String(row.ep).padStart(2, '0')}` : `Ep. ${idx + 1}`;
+                            const btn = document.createElement('button');
+                            btn.className = 'seek-ep-btn';
+                            btn.textContent = label;
+                            btn.title = row.title;
+                            btn.addEventListener('click', () => loadEpisode(row, btn));
+                            epGroup.appendChild(btn);
+                        });
+
+                        list.appendChild(epGroup);
                     });
-                    list.appendChild(btn);
-                });
-
-                // Afficher le bouton toggle une fois les épisodes chargés
-                if (matched.length > 0) {
-                    document.getElementById('seek-toggle-btn').style.display = '';
+                } else {
+                    // ── Affichage simple : une ligne de boutons ──
+                    list.style.flexDirection = '';
+                    matched.forEach((row, idx) => {
+                        const label = row.ep !== null ? `Épisode ${String(row.ep).padStart(2, '0')}` : `Épisode ${idx + 1}`;
+                        const btn = document.createElement('button');
+                        btn.className = 'seek-ep-btn';
+                        btn.textContent = label;
+                        btn.title = row.title;
+                        btn.addEventListener('click', () => loadEpisode(row, btn));
+                        list.appendChild(btn);
+                    });
                 }
 
-                // Sélectionner le premier épisode par défaut (sans ouvrir le lecteur)
-                if (matched.length >= 1) {
-                    list.querySelector('.seek-ep-btn').classList.add('active');
-                    document.getElementById('seek-iframe').src = matched[0].watch;
-                }
+                // Afficher le bouton toggle
+                toggleBtn.style.display = '';
 
             } catch (e) {
                 console.warn('SeekStreaming load error:', e);
