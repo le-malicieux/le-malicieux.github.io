@@ -149,10 +149,19 @@
             return allAnimes.filter(a => normalize(a.nom).includes(q));
         }
 
-        function setBackground() {
+        async function setBackground() {
             const isMobile = window.innerWidth <= 1000;
-            const n = Math.floor(Math.random() * (isMobile ? 14 : 64)) + 1;
-            document.getElementById('bg-layer').style.backgroundImage = `url('img/${isMobile ? 'mobile'+n : 'fond'+n}.webp')`;
+            const prefix = isMobile ? 'mobile' : 'fond';
+            let count = 0;
+            while (true) {
+                const ok = await new Promise(res => { const img = new Image(); img.onload = () => res(true); img.onerror = () => res(false); img.src = `img/${prefix}${count + 1}.webp`; });
+                if (!ok) break;
+                count++;
+                if (count > 200) break;
+            }
+            if (count === 0) return;
+            const n = Math.floor(Math.random() * count) + 1;
+            document.getElementById('bg-layer').style.backgroundImage = `url('img/${prefix}${n}.webp')`;
         }
 
         // Fond fixe, pas de parallax
