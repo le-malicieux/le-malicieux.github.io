@@ -147,7 +147,7 @@ const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", auth
 const app = initializeApp(firebaseConfig); const db = getFirestore(app); const auth = getAuth(app);
 let currentUser=null, selectedPlaylist=null, isPublic=false, selectedTarget=null, publicItems=[], myAnimes=[];
 
-async function setBackground(){ const isMobile=window.innerWidth<=1000; const prefix=isMobile?'mobile':'fond'; let count=0; while(true){ const ok=await new Promise(res=>{const img=new Image();img.onload=()=>res(true);img.onerror=()=>res(false);img.src=`img/${prefix}${count+1}.webp`;}); if(!ok)break; count++; if(count>200)break; } if(count===0)return; const n=Math.floor(Math.random()*count)+1; document.getElementById('bg-layer').style.backgroundImage=`url('img/${prefix}${n}.webp')`; }
+async function setBackground(){ const isMobile=window.innerWidth<=1000; try{ const res=await fetch('backgrounds.json'); const data=await res.json(); const list=isMobile?data.mobile:data.desktop; if(!list||!list.length)return; const file=list[Math.floor(Math.random()*list.length)]; document.getElementById('bg-layer').style.backgroundImage=`url('img/${file}')`; }catch(e){} }
 setBackground();
 
 function getRealImgPath(n){ if(!n) return "img/logo.jpg"; const m=n.match(/\d+/); return m?`img/anime-${m[0]}.jpg`:"img/logo.jpg"; }
