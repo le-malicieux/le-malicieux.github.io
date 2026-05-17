@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="img/logo.jpg" type="image/jpeg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="mobile.css">
     <title>Mon Profil - Le Malicieux</title>
@@ -24,6 +25,12 @@
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
+        }
+
+        /* Overlay sombre pour lisibilité */
+        body::after {
+            content: ''; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); z-index: -1; pointer-events: none;
         }
 
         body {
@@ -275,7 +282,7 @@
     <input type="file" id="avatar-file-input" accept="image/*">
 
     <script>
-        (function() {
+        (async function() {
             const isMobile = window.innerWidth <= 1000;
             try {
                 const res = await fetch('backgrounds.json');

@@ -2,10 +2,17 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="img/logo.jpg" type="image/jpeg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="stylesheet" href="mobile.css">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Visionnage - Le Malicieux</title>
+    <script>
+        (function(){
+            const p = new URLSearchParams(window.location.search).get('name');
+            if (p) document.title = p + ' - Le Malicieux';
+        })();
+    </script>
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
         #bg-layer {
