@@ -167,9 +167,26 @@
                         <option value="nom-desc">Trier : Z → A</option>
                         <option value="score">Trier : Score ↓</option>
                     </select>
+                    <button class="sort-select" id="btn-toggle-all-animes" onclick="toggleAllAnimes()" style="cursor:pointer;background:#1a1a1a;color:white;border:1px solid #444;">🎬 Tous les animes</button>
                 </div>
             </div>
             <div class="studios-grid" id="studios-grid"><div class="empty-state">Chargement…</div></div>
+
+            <!-- Vue tous les animes par studio -->
+            <div id="view-all-animes" style="display:none;">
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+                    <h2 style="margin:0;font-size:1.1em;color:var(--primary);">🎬 Tous les animes</h2>
+                    <select class="sort-select" id="all-studio-filter" style="min-width:160px;"><option value="">🏢 Tous les studios</option></select>
+                    <select class="sort-select" id="all-sort">
+                        <option value="studio">Trier : Studio</option>
+                        <option value="nom">Trier : Nom A-Z</option>
+                        <option value="score">Trier : Score ↓</option>
+                        <option value="année">Trier : Année ↓</option>
+                    </select>
+                    <span id="all-count" style="font-size:0.8em;color:#666;margin-left:auto;"></span>
+                </div>
+                <div class="producer-grid" id="all-animes-grid"></div>
+            </div>
         </div>
 
         <div id="view-producer">
@@ -196,6 +213,7 @@
                     <option value="etat">🛠️ État</option>
                 </select>
                 <select class="ctrl-select" id="prod-filter"><option value="">Tout afficher</option><option value="en cours">🟢 En cours</option><option value="terminé">✅ Terminés</option><option value="oui">🔞 Censuré</option><option value="non">✔️ Non censuré</option></select>
+                <select class="ctrl-select" id="prod-costudio-filter"><option value="">🏢 Tous les studios</option></select>
                 <span class="result-count" id="prod-count"></span>
             </div>
             <div class="producer-grid" id="producer-grid"></div>
@@ -230,13 +248,21 @@
             grid.innerHTML=studios.map(studio=>{ const animes=map[studio], slug=studio.replace(/\s+/g,'-'), avgSc=(()=>{ const sc=animes.map(x=>parseFloat(x.score.replace(',','.'))).filter(Boolean); return sc.length?(sc.reduce((s,v)=>s+v,0)/sc.length).toFixed(1):null; })(); const previews=animes.slice(0,3).map(a=>`<img src="img/${a.img}" onerror="this.src='img/logo.jpg'" title="${a.nom}">`).join(''); return `<div class="studio-card" onclick="showProducer('${studio.replace(/'/g,"\\'")}')"><div class="studio-logo-wrap"><img class="studio-logo" src="img/${slug}.jpg" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="studio-logo-fallback" style="display:none;">${studio.split(/[\s\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase()}</div></div><div class="studio-card-body"><div class="studio-name">${studio}</div><div class="studio-count"><span>${animes.length}</span> titre${animes.length>1?'s':''}${avgSc?` · ⭐ ${avgSc}`:''}</div><div class="studio-preview">${previews}</div></div></div>`; }).join('');
         }
         document.getElementById('studio-sort').onchange=()=>renderList(document.getElementById('studio-search').value);
-        function showProducer(studio){ currentStudio=studio; document.getElementById('view-list').style.display='none'; document.getElementById('view-producer').style.display='block'; document.title=studio+' - Le Malicieux'; history.pushState({studio},'',`editeurs.html?studio=${encodeURIComponent(studio)}`); const slug=studio.replace(/\s+/g,'-'); const avatarEl=document.getElementById('prod-avatar'); avatarEl.innerHTML=`<img src="img/${slug}.jpg" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<span class=\'avatar-initials\' style=\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;\'>'+studio.split(/[\\s\\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase()+'</span>'">`; document.getElementById('prod-name').textContent=studio; renderProducerGrid(); }
+        function showProducer(studio){ currentStudio=studio; document.getElementById('view-list').style.display='none'; document.getElementById('view-producer').style.display='block'; document.title=studio+' - Le Malicieux'; history.pushState({studio},'',`editeurs.html?studio=${encodeURIComponent(studio)}`); const slug=studio.replace(/\s+/g,'-'); const avatarEl=document.getElementById('prod-avatar'); avatarEl.innerHTML=`<img src="img/${slug}.jpg" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<span class=\'avatar-initials\' style=\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;\'>'+studio.split(/[\\s\\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase()+'</span>'">`; document.getElementById('prod-name').textContent=studio;
+            // Remplir le filtre co-studio
+            const map=buildStudioMap(); const allForStudio=map[studio]||[];
+            const coStudios=[...new Set(allForStudio.flatMap(a=>a.editeur.split(',').map(e=>e.trim())).filter(e=>e&&e!==studio))].sort();
+            const coSel=document.getElementById('prod-costudio-filter'); coSel.innerHTML='<option value="">🏢 Tous les studios</option>'+coStudios.map(s=>`<option value="${s}">${s}</option>`).join('');
+            renderProducerGrid();
+        }
         function renderProducerGrid(){ 
             const map=buildStudioMap(); let animes=map[currentStudio]||[]; 
-            const filterVal=document.getElementById('prod-filter').value; 
+            const filterVal=document.getElementById('prod-filter').value;
+            const coStudioVal=document.getElementById('prod-costudio-filter').value;
             if(filterVal==='oui'||filterVal==='non') animes=animes.filter(a=>a.censure.toLowerCase()===filterVal); 
             else if(filterVal==='terminé') animes=animes.filter(a=>a.etat.toLowerCase().includes('termin')||a.etat.toLowerCase().includes('fini')); 
-            else if(filterVal==='en cours') animes=animes.filter(a=>a.etat.toLowerCase().includes('cours')||a.etat.toLowerCase().includes('airing')); 
+            else if(filterVal==='en cours') animes=animes.filter(a=>a.etat.toLowerCase().includes('cours')||a.etat.toLowerCase().includes('airing'));
+            if(coStudioVal) animes=animes.filter(a=>a.editeur.split(',').map(e=>e.trim()).includes(coStudioVal));
             const sortVal=document.getElementById('prod-sort').value; 
             animes=[...animes].sort((a,b)=>{ 
                 if(sortVal==='score')return parseFloat(b.score.replace(',','.')||0)-parseFloat(a.score.replace(',','.')||0); 
@@ -254,21 +280,63 @@
             fetchStudioScoresFromMAL(allForStudio); 
             const grid=document.getElementById('producer-grid'); 
             if(animes.length===0){ grid.innerHTML='<div class="empty-state">Aucun anime pour ces critères.</div>'; return; } 
-            // Highlight helper
-            const hl=(field)=>`style="background:rgba(255,71,87,0.18);color:#ff8090;padding:0 2px;border-radius:3px;"`;
             const isHl=(field)=>sortVal===field;
             grid.innerHTML=animes.map(a=>{ 
                 const scoreNum=parseFloat(a.score.replace(',','.')); 
-                const scoreBadge=scoreNum?`<div class="score-badge">⭐ ${a.score}</div>`:''; 
-                const metaExtra=isHl('pop')?`<div class="ac-hl">📈 ${a.pop||'—'}</div>`:isHl('année')?`<div class="ac-hl">📅 ${a.sortie||'—'}</div>`:isHl('episodes')?`<div class="ac-hl">🎞️ ${a.ep||'—'}</div>`:isHl('censure')?`<div class="ac-hl">🔞 ${a.censure||'—'}</div>`:isHl('etat')?`<div class="ac-hl">🛠️ ${a.etat||'—'}</div>`:'';
-                return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card"><div class="img-wrap"><img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">${scoreBadge}</div><div class="ac-info"><div class="ac-title">${a.nom}</div><div class="ac-meta"><span${isHl('année')?' style="color:var(--primary);font-weight:bold;"':''}>📅 ${a.sortie}</span><span${isHl('episodes')?' style="color:var(--primary);font-weight:bold;"':''}>🎞️ ${a.ep}</span></div><div class="ac-meta"><span${isHl('censure')?' style="color:var(--primary);font-weight:bold;"':''}>🔞 ${a.censure}</span><span${isHl('etat')?' style="color:var(--primary);font-weight:bold;"':''}>🛠️ ${a.etat}</span></div>${isHl('score')?`<div class="ac-meta"><span style="color:var(--primary);font-weight:bold;">⭐ ${a.score||'—'}</span></div>`:''}${isHl('pop')?`<div class="ac-meta"><span style="color:var(--primary);font-weight:bold;">📈 ${a.pop||'—'}</span></div>`:''}</div></a>`; 
+                const scoreBadge=scoreNum?`<div class="score-badge">⭐ ${a.score}</div>`:'';
+                // Badge co-studio si l'anime a plusieurs éditeurs
+                const coStudios=a.editeur.split(',').map(e=>e.trim()).filter(e=>e&&e!==currentStudio);
+                const coStudioBadge=coStudios.length?`<div style="font-size:0.62em;color:#888;margin-top:2px;">🤝 ${coStudios.join(', ')}</div>`:'';
+                return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card"><div class="img-wrap"><img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">${scoreBadge}</div><div class="ac-info"><div class="ac-title">${a.nom}</div><div class="ac-meta"><span${isHl('année')?' style="color:var(--primary);font-weight:bold;"':''}>📅 ${a.sortie}</span><span${isHl('episodes')?' style="color:var(--primary);font-weight:bold;"':''}>🎞️ ${a.ep}</span></div><div class="ac-meta"><span${isHl('censure')?' style="color:var(--primary);font-weight:bold;"':''}>🔞 ${a.censure}</span><span${isHl('etat')?' style="color:var(--primary);font-weight:bold;"':''}>🛠️ ${a.etat}</span></div>${isHl('score')?`<div class="ac-meta"><span style="color:var(--primary);font-weight:bold;">⭐ ${a.score||'—'}</span></div>`:''}${isHl('pop')?`<div class="ac-meta"><span style="color:var(--primary);font-weight:bold;">📈 ${a.pop||'—'}</span></div>`:''}${coStudioBadge}</div></a>`; 
             }).join(''); 
         }
+
+        let allAnimesVisible=false;
+        function toggleAllAnimes(){
+            allAnimesVisible=!allAnimesVisible;
+            document.getElementById('studios-grid').style.display=allAnimesVisible?'none':'grid';
+            document.getElementById('view-all-animes').style.display=allAnimesVisible?'block':'none';
+            document.getElementById('btn-toggle-all-animes').textContent=allAnimesVisible?'🏢 Vue studios':'🎬 Tous les animes';
+            if(allAnimesVisible) renderAllAnimes();
+        }
+        function renderAllAnimes(){
+            const map=buildStudioMap();
+            const studios=Object.keys(map).sort();
+            // Remplir le filtre studio
+            const studioSel=document.getElementById('all-studio-filter');
+            const prev=studioSel.value;
+            studioSel.innerHTML='<option value="">🏢 Tous les studios</option>'+studios.map(s=>`<option value="${s}">${s} (${map[s].length})</option>`).join('');
+            if(prev) studioSel.value=prev;
+            const filterStudio=studioSel.value;
+            const sortVal=document.getElementById('all-sort').value;
+            let animes=allAnimes.filter(a=>a.editeur);
+            if(filterStudio) animes=animes.filter(a=>a.editeur.split(',').map(e=>e.trim()).includes(filterStudio));
+            animes=[...animes].sort((a,b)=>{
+                if(sortVal==='studio') return (a.editeur||'').localeCompare(b.editeur||'');
+                if(sortVal==='nom') return a.nom.localeCompare(b.nom);
+                if(sortVal==='score') return parseFloat(b.score.replace(',','.')||0)-parseFloat(a.score.replace(',','.')||0);
+                if(sortVal==='année') return (b.sortie||'').localeCompare(a.sortie||'');
+                return 0;
+            });
+            document.getElementById('all-count').textContent=`${animes.length} titre${animes.length>1?'s':''}`;
+            const grid=document.getElementById('all-animes-grid');
+            if(animes.length===0){ grid.innerHTML='<div class="empty-state">Aucun anime trouvé.</div>'; return; }
+            grid.innerHTML=animes.map(a=>{
+                const scoreNum=parseFloat(a.score.replace(',','.'));
+                const scoreBadge=scoreNum?`<div class="score-badge">⭐ ${a.score}</div>`:'';
+                const studios=a.editeur.split(',').map(e=>e.trim()).filter(Boolean);
+                const studioBadges=studios.map(s=>`<span onclick="event.preventDefault();showProducer('${s.replace(/'/g,"\\'")}');toggleAllAnimes();" style="cursor:pointer;background:rgba(255,71,87,0.15);color:var(--primary);border-radius:4px;padding:1px 5px;font-size:0.9em;">${s}</span>`).join(' ');
+                return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card"><div class="img-wrap"><img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">${scoreBadge}</div><div class="ac-info"><div class="ac-title">${a.nom}</div><div class="ac-meta">📅 ${a.sortie} · 🎞️ ${a.ep}</div><div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;">${studioBadges}</div></div></a>`;
+            }).join('');
+        }
+        window.toggleAllAnimes=toggleAllAnimes;
         async function fetchStudioScoresFromMAL(animes){ const scores=[]; const sample=animes.slice(0,6); for(const a of sample){ try{ await new Promise(r=>setTimeout(r,400)); const q=a.nom.split('/')[0].trim(); const resp=await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`); if(!resp.ok)continue; const json=await resp.json(); const s=json.data?.[0]?.score; if(s) scores.push(parseFloat(s)); }catch(e){} } if(scores.length===0){ document.getElementById('prod-avg').textContent='—'; document.getElementById('prod-best').textContent='—'; return; } const avg=(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2); const best=Math.max(...scores).toFixed(2); document.getElementById('prod-avg').textContent='⭐ '+avg; document.getElementById('prod-best').textContent='⭐ '+best; }
         function showList(){ currentStudio=null; renderList(document.getElementById('studio-search').value); }
         function studioRandom(){ const map=buildStudioMap(); const studios=Object.keys(map); if(studios.length) showProducer(studios[Math.floor(Math.random()*studios.length)]); }
         window.studioRandom=studioRandom;
-        document.getElementById('prod-sort').onchange=renderProducerGrid; document.getElementById('prod-filter').onchange=renderProducerGrid; init();
+        document.getElementById('prod-sort').onchange=renderProducerGrid; document.getElementById('prod-filter').onchange=renderProducerGrid; document.getElementById('prod-costudio-filter').onchange=renderProducerGrid;
+        document.getElementById('all-studio-filter').onchange=renderAllAnimes; document.getElementById('all-sort').onchange=renderAllAnimes;
+        init();
         window.addEventListener('popstate',(e)=>{ if(e.state&&e.state.studio) showProducer(e.state.studio); else{ currentStudio=null; renderList(document.getElementById('studio-search').value); document.getElementById('view-list').style.display='block'; document.getElementById('view-producer').style.display='none'; document.title='Éditeurs & Studios - Le Malicieux'; } });
         function toggleM(){ const m=document.getElementById('menu'), ov=document.getElementById('overlay'); const isOpen=m.classList.toggle('active'); ov.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }
         window.toggleM=toggleM;
