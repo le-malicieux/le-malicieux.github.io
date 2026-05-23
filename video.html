@@ -228,6 +228,24 @@
         window.randomAnime = () => { if(allAnimesForSearch.length) { const a=allAnimesForSearch[Math.floor(Math.random()*allAnimesForSearch.length)]; window.location.href='video.html?name='+encodeURIComponent(a.nom); } };
 
         function traduitStatutMAL(s){ const m={'Finished Airing':'Terminé','Currently Airing':'En cours','Not yet aired':'À venir','Airing':'En cours'}; return m[s]||s||'—'; }
+        function formatDateFR(raw){
+            if(!raw || !raw.trim()) return '—';
+            const moisEN={'Jan':'janv.','Feb':'févr.','Mar':'mars','Apr':'avr.','May':'mai','Jun':'juin','Jul':'juil.','Aug':'août','Sep':'sept.','Oct':'oct.','Nov':'nov.','Dec':'déc.'};
+            const parseDate = s => {
+                s = s.trim();
+                // Format "Apr 7, 2019"
+                const m = s.match(/^([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})$/);
+                if(m) return `${parseInt(m[2])} ${moisEN[m[1]]||m[1]} ${m[3]}`;
+                // Format "Apr 2019" (sans jour)
+                const m2 = s.match(/^([A-Za-z]{3})\s+(\d{4})$/);
+                if(m2) return `${moisEN[m2[1]]||m2[1]} ${m2[2]}`;
+                return s; // année seule ou format inconnu → inchangé
+            };
+            // Format "Apr 7, 2019 to Jun 30, 2019"
+            const rangeMatch = raw.match(/^(.+?)\s+to\s+(.+)$/i);
+            if(rangeMatch) return `${parseDate(rangeMatch[1])} au ${parseDate(rangeMatch[2])}`;
+            return parseDate(raw);
+        }
         function formatPop(n){ return (!n && n!==0)?'—':'#'+n.toLocaleString('fr-FR'); }
         function formatScore(s){ return (!s && s!==0)?'—':parseFloat(s).toFixed(2); }
 
@@ -298,7 +316,7 @@
                     <div class="anime-header">
                         <div class="top-info"><div class="poster"><img src="img/${anime.img.split('.')[0]}.jpg" onerror="this.src='img/${anime.img.split('.')[0]}.png'"></div>
                         <div class="main-details"><h1 class="anime-title">${anime.nom}</h1>
-                        <div class="stats-grid"><div class="stat-item"><small>Pop.</small><span id="stat-pop">${anime.pop}</span></div><div class="stat-item"><small>Score</small><span id="stat-score">⭐ ${anime.score}</span></div><div class="stat-item"><small>Année</small><span>${anime.year}</span></div><div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div><div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div><div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div><div class="stat-item" style="grid-column: span 2; cursor:${anime.editeur?'pointer':'default'};" ${anime.editeur?`onclick="window.location='editeurs.html?studio='+encodeURIComponent('${anime.editeur.split(',')[0].trim()}')"`:''}><small>Éditeur${anime.editeur&&anime.editeur.includes(',')?'s':''}</small><span>${anime.editeur?anime.editeur.split(',').map(e=>e.trim()).map((e,i,arr)=>arr.length>1?`<a href="editeurs.html?studio=${encodeURIComponent(e)}" style="color:var(--primary);">${e}</a>`:e).join(' / ') : '—'}</span></div></div>
+                        <div class="stats-grid"><div class="stat-item"><small>Pop.</small><span id="stat-pop">${anime.pop}</span></div><div class="stat-item"><small>Score</small><span id="stat-score">⭐ ${anime.score}</span></div><div class="stat-item"><small>Sortie</small><span>${formatDateFR(anime.year)}</span></div><div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div><div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div><div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div><div class="stat-item" style="grid-column: span 2; cursor:${anime.editeur?'pointer':'default'};" ${anime.editeur?`onclick="window.location='editeurs.html?studio='+encodeURIComponent('${anime.editeur.split(',')[0].trim()}')"`:''}><small>Éditeur${anime.editeur&&anime.editeur.includes(',')?'s':''}</small><span>${anime.editeur?anime.editeur.split(',').map(e=>e.trim()).map((e,i,arr)=>arr.length>1?`<a href="editeurs.html?studio=${encodeURIComponent(e)}" style="color:var(--primary);">${e}</a>`:e).join(' / ') : '—'}</span></div></div>
                         <div id="mal-badge"><span class="mal-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span>Chargement MAL…</span></div>
                         <p style="font-size:0.85em; color:#ccc; line-height:1.5;">${anime.desc}</p></div></div>
                         <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:${relatedSection?'10px':'15px'};">${tagsHtml}</div>
