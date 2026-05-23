@@ -267,7 +267,7 @@
             animes=[...animes].sort((a,b)=>{ 
                 if(sortVal==='score')return parseFloat(b.score.replace(',','.')||0)-parseFloat(a.score.replace(',','.')||0); 
                 if(sortVal==='pop')return (parseInt(a.pop.replace('#',''))||99999)-(parseInt(b.pop.replace('#',''))||99999); 
-                if(sortVal==='année')return (b.sortie||'').localeCompare(a.sortie||''); 
+                if(sortVal==='année')return (parseInt((b.sortie||'').match(/\d{4}/g)?.pop()||0))-(parseInt((a.sortie||'').match(/\d{4}/g)?.pop()||0));
                 if(sortVal==='nom')return a.nom.localeCompare(b.nom); 
                 if(sortVal==='episodes'){ const na=parseInt((a.ep||'').match(/\d+/g)?.pop()||0), nb=parseInt((b.ep||'').match(/\d+/g)?.pop()||0); return nb-na; }
                 if(sortVal==='censure')return (a.censure||'').localeCompare(b.censure||'');
@@ -287,7 +287,7 @@
                 const coStudios=a.editeur.split(',').map(e=>e.trim()).filter(e=>e&&e!==currentStudio);
                 const coStudioBadge=coStudios.length?`<div style="font-size:0.62em;color:#888;margin-top:2px;">🤝 ${coStudios.join(', ')}</div>`:'';
                 const hl=(f)=>isHl(f)?'color:var(--primary);font-weight:bold;':'';
-                const line1=`<span style="${hl('année')}">📅 ${a.sortie}</span> · <span style="${hl('episodes')}">🎞️ ${a.ep}</span> · <span style="${hl('censure')}">🔞 ${a.censure}</span> · <span style="${hl('etat')}">${a.etat}</span>`;
+                const line1=`<span style="${hl('année')}">📅 ${(a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie}</span> · <span style="${hl('episodes')}">🎞️ ${a.ep}</span> · <span style="${hl('censure')}">🔞 ${a.censure}</span> · <span style="${hl('etat')}">${a.etat}</span>`;
                 const line2parts=[];
                 if(a.pop) line2parts.push(`<span style="${hl('pop')}">📈 ${a.pop}</span>`);
                 if(isHl('score')&&a.score) line2parts.push(`<span style="${hl('score')}">⭐ ${a.score}</span>`);
@@ -319,7 +319,7 @@
                 if(sortVal==='studio') return (a.editeur||'').localeCompare(b.editeur||'');
                 if(sortVal==='nom') return a.nom.localeCompare(b.nom);
                 if(sortVal==='score') return parseFloat(b.score.replace(',','.')||0)-parseFloat(a.score.replace(',','.')||0);
-                if(sortVal==='année') return (b.sortie||'').localeCompare(a.sortie||'');
+                if(sortVal==='année') return (parseInt((b.sortie||'').match(/\d{4}/g)?.pop()||0))-(parseInt((a.sortie||'').match(/\d{4}/g)?.pop()||0));
                 return 0;
             });
             document.getElementById('all-count').textContent=`${animes.length} titre${animes.length>1?'s':''}`;
@@ -330,7 +330,7 @@
                 const scoreBadge=scoreNum?`<div class="score-badge">⭐ ${a.score}</div>`:'';
                 const studios=a.editeur.split(',').map(e=>e.trim()).filter(Boolean);
                 const studioBadges=studios.map(s=>`<span onclick="event.preventDefault();showProducer('${s.replace(/'/g,"\\'")}');toggleAllAnimes();" style="cursor:pointer;background:rgba(255,71,87,0.15);color:var(--primary);border-radius:4px;padding:1px 5px;font-size:0.9em;">${s}</span>`).join(' ');
-                return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card"><div class="img-wrap"><img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">${scoreBadge}</div><div class="ac-info"><div class="ac-title">${a.nom}</div><div class="ac-meta" style="line-height:1.6;">📅 ${a.sortie} · 🎞️ ${a.ep} · 🔞 ${a.censure} · ${a.etat}</div><div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;">${studioBadges}</div></div></a>`;
+                return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card"><div class="img-wrap"><img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">${scoreBadge}</div><div class="ac-info"><div class="ac-title">${a.nom}</div><div class="ac-meta" style="line-height:1.6;">📅 ${(a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie} · 🎞️ ${a.ep} · 🔞 ${a.censure} · ${a.etat}</div><div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;">${studioBadges}</div></div></a>`;
             }).join('');
         }
         window.toggleAllAnimes=toggleAllAnimes;

@@ -294,8 +294,8 @@
                 sorted.sort((a,b) => (parseInt((a.pop||'').replace('#',''))||99999) - (parseInt((b.pop||'').replace('#',''))||99999));
             } else if (sortMode === 'sortie') {
                 sorted.sort((a,b) => {
-                    const ya = parseInt((a.sortie||'').match(/\d{4}/)?.[0]||'0');
-                    const yb = parseInt((b.sortie||'').match(/\d{4}/)?.[0]||'0');
+                    const ya = parseInt((a.sortie||'').match(/\d{4}/g)?.pop()||'0');
+                    const yb = parseInt((b.sortie||'').match(/\d{4}/g)?.pop()||'0');
                     return yb - ya;
                 });
             } else if (sortMode === 'episodes') {
@@ -375,7 +375,7 @@
                             <div class="card-info">
                                 <div class="card-title">${a.nom}</div>
                                 <div class="card-meta-row">
-                                    <span ${hl('sortie')}>📅${a.sortie}</span>
+                                    <span ${hl('sortie')}>📅${(a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie}</span>
                                     <span ${hl('score')}>⭐${a.score}</span>
                                     <span ${hl('popularite')}>📈${a.pop}</span>
                                 </div>

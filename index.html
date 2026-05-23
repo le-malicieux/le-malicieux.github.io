@@ -420,7 +420,7 @@
                 <div class="img-container"><img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')"></div>
                 <div class="card-info">
                     <div class="card-title">${titleHtml}</div>
-                    <div class="card-meta-row"><span>📅${a.sortie}</span><span class="mal-score">⭐${a.score}</span><span class="mal-pop">📈${a.pop}</span></div>
+                    <div class="card-meta-row"><span>📅${(a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie}</span><span class="mal-score">⭐${a.score}</span><span class="mal-pop">📈${a.pop}</span></div>
                     <div class="card-meta-row"><span>🎞️${a.ep}</span><span>🔞${a.censure}</span><span>🛠️${a.etat}</span></div>
                     ${a.editeur ? `<div class="card-meta-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🏢${a.editeur}</span></div>` : ''}
                 </div>

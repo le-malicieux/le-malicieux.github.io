@@ -241,7 +241,7 @@
             let list = [...currentFiltered];
             if(sortVal==='score') list.sort((a,b)=>parseFloat((b.score||'0').replace(',','.'))-parseFloat((a.score||'0').replace(',','.')));
             else if(sortVal==='popularite') list.sort((a,b)=>(parseInt((a.pop||'').replace('#',''))||99999)-(parseInt((b.pop||'').replace('#',''))||99999));
-            else if(sortVal==='sortie') list.sort((a,b)=>{ const ya=parseInt((a.sortie||'').match(/\d{4}/)?.[0]||0); const yb=parseInt((b.sortie||'').match(/\d{4}/)?.[0]||0); return yb-ya; });
+            else if(sortVal==='sortie') list.sort((a,b)=>{ const ya=parseInt((a.sortie||'').match(/\d{4}/g)?.pop()||0); const yb=parseInt((b.sortie||'').match(/\d{4}/g)?.pop()||0); return yb-ya; });
             else if(sortVal==='episodes') list.sort((a,b)=>{ const ea=parseInt((a.ep||'').match(/\d+/g)?.pop()||0); const eb=parseInt((b.ep||'').match(/\d+/g)?.pop()||0); return eb-ea; });
             else if(sortVal==='nom') list.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
             else if(sortVal==='censure') list.sort((a,b)=>(a.censure||'').localeCompare(b.censure||''));
@@ -257,7 +257,7 @@
                     <div class="img-container"><img src="img/${a.img}" onerror="this.src='img/logo.jpg'"></div>
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
-                        <div class="card-meta-row"><span ${hl('sortie')}>📅${a.sortie}</span><span ${hl('score')}>⭐${a.score}</span><span ${hl('popularite')}>📈${a.pop}</span></div>
+                        <div class="card-meta-row"><span ${hl('sortie')}>📅${(a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie}</span><span ${hl('score')}>⭐${a.score}</span><span ${hl('popularite')}>📈${a.pop}</span></div>
                         <div class="card-meta-row"><span ${hl('episodes')}>🎞️${a.ep}</span><span ${hl('censure')}>🔞${a.censure}</span><span ${hl('etat')}>🛠️${a.etat}</span></div>
                         ${a.editeur?`<div class="card-meta-row"><span ${hl('editeur')}>🏢${a.editeur}</span></div>`:''}
                     </div>
