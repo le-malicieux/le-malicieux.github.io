@@ -336,6 +336,7 @@
                             <div class="ep-row"><span>Vu :</span><select id="user-ep">${epOptions}</select><span>/ ${maxEp}</span></div>
                             <div class="star-rating" id="stars">${Array.from({length:10},(_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
                             <div id="added-at-label" style="font-size:0.65em; color:#666; margin-top:4px; text-align:center;"></div>
+                            <div id="completed-at-label" style="font-size:0.65em; color:#2e86de; margin-top:2px; text-align:center; display:none;"></div>
                             <button class="btn-delete" id="delete-btn">Retirer de ma liste</button></div>
                             <div class="link-box"><div class="link-title">📥 Téléchargement</div><div id="dl-area" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
                             <div class="link-title">🎬 Visionnage</div><div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px;"></div>
@@ -406,11 +407,14 @@
                             if(!ts) return '';
                             const d = ts.toDate ? ts.toDate() : new Date(ts);
                             const moisFR=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-                            return `Ajouté le ${d.getDate()} ${moisFR[d.getMonth()]} ${d.getFullYear()} à ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`;
+                            return `${d.getDate()} ${moisFR[d.getMonth()]} ${d.getFullYear()} à ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`;
                         }
                         function refreshAddedAt(data){
                             const el=document.getElementById('added-at-label');
-                            if(el && data && data.addedAt) el.textContent=formatAddedAt(data.addedAt);
+                            if(el && data && data.addedAt) el.textContent=`➕ Ajouté le ${formatAddedAt(data.addedAt)}`;
+                            const cel=document.getElementById('completed-at-label');
+                            if(cel && data && data.completedAt){ cel.textContent=`✅ Terminé le ${formatAddedAt(data.completedAt)}`; cel.style.display='block'; }
+                            else if(cel){ cel.style.display='none'; }
                         }
                         if(snap.exists()) refreshAddedAt(snap.data());
                         const autoSave=async()=>{
