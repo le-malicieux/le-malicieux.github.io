@@ -168,13 +168,14 @@
         let currentUser=null, userAnimes=[], csvDataMap={}, searchQuery='';
         function normalize(s){ return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[-_.:;,!?()'"&~#|]/g,' ').replace(/\s+/g,' ').trim(); }
         function getRealImgPath(n){ if(!n) return "img/logo.jpg"; const m=n.match(/\d+/); return m?`img/anime-${m[0]}.jpg`:"img/logo.jpg"; }
+        window.handleImgErr=function(img,n){ if(!img.dataset.step){ img.dataset.step="1"; const m=n.match(/\d+/); img.src=m?`img/anime-${m[0]}.png`:"img/logo.jpg"; } else img.onerror=null; };
         function formatAddedAt(ts){
             if(!ts) return '';
             const moisFR=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-            const d = ts.toDate ? ts.toDate() : (ts.seconds ? new Date(ts.seconds*1000) : new Date(ts));
+            const d=ts.toDate?ts.toDate():(ts.seconds?new Date(ts.seconds*1000):new Date(ts));
             return `${d.getDate()} ${moisFR[d.getMonth()]} ${d.getFullYear()} à ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`;
         }
-        window.handleImgErr=function(img,n){ if(!img.dataset.step){ img.dataset.step="1"; const m=n.match(/\d+/); img.src=m?`img/anime-${m[0]}.png`:"img/logo.jpg"; } else img.onerror=null; };, savedDisplay=localStorage.getItem('playlistDisplayMode')||'grid';
+        let currentStatus=localStorage.getItem('playlistTab')||'watching', savedDisplay=localStorage.getItem('playlistDisplayMode')||'grid';
         document.getElementById('display-mode').value=savedDisplay;
         const savePos=()=>sessionStorage.setItem('playlistScrollPos',window.scrollY); window.addEventListener('beforeunload',savePos);
         function restoreScroll(){ const p=sessionStorage.getItem('playlistScrollPos'); if(p){ window.scrollTo(0,parseInt(p)); sessionStorage.removeItem('playlistScrollPos'); } }
@@ -226,8 +227,7 @@
             if(mode==="grid"){
                 grid.style.display="grid"; table.classList.remove('active'); listBody.innerHTML='';
                 grid.innerHTML=filtered.map(a=>{ let hlLine=''; if(sortVal==='score_mal') hlLine=`<div style="font-size:0.7em;color:var(--primary);">⭐ ${a.score||'N/A'}</div>`; else if(sortVal==='popularite') hlLine=`<div style="font-size:0.7em;color:var(--primary);">📈 ${a.pop||'N/A'}</div>`; else if(sortVal==='sortie') hlLine=`<div style="font-size:0.7em;color:var(--primary);">📅 ${a.sortie||'?'}</div>`; else if(sortVal==='episodes') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🎞️ ${a.epMax||'?'}</div>`; else if(sortVal==='editeur') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🏢 ${a.editeur||'—'}</div>`;
-                    const dateStr = formatAddedAt(a.addedAt);
-                    return `<div class="card"><button class="delete-btn-overlay" onclick="removeAnime(event,'${a.id}')">🗑️</button><a href="video.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;"><img src="${getRealImgPath(a.img)}" onerror="handleImgErr(this,'${a.img}')"><div class="card-info"><div class="card-title">${a.anime}</div><div style="font-size:0.75em; color:#ccc;">⭐ ${a.rating}/10 • Ep: ${a.epSeen}</div>${hlLine}${dateStr?`<div style="font-size:0.62em;color:#555;margin-top:3px;">📅 ${dateStr}</div>`:''}</div></a></div>`;
+                    return `<div class="card"><button class="delete-btn-overlay" onclick="removeAnime(event,'${a.id}')">🗑️</button><a href="video.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;"><img src="${getRealImgPath(a.img)}" onerror="handleImgErr(this,'${a.img}')"><div class="card-info"><div class="card-title">${a.anime}</div><div style="font-size:0.75em; color:#ccc;">⭐ ${a.rating}/10 • Ep: ${a.epSeen}</div>${hlLine}${formatAddedAt(a.addedAt)?`<div style="font-size:0.62em;color:#555;margin-top:3px;">📅 ${formatAddedAt(a.addedAt)}</div>`:''}</div></a></div>`;
                 }).join('');
             }else{
                 grid.style.display="none"; grid.innerHTML=''; table.classList.add('active');
