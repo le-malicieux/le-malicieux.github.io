@@ -248,6 +248,14 @@
         }
         function formatPop(n){ return (!n && n!==0)?'—':'#'+n.toLocaleString('fr-FR'); }
         function formatScore(s){ return (!s && s!==0)?'—':parseFloat(s).toFixed(2); }
+        function formatAiredJikan(aired){
+            const moisFR=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+            const parseISO = s => { if(!s) return null; const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m) return null; return `${parseInt(m[3])} ${moisFR[parseInt(m[2])-1]} ${m[1]}`; };
+            if(!aired) return null;
+            const from=parseISO(aired.from), to=parseISO(aired.to);
+            if(from && to) return `${from} au ${to}`;
+            return from||null;
+        }
 
         async function fetchMALData(nom,malId){
             try{
@@ -257,7 +265,7 @@
                     const json=await resp.json();
                     if(!json.data) return null;
                     const item=json.data;
-                    return { score:item.score, popularity:item.popularity, status:item.status, malUrl:item.url };
+                    return { score:item.score, popularity:item.popularity, status:item.status, malUrl:item.url, aired:item.aired };
                 }else{
                     const q=nom.split('/')[0].trim();
                     const resp=await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`);
@@ -265,16 +273,17 @@
                     const json=await resp.json();
                     if(!json.data || json.data.length===0) return null;
                     const item=json.data[0];
-                    return { score:item.score, popularity:item.popularity, status:item.status, malUrl:item.url };
+                    return { score:item.score, popularity:item.popularity, status:item.status, malUrl:item.url, aired:item.aired };
                 }
             }catch(e){ return null; }
         }
-        function applyMALStats(malData){
+        function applyMALStats(malData, updateDate=true){
             if(!malData) return;
-            const popEl=document.getElementById('stat-pop'), scoreEl=document.getElementById('stat-score'), etatEl=document.getElementById('stat-etat'), malBadge=document.getElementById('mal-badge');
+            const popEl=document.getElementById('stat-pop'), scoreEl=document.getElementById('stat-score'), etatEl=document.getElementById('stat-etat'), sortieEl=document.getElementById('stat-sortie'), malBadge=document.getElementById('mal-badge');
             if(popEl && malData.popularity!=null){ popEl.textContent=formatPop(malData.popularity); popEl.closest('.stat-item').classList.add('mal-live'); }
             if(scoreEl && malData.score!=null){ scoreEl.textContent='⭐ '+formatScore(malData.score); scoreEl.closest('.stat-item').classList.add('mal-live'); }
             if(etatEl && malData.status){ etatEl.textContent=traduitStatutMAL(malData.status); etatEl.closest('.stat-item').classList.add('mal-live'); }
+            if(updateDate && sortieEl && malData.aired){ const d=formatAiredJikan(malData.aired); if(d){ sortieEl.textContent=d; sortieEl.closest('.stat-item').classList.add('mal-live'); } }
             if(malBadge && malData.malUrl) malBadge.innerHTML=`<a href="${malData.malUrl}" target="_blank" class="mal-link">🔗 Voir sur MyAnimeList</a>`;
         }
 
@@ -316,7 +325,7 @@
                     <div class="anime-header">
                         <div class="top-info"><div class="poster"><img src="img/${anime.img.split('.')[0]}.jpg" onerror="this.src='img/${anime.img.split('.')[0]}.png'"></div>
                         <div class="main-details"><h1 class="anime-title">${anime.nom}</h1>
-                        <div class="stats-grid"><div class="stat-item"><small>Pop.</small><span id="stat-pop">${anime.pop}</span></div><div class="stat-item"><small>Score</small><span id="stat-score">⭐ ${anime.score}</span></div><div class="stat-item"><small>Sortie</small><span>${formatDateFR(anime.year)}</span></div><div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div><div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div><div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div><div class="stat-item" style="grid-column: span 2; cursor:${anime.editeur?'pointer':'default'};" ${anime.editeur?`onclick="window.location='editeurs.html?studio='+encodeURIComponent('${anime.editeur.split(',')[0].trim()}')"`:''}><small>Éditeur${anime.editeur&&anime.editeur.includes(',')?'s':''}</small><span>${anime.editeur?anime.editeur.split(',').map(e=>e.trim()).map((e,i,arr)=>arr.length>1?`<a href="editeurs.html?studio=${encodeURIComponent(e)}" style="color:var(--primary);">${e}</a>`:e).join(' / ') : '—'}</span></div></div>
+                        <div class="stats-grid"><div class="stat-item"><small>Pop.</small><span id="stat-pop">${anime.pop}</span></div><div class="stat-item"><small>Score</small><span id="stat-score">⭐ ${anime.score}</span></div><div class="stat-item"><small>Sortie</small><span id="stat-sortie">${formatDateFR(anime.year)}</span></div><div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div><div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div><div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div><div class="stat-item" style="grid-column: span 2; cursor:${anime.editeur?'pointer':'default'};" ${anime.editeur?`onclick="window.location='editeurs.html?studio='+encodeURIComponent('${anime.editeur.split(',')[0].trim()}')"`:''}><small>Éditeur${anime.editeur&&anime.editeur.includes(',')?'s':''}</small><span>${anime.editeur?anime.editeur.split(',').map(e=>e.trim()).map((e,i,arr)=>arr.length>1?`<a href="editeurs.html?studio=${encodeURIComponent(e)}" style="color:var(--primary);">${e}</a>`:e).join(' / ') : '—'}</span></div></div>
                         <div id="mal-badge"><span class="mal-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span>Chargement MAL…</span></div>
                         <p style="font-size:0.85em; color:#ccc; line-height:1.5;">${anime.desc}</p></div></div>
                         <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:${relatedSection?'10px':'15px'};">${tagsHtml}</div>
@@ -351,7 +360,13 @@
                         infovArea.appendChild(t); infovArea.appendChild(b);
                     }
                 }
-                fetchMALData(anime.nom,anime.malId).then(md=>{ applyMALStats(md); if(!md){ const badge=document.getElementById('mal-badge'); if(badge) badge.innerHTML='<span style="font-size:0.7em;color:#555;">Données MAL indisponibles</span>'; } });
+                const yearIsOnlyYear = /^\d{4}$/.test(anime.year.trim());
+                if(yearIsOnlyYear){
+                    fetchMALData(anime.nom,anime.malId).then(md=>{ applyMALStats(md); if(!md){ const badge=document.getElementById('mal-badge'); if(badge) badge.innerHTML='<span style="font-size:0.7em;color:#555;">Données MAL indisponibles</span>'; } });
+                } else {
+                    // Date complète dans le CSV → traduction directe, pas de Jikan pour la date
+                    fetchMALData(anime.nom,anime.malId).then(md=>{ applyMALStats(md,false); if(!md){ const badge=document.getElementById('mal-badge'); if(badge) badge.innerHTML='<span style="font-size:0.7em;color:#555;">Données MAL indisponibles</span>'; } });
+                }
                 const _ref=document.referrer, _bl=document.getElementById('back-link');
                 if(_ref.includes('playlist.html')) _bl.innerText='← Retour à la playlist';
                 else if(_ref.includes('tags.html')) _bl.innerText='← Retour aux tags';
