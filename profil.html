@@ -421,6 +421,13 @@
             return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
         }
 
+        function formatAddedAt(ts) {
+            if (!ts) return '';
+            const moisFR = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+            const d = ts.toDate ? ts.toDate() : (ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts));
+            return `${d.getDate()} ${moisFR[d.getMonth()]} ${d.getFullYear()} à ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`;
+        }
+
         document.getElementById('btn-login-page').onclick = () => signInWithPopup(auth, provider);
 
         onAuthStateChanged(auth, async (user) => {
@@ -575,7 +582,7 @@
         function renderRecentAnimes(animes) {
             const sorted = [...animes].filter(a => a.addedAt).sort((a, b) => (b.addedAt?.seconds || 0) - (a.addedAt?.seconds || 0)).slice(0, 12);
             if (sorted.length === 0) { document.getElementById('recent-grid').innerHTML = `<div style="color:#555;">Aucun anime ajouté.</div>`; return; }
-            document.getElementById('recent-grid').innerHTML = sorted.map(a => `<a href="video.html?name=${encodeURIComponent(a.anime)}" class="recent-card"><img src="${getRealImgPath(a.img)}" onerror="this.src='img/logo.jpg'"><div class="rc-title">${a.anime}</div></a>`).join('');
+            document.getElementById('recent-grid').innerHTML = sorted.map(a => `<a href="video.html?name=${encodeURIComponent(a.anime)}" class="recent-card"><img src="${getRealImgPath(a.img)}" onerror="this.src='img/logo.jpg'"><div class="rc-title">${a.anime}</div>${a.addedAt?`<div style="font-size:0.62em;color:#555;margin-top:2px;">📅 ${formatAddedAt(a.addedAt)}</div>`:''}</a>`).join('');
         }
 
         function renderScoreDist(animes) {
