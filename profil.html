@@ -271,7 +271,7 @@
     </nav>
 
     <div id="root">
-        <div class="not-logged">
+        <div class="not-logged" id="not-logged-block">
             <h2>Connexion requise</h2>
             <p>Connecte-toi pour accéder à ton profil.</p>
             <button class="btn-login" id="btn-login-page">Se connecter avec Google</button>
@@ -430,10 +430,80 @@
 
         document.getElementById('btn-login-page').onclick = () => signInWithPopup(auth, provider);
 
+        // Detect public profile view
+        const urlParams = new URLSearchParams(window.location.search);
+        const publicUid = urlParams.get('uid');
+        if (publicUid) document.getElementById('not-logged-block').style.display = 'none';
+        const publicUid = urlParams.get('uid');
+
         onAuthStateChanged(auth, async (user) => {
-            if (!user) return;
-            await buildProfile(user);
+            if (publicUid) {
+                // Public profile — accessible even without login
+                await buildPublicProfile(publicUid, user);
+            } else if (user) {
+                await buildProfile(user);
+            }
+            // else: stays on login wall
         });
+
+        async function buildPublicProfile(uid, currentUser) {
+            const userRef = doc(db, "users", uid);
+            const userSnap = await getDoc(userRef);
+            if (!userSnap.exists()) {
+                document.getElementById('root').innerHTML = `<div class="not-logged"><h2>Profil introuvable</h2><p>Cet utilisateur n'existe pas.</p></div>`;
+                return;
+            }
+            const userData = userSnap.data();
+            const pseudo = userData.pseudo || userData.displayName || 'Utilisateur';
+            const avatarUrl = userData.photoURL || 'img/logo.jpg';
+            const createdAt = userData.createdAt || null;
+
+            // Render read-only shell
+            document.getElementById('root').innerHTML = `
+                <div class="profile-layout">
+                    <div class="sidebar">
+                        <div class="avatar-card">
+                            <div class="avatar-wrapper">
+                                <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='img/logo.jpg'">
+                            </div>
+                            <div class="profile-username">${pseudo}</div>
+                            <div class="profile-meta">Membre depuis<br><span>${formatDate(createdAt)}</span></div>
+                            ${currentUser && currentUser.uid !== uid ? `<a href="share.html" style="display:inline-block;margin-top:10px;background:var(--primary);color:white;border-radius:6px;padding:6px 14px;font-size:0.8em;text-decoration:none;">🔗 Partager une playlist</a>` : ''}
+                        </div>
+                        <div class="stats-card"><h3>📊 Statistiques</h3><div id="stat-rows"><div class="stat-row"><span class="label">Chargement…</span></div></div><div class="status-bars" id="status-bars"></div></div>
+                        <div class="stats-card"><h3>⭐ Score moyen</h3><div class="score-avg-display"><div class="score-avg-number" id="avg-score">—</div><div class="score-stars" id="avg-stars"></div><div class="score-avg-label" id="avg-label">Aucune note pour l'instant</div></div></div>
+                    </div>
+                    <div class="main-content">
+                        <div class="section"><h2>🕐 Activité récente</h2><div id="activity-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
+                        <div class="section"><h2>🎬 Derniers animes ajoutés</h2><div id="recent-grid" class="recent-grid"></div></div>
+                        <div class="section"><h2>📈 Distribution des scores</h2><div class="score-dist" id="score-dist"></div><div style="display:flex; gap:4px; margin-top:24px;">${Array.from({length:10},(_,i)=>`<div style="flex:1; text-align:center; font-size:0.65em; color:#555;">${i+1}</div>`).join('')}</div></div>
+                    </div>
+                </div>`;
+
+            document.title = `${pseudo} - Le Malicieux`;
+
+            // Load public animes (own playlist only, exclude shared imports)
+            const snap = await new Promise(resolve => {
+                onSnapshot(query(collection(db, "playlists"), where("uid", "==", uid)), resolve);
+            });
+            // Get shared playlist names to exclude
+            const sharedSnap = await new Promise(resolve => {
+                onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", uid), where("shared", "==", true)), resolve);
+            });
+            const sharedNames = new Set();
+            sharedSnap.forEach(d => sharedNames.add(d.data().name));
+
+            const animes = [];
+            snap.forEach(d => {
+                const a = { id: d.id, ...d.data() };
+                if (!sharedNames.has(a.playlistTarget)) animes.push(a);
+            });
+
+            renderStats(animes);
+            renderActivity(animes);
+            renderRecentAnimes(animes);
+            renderScoreDist(animes);
+        }
 
         async function buildProfile(user) {
             const userRef = doc(db, "users", user.uid);
@@ -454,9 +524,19 @@
 
             renderProfileShell(user, pseudo, avatarUrl, createdAt, userData.displayName || user.displayName);
 
-            onSnapshot(query(collection(db, "playlists"), where("uid", "==", user.uid)), (snap) => {
+            onSnapshot(query(collection(db, "playlists"), where("uid", "==", user.uid)), async (snap) => {
+                // Exclude animes imported from shared playlists
+                const sharedSnap = await new Promise(resolve => {
+                    onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", user.uid), where("shared", "==", true)), resolve);
+                });
+                const sharedNames = new Set();
+                sharedSnap.forEach(d => sharedNames.add(d.data().name));
+
                 const animes = [];
-                snap.forEach(d => animes.push({ id: d.id, ...d.data() }));
+                snap.forEach(d => {
+                    const a = { id: d.id, ...d.data() };
+                    if (!sharedNames.has(a.playlistTarget)) animes.push(a);
+                });
                 renderStats(animes);
                 renderActivity(animes);
                 renderRecentAnimes(animes);
