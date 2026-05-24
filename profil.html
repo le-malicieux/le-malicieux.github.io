@@ -209,6 +209,12 @@
         .tag-rated { background: rgba(241,196,15,0.2); color: #f1c40f; }
         .tag-finished { background: rgba(255,71,87,0.2); color: #ff4757; }
         .activity-time { font-size: 0.7em; color: #555; flex-shrink: 0; }
+
+        .comment-item { padding: 10px 0; border-bottom: 1px solid #1f1f1f; }
+        .comment-anime-link { font-size: 0.8em; font-weight: bold; color: white; text-decoration: none; }
+        .comment-anime-link:hover { color: var(--primary); }
+        .comment-text { font-size: 0.85em; color: #ccc; margin: 4px 0 0; }
+        .comment-time { font-size: 0.7em; color: #555; margin-top: 3px; }
         
         .recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
         .recent-card { text-decoration: none; color: inherit; }
@@ -531,6 +537,7 @@
             renderActivity(animes);
             renderRecentAnimes(animes);
             renderScoreDist(animes);
+            renderComments(uid);
             await loadCommunity(currentUser);
         }
 
@@ -569,6 +576,7 @@
                 renderActivity(animes);
                 renderRecentAnimes(animes);
                 renderScoreDist(animes);
+                renderComments(user.uid);
             });
 
             // Edit controls
@@ -652,9 +660,27 @@
                     <div class="main-content">
                         <div class="section"><h2>🕐 Activité récente</h2><div id="activity-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
                         <div class="section"><h2>🎬 Derniers animes ajoutés</h2><div id="recent-grid" class="recent-grid"></div></div>
+                        <div class="section"><h2>💬 Commentaires</h2><div id="comments-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
                         <div class="section"><h2>📈 Distribution des scores</h2><div class="score-dist" id="score-dist"></div><div style="display:flex; gap:4px; margin-top:24px;">${Array.from({length:10},(_,i)=>`<div style="flex:1; text-align:center; font-size:0.65em; color:#555;">${i+1}</div>`).join('')}</div></div>
                     </div>
                 </div>`;
+        }
+
+        async function renderComments(uid) {
+            const el = document.getElementById('comments-feed');
+            if (!el) return;
+            try {
+                const snap = await getDocs(query(collection(db, "commentaires"), where("uid", "==", uid), orderBy("date", "desc")));
+                if (snap.empty) { el.innerHTML = `<div style="color:#555; font-size:0.85em;">Aucun commentaire.</div>`; return; }
+                el.innerHTML = snap.docs.map(d => {
+                    const c = d.data();
+                    return `<div class="comment-item">
+                        <a href="video.html?name=${encodeURIComponent(c.anime)}" class="comment-anime-link">🎬 ${c.anime}</a>
+                        <div class="comment-text">${c.text}</div>
+                        <div class="comment-time">${timeAgo(c.date)}</div>
+                    </div>`;
+                }).join('');
+            } catch(e) { el.innerHTML = `<div style="color:#555; font-size:0.85em;">Impossible de charger les commentaires.</div>`; }
         }
 
         function renderStats(animes) {
