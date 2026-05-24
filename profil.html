@@ -224,6 +224,23 @@
         .not-logged { text-align: center; padding: 80px 20px; color: #666; }
         .not-logged h2 { color: var(--primary); margin-bottom: 10px; }
         .btn-login { display: inline-block; margin-top: 20px; background: var(--primary); color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; }
+
+        /* Onglets */
+        .page-tabs { display: flex; gap: 8px; padding: 16px 20px 0; max-width: 1100px; margin: 0 auto; }
+        .page-tab { background: var(--card-bg); border: 1px solid var(--border); color: #888; padding: 9px 20px; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 0.85em; font-weight: 700; border-bottom: none; transition: 0.2s; }
+        .page-tab.active { background: rgba(255,71,87,0.12); border-color: var(--primary); color: var(--primary); }
+        .page-tab:hover:not(.active) { color: white; border-color: #555; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Communauté */
+        .community-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; padding: 4px 0; }
+        .member-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px; text-align: center; text-decoration: none; color: inherit; transition: border-color 0.2s; display: block; }
+        .member-card:hover { border-color: var(--primary); }
+        .member-avatar { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; margin: 0 auto 10px; display: block; }
+        .member-card:hover .member-avatar { border-color: var(--primary); }
+        .member-name { font-weight: 700; font-size: 0.9em; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .member-sub { font-size: 0.7em; color: #555; margin-top: 3px; }
         
         .upload-spinner { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.6); border-radius: 50%; align-items: center; justify-content: center; font-size: 1.2em; }
         .upload-spinner.active { display: flex; }
@@ -278,6 +295,23 @@
         </div>
     </div>
 
+    <!-- Onglets (affichés une fois connecté ou en vue publique) -->
+    <div id="tabs-bar" class="page-tabs" style="display:none;">
+        <button class="page-tab active" id="tab-btn-profil" onclick="switchTab('profil')">👤 Mon Profil</button>
+        <button class="page-tab" id="tab-btn-community" onclick="switchTab('community')">🌐 Communauté Malicieuse</button>
+    </div>
+    <div id="tab-profil" class="tab-content active"></div>
+    <div id="tab-community" class="tab-content">
+        <div style="max-width:1100px; margin:0 auto; padding:20px;">
+            <div class="main-content">
+                <div class="section" style="background:var(--card-bg); border:1px solid var(--border); border-radius:14px; padding:20px;">
+                    <h2 style="font-size:0.85em; text-transform:uppercase; color:var(--primary); margin:0 0 16px;">🌐 Membres de la communauté</h2>
+                    <div id="community-grid" class="community-grid"><div style="color:#555;">Chargement…</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="toast"></div>
     <input type="file" id="avatar-file-input" accept="image/*">
 
@@ -297,7 +331,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, orderBy }
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, orderBy, getDocs }
                from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider }
                from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -430,15 +464,25 @@
 
         document.getElementById('btn-login-page').onclick = () => signInWithPopup(auth, provider);
 
-        // Detect public profile view
         const urlParams = new URLSearchParams(window.location.search);
         const publicUid = urlParams.get('uid');
-        if (publicUid) document.getElementById('not-logged-block').style.display = 'none';
-        const publicUid = urlParams.get('uid');
+
+        // switchTab function
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-btn-' + tab).classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+        };
+
+        // If public profile view, hide login wall immediately
+        if (publicUid) {
+            document.getElementById('not-logged-block').style.display = 'none';
+            // Hide "Mon Profil" tab for public view
+        }
 
         onAuthStateChanged(auth, async (user) => {
             if (publicUid) {
-                // Public profile — accessible even without login
                 await buildPublicProfile(publicUid, user);
             } else if (user) {
                 await buildProfile(user);
@@ -446,63 +490,48 @@
             // else: stays on login wall
         });
 
+        // Helper: filter out animes from imported shared playlists
+        async function getOwnAnimes(uid) {
+            const [playlistSnap, sharedCustomSnap] = await Promise.all([
+                getDocs(query(collection(db, "playlists"), where("uid", "==", uid))),
+                getDocs(query(collection(db, "playlists_custom"), where("uid", "==", uid), where("shared", "==", true)))
+            ]);
+            const sharedNames = new Set();
+            sharedCustomSnap.forEach(d => sharedNames.add(d.data().name));
+            const animes = [];
+            playlistSnap.forEach(d => {
+                const a = { id: d.id, ...d.data() };
+                if (!sharedNames.has(a.playlistTarget)) animes.push(a);
+            });
+            return animes;
+        }
+
         async function buildPublicProfile(uid, currentUser) {
-            const userRef = doc(db, "users", uid);
-            const userSnap = await getDoc(userRef);
+            const userSnap = await getDoc(doc(db, "users", uid));
             if (!userSnap.exists()) {
-                document.getElementById('root').innerHTML = `<div class="not-logged"><h2>Profil introuvable</h2><p>Cet utilisateur n'existe pas.</p></div>`;
+                document.getElementById('tab-profil').innerHTML = `<div class="not-logged"><h2>Profil introuvable</h2><p>Cet utilisateur n'existe pas.</p></div>`;
+                document.getElementById('tabs-bar').style.display = 'flex';
+                document.getElementById('tab-profil').classList.add('active');
                 return;
             }
             const userData = userSnap.data();
             const pseudo = userData.pseudo || userData.displayName || 'Utilisateur';
             const avatarUrl = userData.photoURL || 'img/logo.jpg';
             const createdAt = userData.createdAt || null;
-
-            // Render read-only shell
-            document.getElementById('root').innerHTML = `
-                <div class="profile-layout">
-                    <div class="sidebar">
-                        <div class="avatar-card">
-                            <div class="avatar-wrapper">
-                                <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='img/logo.jpg'">
-                            </div>
-                            <div class="profile-username">${pseudo}</div>
-                            <div class="profile-meta">Membre depuis<br><span>${formatDate(createdAt)}</span></div>
-                            ${currentUser && currentUser.uid !== uid ? `<a href="share.html" style="display:inline-block;margin-top:10px;background:var(--primary);color:white;border-radius:6px;padding:6px 14px;font-size:0.8em;text-decoration:none;">🔗 Partager une playlist</a>` : ''}
-                        </div>
-                        <div class="stats-card"><h3>📊 Statistiques</h3><div id="stat-rows"><div class="stat-row"><span class="label">Chargement…</span></div></div><div class="status-bars" id="status-bars"></div></div>
-                        <div class="stats-card"><h3>⭐ Score moyen</h3><div class="score-avg-display"><div class="score-avg-number" id="avg-score">—</div><div class="score-stars" id="avg-stars"></div><div class="score-avg-label" id="avg-label">Aucune note pour l'instant</div></div></div>
-                    </div>
-                    <div class="main-content">
-                        <div class="section"><h2>🕐 Activité récente</h2><div id="activity-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
-                        <div class="section"><h2>🎬 Derniers animes ajoutés</h2><div id="recent-grid" class="recent-grid"></div></div>
-                        <div class="section"><h2>📈 Distribution des scores</h2><div class="score-dist" id="score-dist"></div><div style="display:flex; gap:4px; margin-top:24px;">${Array.from({length:10},(_,i)=>`<div style="flex:1; text-align:center; font-size:0.65em; color:#555;">${i+1}</div>`).join('')}</div></div>
-                    </div>
-                </div>`;
-
             document.title = `${pseudo} - Le Malicieux`;
 
-            // Load public animes (own playlist only, exclude shared imports)
-            const snap = await new Promise(resolve => {
-                onSnapshot(query(collection(db, "playlists"), where("uid", "==", uid)), resolve);
-            });
-            // Get shared playlist names to exclude
-            const sharedSnap = await new Promise(resolve => {
-                onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", uid), where("shared", "==", true)), resolve);
-            });
-            const sharedNames = new Set();
-            sharedSnap.forEach(d => sharedNames.add(d.data().name));
+            // For public profile: hide "Mon Profil" tab label, show only the profile
+            document.getElementById('tab-btn-profil').textContent = `👤 ${pseudo}`;
 
-            const animes = [];
-            snap.forEach(d => {
-                const a = { id: d.id, ...d.data() };
-                if (!sharedNames.has(a.playlistTarget)) animes.push(a);
-            });
+            renderProfileShellInto('tab-profil', null, pseudo, avatarUrl, createdAt, null, false);
+            document.getElementById('tabs-bar').style.display = 'flex';
 
+            const animes = await getOwnAnimes(uid);
             renderStats(animes);
             renderActivity(animes);
             renderRecentAnimes(animes);
             renderScoreDist(animes);
+            await loadCommunity(currentUser);
         }
 
         async function buildProfile(user) {
@@ -522,16 +551,15 @@
             const avatarUrl = userData.photoURL || user.photoURL || 'img/logo.jpg';
             const createdAt = userData.createdAt || user.metadata?.creationTime || null;
 
-            renderProfileShell(user, pseudo, avatarUrl, createdAt, userData.displayName || user.displayName);
+            renderProfileShellInto('tab-profil', user, pseudo, avatarUrl, createdAt, userData.displayName || user.displayName, true);
+            document.getElementById('tabs-bar').style.display = 'flex';
+            document.getElementById('not-logged-block').style.display = 'none';
 
+            // Live updates — filter out shared playlists each time
             onSnapshot(query(collection(db, "playlists"), where("uid", "==", user.uid)), async (snap) => {
-                // Exclude animes imported from shared playlists
-                const sharedSnap = await new Promise(resolve => {
-                    onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", user.uid), where("shared", "==", true)), resolve);
-                });
+                const sharedCustomSnap = await getDocs(query(collection(db, "playlists_custom"), where("uid", "==", user.uid), where("shared", "==", true)));
                 const sharedNames = new Set();
-                sharedSnap.forEach(d => sharedNames.add(d.data().name));
-
+                sharedCustomSnap.forEach(d => sharedNames.add(d.data().name));
                 const animes = [];
                 snap.forEach(d => {
                     const a = { id: d.id, ...d.data() };
@@ -543,6 +571,7 @@
                 renderScoreDist(animes);
             });
 
+            // Edit controls
             document.getElementById('avatar-upload-btn').onclick = () => document.getElementById('avatar-file-input').click();
             document.getElementById('avatar-file-input').onchange = async (e) => {
                 const file = e.target.files[0];
@@ -560,7 +589,6 @@
                 } catch(err) { toast('❌ Erreur lors de l\'upload.'); }
                 finally { spinner.classList.remove('active'); }
             };
-
             document.getElementById('btn-save-pseudo').onclick = async () => {
                 const val = document.getElementById('input-pseudo').value.trim();
                 if (!val) { toast('⚠️ Le pseudo ne peut pas être vide.'); return; }
@@ -570,21 +598,52 @@
                 sessionStorage.setItem('userPseudo', val);
                 toast('✅ Pseudo mis à jour !');
             };
+
+            await loadCommunity(user);
         }
 
-        function renderProfileShell(user, pseudo, avatarUrl, createdAt, googleName) {
-            document.getElementById('root').innerHTML = `
+        async function loadCommunity(currentUser) {
+            const snap = await getDocs(collection(db, "users"));
+            const members = [];
+            snap.forEach(d => members.push({ uid: d.id, ...d.data() }));
+            // Sort by createdAt desc
+            members.sort((a, b) => {
+                const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                return tb - ta;
+            });
+            document.getElementById('community-grid').innerHTML = members.map(m => {
+                const pseudo = m.pseudo || m.displayName || 'Utilisateur';
+                const avatar = m.photoURL || 'img/logo.jpg';
+                const isMe = currentUser && m.uid === currentUser.uid;
+                return `<a href="profil.html?uid=${m.uid}" class="member-card">
+                    <img src="${avatar}" class="member-avatar" onerror="this.src='img/logo.jpg'">
+                    <div class="member-name">${pseudo}${isMe ? ' <span style="color:var(--primary);font-size:0.75em;">(moi)</span>' : ''}</div>
+                    <div class="member-sub">Membre depuis ${formatDate(m.createdAt)}</div>
+                </a>`;
+            }).join('');
+        }
+
+        function renderProfileShellInto(containerId, user, pseudo, avatarUrl, createdAt, googleName, editable) {
+            const avatarSection = editable ? `
+                <div class="avatar-wrapper">
+                    <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='img/logo.jpg'">
+                    <div id="avatar-upload-btn" class="avatar-upload-btn" title="Changer la photo">📷</div>
+                    <div id="avatar-spinner" class="upload-spinner">⏳</div>
+                </div>` : `
+                <div class="avatar-wrapper">
+                    <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='img/logo.jpg'">
+                </div>`;
+            const editSection = editable ? `
+                <div class="profile-google-name">Compte Google : ${googleName}</div>
+                <div class="edit-pseudo-row"><input id="input-pseudo" type="text" placeholder="Changer le pseudo…" maxlength="30"><button id="btn-save-pseudo">OK</button></div>` : '';
+            document.getElementById(containerId).innerHTML = `
                 <div class="profile-layout">
                     <div class="sidebar">
                         <div class="avatar-card">
-                            <div class="avatar-wrapper">
-                                <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='img/logo.jpg'">
-                                <div id="avatar-upload-btn" class="avatar-upload-btn" title="Changer la photo">📷</div>
-                                <div id="avatar-spinner" class="upload-spinner">⏳</div>
-                            </div>
+                            ${avatarSection}
                             <div class="profile-username" id="display-pseudo">${pseudo}</div>
-                            <div class="profile-google-name">Compte Google : ${googleName}</div>
-                            <div class="edit-pseudo-row"><input id="input-pseudo" type="text" placeholder="Changer le pseudo…" maxlength="30"><button id="btn-save-pseudo">OK</button></div>
+                            ${editSection}
                             <div class="profile-meta">Membre depuis<br><span>${formatDate(createdAt)}</span></div>
                         </div>
                         <div class="stats-card"><h3>📊 Statistiques</h3><div id="stat-rows"><div class="stat-row"><span class="label">Chargement…</span></div></div><div class="status-bars" id="status-bars"></div></div>
