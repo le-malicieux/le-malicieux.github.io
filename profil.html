@@ -670,17 +670,15 @@
             const el = document.getElementById('comments-feed');
             if (!el) return;
             try {
-                const snap = await getDocs(query(collection(db, "commentaires"), where("uid", "==", uid), orderBy("date", "desc")));
+                const snap = await getDocs(query(collection(db, "commentaires"), where("uid", "==", uid)));
                 if (snap.empty) { el.innerHTML = `<div style="color:#555; font-size:0.85em;">Aucun commentaire.</div>`; return; }
-                el.innerHTML = snap.docs.map(d => {
-                    const c = d.data();
-                    return `<div class="comment-item">
+                const docs = snap.docs.map(d => d.data()).sort((a,b) => (b.date?.seconds||0) - (a.date?.seconds||0));
+                el.innerHTML = docs.map(c => `<div class="comment-item">
                         <a href="video.html?name=${encodeURIComponent(c.anime)}" class="comment-anime-link">🎬 ${c.anime}</a>
                         <div class="comment-text">${c.text}</div>
                         <div class="comment-time">${timeAgo(c.date)}</div>
-                    </div>`;
-                }).join('');
-            } catch(e) { el.innerHTML = `<div style="color:#555; font-size:0.85em;">Impossible de charger les commentaires.</div>`; }
+                    </div>`).join('');
+            } catch(e) { console.error('comments error', e); el.innerHTML = `<div style="color:#555; font-size:0.85em;">Aucun commentaire.</div>`; }
         }
 
         function renderStats(animes) {
