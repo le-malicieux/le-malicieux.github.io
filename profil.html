@@ -544,11 +544,12 @@
             renderProfileShellInto('public-shell', null, pseudo, avatarUrl, createdAt, null, false);
 
             const animes = await getOwnAnimes(uid);
-            renderStats(animes);
-            renderActivity(animes);
-            renderRecentAnimes(animes);
-            renderScoreDist(animes);
-            renderComments(uid);
+            const ctx = document.getElementById('public-shell');
+            renderStats(animes, ctx);
+            renderActivity(animes, ctx);
+            renderRecentAnimes(animes, ctx);
+            renderScoreDist(animes, ctx);
+            renderComments(uid, ctx);
             await loadCommunity(currentUser);
         }
 
@@ -583,11 +584,12 @@
                     const a = { id: d.id, ...d.data() };
                     if (!sharedNames.has(a.playlistTarget)) animes.push(a);
                 });
-                renderStats(animes);
-                renderActivity(animes);
-                renderRecentAnimes(animes);
-                renderScoreDist(animes);
-                renderComments(user.uid);
+                const ctx = document.getElementById('tab-profil');
+                renderStats(animes, ctx);
+                renderActivity(animes, ctx);
+                renderRecentAnimes(animes, ctx);
+                renderScoreDist(animes, ctx);
+                renderComments(user.uid, ctx);
             });
 
             // Edit controls
@@ -671,20 +673,20 @@
                             ${editSection}
                             <div class="profile-meta">Membre depuis<br><span>${formatDate(createdAt)}</span></div>
                         </div>
-                        <div class="stats-card"><h3>📊 Statistiques</h3><div id="stat-rows"><div class="stat-row"><span class="label">Chargement…</span></div></div><div class="status-bars" id="status-bars"></div></div>
-                        <div class="stats-card"><h3>⭐ Score moyen</h3><div class="score-avg-display"><div class="score-avg-number" id="avg-score">—</div><div class="score-stars" id="avg-stars"></div><div class="score-avg-label" id="avg-label">Aucune note pour l'instant</div></div></div>
+                        <div class="stats-card"><h3>📊 Statistiques</h3><div data-id="stat-rows"><div class="stat-row"><span class="label">Chargement…</span></div></div><div class="status-bars" data-id="status-bars"></div></div>
+                        <div class="stats-card"><h3>⭐ Score moyen</h3><div class="score-avg-display"><div class="score-avg-number" data-id="avg-score">—</div><div class="score-stars" data-id="avg-stars"></div><div class="score-avg-label" data-id="avg-label">Aucune note pour l'instant</div></div></div>
                     </div>
                     <div class="main-content">
-                        <div class="section"><h2>🕐 Activité récente</h2><div id="activity-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
-                        <div class="section"><h2>🎬 Derniers animes ajoutés</h2><div id="recent-grid" class="recent-grid"></div></div>
-                        <div class="section"><h2>💬 Commentaires</h2><div id="comments-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
-                        <div class="section"><h2>📈 Distribution des scores</h2><div class="score-dist" id="score-dist"></div><div style="display:flex; gap:4px; margin-top:24px;">${Array.from({length:10},(_,i)=>`<div style="flex:1; text-align:center; font-size:0.65em; color:#555;">${i+1}</div>`).join('')}</div></div>
+                        <div class="section"><h2>🕐 Activité récente</h2><div data-id="activity-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
+                        <div class="section"><h2>🎬 Derniers animes ajoutés</h2><div data-id="recent-grid" class="recent-grid"></div></div>
+                        <div class="section"><h2>💬 Commentaires</h2><div data-id="comments-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
+                        <div class="section"><h2>📈 Distribution des scores</h2><div class="score-dist" data-id="score-dist"></div><div style="display:flex; gap:4px; margin-top:24px;">${Array.from({length:10},(_,i)=>`<div style="flex:1; text-align:center; font-size:0.65em; color:#555;">${i+1}</div>`).join('')}</div></div>
                     </div>
                 </div>`;
         }
 
-        async function renderComments(uid) {
-            const el = document.getElementById('comments-feed');
+        async function renderComments(uid, ctx) {
+            const el = ctx.querySelector('[data-id="comments-feed"]');
             if (!el) return;
             try {
                 const snap = await getDocs(query(collection(db, "commentaires"), where("uid", "==", uid)));
@@ -698,7 +700,7 @@
             } catch(e) { console.error('comments error', e); el.innerHTML = `<div style="color:#555; font-size:0.85em;">Aucun commentaire.</div>`; }
         }
 
-        function renderStats(animes) {
+        function renderStats(animes, ctx) {
             const watching = animes.filter(a => a.status === 'watching').length;
             const completed = animes.filter(a => a.status === 'completed').length;
             const waiting = animes.filter(a => a.status === 'waiting').length;
@@ -707,7 +709,7 @@
             const rated = animes.filter(a => a.rating && a.rating > 0);
             const avgScore = rated.length > 0 ? (rated.reduce((s, a) => s + a.rating, 0) / rated.length).toFixed(1) : null;
 
-            document.getElementById('stat-rows').innerHTML = `
+            ctx.querySelector('[data-id="stat-rows"]').innerHTML = `
                 <div class="stat-row"><span class="label">Total animes</span><span class="value">${total}</span></div>
                 <div class="stat-row"><span class="label" style="color:#2ecc71;">En cours</span><span class="value">${watching}</span></div>
                 <div class="stat-row"><span class="label" style="color:#2e86de;">Terminés</span><span class="value">${completed}</span></div>
@@ -716,19 +718,19 @@
                 <div class="stat-row"><span class="label">Notés</span><span class="value">${rated.length}</span></div>`;
 
             const pct = (n) => total > 0 ? Math.round((n / total) * 100) : 0;
-            document.getElementById('status-bars').innerHTML = `
+            ctx.querySelector('[data-id="status-bars"]').innerHTML = `
                 <div class="status-bar-item"><div class="bar-label"><span style="color:#2ecc71;">En cours</span><span>${watching}</span></div><div class="bar-track"><div class="bar-fill bar-watching" style="width:${pct(watching)}%"></div></div></div>
                 <div class="status-bar-item"><div class="bar-label"><span style="color:#2e86de;">Terminés</span><span>${completed}</span></div><div class="bar-track"><div class="bar-fill bar-completed" style="width:${pct(completed)}%"></div></div></div>
                 <div class="status-bar-item"><div class="bar-label"><span style="color:#f1c40f;">En attente</span><span>${waiting}</span></div><div class="bar-track"><div class="bar-fill bar-waiting" style="width:${pct(waiting)}%"></div></div></div>`;
 
             if (avgScore) {
-                document.getElementById('avg-score').textContent = avgScore + '/10';
-                document.getElementById('avg-stars').textContent = starsHtml(parseFloat(avgScore));
-                document.getElementById('avg-label').textContent = `Basé sur ${rated.length} note${rated.length > 1 ? 's' : ''}`;
+                ctx.querySelector('[data-id="avg-score"]').textContent = avgScore + '/10';
+                ctx.querySelector('[data-id="avg-stars"]').textContent = starsHtml(parseFloat(avgScore));
+                ctx.querySelector('[data-id="avg-label"]').textContent = `Basé sur ${rated.length} note${rated.length > 1 ? 's' : ''}`;
             }
         }
 
-        function renderActivity(animes) {
+        function renderActivity(animes, ctx) {
             const events = [];
             animes.forEach(a => {
                 if (a.addedAt) events.push({ type: 'added', anime: a, ts: a.addedAt });
@@ -742,14 +744,11 @@
                 return tb - ta;
             });
             const recent = events.slice(0, 15);
-            if (recent.length === 0) {
-                document.getElementById('activity-feed').innerHTML = `<div style="color:#555; text-align:center; padding:20px;">Aucune activité récente.</div>`;
-                return;
-            }
+            const feed = ctx.querySelector('[data-id="activity-feed"]');
+            if (recent.length === 0) { feed.innerHTML = `<div style="color:#555; text-align:center; padding:20px;">Aucune activité récente.</div>`; return; }
             const tagMap = { added: { cls: 'tag-added', label: 'Ajouté' }, finished: { cls: 'tag-finished', label: 'Terminé' }, rated: { cls: 'tag-rated', label: 'Noté' }, ep: { cls: 'tag-ep', label: 'Épisode vu' } };
-            document.getElementById('activity-feed').innerHTML = recent.map(ev => {
-                const a = ev.anime;
-                const tag = tagMap[ev.type];
+            feed.innerHTML = recent.map(ev => {
+                const a = ev.anime; const tag = tagMap[ev.type];
                 let detail = '';
                 if (ev.type === 'rated') detail = `Note : ⭐ ${a.rating}/10`;
                 if (ev.type === 'ep') detail = `Épisode ${a.epSeen} / ${a.epMax || '?'}`;
@@ -759,17 +758,18 @@
             }).join('');
         }
 
-        function renderRecentAnimes(animes) {
+        function renderRecentAnimes(animes, ctx) {
             const sorted = [...animes].filter(a => a.addedAt).sort((a, b) => (b.addedAt?.seconds || 0) - (a.addedAt?.seconds || 0)).slice(0, 12);
-            if (sorted.length === 0) { document.getElementById('recent-grid').innerHTML = `<div style="color:#555;">Aucun anime ajouté.</div>`; return; }
-            document.getElementById('recent-grid').innerHTML = sorted.map(a => `<a href="video.html?name=${encodeURIComponent(a.anime)}" class="recent-card"><img src="${getRealImgPath(a.img)}" onerror="this.src='img/logo.jpg'"><div class="rc-title">${a.anime}</div>${a.addedAt?`<div style="font-size:0.62em;color:#555;margin-top:2px;">📅 ${formatAddedAt(a.addedAt)}</div>`:''}</a>`).join('');
+            const grid = ctx.querySelector('[data-id="recent-grid"]');
+            if (sorted.length === 0) { grid.innerHTML = `<div style="color:#555;">Aucun anime ajouté.</div>`; return; }
+            grid.innerHTML = sorted.map(a => `<a href="video.html?name=${encodeURIComponent(a.anime)}" class="recent-card"><img src="${getRealImgPath(a.img)}" onerror="this.src='img/logo.jpg'"><div class="rc-title">${a.anime}</div>${a.addedAt?`<div style="font-size:0.62em;color:#555;margin-top:2px;">📅 ${formatAddedAt(a.addedAt)}</div>`:''}</a>`).join('');
         }
 
-        function renderScoreDist(animes) {
+        function renderScoreDist(animes, ctx) {
             const counts = Array(10).fill(0);
             animes.forEach(a => { if (a.rating >= 1 && a.rating <= 10) counts[a.rating - 1]++; });
             const maxCount = Math.max(...counts, 1);
-            document.getElementById('score-dist').innerHTML = counts.map((c, i) => `<div class="score-dist-bar" style="height:${Math.round((c / maxCount) * 100)}%" title="${c} anime${c > 1 ? 's' : ''} noté${c > 1 ? 's' : ''} ${i+1}/10">${c > 0 ? `<div class="bar-count">${c}</div>` : ''}<div class="bar-val">${i+1}</div></div>`).join('');
+            ctx.querySelector('[data-id="score-dist"]').innerHTML = counts.map((c, i) => `<div class="score-dist-bar" style="height:${Math.round((c / maxCount) * 100)}%" title="${c} anime${c > 1 ? 's' : ''} noté${c > 1 ? 's' : ''} ${i+1}/10">${c > 0 ? `<div class="bar-count">${c}</div>` : ''}<div class="bar-val">${i+1}</div></div>`).join('');
         }
         
         window.toggleM = () => {
