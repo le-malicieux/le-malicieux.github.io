@@ -314,6 +314,8 @@
                     <h2 style="font-size:0.85em; text-transform:uppercase; color:var(--primary); margin:0 0 16px;">🌐 Membres de la communauté</h2>
                     <div id="community-grid" class="community-grid"><div style="color:#555;">Chargement…</div></div>
                 </div>
+                <!-- Profil public affiché ici quand on clique sur un membre -->
+                <div id="public-profile-container" style="display:none; margin-top:20px;"></div>
             </div>
         </div>
     </div>
@@ -481,10 +483,9 @@
             document.getElementById('tab-' + tab).classList.add('active');
         };
 
-        // If public profile view, hide login wall immediately
+        // If public profile view (?uid=), open community tab and show profile there
         if (publicUid) {
             document.getElementById('not-logged-block').style.display = 'none';
-            // Hide "Mon Profil" tab for public view
         }
 
         onAuthStateChanged(auth, async (user) => {
@@ -513,11 +514,18 @@
         }
 
         async function buildPublicProfile(uid, currentUser) {
+            // Show tabs, activate community tab
+            document.getElementById('tabs-bar').style.display = 'flex';
+            switchTab('community');
+
+            const container = document.getElementById('public-profile-container');
+            container.style.display = 'block';
+            document.getElementById('community-grid').style.display = 'none';
+            container.innerHTML = `<div style="color:#555; font-size:0.85em; padding:20px;">Chargement…</div>`;
+
             const userSnap = await getDoc(doc(db, "users", uid));
             if (!userSnap.exists()) {
-                document.getElementById('tab-profil').innerHTML = `<div class="not-logged"><h2>Profil introuvable</h2><p>Cet utilisateur n'existe pas.</p></div>`;
-                document.getElementById('tabs-bar').style.display = 'flex';
-                document.getElementById('tab-profil').classList.add('active');
+                container.innerHTML = `<div class="not-logged"><h2>Profil introuvable</h2><p>Cet utilisateur n'existe pas.</p></div>`;
                 return;
             }
             const userData = userSnap.data();
@@ -526,11 +534,14 @@
             const createdAt = userData.createdAt || null;
             document.title = `${pseudo} - Le Malicieux`;
 
-            // For public profile: hide "Mon Profil" tab label, show only the profile
-            document.getElementById('tab-btn-profil').textContent = `👤 ${pseudo}`;
+            // Back button + profile shell inside community tab
+            container.innerHTML = `
+                <div style="margin-bottom:12px;">
+                    <button onclick="document.getElementById('public-profile-container').style.display='none'; document.getElementById('community-grid').style.display='grid'; history.pushState({},'','profil.html');" style="background:#222; border:1px solid #444; color:#ccc; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:0.8em;">← Retour à la communauté</button>
+                </div>
+                <div id="public-shell"></div>`;
 
-            renderProfileShellInto('tab-profil', null, pseudo, avatarUrl, createdAt, null, false);
-            document.getElementById('tabs-bar').style.display = 'flex';
+            renderProfileShellInto('public-shell', null, pseudo, avatarUrl, createdAt, null, false);
 
             const animes = await getOwnAnimes(uid);
             renderStats(animes);
@@ -614,7 +625,6 @@
             const snap = await getDocs(collection(db, "users"));
             const members = [];
             snap.forEach(d => members.push({ uid: d.id, ...d.data() }));
-            // Sort by createdAt desc
             members.sort((a, b) => {
                 const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
                 const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -624,13 +634,20 @@
                 const pseudo = m.pseudo || m.displayName || 'Utilisateur';
                 const avatar = m.photoURL || 'img/logo.jpg';
                 const isMe = currentUser && m.uid === currentUser.uid;
-                return `<a href="profil.html?uid=${m.uid}" class="member-card">
+                return `<div class="member-card" onclick="openMemberProfile('${m.uid}')" style="cursor:pointer;">
                     <img src="${avatar}" class="member-avatar" onerror="this.src='img/logo.jpg'">
                     <div class="member-name">${pseudo}${isMe ? ' <span style="color:var(--primary);font-size:0.75em;">(moi)</span>' : ''}</div>
                     <div class="member-sub">Membre depuis ${formatDate(m.createdAt)}</div>
-                </a>`;
+                </div>`;
             }).join('');
         }
+
+        window.openMemberProfile = async function(uid) {
+            // Scroll to top of community tab
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            history.pushState({}, '', `profil.html?uid=${uid}`);
+            await buildPublicProfile(uid, null);
+        };
 
         function renderProfileShellInto(containerId, user, pseudo, avatarUrl, createdAt, googleName, editable) {
             const avatarSection = editable ? `
