@@ -363,12 +363,11 @@
                     }
                 }
                 const yearIsOnlyYear = /^\d{4}$/.test(anime.year.trim());
-                if(yearIsOnlyYear){
-                    fetchMALData(anime.nom,anime.malId).then(md=>{ applyMALStats(md); if(!md){ const badge=document.getElementById('mal-badge'); if(badge) badge.innerHTML='<span style="font-size:0.7em;color:#555;">Données MAL indisponibles</span>'; } });
-                } else {
-                    // Date complète dans le CSV → traduction directe, pas de Jikan pour la date
-                    fetchMALData(anime.nom,anime.malId).then(md=>{ applyMALStats(md,false); if(!md){ const badge=document.getElementById('mal-badge'); if(badge) badge.innerHTML='<span style="font-size:0.7em;color:#555;">Données MAL indisponibles</span>'; } });
-                }
+                const lastYear = parseInt((anime.year.match(/\d{4}/g)||[]).pop()||'0');
+                const isRecent = lastYear >= new Date().getFullYear() - 5;
+                const isEnCours = (anime.etat||'').toLowerCase().includes('cours') || (anime.etat||'').toLowerCase().includes('airing');
+                const shouldRefreshDate = yearIsOnlyYear || (isEnCours && isRecent);
+                fetchMALData(anime.nom,anime.malId).then(md=>{ applyMALStats(md, shouldRefreshDate); if(!md){ const badge=document.getElementById('mal-badge'); if(badge) badge.innerHTML='<span style="font-size:0.7em;color:#555;">Données MAL indisponibles</span>'; } });
                 const _ref=document.referrer, _bl=document.getElementById('back-link');
                 if(_ref.includes('playlist.html')) _bl.innerText='← Retour à la playlist';
                 else if(_ref.includes('tags.html')) _bl.innerText='← Retour aux tags';
@@ -435,8 +434,8 @@
                         document.getElementById('delete-btn').onclick=()=>showConfirm('Supprimer cet anime de votre liste ?',()=>deleteDoc(docRef).then(()=>location.reload()));
                     }
                 });
-                onSnapshot(query(collection(db,"commentaires"),where("anime","==",animeName)),(snap)=>{ const cDisp=document.getElementById('comments-display'); let docs=[]; snap.forEach(d=>docs.push({id:d.id,...d.data()})); docs.sort((a,b)=>(b.date?.seconds||0)-(a.date?.seconds||0)); cDisp.innerHTML=docs.map(d=>{ const nameHtml=d.uid?`<a href="profil.html?uid=${d.uid}" style="color:var(--primary);font-size:0.85em;font-weight:bold;text-decoration:none;">${d.userName}</a>`:`<b style="color:var(--primary);font-size:0.85em;">${d.userName}</b>`; return `<div style="margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:6px;">${nameHtml}<p style="margin:4px 0; font-size:0.85em;">${d.text}</p></div>`; }).join(''); });
-                document.getElementById('btn-post').onclick=async()=>{ const t=document.getElementById('comment-input').value; if(t.trim() && currentUser){ await addDoc(collection(db,"commentaires"),{ anime:animeName, text:t, userName:sessionStorage.getItem("userPseudo")||currentUser.displayName, uid:currentUser.uid, date:serverTimestamp() }); document.getElementById('comment-input').value=""; } };
+                onSnapshot(query(collection(db,"commentaires"),where("anime","==",animeName)),(snap)=>{ const cDisp=document.getElementById('comments-display'); let docs=[]; snap.forEach(d=>docs.push(d.data())); docs.sort((a,b)=>(b.date?.seconds||0)-(a.date?.seconds||0)); cDisp.innerHTML=docs.map(d=>`<div style="margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:6px;"><b style="color:var(--primary); font-size:0.85em;">${d.userName}</b><p style="margin:4px 0; font-size:0.85em;">${d.text}</p></div>`).join(''); });
+                document.getElementById('btn-post').onclick=async()=>{ const t=document.getElementById('comment-input').value; if(t.trim() && currentUser){ await addDoc(collection(db,"commentaires"),{ anime:animeName, text:t, userName:sessionStorage.getItem("userPseudo")||currentUser.displayName, date:serverTimestamp() }); document.getElementById('comment-input').value=""; } };
             }catch(err){ console.error(err); }
         }
         load();
