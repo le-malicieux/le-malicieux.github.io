@@ -269,14 +269,14 @@
             return 0;
         }
 
-function renderCards(list,sortVal) {
+        function renderCards(list,sortVal) {
             const hl = (f)=>sortVal===f?'class="highlight"':'';
             document.getElementById('anime-container').innerHTML = list.map(a=>`
                 <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                     <div class="img-container"><img src="img/${a.img}" onerror="this.src='img/logo.jpg'"></div>
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
-                        <div class="card-meta-row"><span ${hl('sortie')}>📅${sortMode==='sortie'?(a.sortie||''):((a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie)}</span><span ${hl('score')}>⭐${a.score}</span><span ${hl('popularite')}>📈${a.pop}</span></div>
+                        <div class="card-meta-row"><span ${hl('sortie')}>📅${sortVal==='sortie'?(a.sortie||''):((a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie)}</span><span ${hl('score')}>⭐${a.score}</span><span ${hl('popularite')}>📈${a.pop}</span></div>
                         <div class="card-meta-row"><span ${hl('episodes')}>🎞️${a.ep}</span><span ${hl('censure')}>🔞${a.censure}</span><span ${hl('etat')}>🛠️${a.etat}</span></div>
                         ${a.editeur?`<div class="card-meta-row"><span ${hl('editeur')}>🏢${a.editeur}</span></div>`:''}
                     </div>

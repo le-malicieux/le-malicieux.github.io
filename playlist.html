@@ -249,7 +249,7 @@
                 grid.innerHTML='<div class="empty-msg">Aucun anime trouvé.</div>';
                 grid.style.display="grid"; table.classList.remove('active'); return;
             }
-            const hl=v=>sortVal===v?'style="color:var(--primary);font-weight:bold;"':'';
+            const hl=v=>sortVal===v?'class="highlight"':'';
             if(mode==="grid"){
                 grid.style.display="grid"; table.classList.remove('active'); listBody.innerHTML='';
                 grid.innerHTML=filtered.map(a=>{ let hlLine=''; if(sortVal==='score_mal') hlLine=`<div style="font-size:0.7em;color:var(--primary);">⭐ ${a.score||'N/A'}</div>`; else if(sortVal==='popularite') hlLine=`<div style="font-size:0.7em;color:var(--primary);">📈 ${a.pop||'N/A'}</div>`; else if(sortVal==='sortie') hlLine=`<div class="highlight" style="font-size:0.7em;">📅 ${a.sortie||'?'}</div>`; else if(sortVal==='episodes') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🎞️ ${a.epMax||'?'}</div>`; else if(sortVal==='editeur') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🏢 ${a.editeur||'—'}</div>`;

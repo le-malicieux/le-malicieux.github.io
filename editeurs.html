@@ -305,11 +305,12 @@ function buildStudioMap(){ const m={}; allAnimes.forEach(a=>{ a.editeur.split(',
                 const scoreBadge=scoreNum?`<div class="score-badge">⭐ ${a.score}</div>`:'';
                 const coStudios=a.editeur.split(',').map(e=>e.trim()).filter(e=>e&&e!==currentStudio);
                 const coStudioBadge=coStudios.length?`<div style="font-size:0.62em;color:#888;margin-top:2px;">🤝 ${coStudios.join(', ')}</div>`:'';
-                const hl=(f)=>isHl(f)?'color:var(--primary);font-weight:bold;':'';
-                const line1=`<span style="${hl('année')}">📅 ${sortVal==='année'?(a.sortie||''):((a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie)}</span> · <span style="${hl('episodes')}">🎞️ ${a.ep}</span> · <span style="${hl('censure')}">🔞 ${a.censure}</span> · <span style="${hl('etat')}">${a.etat}</span>`;
+                const hl=(f)=>isHl(f)?'highlight':'';
+                const sp=(f,content)=>isHl(f)?`<span class="highlight">${content}</span>`:`<span>${content}</span>`;
+                const line1=`${sp('année','📅 '+(sortVal==='année'?(a.sortie||''):((a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie)))} · ${sp('episodes','🎞️ '+a.ep)} · ${sp('censure','🔞 '+a.censure)} · ${sp('etat',a.etat)}`;
                 const line2parts=[];
-                if(a.pop) line2parts.push(`<span style="${hl('pop')}">📈 ${a.pop}</span>`);
-                if(isHl('score')&&a.score) line2parts.push(`<span style="${hl('score')}">⭐ ${a.score}</span>`);
+                if(a.pop) line2parts.push(sp('pop','📈 '+a.pop));
+                if(isHl('score')&&a.score) line2parts.push(sp('score','⭐ '+a.score));
                 return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card"><div class="img-wrap"><img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">${scoreBadge}</div><div class="ac-info"><div class="ac-title">${a.nom}</div><div class="ac-meta" style="flex-wrap:wrap;line-height:1.6;">${line1}</div>${line2parts.length?`<div class="ac-meta">${line2parts.join(' · ')}</div>`:''}${coStudioBadge}</div></a>`; 
             }).join(''); 
         }
