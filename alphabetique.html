@@ -128,7 +128,7 @@
         .card-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
         .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
-        .highlight { background: var(--primary); color: white; padding: 0 3px; border-radius: 3px; font-weight: bold; }
+        .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; font-weight: bold; }
         .alpha-nav { position: fixed; top: 50px; left: 0; right: 0; z-index: 998; display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 4px; padding: 4px 16px; background: rgba(15,15,15,0.97); backdrop-filter: blur(10px); border-bottom: 1px solid #1a1a1a; height: 36px; align-items: center; scrollbar-width: none; box-sizing: border-box; }
         .alpha-nav::-webkit-scrollbar { display: none; }
         .alpha-nav a { color: #aaa; text-decoration: none; font-weight: bold; font-size: 0.8em; padding: 2px 6px; border-radius: 4px; transition: 0.2s; border: 1px solid #2a2a2a; flex-shrink: 0; }
@@ -183,17 +183,6 @@
 
         <div class="search-bar-wrap">
             <input type="text" id="search" placeholder="Rechercher un anime...">
-            <select id="sort-select">
-                <option value="">🔀 Aléatoire</option>
-                <option value="popularite">📈 Popularité</option>
-                <option value="score">⭐ Score</option>
-                <option value="nom">📝 Nom (A-Z)</option>
-                <option value="sortie">📅 Année</option>
-                <option value="episodes">🎞️ Épisodes</option>
-                <option value="etat">🛠️ État</option>
-                <option value="censure">🔞 Censure</option>
-                <option value="editeur">🏢 Éditeur</option>
-            </select>
         </div>
 
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
@@ -335,7 +324,7 @@
         function switchDisplayMode() {
             currentDisplayMode = document.getElementById('display-mode').value;
             localStorage.setItem('alphaDisplayMode', currentDisplayMode);
-            render(document.getElementById('search').value, document.getElementById('sort-select').value);
+            render(document.getElementById('search').value, '');
         }
         window.switchDisplayMode = switchDisplayMode;
 
@@ -484,8 +473,7 @@
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
-        document.getElementById('search').oninput = (e) => render(e.target.value, document.getElementById('sort-select').value);
-        document.getElementById('sort-select').onchange = () => render(document.getElementById('search').value, document.getElementById('sort-select').value);
+        document.getElementById('search').oninput = (e) => render(e.target.value, '');
 
         function toggleM() {
             const menu = document.getElementById('menu');
