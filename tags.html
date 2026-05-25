@@ -73,7 +73,8 @@
         .sort-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
         .sort-controls select { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
         @media (max-width: 1000px) { .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } }
-    </style>
+            .highlight { background: rgba(255,71,87,0.18); color: var(--primary); padding: 0 3px; border-radius: 3px; font-weight: bold; }
+        </style>
 </head>
 <body>
     <div id="bg-layer"></div>
@@ -241,7 +242,7 @@
             let list = [...currentFiltered];
             if(sortVal==='score') list.sort((a,b)=>parseFloat((b.score||'0').replace(',','.'))-parseFloat((a.score||'0').replace(',','.')));
             else if(sortVal==='popularite') list.sort((a,b)=>(parseInt((a.pop||'').replace('#',''))||99999)-(parseInt((b.pop||'').replace('#',''))||99999));
-            else if(sortVal==='sortie') list.sort((a,b)=>{ const ya=parseInt((a.sortie||'').match(/\d{4}/g)?.pop()||0); const yb=parseInt((b.sortie||'').match(/\d{4}/g)?.pop()||0); return yb-ya; });
+            else if(sortVal==='sortie') list.sort((a,b)=>dateToTs(b.sortie)-dateToTs(a.sortie));
             else if(sortVal==='episodes') list.sort((a,b)=>{ const ea=parseInt((a.ep||'').match(/\d+/g)?.pop()||0); const eb=parseInt((b.ep||'').match(/\d+/g)?.pop()||0); return eb-ea; });
             else if(sortVal==='nom') list.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
             else if(sortVal==='censure') list.sort((a,b)=>(a.censure||'').localeCompare(b.censure||''));
@@ -250,14 +251,32 @@
             renderCards(list,sortVal);
         }
 
-        function renderCards(list,sortVal) {
+        
+        // Convertit une date (française, américaine ou année seule) en timestamp pour tri précis
+        function dateToTs(s){
+            if(!s) return 0;
+            s = s.trim();
+            const mois={'janv.':1,'févr.':2,'mars':3,'avr.':4,'mai':5,'juin':6,'juil.':7,'août':8,'sept.':9,'oct.':10,'nov.':11,'déc.':12,
+                        'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
+            const parts = s.split(' au ');
+            const last = parts[parts.length-1].trim();
+            const m1 = last.match(/(\d{1,2})\s+([a-zéûôA-Z.]+)\s+(\d{4})/);
+            if(m1){ const mo=mois[m1[2]]||1; return new Date(+m1[3], mo-1, +m1[1]).getTime(); }
+            const m2 = last.match(/([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})/);
+            if(m2){ const mo=mois[m2[1]]||1; return new Date(+m2[3], mo-1, +m2[2]).getTime(); }
+            const m3 = (last.match(/\d{4}/g)||[]);
+            if(m3.length){ return new Date(+m3[m3.length-1], 0, 1).getTime(); }
+            return 0;
+        }
+
+function renderCards(list,sortVal) {
             const hl = (f)=>sortVal===f?'class="highlight"':'';
             document.getElementById('anime-container').innerHTML = list.map(a=>`
                 <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card">
                     <div class="img-container"><img src="img/${a.img}" onerror="this.src='img/logo.jpg'"></div>
                     <div class="card-info">
                         <div class="card-title">${a.nom}</div>
-                        <div class="card-meta-row"><span ${hl('sortie')}>📅${(a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie}</span><span ${hl('score')}>⭐${a.score}</span><span ${hl('popularite')}>📈${a.pop}</span></div>
+                        <div class="card-meta-row"><span ${hl('sortie')}>📅${sortMode==='sortie'?(a.sortie||''):((a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie)}</span><span ${hl('score')}>⭐${a.score}</span><span ${hl('popularite')}>📈${a.pop}</span></div>
                         <div class="card-meta-row"><span ${hl('episodes')}>🎞️${a.ep}</span><span ${hl('censure')}>🔞${a.censure}</span><span ${hl('etat')}>🛠️${a.etat}</span></div>
                         ${a.editeur?`<div class="card-meta-row"><span ${hl('editeur')}>🏢${a.editeur}</span></div>`:''}
                     </div>

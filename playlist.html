@@ -87,7 +87,8 @@
         .modal-btn-cancel { background: #333; color: #ccc; }
         .modal-btn-confirm { background: var(--primary); color: white; }
         @media (max-width: 480px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
-    </style>
+            .highlight { background: rgba(255,71,87,0.18); color: var(--primary); padding: 0 3px; border-radius: 3px; font-weight: bold; }
+        </style>
 </head>
 <body>
     <div id="bg-layer"></div>
@@ -169,6 +170,23 @@
         function normalize(s){ return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[-_.:;,!?()'"&~#|]/g,' ').replace(/\s+/g,' ').trim(); }
         function getRealImgPath(n){ if(!n) return "img/logo.jpg"; const m=n.match(/\d+/); return m?`img/anime-${m[0]}.jpg`:"img/logo.jpg"; }
         window.handleImgErr=function(img,n){ if(!img.dataset.step){ img.dataset.step="1"; const m=n.match(/\d+/); img.src=m?`img/anime-${m[0]}.png`:"img/logo.jpg"; } else img.onerror=null; };
+        
+        function dateToTs(s){
+            if(!s) return 0;
+            s = s.trim();
+            const mois={'janv.':1,'févr.':2,'mars':3,'avr.':4,'mai':5,'juin':6,'juil.':7,'août':8,'sept.':9,'oct.':10,'nov.':11,'déc.':12,
+                        'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
+            const parts = s.split(' au ');
+            const last = parts[parts.length-1].trim();
+            const m1 = last.match(/(\d{1,2})\s+([a-zéûôA-Z.]+)\s+(\d{4})/);
+            if(m1){ const mo=mois[m1[2]]||1; return new Date(+m1[3], mo-1, +m1[1]).getTime(); }
+            const m2 = last.match(/([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})/);
+            if(m2){ const mo=mois[m2[1]]||1; return new Date(+m2[3], mo-1, +m2[2]).getTime(); }
+            const m3 = (last.match(/\d{4}/g)||[]);
+            if(m3.length){ return new Date(+m3[m3.length-1], 0, 1).getTime(); }
+            return 0;
+        }
+
         function formatAddedAt(ts){
             if(!ts) return '';
             const moisFR=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
@@ -220,7 +238,7 @@
                 if(sortVal==="date"){ const ta=a.addedAt?.seconds||0, tb=b.addedAt?.seconds||0; return tb-ta; }
                 if(sortVal==="score_mal") return parseFloat((b.score||'0').replace(',','.'))-parseFloat((a.score||'0').replace(',','.'));
                 if(sortVal==="popularite") return (parseInt((a.pop||'').replace('#',''))||99999)-(parseInt((b.pop||'').replace('#',''))||99999);
-                if(sortVal==="sortie"){ const ya=parseInt((a.sortie||'').match(/\d{4}/)?.[0]||0), yb=parseInt((b.sortie||'').match(/\d{4}/)?.[0]||0); return yb-ya; }
+                if(sortVal==="sortie") return dateToTs(b.sortie)-dateToTs(a.sortie);
                 if(sortVal==="episodes"){ const ea=parseInt((a.epMax||'').toString().match(/\d+/g)?.pop()||0), eb=parseInt((b.epMax||'').toString().match(/\d+/g)?.pop()||0); return eb-ea; }
                 if(sortVal==="note_perso") return (b.rating||0)-(a.rating||0);
                 if(sortVal==="editeur") return (a.editeur||'').localeCompare(b.editeur||'');
@@ -234,13 +252,13 @@
             const hl=v=>sortVal===v?'style="color:var(--primary);font-weight:bold;"':'';
             if(mode==="grid"){
                 grid.style.display="grid"; table.classList.remove('active'); listBody.innerHTML='';
-                grid.innerHTML=filtered.map(a=>{ let hlLine=''; if(sortVal==='score_mal') hlLine=`<div style="font-size:0.7em;color:var(--primary);">⭐ ${a.score||'N/A'}</div>`; else if(sortVal==='popularite') hlLine=`<div style="font-size:0.7em;color:var(--primary);">📈 ${a.pop||'N/A'}</div>`; else if(sortVal==='sortie') hlLine=`<div style="font-size:0.7em;color:var(--primary);">📅 ${a.sortie||'?'}</div>`; else if(sortVal==='episodes') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🎞️ ${a.epMax||'?'}</div>`; else if(sortVal==='editeur') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🏢 ${a.editeur||'—'}</div>`;
+                grid.innerHTML=filtered.map(a=>{ let hlLine=''; if(sortVal==='score_mal') hlLine=`<div style="font-size:0.7em;color:var(--primary);">⭐ ${a.score||'N/A'}</div>`; else if(sortVal==='popularite') hlLine=`<div style="font-size:0.7em;color:var(--primary);">📈 ${a.pop||'N/A'}</div>`; else if(sortVal==='sortie') hlLine=`<div class="highlight" style="font-size:0.7em;">📅 ${a.sortie||'?'}</div>`; else if(sortVal==='episodes') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🎞️ ${a.epMax||'?'}</div>`; else if(sortVal==='editeur') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🏢 ${a.editeur||'—'}</div>`;
                     const addedStr=formatAddedAt(a.addedAt), modifStr=formatAddedAt(getLastModified(a));
                     return `<div class="card"><button class="delete-btn-overlay" onclick="removeAnime(event,'${a.id}')">🗑️</button><a href="video.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;"><img src="${getRealImgPath(a.img)}" onerror="handleImgErr(this,'${a.img}')"><div class="card-info"><div class="card-title">${a.anime}</div><div style="font-size:0.75em; color:#ccc;">⭐ ${a.rating}/10 • Ep: ${a.epSeen}</div>${hlLine}${addedStr?`<div style="font-size:0.62em;color:#555;margin-top:3px;">➕ ${addedStr}</div>`:''}${modifStr?`<div style="font-size:0.62em;color:#555;margin-top:1px;">✏️ ${modifStr}</div>`:''}</div></a></div>`;
                 }).join('');
             }else{
                 grid.style.display="none"; grid.innerHTML=''; table.classList.add('active');
-                listBody.innerHTML=filtered.map((a,i)=>`<tr><td class="status-bar status-${a.status}-bg"></td><td>${i+1}</td><td><img src="${getRealImgPath(a.img)}" class="list-img" onerror="handleImgErr(this,'${a.img}')"></td><td><a href="video.html?name=${encodeURIComponent(a.anime)}" style="color:white; text-decoration:none;">${a.anime}</a></td><td>⭐ ${a.rating||0}</td><td ${hl('episodes')}>${a.epSeen}/${a.epMax||'?'}</td><td ${hl('score_mal')}>${a.score||'N/A'}</td><td ${hl('popularite')}>${a.pop||'N/A'}</td><td ${hl('sortie')}>${a.sortie||'?'}</td><td>${a.censure||''}</td><td ${hl('editeur')}>${a.editeur||'—'}</td><td style="color:#666;font-size:0.75em;white-space:nowrap;">${formatAddedAt(a.addedAt)||'—'}</td><td style="color:#666;font-size:0.75em;white-space:nowrap;">${formatAddedAt(getLastModified(a))||'—'}</td><td><button onclick="removeAnime(event,'${a.id}')" style="background:none;border:none;color:#ff4757;cursor:pointer;">🗑️</button></td></tr>`).join('');
+                listBody.innerHTML=filtered.map((a,i)=>`<tr><td class="status-bar status-${a.status}-bg"></td><td>${i+1}</td><td><img src="${getRealImgPath(a.img)}" class="list-img" onerror="handleImgErr(this,'${a.img}')"></td><td><a href="video.html?name=${encodeURIComponent(a.anime)}" style="color:white; text-decoration:none;">${a.anime}</a></td><td>⭐ ${a.rating||0}</td><td ${hl('episodes')}>${a.epSeen}/${a.epMax||'?'}</td><td ${hl('score_mal')}>${a.score||'N/A'}</td><td ${hl('popularite')}>${a.pop||'N/A'}</td><td ${hl('sortie')}>${sortVal==='sortie'?(a.sortie||'?'):((a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie||'?')}</td><td>${a.censure||''}</td><td ${hl('editeur')}>${a.editeur||'—'}</td><td style="color:#666;font-size:0.75em;white-space:nowrap;">${formatAddedAt(a.addedAt)||'—'}</td><td style="color:#666;font-size:0.75em;white-space:nowrap;">${formatAddedAt(getLastModified(a))||'—'}</td><td><button onclick="removeAnime(event,'${a.id}')" style="background:none;border:none;color:#ff4757;cursor:pointer;">🗑️</button></td></tr>`).join('');
             }
             requestAnimationFrame(restoreScroll);
         }

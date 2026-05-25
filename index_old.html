@@ -426,7 +426,7 @@
                         return numB - numA;
                     }
                     if (sortMode === "popularite") return (parseInt((a.pop||'').replace('#','')) || 99999) - (parseInt((b.pop||'').replace('#','')) || 99999);
-                    if (sortMode === "sortie") return (parseInt((b.sortie||'').match(/\d{4}/g)?.pop()||0)) - (parseInt((a.sortie||'').match(/\d{4}/g)?.pop()||0));
+                    if (sortMode === "sortie") return dateToTs(b.sortie) - dateToTs(a.sortie);
                     if (sortMode === "editeur") return (a.editeur || '').localeCompare(b.editeur || '');
                     if (sortMode === "nom") return a.nom.localeCompare(b.nom);
                     if (sortMode === "censure") return (a.censure || '').localeCompare(b.censure || '');
@@ -437,7 +437,25 @@
             displayAnimes(filtered, sortMode);
         }
 
-        function displayAnimes(list, sortMode) {
+        
+        // Convertit une date (française, américaine ou année seule) en timestamp pour tri précis
+        function dateToTs(s){
+            if(!s) return 0;
+            s = s.trim();
+            const mois={'janv.':1,'févr.':2,'mars':3,'avr.':4,'mai':5,'juin':6,'juil.':7,'août':8,'sept.':9,'oct.':10,'nov.':11,'déc.':12,
+                        'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
+            const parts = s.split(' au ');
+            const last = parts[parts.length-1].trim();
+            const m1 = last.match(/(\d{1,2})\s+([a-zéûôA-Z.]+)\s+(\d{4})/);
+            if(m1){ const mo=mois[m1[2]]||1; return new Date(+m1[3], mo-1, +m1[1]).getTime(); }
+            const m2 = last.match(/([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})/);
+            if(m2){ const mo=mois[m2[1]]||1; return new Date(+m2[3], mo-1, +m2[2]).getTime(); }
+            const m3 = (last.match(/\d{4}/g)||[]);
+            if(m3.length){ return new Date(+m3[m3.length-1], 0, 1).getTime(); }
+            return 0;
+        }
+
+function displayAnimes(list, sortMode) {
             const container = document.getElementById('anime-container');
             container.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.unobserve(c));
             const hl = (m) => (sortMode === m) ? 'class="highlight"' : '';
@@ -452,7 +470,7 @@
                     <div class="card-info">
                         <div class="card-title">${titleHtml}</div>
                         <div class="card-meta-row">
-                            <span ${hl('sortie')}>📅${(a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie}</span>
+                            <span ${hl('sortie')}>📅${sortMode==='sortie'?(a.sortie||''):((a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie)}</span>
                             <span ${hl('score')} class="mal-score">⭐${a.score}</span>
                             <span ${hl('popularite')} class="mal-pop">📈${a.pop}</span>
                         </div>
