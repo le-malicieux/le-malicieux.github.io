@@ -51,7 +51,7 @@
             .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
-            /* .grid responsive géré par auto-fill */
+/* auto-fill gère les colonnes */
         }
         .playlist-header { padding: 20px 20px 10px; text-align: center; }
         .controls-row { display: flex; justify-content: center; gap: 8px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
@@ -86,24 +86,38 @@
         .modal-btn { padding: 8px 20px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
         .modal-btn-cancel { background: #333; color: #ccc; }
         .modal-btn-confirm { background: var(--primary); color: white; }
-        /* .grid responsive géré par auto-fill */
+/* auto-fill gère les colonnes */
             .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; font-weight: bold; }
         
-        /* ── Images lisses ─────────────────────────────── */
+        /* ── Images lisses (anti-pixelisation maximale) ─── */
+        img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
+        }
         .card img, .sugg-img, .mal-row .ml-img, .list-img,
-        .anime-card img, .studio-preview img, .studio-logo {
-            image-rendering: auto;
+        .anime-card img, .studio-preview img, .studio-logo,
+        .img-container img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
             -ms-interpolation-mode: bicubic;
+            will-change: transform;
         }
         
-        /* ── Zoom page 80% par défaut ───────────────────── */
-        @media screen {
-            html { zoom: 0.8; }
+        /* ── Zoom 80% — centré ───────────────────────────── */
+        html {
+            zoom: 0.8;
+        }
+        body {
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        /* ── Grille responsive (s'adapte au zoom) ───────── */
+        /* ── Grille responsive (auto-fill, s'adapte au zoom) */
         .grid {
-            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
         }
         </style>
 </head>
@@ -284,27 +298,33 @@
     </script>
 
     <script>
-    /* ── Mémoire des tris (playlist) ─────────────────── */
+    /* ── Mémoire des tris ─────────────────────────────── */
     (function() {
-        const KEY = 'sortmem_playlist';
-        const IDS = ['sort-selector'];
+        var KEY = 'sortmem_playlist';
+        var IDS = ['sort-selector'];
         function save() {
-            const d = {};
-            IDS.forEach(id => { const el = document.getElementById(id); if (el) d[id] = el.value; });
+            var d = {};
+            IDS.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) d[id] = el.value;
+            });
             try { sessionStorage.setItem(KEY, JSON.stringify(d)); } catch(e) {}
         }
         function restore() {
             try {
-                const raw = sessionStorage.getItem(KEY);
+                var raw = sessionStorage.getItem(KEY);
                 if (!raw) return;
-                const d = JSON.parse(raw);
-                IDS.forEach(id => { const el = document.getElementById(id); if (el && d[id] !== undefined) el.value = d[id]; });
+                var d = JSON.parse(raw);
+                IDS.forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el && d[id] !== undefined) el.value = d[id];
+                });
             } catch(e) {}
         }
         document.addEventListener('DOMContentLoaded', function() {
             restore();
-            IDS.forEach(id => {
-                const el = document.getElementById(id);
+            IDS.forEach(function(id) {
+                var el = document.getElementById(id);
                 if (el) el.addEventListener('change', save);
             });
         });

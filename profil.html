@@ -260,11 +260,20 @@
             .recent-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
         }
     
-        /* ── Images lisses ─────────────────────────────── */
+        /* ── Images lisses (anti-pixelisation maximale) ─── */
+        img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
+        }
         .card img, .sugg-img, .mal-row .ml-img, .list-img,
-        .anime-card img, .studio-preview img, .studio-logo {
-            image-rendering: auto;
+        .anime-card img, .studio-preview img, .studio-logo,
+        .img-container img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
             -ms-interpolation-mode: bicubic;
+            will-change: transform;
         }
         </style>
 </head>

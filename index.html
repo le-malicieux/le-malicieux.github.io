@@ -165,7 +165,7 @@
         .carousel-wrapper {
             position: relative; max-width: 1400px; margin: 0 auto; padding: 0 40px; /* espace pour les flèches */
         }
-        .carousel-container { overflow: hidden; touch-action: pan-y; } /* desktop */
+        .carousel-container { overflow: hidden; touch-action: pan-y; }
         .carousel-track { display: flex; gap: 10px; transition: transform 0.4s ease; cursor: grab; }
         .carousel-track:active { cursor: grabbing; }
         .carousel-btn {
@@ -212,28 +212,41 @@
             .carousel-wrapper { padding: 0 5px; }
             .carousel-btn { display: none; } /* masquer les flèches sur mobile */
             .carousel-track { gap: 8px; }
-            #search-results-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+/* auto-fill gère les colonnes */
         }
         @media (max-width: 480px) {
             .card { width: 120px; }
-            #search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
         }
     
-        /* ── Images lisses ─────────────────────────────── */
+        /* ── Images lisses (anti-pixelisation maximale) ─── */
+        img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
+        }
         .card img, .sugg-img, .mal-row .ml-img, .list-img,
-        .anime-card img, .studio-preview img, .studio-logo {
-            image-rendering: auto;
+        .anime-card img, .studio-preview img, .studio-logo,
+        .img-container img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
             -ms-interpolation-mode: bicubic;
+            will-change: transform;
         }
         
-        /* ── Zoom page 80% par défaut ───────────────────── */
-        @media screen {
-            html { zoom: 0.8; }
+        /* ── Zoom 80% — centré ───────────────────────────── */
+        html {
+            zoom: 0.8;
+        }
+        body {
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        /* ── Grille responsive (s'adapte au zoom) ───────── */
+        /* ── Grille responsive search results ────────────── */
         #search-results-grid {
-            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
         }
         
         /* ── Carrousel mobile: scroll natif fluide ───────── */
@@ -243,31 +256,29 @@
                 overflow-y: hidden;
                 -webkit-overflow-scrolling: touch;
                 scroll-snap-type: x mandatory;
-                cursor: default;
+                scrollbar-width: none;
             }
             .carousel-container::-webkit-scrollbar { display: none; }
-            .carousel-container { scrollbar-width: none; }
             .carousel-track {
-                /* On désactive le transform JS sur mobile */
-                transition: none !important;
+                will-change: scroll-position;
             }
-            .card {
-                scroll-snap-align: start;
-            }
+            .card { scroll-snap-align: start; }
         }
         
         /* ── Bouton Voir tout ─────────────────────────────── */
         .voir-tout-wrap {
+            max-width: 1400px; margin: 6px auto 0;
+            padding: 0 44px;
             display: flex; justify-content: flex-end;
-            max-width: 1400px; margin: 8px auto 0; padding: 0 40px;
         }
         .voir-tout-btn {
-            background: transparent; border: 1px solid var(--primary);
-            color: var(--primary); padding: 4px 14px; border-radius: 20px;
-            font-size: 0.78em; font-weight: bold; text-decoration: none;
-            cursor: pointer; transition: 0.2s; white-space: nowrap;
+            background: transparent;
+            border: 1px solid rgba(255,71,87,0.5);
+            color: #ff6b7a; padding: 3px 12px; border-radius: 20px;
+            font-size: 0.75em; font-weight: bold; text-decoration: none;
+            transition: 0.2s;
         }
-        .voir-tout-btn:hover { background: var(--primary); color: white; }
+        .voir-tout-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
         </style>
 </head>
 <body>
@@ -327,7 +338,7 @@
             <div class="carousel-container"><div class="carousel-track" id="carousel-random-track"></div></div>
             <button class="carousel-btn carousel-next" data-target="carousel-random-track">›</button>
         </div>
-        <div class="voir-tout-wrap"><a href="tags.html" class="voir-tout-btn">Voir tout →</a></div>
+        <div class="voir-tout-wrap"><a href="index_old.html" class="voir-tout-btn">Voir tout →</a></div>
 
         <div class="section-title-wrapper"><h2 class="section-title">🆕 Derniers ajouts</h2></div>
         <div class="carousel-wrapper" id="carousel-recent-wrapper">
@@ -335,7 +346,7 @@
             <div class="carousel-container"><div class="carousel-track" id="carousel-recent-track"></div></div>
             <button class="carousel-btn carousel-next" data-target="carousel-recent-track">›</button>
         </div>
-        <div class="voir-tout-wrap"><a href="index_old.html?sort=recent" class="voir-tout-btn">Voir tout →</a></div>
+        <div class="voir-tout-wrap"><a href="index_old.html?sort=ordre_ajout" class="voir-tout-btn">Voir tout →</a></div>
 
         <div class="section-title-wrapper" id="tag-section-title-wrapper">
             <h2 class="section-title">🏷️ Tag aléatoire</h2>
@@ -350,7 +361,7 @@
             <div class="carousel-container"><div class="carousel-track" id="carousel-tag-track"></div></div>
             <button class="carousel-btn carousel-next" data-target="carousel-tag-track">›</button>
         </div>
-        <div class="voir-tout-wrap"><a id="voir-tout-tag-link" href="tags.html" class="voir-tout-btn">Voir tout →</a></div>
+        <div class="voir-tout-wrap"><a id="voir-tout-tag-btn" href="tags.html" class="voir-tout-btn">Voir tout →</a></div>
     </div>
 
     <div id="search-results-section" style="display:none; padding: 20px 8px 40px;">
@@ -481,7 +492,7 @@
         }
 
         function addTouchSwipe(trackId, getCurrentIndex, setCurrentIndex, getMaxIndex, getCardWidth, scrollFn) {
-            // Mobile: scroll natif CSS, pas de touch JS
+            // Sur mobile: scroll natif CSS, pas de touch JS
             if (window.innerWidth <= 1000) return;
             const track = document.getElementById(trackId);
             if (!track) return;
@@ -534,7 +545,6 @@
             function getMaxIndex() { return Math.max(0, track.children.length - getCardsPerView()); }
             function scrollToIndex() {
                 if (window.innerWidth <= 1000) {
-                    // Mobile: utilise le scroll natif CSS, pas de transform JS
                     const container = track.closest('.carousel-container');
                     if (container) container.scrollLeft = currentIndex * getCardWidth();
                 } else {
@@ -674,10 +684,9 @@
                     const rTag = allTags[Math.floor(Math.random() * allTags.length)];
                     document.getElementById('tag-pill-link').textContent = rTag.nom;
                     document.getElementById('tag-pill-link').href = `tags.html?tag=${encodeURIComponent(rTag.nom)}`;
+                    const _vtt = document.getElementById('voir-tout-tag-btn');
+                    if (_vtt) _vtt.href = 'tags.html?tag=' + encodeURIComponent(rTag.nom);
                     document.getElementById('tag-description-text').textContent = rTag.description || 'Découvrez les animes associés à ce tag.';
-                    // MAJ lien voir tout tag
-                    const vtt = document.getElementById('voir-tout-tag-link');
-                    if (vtt) vtt.href = 'tags.html?tag=' + encodeURIComponent(rTag.nom);
                     const tagAnimes = allAnimes.filter(a => a.tags && a.tags.toLowerCase().includes(rTag.nom.toLowerCase()));
                     buildCarousel('carousel-tag-track', shuffle(tagAnimes).slice(0, 20));
                 } else {
@@ -726,34 +735,6 @@
         window.randomAnime = () => { if(allAnimes.length) { const a = allAnimes[Math.floor(Math.random()*allAnimes.length)]; window.location.href = 'video.html?name='+encodeURIComponent(a.nom); } };
         window.toggleM = () => { const menu = document.getElementById('menu'); const overlay = document.getElementById('overlay'); const isOpen = menu.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow = isOpen ? 'hidden' : ''; };
         init();
-    </script>
-
-    <script>
-    /* ── Mémoire des tris (index) ─────────────────── */
-    (function() {
-        const KEY = 'sortmem_index';
-        const IDS = [];
-        function save() {
-            const d = {};
-            IDS.forEach(id => { const el = document.getElementById(id); if (el) d[id] = el.value; });
-            try { sessionStorage.setItem(KEY, JSON.stringify(d)); } catch(e) {}
-        }
-        function restore() {
-            try {
-                const raw = sessionStorage.getItem(KEY);
-                if (!raw) return;
-                const d = JSON.parse(raw);
-                IDS.forEach(id => { const el = document.getElementById(id); if (el && d[id] !== undefined) el.value = d[id]; });
-            } catch(e) {}
-        }
-        document.addEventListener('DOMContentLoaded', function() {
-            restore();
-            IDS.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.addEventListener('change', save);
-            });
-        });
-    })();
     </script>
 </body>
 </html>

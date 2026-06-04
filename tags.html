@@ -52,7 +52,7 @@
             .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
-            /* .grid responsive géré par auto-fill */
+/* auto-fill gère les colonnes */
         }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         .tags-container { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
@@ -72,24 +72,38 @@
         .tag-def-text { color: #ddd; font-size: 0.9em; line-height: 1.55; }
         .sort-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
         .sort-controls select { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
-        /* .grid responsive géré par auto-fill */
+/* auto-fill gère les colonnes */
             .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; font-weight: bold; }
         
-        /* ── Images lisses ─────────────────────────────── */
+        /* ── Images lisses (anti-pixelisation maximale) ─── */
+        img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
+        }
         .card img, .sugg-img, .mal-row .ml-img, .list-img,
-        .anime-card img, .studio-preview img, .studio-logo {
-            image-rendering: auto;
+        .anime-card img, .studio-preview img, .studio-logo,
+        .img-container img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
             -ms-interpolation-mode: bicubic;
+            will-change: transform;
         }
         
-        /* ── Zoom page 80% par défaut ───────────────────── */
-        @media screen {
-            html { zoom: 0.8; }
+        /* ── Zoom 80% — centré ───────────────────────────── */
+        html {
+            zoom: 0.8;
+        }
+        body {
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        /* ── Grille responsive (s'adapte au zoom) ───────── */
+        /* ── Grille responsive (auto-fill, s'adapte au zoom) */
         .grid {
-            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
         }
         </style>
 </head>
@@ -155,7 +169,7 @@
         let allAnimes = [];
         let tagDescriptions = {};
         let activeTag = (new URLSearchParams(window.location.search).get('tag'))
-                     || sessionStorage.getItem('tags_activeTag') || null;
+                      || sessionStorage.getItem('tags_activeTag') || null;
         let currentFiltered = [];
 
         function normalize(str) {
@@ -212,11 +226,10 @@
                 }
                 generateTagCloud();
                 filterByTag(activeTag);
-                // Restaurer le tri sauvegardé
-                const _savedTagSort = sessionStorage.getItem('tags_sort');
-                if (_savedTagSort && activeTag) {
-                    const _tsel = document.getElementById('tag-sort');
-                    if (_tsel) { _tsel.value = _savedTagSort; applySort(); }
+                var _sv = sessionStorage.getItem('tags_sort');
+                if (_sv && activeTag) {
+                    var _ts = document.getElementById('tag-sort');
+                    if (_ts) { _ts.value = _sv; applySort(); }
                 }
 
                 const searchInput = document.getElementById('search');

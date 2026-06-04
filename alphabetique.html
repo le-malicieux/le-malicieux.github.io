@@ -159,27 +159,40 @@
         .mal-row .ml-title { font-size: 0.85em; font-weight: bold; color: var(--primary); flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
         @media (max-width: 1000px) { 
-            .anime-list { grid-template-columns: repeat(3, 1fr); gap: 8px; } 
             .card-info { padding: 5px; } 
             .card-title { font-size: 0.85em; } 
             .card-meta-row { font-size: 0.65em; gap: 2px; } 
         }
     
-        /* ── Images lisses ─────────────────────────────── */
+        /* ── Images lisses (anti-pixelisation maximale) ─── */
+        img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
+        }
         .card img, .sugg-img, .mal-row .ml-img, .list-img,
-        .anime-card img, .studio-preview img, .studio-logo {
-            image-rendering: auto;
+        .anime-card img, .studio-preview img, .studio-logo,
+        .img-container img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
             -ms-interpolation-mode: bicubic;
+            will-change: transform;
         }
         
-        /* ── Zoom page 80% par défaut ───────────────────── */
-        @media screen {
-            html { zoom: 0.8; }
+        /* ── Zoom 80% — centré ───────────────────────────── */
+        html {
+            zoom: 0.8;
+        }
+        body {
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        /* ── Grille responsive (s'adapte au zoom) ───────── */
+        /* ── Grille responsive (auto-fill) ───────────────── */
         .anime-list {
-            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
         }
         </style>
 </head>
@@ -486,12 +499,9 @@
                     allGroups[k].push(a);
                 }
                 buildAlphaNav(allGroups);
-                const _savedAlphaSearch = sessionStorage.getItem('alpha_search') || '';
-                if (_savedAlphaSearch) {
-                    const _inp = document.getElementById('search');
-                    if (_inp) _inp.value = _savedAlphaSearch;
-                }
-                render(_savedAlphaSearch, '');
+                var _as = sessionStorage.getItem('alpha_search') || '';
+                if (_as) { var _ai = document.getElementById('search'); if (_ai) _ai.value = _as; }
+                render(_as, '');
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
@@ -499,13 +509,9 @@
             sessionStorage.setItem('alpha_search', e.target.value);
             render(e.target.value, '');
         };
-        // Restaurer la recherche au retour
         (function() {
-            const s = sessionStorage.getItem('alpha_search');
-            if (s) {
-                const inp = document.getElementById('search');
-                if (inp) { inp.value = s; }
-            }
+            var s = sessionStorage.getItem('alpha_search');
+            if (s) { var inp = document.getElementById('search'); if (inp) inp.value = s; }
         })();
 
         function toggleM() {

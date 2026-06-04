@@ -113,7 +113,7 @@
             .nav-links.active { right: 0; left: auto; }
             .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
-            /* .grid responsive géré par auto-fill */
+/* auto-fill gère les colonnes */
             .card-info { padding: 5px; }
             .card-title { font-size: 0.85em; }
         }
@@ -148,21 +148,35 @@
         
         @media (max-width: 480px) { .card-title { font-size: 0.85em; } }
     
-        /* ── Images lisses ─────────────────────────────── */
+        /* ── Images lisses (anti-pixelisation maximale) ─── */
+        img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
+        }
         .card img, .sugg-img, .mal-row .ml-img, .list-img,
-        .anime-card img, .studio-preview img, .studio-logo {
-            image-rendering: auto;
+        .anime-card img, .studio-preview img, .studio-logo,
+        .img-container img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: smooth;
+            image-rendering: high-quality;
             -ms-interpolation-mode: bicubic;
+            will-change: transform;
         }
         
-        /* ── Zoom page 80% par défaut ───────────────────── */
-        @media screen {
-            html { zoom: 0.8; }
+        /* ── Zoom 80% — centré ───────────────────────────── */
+        html {
+            zoom: 0.8;
+        }
+        body {
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        /* ── Grille responsive (s'adapte au zoom) ───────── */
+        /* ── Grille responsive (auto-fill, s'adapte au zoom) */
         .grid {
-            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
         }
         </style>
 </head>
@@ -525,31 +539,52 @@ function displayAnimes(list, sortMode) {
     </script>
 
     <script>
-    /* ── Mémoire des tris (index_old) ─────────────────── */
+    /* ── Mémoire des tris ─────────────────────────────── */
     (function() {
-        const KEY = 'sortmem_index_old';
-        const IDS = ['sort'];
+        var KEY = 'sortmem_index_old';
+        var IDS = ['sort'];
         function save() {
-            const d = {};
-            IDS.forEach(id => { const el = document.getElementById(id); if (el) d[id] = el.value; });
+            var d = {};
+            IDS.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) d[id] = el.value;
+            });
             try { sessionStorage.setItem(KEY, JSON.stringify(d)); } catch(e) {}
         }
         function restore() {
             try {
-                const raw = sessionStorage.getItem(KEY);
+                var raw = sessionStorage.getItem(KEY);
                 if (!raw) return;
-                const d = JSON.parse(raw);
-                IDS.forEach(id => { const el = document.getElementById(id); if (el && d[id] !== undefined) el.value = d[id]; });
+                var d = JSON.parse(raw);
+                IDS.forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el && d[id] !== undefined) el.value = d[id];
+                });
             } catch(e) {}
         }
         document.addEventListener('DOMContentLoaded', function() {
             restore();
-            IDS.forEach(id => {
-                const el = document.getElementById(id);
+            IDS.forEach(function(id) {
+                var el = document.getElementById(id);
                 if (el) el.addEventListener('change', save);
             });
         });
     })();
+    </script>
+
+    <script>
+    /* ── Restaure tri depuis URL ?sort=ajout ─────────────── */
+    document.addEventListener('DOMContentLoaded', function() {
+        var param = new URLSearchParams(window.location.search).get('sort');
+        if (param) {
+            var sel = document.getElementById('sort');
+            if (sel) {
+                sel.value = param;
+                sel.dispatchEvent(new Event("change"));
+                sel.dispatchEvent(new Event('change'));
+            }
+        }
+    });
     </script>
 </body>
 </html>
