@@ -74,6 +74,37 @@
         .sort-controls select { background: #222; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
         @media (max-width: 1000px) { .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } }
             .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; font-weight: bold; }
+        
+        /* ===== CORRECTIONS GLOBALES ===== */
+        /* 1. Images lisses (anti-pixelisation) */
+        img {
+            image-rendering: auto;
+            -webkit-backface-visibility: hidden;
+        }
+        .card img, .sugg-img, .ml-img, .list-img, .studio-logo, .studio-preview img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: auto;
+            interpolation-mode: bicubic;
+        }
+
+        
+        /* 2. Zoom par défaut 80% */
+        @media screen {
+            html { zoom: 0.8; }
+        }
+
+        
+        /* 3. Grille responsive au zoom */
+        .grid, .anime-list, #search-results-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        }
+        @media (max-width: 600px) {
+            .grid, .anime-list, #search-results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+            }
+        }
+
         </style>
 </head>
 <body>
@@ -137,7 +168,8 @@
     <script>
         let allAnimes = [];
         let tagDescriptions = {};
-        let activeTag = new URLSearchParams(window.location.search).get('tag');
+        let activeTag = new URLSearchParams(window.location.search).get('tag') 
+                || sessionStorage.getItem('tags_activeTag') || null;
         let currentFiltered = [];
 
         function normalize(str) {
@@ -194,6 +226,12 @@
                 }
                 generateTagCloud();
                 filterByTag(activeTag);
+                // Restore saved sort
+                const savedSort = sessionStorage.getItem('tags_sort');
+                if (savedSort && activeTag) {
+                    const sel = document.getElementById('tag-sort');
+                    if (sel) { sel.value = savedSort; applySort(); }
+                }
 
                 const searchInput = document.getElementById('search');
                 const searchSuggestions = document.getElementById('search-suggestions');
@@ -224,6 +262,8 @@
 
         function filterByTag(tag) {
             activeTag = tag;
+            if (tag) sessionStorage.setItem('tags_activeTag', tag);
+            else sessionStorage.removeItem('tags_activeTag');
             document.getElementById('search').value='';
             document.querySelectorAll('.tag-pill').forEach(btn=>btn.classList.toggle('active',btn.innerText.trim()===tag));
             const title=document.getElementById('results-title'), header=document.getElementById('results-header'), defBox=document.getElementById('tag-def-box');
@@ -239,6 +279,7 @@
 
         function applySort() {
             const sortVal = document.getElementById('tag-sort').value;
+            sessionStorage.setItem('tags_sort', sortVal);
             let list = [...currentFiltered];
             if(sortVal==='score') list.sort((a,b)=>parseFloat((b.score||'0').replace(',','.'))-parseFloat((a.score||'0').replace(',','.')));
             else if(sortVal==='popularite') list.sort((a,b)=>(parseInt((a.pop||'').replace('#',''))||99999)-(parseInt((b.pop||'').replace('#',''))||99999));
@@ -286,6 +327,42 @@
         function toggleM() { const menu=document.getElementById('menu'), overlay=document.getElementById('overlay'); const isOpen=menu.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }
         window.filterByTag=filterByTag; window.applySort=applySort; window.toggleM=toggleM;
         init();
+    </script>
+
+    <script>
+
+        // ===== MÉMOIRE DES TRIS =====
+        (function() {
+            const PAGE_KEY = 'sort_' + (location.pathname.split('/').pop() || 'index');
+            // Sauvegarde automatique des selects de tri
+            function saveSort() {
+                const sorts = {};
+                document.querySelectorAll('select[id$="-sort"], select[id^="tag-sort"], select[id^="alpha-sort"], select[id^="prod-sort"], select[id^="studio-sort"], select[id^="all-sort"], #display-mode, #sort-select').forEach(sel => {
+                    if (sel.id) sorts[sel.id] = sel.value;
+                });
+                if (Object.keys(sorts).length) sessionStorage.setItem(PAGE_KEY, JSON.stringify(sorts));
+            }
+            function restoreSort() {
+                const saved = sessionStorage.getItem(PAGE_KEY);
+                if (!saved) return;
+                try {
+                    const sorts = JSON.parse(saved);
+                    Object.entries(sorts).forEach(([id, val]) => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = val;
+                    });
+                } catch(e) {}
+            }
+            // Restore on load
+            document.addEventListener('DOMContentLoaded', restoreSort);
+            window.addEventListener('load', function() {
+                restoreSort();
+                document.querySelectorAll('select').forEach(sel => {
+                    sel.addEventListener('change', saveSort);
+                });
+            });
+        })();
+
     </script>
 </body>
 </html>

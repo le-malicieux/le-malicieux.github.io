@@ -218,7 +218,59 @@
             .card { width: 120px; }
             #search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
         }
-    </style>
+    
+        /* ===== CORRECTIONS ===== */
+        /* Images lisses */
+        img { image-rendering: auto; }
+        .card img, .sugg-img, .nav-logo-small, .main-logo {
+            image-rendering: auto;
+            -ms-interpolation-mode: bicubic;
+        }
+
+        
+        /* Zoom 80% par défaut */
+        @media screen { html { zoom: 0.8; } }
+
+        
+        /* Carousel: défilement natif sur mobile */
+        @media (max-width: 1000px) {
+            .carousel-container {
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+                cursor: default;
+            }
+            .carousel-container::-webkit-scrollbar { display: none; }
+            .carousel-track {
+                transform: none !important;
+                flex-wrap: nowrap;
+                cursor: default;
+            }
+            .card { scroll-snap-align: start; }
+        }
+
+        
+        /* Grille responsive */
+        #search-results-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        }
+
+        
+        /* Voir plus / infinite scroll */
+        #voir-plus-bar {
+            text-align: center; padding: 20px;
+        }
+        #voir-plus-btn {
+            background: var(--primary); color: white; border: none;
+            padding: 12px 32px; border-radius: 8px; font-size: 1em;
+            font-weight: bold; cursor: pointer; transition: 0.2s;
+            display: inline-block; text-decoration: none;
+        }
+        #voir-plus-btn:hover { background: #e0313f; transform: translateY(-2px); }
+        #sentinel { height: 1px; }
+
+        </style>
 </head>
 <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
@@ -305,6 +357,8 @@
         <p id="search-results-count" style="color:#aaa;margin:5px 15px;font-size:0.9em;"></p>
         <div id="search-results-grid"></div>
     </div>
+
+    <div id="voir-plus-bar" style="display:none;"><a id="voir-plus-btn" href="index_old.html">🔍 Voir plus d'animes (index complet)</a></div>
 
     <div class="anime-count-wrapper">
         <div class="anime-count" id="anime-count"></div>
@@ -433,6 +487,11 @@
             let startX = 0, startY = 0, movedX = 0;
             let isDragging = false;
 
+            // Mobile: use native scroll
+            if (window.innerWidth <= 1000) {
+                // Native scroll handles swipe via CSS scroll-snap
+                return;
+            }
             track.addEventListener('touchstart', (e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
@@ -519,6 +578,17 @@
                 resultsGrid.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
             }
             backHome.style.display = 'block';
+            // Show "voir plus" if many results
+            const voirPlusBar = document.getElementById('voir-plus-bar');
+            if (voirPlusBar) {
+                if (results.length > 20) {
+                    voirPlusBar.style.display = 'block';
+                    const btn = document.getElementById('voir-plus-btn');
+                    if (btn) btn.href = `tags.html`;
+                } else {
+                    voirPlusBar.style.display = 'none';
+                }
+            }
             window.scrollTo({ top: resultsSection.offsetTop - 80, behavior: 'smooth' });
             history.pushState({}, '', `?search=${encodeURIComponent(query)}`);
         }
@@ -661,5 +731,45 @@
         window.toggleM = () => { const menu = document.getElementById('menu'); const overlay = document.getElementById('overlay'); const isOpen = menu.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow = isOpen ? 'hidden' : ''; };
         init();
     </script>
+
+    <script>
+        // ===== MÉMOIRE DES TRIS =====
+        (function() {
+            const PAGE_KEY = 'sort_index';
+            function saveSort() {
+                const sorts = {};
+                document.querySelectorAll('select').forEach(sel => {
+                    if (sel.id) sorts[sel.id] = sel.value;
+                });
+                if (Object.keys(sorts).length) sessionStorage.setItem(PAGE_KEY, JSON.stringify(sorts));
+            }
+            function restoreSort() {
+                const saved = sessionStorage.getItem(PAGE_KEY);
+                if (!saved) return;
+                try {
+                    const sorts = JSON.parse(saved);
+                    Object.entries(sorts).forEach(([id, val]) => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = val;
+                    });
+                } catch(e) {}
+            }
+            window.addEventListener('load', function() {
+                restoreSort();
+                document.querySelectorAll('select').forEach(sel => {
+                    sel.addEventListener('change', saveSort);
+                });
+            });
+        })();
+
+        // ===== CAROUSEL MOBILE: scroll natif =====
+        // Patch buildCarousel pour mobile: utilise scroll natif
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth > 1000) return;
+            // Désactiver les touch handlers sur les tracks et utiliser le scroll CSS natif
+            const origBuild = window.buildCarouselNative;
+        });
+    </script>
+
 </body>
 </html>

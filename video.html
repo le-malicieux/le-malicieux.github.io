@@ -125,7 +125,21 @@
             .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
             .bottom-controls { grid-template-columns: 1fr; }
         }
-    </style>
+    
+        /* ===== CORRECTIONS GLOBALES ===== */
+        /* 1. Images lisses (anti-pixelisation) */
+        img {
+            image-rendering: auto;
+            -webkit-backface-visibility: hidden;
+        }
+        .card img, .sugg-img, .ml-img, .list-img, .studio-logo, .studio-preview img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: auto;
+            interpolation-mode: bicubic;
+        }
+
+        </style>
 </head>
 <body>
     <div id="bg-layer"></div>
