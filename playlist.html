@@ -51,7 +51,7 @@
             .nav-links a, .nav-links .nav-btn, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
-            .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
+            /* .grid responsive géré par auto-fill */
         }
         .playlist-header { padding: 20px 20px 10px; text-align: center; }
         .controls-row { display: flex; justify-content: center; gap: 8px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
@@ -86,39 +86,25 @@
         .modal-btn { padding: 8px 20px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
         .modal-btn-cancel { background: #333; color: #ccc; }
         .modal-btn-confirm { background: var(--primary); color: white; }
-        @media (max-width: 480px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
+        /* .grid responsive géré par auto-fill */
             .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; font-weight: bold; }
         
-        /* ===== CORRECTIONS GLOBALES ===== */
-        /* 1. Images lisses (anti-pixelisation) */
-        img {
+        /* ── Images lisses ─────────────────────────────── */
+        .card img, .sugg-img, .mal-row .ml-img, .list-img,
+        .anime-card img, .studio-preview img, .studio-logo {
             image-rendering: auto;
-            -webkit-backface-visibility: hidden;
+            -ms-interpolation-mode: bicubic;
         }
-        .card img, .sugg-img, .ml-img, .list-img, .studio-logo, .studio-preview img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            image-rendering: auto;
-            interpolation-mode: bicubic;
-        }
-
         
-        /* 2. Zoom par défaut 80% */
+        /* ── Zoom page 80% par défaut ───────────────────── */
         @media screen {
             html { zoom: 0.8; }
         }
-
         
-        /* 3. Grille responsive au zoom */
-        .grid, .anime-list, #search-results-grid {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        /* ── Grille responsive (s'adapte au zoom) ───────── */
+        .grid {
+            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
         }
-        @media (max-width: 600px) {
-            .grid, .anime-list, #search-results-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
-            }
-        }
-
         </style>
 </head>
 <body>
@@ -298,39 +284,31 @@
     </script>
 
     <script>
-
-        // ===== MÉMOIRE DES TRIS =====
-        (function() {
-            const PAGE_KEY = 'sort_' + (location.pathname.split('/').pop() || 'index');
-            // Sauvegarde automatique des selects de tri
-            function saveSort() {
-                const sorts = {};
-                document.querySelectorAll('select[id$="-sort"], select[id^="tag-sort"], select[id^="alpha-sort"], select[id^="prod-sort"], select[id^="studio-sort"], select[id^="all-sort"], #display-mode, #sort-select').forEach(sel => {
-                    if (sel.id) sorts[sel.id] = sel.value;
-                });
-                if (Object.keys(sorts).length) sessionStorage.setItem(PAGE_KEY, JSON.stringify(sorts));
-            }
-            function restoreSort() {
-                const saved = sessionStorage.getItem(PAGE_KEY);
-                if (!saved) return;
-                try {
-                    const sorts = JSON.parse(saved);
-                    Object.entries(sorts).forEach(([id, val]) => {
-                        const el = document.getElementById(id);
-                        if (el) el.value = val;
-                    });
-                } catch(e) {}
-            }
-            // Restore on load
-            document.addEventListener('DOMContentLoaded', restoreSort);
-            window.addEventListener('load', function() {
-                restoreSort();
-                document.querySelectorAll('select').forEach(sel => {
-                    sel.addEventListener('change', saveSort);
-                });
+    /* ── Mémoire des tris (playlist) ─────────────────── */
+    (function() {
+        const KEY = 'sortmem_playlist';
+        const IDS = ['sort-selector'];
+        function save() {
+            const d = {};
+            IDS.forEach(id => { const el = document.getElementById(id); if (el) d[id] = el.value; });
+            try { sessionStorage.setItem(KEY, JSON.stringify(d)); } catch(e) {}
+        }
+        function restore() {
+            try {
+                const raw = sessionStorage.getItem(KEY);
+                if (!raw) return;
+                const d = JSON.parse(raw);
+                IDS.forEach(id => { const el = document.getElementById(id); if (el && d[id] !== undefined) el.value = d[id]; });
+            } catch(e) {}
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            restore();
+            IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', save);
             });
-        })();
-
+        });
+    })();
     </script>
 </body>
 </html>

@@ -126,19 +126,12 @@
             .bottom-controls { grid-template-columns: 1fr; }
         }
     
-        /* ===== CORRECTIONS GLOBALES ===== */
-        /* 1. Images lisses (anti-pixelisation) */
-        img {
+        /* ── Images lisses ─────────────────────────────── */
+        .card img, .sugg-img, .mal-row .ml-img, .list-img,
+        .anime-card img, .studio-preview img, .studio-logo {
             image-rendering: auto;
-            -webkit-backface-visibility: hidden;
+            -ms-interpolation-mode: bicubic;
         }
-        .card img, .sugg-img, .ml-img, .list-img, .studio-logo, .studio-preview img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            image-rendering: auto;
-            interpolation-mode: bicubic;
-        }
-
         </style>
 </head>
 <body>

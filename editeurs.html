@@ -72,7 +72,7 @@
             .nav-links a, .nav-links button, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
-            .studios-grid { grid-template-columns: 1fr 1fr; }
+            /* studios-grid responsive géré par auto-fill */
             /* Fix chevauchement producteur */
             .producer-banner { height: auto; padding: 0; flex-direction: column; align-items: flex-start; }
             .producer-avatar { width: 60px; height: 60px; margin: 0 0 10px 15px; }
@@ -126,36 +126,25 @@
         @media (max-width: 700px) { .producer-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } .producer-name { font-size: 1.2em; } }
             .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; font-weight: bold; }
         
-        /* ===== CORRECTIONS GLOBALES ===== */
-        /* 1. Images lisses (anti-pixelisation) */
-        img {
+        /* ── Images lisses ─────────────────────────────── */
+        .card img, .sugg-img, .mal-row .ml-img, .list-img,
+        .anime-card img, .studio-preview img, .studio-logo {
             image-rendering: auto;
-            -webkit-backface-visibility: hidden;
+            -ms-interpolation-mode: bicubic;
         }
-        .card img, .sugg-img, .ml-img, .list-img, .studio-logo, .studio-preview img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            image-rendering: auto;
-            interpolation-mode: bicubic;
-        }
-
         
-        /* 2. Zoom par défaut 80% */
+        /* ── Zoom page 80% par défaut ───────────────────── */
         @media screen {
             html { zoom: 0.8; }
         }
-
         
-        /* 3. Grille responsive au zoom */
-        .grid, .anime-list, #search-results-grid {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        /* ── Grille responsive (s'adapte au zoom) ───────── */
+        .producer-grid {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
         }
-        @media (max-width: 600px) {
-            .grid, .anime-list, #search-results-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
-            }
+        .studios-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
         }
-
         </style>
 </head>
 <body>
@@ -301,9 +290,11 @@ function buildStudioMap(){ const m={}; allAnimes.forEach(a=>{ a.editeur.split(',
             sessionStorage.setItem('ed_studio_sort', document.getElementById('studio-sort').value);
             renderList(document.getElementById('studio-search').value);
         };
-        // Restore studio-sort
-        const _savedEdSort = sessionStorage.getItem('ed_studio_sort');
-        if (_savedEdSort) { const _sel = document.getElementById('studio-sort'); if(_sel) _sel.value = _savedEdSort; }
+        // Restaurer tri studio
+        (function(){
+            const s = sessionStorage.getItem('ed_studio_sort');
+            if (s) { const el = document.getElementById('studio-sort'); if(el) el.value = s; }
+        })();
         function showProducer(studio){ currentStudio=studio; document.getElementById('view-list').style.display='none'; document.getElementById('view-producer').style.display='block'; document.title=studio+' - Le Malicieux'; history.pushState({studio},'',`editeurs.html?studio=${encodeURIComponent(studio)}`); const slug=studio.replace(/\s+/g,'-'); const avatarEl=document.getElementById('prod-avatar'); avatarEl.innerHTML=`<img src="img/${slug}.jpg" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<span class=\'avatar-initials\' style=\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;\'>'+studio.split(/[\\s\\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase()+'</span>'">`; document.getElementById('prod-name').textContent=studio;
             // Remplir le filtre co-studio
             const map=buildStudioMap(); const allForStudio=map[studio]||[];
@@ -401,42 +392,6 @@ function buildStudioMap(){ const m={}; allAnimes.forEach(a=>{ a.editeur.split(',
         window.addEventListener('popstate',(e)=>{ if(e.state&&e.state.studio) showProducer(e.state.studio); else{ currentStudio=null; renderList(document.getElementById('studio-search').value); document.getElementById('view-list').style.display='block'; document.getElementById('view-producer').style.display='none'; document.title='Éditeurs & Studios - Le Malicieux'; } });
         function toggleM(){ const m=document.getElementById('menu'), ov=document.getElementById('overlay'); const isOpen=m.classList.toggle('active'); ov.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }
         window.toggleM=toggleM;
-    </script>
-
-    <script>
-
-        // ===== MÉMOIRE DES TRIS =====
-        (function() {
-            const PAGE_KEY = 'sort_' + (location.pathname.split('/').pop() || 'index');
-            // Sauvegarde automatique des selects de tri
-            function saveSort() {
-                const sorts = {};
-                document.querySelectorAll('select[id$="-sort"], select[id^="tag-sort"], select[id^="alpha-sort"], select[id^="prod-sort"], select[id^="studio-sort"], select[id^="all-sort"], #display-mode, #sort-select').forEach(sel => {
-                    if (sel.id) sorts[sel.id] = sel.value;
-                });
-                if (Object.keys(sorts).length) sessionStorage.setItem(PAGE_KEY, JSON.stringify(sorts));
-            }
-            function restoreSort() {
-                const saved = sessionStorage.getItem(PAGE_KEY);
-                if (!saved) return;
-                try {
-                    const sorts = JSON.parse(saved);
-                    Object.entries(sorts).forEach(([id, val]) => {
-                        const el = document.getElementById(id);
-                        if (el) el.value = val;
-                    });
-                } catch(e) {}
-            }
-            // Restore on load
-            document.addEventListener('DOMContentLoaded', restoreSort);
-            window.addEventListener('load', function() {
-                restoreSort();
-                document.querySelectorAll('select').forEach(sel => {
-                    sel.addEventListener('change', saveSort);
-                });
-            });
-        })();
-
     </script>
 </body>
 </html>

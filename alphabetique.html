@@ -165,36 +165,22 @@
             .card-meta-row { font-size: 0.65em; gap: 2px; } 
         }
     
-        /* ===== CORRECTIONS GLOBALES ===== */
-        /* 1. Images lisses (anti-pixelisation) */
-        img {
+        /* ── Images lisses ─────────────────────────────── */
+        .card img, .sugg-img, .mal-row .ml-img, .list-img,
+        .anime-card img, .studio-preview img, .studio-logo {
             image-rendering: auto;
-            -webkit-backface-visibility: hidden;
+            -ms-interpolation-mode: bicubic;
         }
-        .card img, .sugg-img, .ml-img, .list-img, .studio-logo, .studio-preview img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            image-rendering: auto;
-            interpolation-mode: bicubic;
-        }
-
         
-        /* 2. Zoom par défaut 80% */
+        /* ── Zoom page 80% par défaut ───────────────────── */
         @media screen {
             html { zoom: 0.8; }
         }
-
         
-        /* 3. Grille responsive au zoom */
-        .grid, .anime-list, #search-results-grid {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        /* ── Grille responsive (s'adapte au zoom) ───────── */
+        .anime-list {
+            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
         }
-        @media (max-width: 600px) {
-            .grid, .anime-list, #search-results-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
-            }
-        }
-
         </style>
 </head>
 <body>
@@ -500,20 +486,27 @@
                     allGroups[k].push(a);
                 }
                 buildAlphaNav(allGroups);
-                render();
+                const _savedAlphaSearch = sessionStorage.getItem('alpha_search') || '';
+                if (_savedAlphaSearch) {
+                    const _inp = document.getElementById('search');
+                    if (_inp) _inp.value = _savedAlphaSearch;
+                }
+                render(_savedAlphaSearch, '');
             } catch (err) { console.error("Erreur CSV:", err); }
         }
 
         document.getElementById('search').oninput = (e) => {
             sessionStorage.setItem('alpha_search', e.target.value);
-            render(e.target.value, document.getElementById('alpha-sort')?.value || '');
+            render(e.target.value, '');
         };
-        // Restore search on load
-        const _savedAlphaSearch = sessionStorage.getItem('alpha_search');
-        if (_savedAlphaSearch) {
-            const _si = document.getElementById('search');
-            if (_si) _si.value = _savedAlphaSearch;
-        }
+        // Restaurer la recherche au retour
+        (function() {
+            const s = sessionStorage.getItem('alpha_search');
+            if (s) {
+                const inp = document.getElementById('search');
+                if (inp) { inp.value = s; }
+            }
+        })();
 
         function toggleM() {
             const menu = document.getElementById('menu');
@@ -532,42 +525,6 @@
         };
 
         init();
-    </script>
-
-    <script>
-
-        // ===== MÉMOIRE DES TRIS =====
-        (function() {
-            const PAGE_KEY = 'sort_' + (location.pathname.split('/').pop() || 'index');
-            // Sauvegarde automatique des selects de tri
-            function saveSort() {
-                const sorts = {};
-                document.querySelectorAll('select[id$="-sort"], select[id^="tag-sort"], select[id^="alpha-sort"], select[id^="prod-sort"], select[id^="studio-sort"], select[id^="all-sort"], #display-mode, #sort-select').forEach(sel => {
-                    if (sel.id) sorts[sel.id] = sel.value;
-                });
-                if (Object.keys(sorts).length) sessionStorage.setItem(PAGE_KEY, JSON.stringify(sorts));
-            }
-            function restoreSort() {
-                const saved = sessionStorage.getItem(PAGE_KEY);
-                if (!saved) return;
-                try {
-                    const sorts = JSON.parse(saved);
-                    Object.entries(sorts).forEach(([id, val]) => {
-                        const el = document.getElementById(id);
-                        if (el) el.value = val;
-                    });
-                } catch(e) {}
-            }
-            // Restore on load
-            document.addEventListener('DOMContentLoaded', restoreSort);
-            window.addEventListener('load', function() {
-                restoreSort();
-                document.querySelectorAll('select').forEach(sel => {
-                    sel.addEventListener('change', saveSort);
-                });
-            });
-        })();
-
     </script>
 </body>
 </html>

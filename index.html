@@ -165,7 +165,7 @@
         .carousel-wrapper {
             position: relative; max-width: 1400px; margin: 0 auto; padding: 0 40px; /* espace pour les flèches */
         }
-        .carousel-container { overflow: hidden; touch-action: pan-y; }
+        .carousel-container { overflow: hidden; touch-action: pan-y; } /* desktop */
         .carousel-track { display: flex; gap: 10px; transition: transform 0.4s ease; cursor: grab; }
         .carousel-track:active { cursor: grabbing; }
         .carousel-btn {
@@ -219,57 +219,55 @@
             #search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
         }
     
-        /* ===== CORRECTIONS ===== */
-        /* Images lisses */
-        img { image-rendering: auto; }
-        .card img, .sugg-img, .nav-logo-small, .main-logo {
+        /* ── Images lisses ─────────────────────────────── */
+        .card img, .sugg-img, .mal-row .ml-img, .list-img,
+        .anime-card img, .studio-preview img, .studio-logo {
             image-rendering: auto;
             -ms-interpolation-mode: bicubic;
         }
-
         
-        /* Zoom 80% par défaut */
-        @media screen { html { zoom: 0.8; } }
-
+        /* ── Zoom page 80% par défaut ───────────────────── */
+        @media screen {
+            html { zoom: 0.8; }
+        }
         
-        /* Carousel: défilement natif sur mobile */
+        /* ── Grille responsive (s'adapte au zoom) ───────── */
+        #search-results-grid {
+            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
+        }
+        
+        /* ── Carrousel mobile: scroll natif fluide ───────── */
         @media (max-width: 1000px) {
             .carousel-container {
-                overflow-x: auto;
-                scroll-snap-type: x mandatory;
-                scrollbar-width: none;
+                overflow-x: scroll !important;
+                overflow-y: hidden;
                 -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x mandatory;
                 cursor: default;
             }
             .carousel-container::-webkit-scrollbar { display: none; }
+            .carousel-container { scrollbar-width: none; }
             .carousel-track {
-                transform: none !important;
-                flex-wrap: nowrap;
-                cursor: default;
+                /* On désactive le transform JS sur mobile */
+                transition: none !important;
             }
-            .card { scroll-snap-align: start; }
+            .card {
+                scroll-snap-align: start;
+            }
         }
-
         
-        /* Grille responsive */
-        #search-results-grid {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        /* ── Bouton Voir tout ─────────────────────────────── */
+        .voir-tout-wrap {
+            display: flex; justify-content: flex-end;
+            max-width: 1400px; margin: 8px auto 0; padding: 0 40px;
         }
-
-        
-        /* Voir plus / infinite scroll */
-        #voir-plus-bar {
-            text-align: center; padding: 20px;
+        .voir-tout-btn {
+            background: transparent; border: 1px solid var(--primary);
+            color: var(--primary); padding: 4px 14px; border-radius: 20px;
+            font-size: 0.78em; font-weight: bold; text-decoration: none;
+            cursor: pointer; transition: 0.2s; white-space: nowrap;
         }
-        #voir-plus-btn {
-            background: var(--primary); color: white; border: none;
-            padding: 12px 32px; border-radius: 8px; font-size: 1em;
-            font-weight: bold; cursor: pointer; transition: 0.2s;
-            display: inline-block; text-decoration: none;
-        }
-        #voir-plus-btn:hover { background: #e0313f; transform: translateY(-2px); }
-        #sentinel { height: 1px; }
-
+        .voir-tout-btn:hover { background: var(--primary); color: white; }
         </style>
 </head>
 <body>
@@ -329,6 +327,7 @@
             <div class="carousel-container"><div class="carousel-track" id="carousel-random-track"></div></div>
             <button class="carousel-btn carousel-next" data-target="carousel-random-track">›</button>
         </div>
+        <div class="voir-tout-wrap"><a href="tags.html" class="voir-tout-btn">Voir tout →</a></div>
 
         <div class="section-title-wrapper"><h2 class="section-title">🆕 Derniers ajouts</h2></div>
         <div class="carousel-wrapper" id="carousel-recent-wrapper">
@@ -336,6 +335,7 @@
             <div class="carousel-container"><div class="carousel-track" id="carousel-recent-track"></div></div>
             <button class="carousel-btn carousel-next" data-target="carousel-recent-track">›</button>
         </div>
+        <div class="voir-tout-wrap"><a href="index_old.html?sort=recent" class="voir-tout-btn">Voir tout →</a></div>
 
         <div class="section-title-wrapper" id="tag-section-title-wrapper">
             <h2 class="section-title">🏷️ Tag aléatoire</h2>
@@ -350,6 +350,7 @@
             <div class="carousel-container"><div class="carousel-track" id="carousel-tag-track"></div></div>
             <button class="carousel-btn carousel-next" data-target="carousel-tag-track">›</button>
         </div>
+        <div class="voir-tout-wrap"><a id="voir-tout-tag-link" href="tags.html" class="voir-tout-btn">Voir tout →</a></div>
     </div>
 
     <div id="search-results-section" style="display:none; padding: 20px 8px 40px;">
@@ -357,8 +358,6 @@
         <p id="search-results-count" style="color:#aaa;margin:5px 15px;font-size:0.9em;"></p>
         <div id="search-results-grid"></div>
     </div>
-
-    <div id="voir-plus-bar" style="display:none;"><a id="voir-plus-btn" href="index_old.html">🔍 Voir plus d'animes (index complet)</a></div>
 
     <div class="anime-count-wrapper">
         <div class="anime-count" id="anime-count"></div>
@@ -482,16 +481,13 @@
         }
 
         function addTouchSwipe(trackId, getCurrentIndex, setCurrentIndex, getMaxIndex, getCardWidth, scrollFn) {
+            // Mobile: scroll natif CSS, pas de touch JS
+            if (window.innerWidth <= 1000) return;
             const track = document.getElementById(trackId);
             if (!track) return;
             let startX = 0, startY = 0, movedX = 0;
             let isDragging = false;
 
-            // Mobile: use native scroll
-            if (window.innerWidth <= 1000) {
-                // Native scroll handles swipe via CSS scroll-snap
-                return;
-            }
             track.addEventListener('touchstart', (e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
@@ -536,7 +532,15 @@
             function getCardsPerView() { const w = window.innerWidth; if (w <= 480) return 2; if (w <= 1000) return 3; return 5; }
             function getCardWidth() { const card = track.querySelector('.card'); return card ? card.offsetWidth + 10 : 160; }
             function getMaxIndex() { return Math.max(0, track.children.length - getCardsPerView()); }
-            function scrollToIndex() { track.style.transform = 'translateX(-' + (currentIndex * getCardWidth()) + 'px)'; }
+            function scrollToIndex() {
+                if (window.innerWidth <= 1000) {
+                    // Mobile: utilise le scroll natif CSS, pas de transform JS
+                    const container = track.closest('.carousel-container');
+                    if (container) container.scrollLeft = currentIndex * getCardWidth();
+                } else {
+                    track.style.transform = 'translateX(-' + (currentIndex * getCardWidth()) + 'px)';
+                }
+            }
             const getCI = () => currentIndex;
             const setCI = (v) => { currentIndex = v; };
             addTouchSwipe(trackId, getCI, setCI, getMaxIndex, getCardWidth, scrollToIndex);
@@ -578,17 +582,6 @@
                 resultsGrid.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
             }
             backHome.style.display = 'block';
-            // Show "voir plus" if many results
-            const voirPlusBar = document.getElementById('voir-plus-bar');
-            if (voirPlusBar) {
-                if (results.length > 20) {
-                    voirPlusBar.style.display = 'block';
-                    const btn = document.getElementById('voir-plus-btn');
-                    if (btn) btn.href = `tags.html`;
-                } else {
-                    voirPlusBar.style.display = 'none';
-                }
-            }
             window.scrollTo({ top: resultsSection.offsetTop - 80, behavior: 'smooth' });
             history.pushState({}, '', `?search=${encodeURIComponent(query)}`);
         }
@@ -682,6 +675,9 @@
                     document.getElementById('tag-pill-link').textContent = rTag.nom;
                     document.getElementById('tag-pill-link').href = `tags.html?tag=${encodeURIComponent(rTag.nom)}`;
                     document.getElementById('tag-description-text').textContent = rTag.description || 'Découvrez les animes associés à ce tag.';
+                    // MAJ lien voir tout tag
+                    const vtt = document.getElementById('voir-tout-tag-link');
+                    if (vtt) vtt.href = 'tags.html?tag=' + encodeURIComponent(rTag.nom);
                     const tagAnimes = allAnimes.filter(a => a.tags && a.tags.toLowerCase().includes(rTag.nom.toLowerCase()));
                     buildCarousel('carousel-tag-track', shuffle(tagAnimes).slice(0, 20));
                 } else {
@@ -733,43 +729,31 @@
     </script>
 
     <script>
-        // ===== MÉMOIRE DES TRIS =====
-        (function() {
-            const PAGE_KEY = 'sort_index';
-            function saveSort() {
-                const sorts = {};
-                document.querySelectorAll('select').forEach(sel => {
-                    if (sel.id) sorts[sel.id] = sel.value;
-                });
-                if (Object.keys(sorts).length) sessionStorage.setItem(PAGE_KEY, JSON.stringify(sorts));
-            }
-            function restoreSort() {
-                const saved = sessionStorage.getItem(PAGE_KEY);
-                if (!saved) return;
-                try {
-                    const sorts = JSON.parse(saved);
-                    Object.entries(sorts).forEach(([id, val]) => {
-                        const el = document.getElementById(id);
-                        if (el) el.value = val;
-                    });
-                } catch(e) {}
-            }
-            window.addEventListener('load', function() {
-                restoreSort();
-                document.querySelectorAll('select').forEach(sel => {
-                    sel.addEventListener('change', saveSort);
-                });
-            });
-        })();
-
-        // ===== CAROUSEL MOBILE: scroll natif =====
-        // Patch buildCarousel pour mobile: utilise scroll natif
+    /* ── Mémoire des tris (index) ─────────────────── */
+    (function() {
+        const KEY = 'sortmem_index';
+        const IDS = [];
+        function save() {
+            const d = {};
+            IDS.forEach(id => { const el = document.getElementById(id); if (el) d[id] = el.value; });
+            try { sessionStorage.setItem(KEY, JSON.stringify(d)); } catch(e) {}
+        }
+        function restore() {
+            try {
+                const raw = sessionStorage.getItem(KEY);
+                if (!raw) return;
+                const d = JSON.parse(raw);
+                IDS.forEach(id => { const el = document.getElementById(id); if (el && d[id] !== undefined) el.value = d[id]; });
+            } catch(e) {}
+        }
         document.addEventListener('DOMContentLoaded', function() {
-            if (window.innerWidth > 1000) return;
-            // Désactiver les touch handlers sur les tracks et utiliser le scroll CSS natif
-            const origBuild = window.buildCarouselNative;
+            restore();
+            IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', save);
+            });
         });
+    })();
     </script>
-
 </body>
 </html>
