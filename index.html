@@ -161,8 +161,12 @@
             margin-right: 5px;
         }
 
+        /* ========== CARROUSELS CORRIGÉS ========== */
         .carousel-wrapper {
-            position: relative; max-width: 1400px; margin: 0 auto; padding: 0 40px;
+            position: relative;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
         }
         .carousel-container {
             overflow: hidden;
@@ -187,6 +191,56 @@
         .carousel-prev { left: 0; }
         .carousel-next { right: 0; }
 
+        /* Desktop : transition et glisser */
+        @media (min-width: 1001px) {
+            .carousel-container {
+                overflow: hidden;
+            }
+            .carousel-track {
+                transition: transform 0.4s ease;
+            }
+        }
+
+        /* Mobile : défilement horizontal natif (scroll) */
+        @media (max-width: 1000px) {
+            .carousel-wrapper {
+                padding: 0 5px;
+            }
+            .carousel-container {
+                overflow-x: auto !important;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x mandatory;
+                scrollbar-width: none;
+            }
+            .carousel-container::-webkit-scrollbar {
+                display: none;
+            }
+            .carousel-track {
+                width: max-content;
+                gap: 8px;
+                transition: none;
+                cursor: default;
+            }
+            .carousel-track:active {
+                cursor: default;
+            }
+            .card {
+                scroll-snap-align: start;
+                width: 140px;
+            }
+            .carousel-btn {
+                display: none;
+            }
+            .hero-section { height: 45vh; }
+            .main-title { font-size: 2em; }
+            .section-title { font-size: 1.2em; }
+        }
+        @media (max-width: 480px) {
+            .card { width: 120px; }
+        }
+        /* ========== FIN CARROUSELS ========== */
+
         .card {
             background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s;
             border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
@@ -210,38 +264,9 @@
         .anime-count-wrapper { text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; margin-top: 40px; display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; }
         .discord-footer-link { background: #5865F2; color: white; text-decoration: none; padding: 8px 18px; border-radius: 30px; font-size: 0.9em; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .discord-footer-link::before { content: '💬'; font-size: 1em; }
-
-        /* ---------- CORRECTION CARROUSEL MOBILE ---------- */
-        @media (max-width: 1000px) {
-            .carousel-container {
-                overflow-x: auto !important;
-                overflow-y: hidden;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
-                scroll-snap-type: x mandatory;
-            }
-            .carousel-container::-webkit-scrollbar {
-                display: none;
-            }
-            .carousel-track {
-                width: max-content;
-                gap: 8px;
-            }
-            .card {
-                scroll-snap-align: start;
-            }
-            .carousel-btn {
-                display: none;
-            }
-            .card { width: 140px; }
-            .hero-section { height: 45vh; }
-            .main-title { font-size: 2em; }
-            .section-title { font-size: 1.2em; }
-            .carousel-wrapper { padding: 0 5px; }
-        }
-        @media (max-width: 480px) {
-            .card { width: 120px; }
-        }
+        .voir-tout-wrap { max-width: 1400px; margin: 6px auto 0; padding: 0 44px; display: flex; justify-content: flex-end; }
+        .voir-tout-btn { background: transparent; border: 1px solid rgba(255,71,87,0.5); color: #ff6b7a; padding: 3px 12px; border-radius: 20px; font-size: 0.75em; font-weight: bold; text-decoration: none; transition: 0.2s; }
+        .voir-tout-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
     
         /* ── Images lisses ── */
         img {
