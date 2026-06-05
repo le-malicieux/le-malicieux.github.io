@@ -18,11 +18,10 @@
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
-            /* plus de transformation, fond fixe */
         }
         #bg-overlay {
             position: fixed; inset: 0; z-index: -1; pointer-events: none;
-            background: black; opacity: 0; /* sera animée au scroll */
+            background: black; opacity: 0;
             transition: none;
         }
         body {
@@ -163,10 +162,18 @@
         }
 
         .carousel-wrapper {
-            position: relative; max-width: 1400px; margin: 0 auto; padding: 0 40px; /* espace pour les flèches */
+            position: relative; max-width: 1400px; margin: 0 auto; padding: 0 40px;
         }
-        .carousel-container { overflow: hidden; touch-action: pan-y; }
-        .carousel-track { display: flex; gap: 10px; transition: transform 0.4s ease; cursor: grab; }
+        .carousel-container {
+            overflow: hidden;
+            touch-action: pan-y;
+        }
+        .carousel-track {
+            display: flex;
+            gap: 10px;
+            transition: transform 0.4s ease;
+            cursor: grab;
+        }
         .carousel-track:active { cursor: grabbing; }
         .carousel-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
@@ -204,7 +211,7 @@
         .discord-footer-link { background: #5865F2; color: white; text-decoration: none; padding: 8px 18px; border-radius: 30px; font-size: 0.9em; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .discord-footer-link::before { content: '💬'; font-size: 1em; }
 
-        /* -------------------- CORRECTION CARROUSEL MOBILE -------------------- */
+        /* ---------- CORRECTION CARROUSEL MOBILE ---------- */
         @media (max-width: 1000px) {
             .carousel-container {
                 overflow-x: auto !important;
@@ -236,23 +243,14 @@
             .card { width: 120px; }
         }
     
-        /* ── Images lisses (anti-pixelisation maximale) ─── */
+        /* ── Images lisses ── */
         img {
             image-rendering: -webkit-optimize-contrast;
             image-rendering: smooth;
             image-rendering: high-quality;
         }
-        .card img, .sugg-img, .mal-row .ml-img, .list-img,
-        .anime-card img, .studio-preview img, .studio-logo,
-        .img-container img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: smooth;
-            image-rendering: high-quality;
-            -ms-interpolation-mode: bicubic;
-            will-change: transform;
-        }
         
-        /* ── Zoom 80% — centré ───────────────────────────── */
+        /* ── Zoom 80% ── */
         html {
             zoom: 0.8;
         }
@@ -262,11 +260,10 @@
             margin-right: auto;
         }
         
-        /* ── Grille responsive search results ────────────── */
         #search-results-grid {
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
         }
-        </style>
+    </style>
 </head>
 <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
@@ -479,13 +476,11 @@
         }
 
         function addTouchSwipe(trackId, getCurrentIndex, setCurrentIndex, getMaxIndex, getCardWidth, scrollFn) {
-            // Sur mobile: scroll natif CSS, pas de touch JS
             if (window.innerWidth <= 1000) return;
             const track = document.getElementById(trackId);
             if (!track) return;
             let startX = 0, startY = 0, movedX = 0;
             let isDragging = false;
-
             track.addEventListener('touchstart', (e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
@@ -493,7 +488,6 @@
                 isDragging = true;
                 track.style.transition = 'none';
             }, { passive: true });
-
             track.addEventListener('touchmove', (e) => {
                 if (!isDragging) return;
                 const dx = e.touches[0].clientX - startX;
@@ -505,7 +499,6 @@
                     track.style.transform = `translateX(${offset}px)`;
                 }
             }, { passive: false });
-
             track.addEventListener('touchend', () => {
                 if (!isDragging) return;
                 isDragging = false;
@@ -541,14 +534,11 @@
             const getCI = () => currentIndex;
             const setCI = (v) => { currentIndex = v; };
             addTouchSwipe(trackId, getCI, setCI, getMaxIndex, getCardWidth, scrollToIndex);
-            
-            // Flèches de navigation
             const wrapper = track.closest('.carousel-wrapper');
             const prevBtn = wrapper?.querySelector('.carousel-prev');
             const nextBtn = wrapper?.querySelector('.carousel-next');
             if (prevBtn) prevBtn.onclick = () => { if (currentIndex > 0) { currentIndex--; scrollToIndex(); } };
             if (nextBtn) nextBtn.onclick = () => { if (currentIndex < getMaxIndex()) { currentIndex++; scrollToIndex(); } };
-
             let resizeTimeout; window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => { currentIndex = Math.min(currentIndex, getMaxIndex()); scrollToIndex(); }, 150); });
         }
 
@@ -563,12 +553,10 @@
             const resultsTitle = document.getElementById('search-results-title');
             const resultsCount = document.getElementById('search-results-count');
             const backHome = document.getElementById('back-home');
-
             mainContent.style.display = 'none';
             resultsSection.style.display = 'block';
             resultsTitle.textContent = '🔍 ' + query;
             resultsCount.textContent = results.length + ' anime' + (results.length > 1 ? 's' : '') + ' trouvé' + (results.length > 1 ? 's' : '');
-
             if (results.length === 0) {
                 resultsGrid.innerHTML = '<p style="color:#ff6b7a;text-align:center;padding:40px;">Aucun anime trouvé pour "' + query + '"</p>';
             } else if (results.length === 1) {
@@ -617,11 +605,10 @@
             } catch(e) {}
         }
 
-        // Assombrissement progressif au scroll
         function updateOverlayOpacity() {
             const scrollY = window.scrollY;
             const maxScroll = document.body.scrollHeight - window.innerHeight || 1;
-            const opacity = Math.min(scrollY / 600, 0.65); // s'assombrit jusqu'à 0.65
+            const opacity = Math.min(scrollY / 600, 0.65);
             document.getElementById('bg-overlay').style.opacity = opacity;
         }
 
@@ -632,7 +619,6 @@
                 const bgLayer = document.getElementById('bg-layer');
                 if (bgLayer && !bgLayer.style.backgroundImage) setBackground();
             });
-
             try {
                 const resp = await fetch('animes.csv');
                 const raw = await resp.text();
@@ -652,7 +638,6 @@
                         malId: clean(c[13]), editeur: clean(c[14]), ordreAjout
                     };
                 }).filter(a => a !== null);
-
                 try {
                     const tr = await fetch('tags_description.csv');
                     const trRaw = await tr.text();
@@ -662,11 +647,9 @@
                         return { nom: c[0].trim(), description: (c[1]||'').trim() };
                     }).filter(t => t !== null);
                 } catch(e) { allTags = []; }
-
                 buildCarousel('carousel-random-track', shuffle(allAnimes).slice(0, 20));
                 const recents = [...allAnimes].filter(a => a.ordreAjout > 0).sort((a,b) => b.ordreAjout - a.ordreAjout).slice(0, 20);
                 buildCarousel('carousel-recent-track', recents);
-
                 if (allTags.length > 0) {
                     const rTag = allTags[Math.floor(Math.random() * allTags.length)];
                     document.getElementById('tag-pill-link').textContent = rTag.nom;
@@ -681,7 +664,6 @@
                     document.getElementById('tag-description-text').textContent = 'Chargement des tags...';
                 }
                 document.getElementById('anime-count').innerHTML = '📊 <span class="count-number">' + allAnimes.length + '</span> animes dans le catalogue';
-
                 const urlParams = new URLSearchParams(window.location.search);
                 const searchParam = urlParams.get('search');
                 if (searchParam) {

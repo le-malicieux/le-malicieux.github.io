@@ -27,7 +27,6 @@
             background-repeat: no-repeat;
         }
 
-        /* Overlay sombre pour lisibilité */
         body::after {
             content: ''; position: fixed; inset: 0;
             background: rgba(0,0,0,0.5); z-index: -1; pointer-events: none;
@@ -39,6 +38,7 @@
             color: var(--text);
             margin: 0;
             min-height: 100vh;
+            padding-top: 52px;
         }
 
         .top-navbar {
@@ -48,8 +48,10 @@
             padding: 8px 16px;
             background: var(--nav-bg);
             backdrop-filter: blur(10px);
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             gap: 12px;
@@ -134,6 +136,7 @@
             .nav-links a, .nav-links button, .nav-links .discord-btn { margin: 5px 0; text-align: center; font-size: 0.85em !important; padding: 10px !important; }
             .mobile-overlay.active { display: block; }
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
+            body { padding-top: 106px; }
         }
 
         .profile-layout { max-width: 1100px; margin: 0 auto; padding: 30px 20px 40px; display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
@@ -260,7 +263,7 @@
             .recent-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
         }
     
-        /* ── Images lisses (anti-pixelisation maximale) ─── */
+        /* ── Images lisses ── */
         img {
             image-rendering: -webkit-optimize-contrast;
             image-rendering: smooth;

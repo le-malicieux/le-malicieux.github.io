@@ -30,12 +30,14 @@
             margin: 0; 
             min-height: 100vh;
             overflow-x: hidden;
+            padding-top: 52px;
         }
 
         .top-navbar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             gap: 12px;
             flex-wrap: wrap;
         }
@@ -107,13 +109,12 @@
                 background: #0f0f0f; flex-direction: column; padding: 30px 20px;
                 transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
                 overflow-y: auto;
-                left: auto;
-                right: -100%;
+                left: auto; right: -100%;
             }
             .nav-links.active { right: 0; left: auto; }
             .nav-links a, .nav-links button { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
-/* auto-fill gère les colonnes */
+            body { padding-top: 106px; }
             .card-info { padding: 5px; }
             .card-title { font-size: 0.85em; }
         }
@@ -148,23 +149,11 @@
         
         @media (max-width: 480px) { .card-title { font-size: 0.85em; } }
     
-        /* ── Images lisses (anti-pixelisation maximale) ─── */
         img {
             image-rendering: -webkit-optimize-contrast;
             image-rendering: smooth;
             image-rendering: high-quality;
         }
-        .card img, .sugg-img, .mal-row .ml-img, .list-img,
-        .anime-card img, .studio-preview img, .studio-logo,
-        .img-container img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: smooth;
-            image-rendering: high-quality;
-            -ms-interpolation-mode: bicubic;
-            will-change: transform;
-        }
-        
-        /* ── Zoom 80% — centré ───────────────────────────── */
         html {
             zoom: 0.8;
         }
@@ -173,12 +162,10 @@
             margin-left: auto;
             margin-right: auto;
         }
-        
-        /* ── Grille responsive (auto-fill, s'adapte au zoom) */
         .grid {
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
         }
-        </style>
+    </style>
 </head>
 <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
@@ -468,8 +455,6 @@
             displayAnimes(filtered, sortMode);
         }
 
-        
-        // Convertit une date (française, américaine ou année seule) en timestamp pour tri précis
         function dateToTs(s){
             if(!s) return 0;
             s = s.trim();
@@ -539,7 +524,6 @@ function displayAnimes(list, sortMode) {
     </script>
 
     <script>
-    /* ── Mémoire des tris ─────────────────────────────── */
     (function() {
         var KEY = 'sortmem_index_old';
         var IDS = ['sort'];
@@ -573,7 +557,6 @@ function displayAnimes(list, sortMode) {
     </script>
 
     <script>
-    /* ── Restaure tri depuis URL ?sort=ajout ─────────────── */
     document.addEventListener('DOMContentLoaded', function() {
         var param = new URLSearchParams(window.location.search).get('sort');
         if (param) {
