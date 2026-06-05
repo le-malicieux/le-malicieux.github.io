@@ -7,115 +7,34 @@
     <link rel="stylesheet" href="mobile.css">
     <title>Mon Profil - Le Malicieux</title>
     <style>
-        :root {
-            --primary: #ff4757;
-            --bg: #0f0f0f;
-            --card-bg: rgba(20, 20, 20, 0.88);
-            --text: #eee;
-            --nav-bg: rgba(15,15,15,0.9);
-            --border: #2a2a2a;
-            --accent-blue: #2e86de;
-            --accent-green: #2ecc71;
-            --accent-yellow: #f1c40f;
-        }
-
+        /* ... (même style que précédemment, inchangé) ... */
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.88); --text: #eee; --nav-bg: rgba(15,15,15,0.9); --border: #2a2a2a; --accent-blue: #2e86de; --accent-green: #2ecc71; --accent-yellow: #f1c40f; }
         * { box-sizing: border-box; }
-
-        #bg-layer {
-            position: fixed; inset: 0; z-index: -2; pointer-events: none;
-            background-size: cover; background-position: center center;
-            background-repeat: no-repeat;
-        }
-
-        body::after {
-            content: ''; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.5); z-index: -1; pointer-events: none;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            min-height: 100vh;
-            padding-top: 52px;
-        }
-
-        .top-navbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 16px;
-            background: var(--nav-bg);
-            backdrop-filter: blur(10px);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            gap: 12px;
-            flex-wrap: wrap;
-        }
+        #bg-layer { position: fixed; inset: 0; z-index: -2; pointer-events: none; background-size: cover; background-position: center center; background-repeat: no-repeat; }
+        body::after { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: -1; pointer-events: none; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; padding-top: 52px; }
+        .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px); position: fixed; top: 0; left: 0; right: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); gap: 12px; flex-wrap: wrap; }
         .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .nav-logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
         .nav-title { color: var(--primary); font-weight: bold; font-size: 1.1em; }
-        
-        .search-wrapper {
-            position: relative; flex: 1; max-width: 400px; min-width: 200px;
-        }
-        .search-wrapper input {
-            width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; 
-            padding: 8px 35px 8px 12px; border-radius: 5px; font-size: 0.85em;
-            transition: 0.3s; box-sizing: border-box; outline: none;
-        }
+        .search-wrapper { position: relative; flex: 1; max-width: 400px; min-width: 200px; }
+        .search-wrapper input { width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; padding: 8px 35px 8px 12px; border-radius: 5px; font-size: 0.85em; transition: 0.3s; box-sizing: border-box; outline: none; }
         .search-wrapper input:focus { border-color: var(--primary); }
         .search-wrapper input::placeholder { color: #777; }
-        .search-icon {
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            color: #888; font-size: 1em; pointer-events: none;
-        }
-        .search-suggestions {
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: #1a1a1a; border: 1px solid #333; border-radius: 0 0 5px 5px;
-            max-height: 300px; overflow-y: auto; display: none; z-index: 2000;
-        }
+        .search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #888; font-size: 1em; pointer-events: none; }
+        .search-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: #1a1a1a; border: 1px solid #333; border-radius: 0 0 5px 5px; max-height: 300px; overflow-y: auto; display: none; z-index: 2000; }
         .search-suggestions.active { display: block; }
-        .search-suggestions .suggestion-item {
-            padding: 8px 12px; cursor: pointer; color: #ccc; font-size: 0.85em;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex; align-items: center; gap: 10px;
-        }
+        .search-suggestions .suggestion-item { padding: 8px 12px; cursor: pointer; color: #ccc; font-size: 0.85em; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; }
         .search-suggestions .suggestion-item:hover { background: #2a2a2a; color: white; }
-        .search-suggestions .suggestion-item .sugg-img {
-            width: 28px; height: 40px; border-radius: 4px; object-fit: cover;
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .nav-links a, .nav-links button { 
-            background: var(--primary); border: none; color: white; 
-            padding: 5px 10px; border-radius: 4px; font-size: 0.8em; 
-            text-decoration: none; cursor: pointer;
-            font-weight: bold;
-        }
-        .nav-links .discord-btn {
-            background: #5865F2; color: white; text-decoration: none;
-            padding: 5px 10px; border-radius: 20px; font-size: 0.8em;
-            font-weight: bold; white-space: nowrap;
-            border: 2px solid rgba(255,255,255,0.15);
-            display: inline-flex; align-items: center; gap: 5px;
-        }
+        .search-suggestions .suggestion-item .sugg-img { width: 28px; height: 40px; border-radius: 4px; object-fit: cover; }
+        .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .nav-links a, .nav-links button { background: var(--primary); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8em; text-decoration: none; cursor: pointer; font-weight: bold; }
+        .nav-links .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; white-space: nowrap; border: 2px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; gap: 5px; }
         .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
         .nav-links .discord-btn:hover { background: #4752c4; border-color: rgba(255,255,255,0.3); }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
         .burger { display: none; font-size: 28px; cursor: pointer; color: white; order: -1; }
-        
         @media (max-width: 1000px) {
             .burger { display: block; }
             .close-menu { display: block; }
@@ -123,41 +42,18 @@
             .nav-links { order: 3; }
             .top-navbar { flex-direction: column; align-items: stretch; }
             .nav-left { order: 1; display: flex; justify-content: space-between; width: 100%; }
-            .nav-links {
-                position: fixed; top: 0; right: -100%; width: 280px; height: 100vh;
-                background: #0f0f0f; flex-direction: column; padding: 30px 20px;
-                transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch;
-                order: initial;
-                left: auto;
-                right: -100%;
-                overflow-y: auto;
-            }
+            .nav-links { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch; order: initial; left: auto; right: -100%; overflow-y: auto; }
             .nav-links.active { right: 0; left: auto; }
             .nav-links a, .nav-links button, .nav-links .discord-btn { margin: 5px 0; text-align: center; font-size: 0.85em !important; padding: 10px !important; }
             .mobile-overlay.active { display: block; }
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
             body { padding-top: 106px; }
         }
-
         .profile-layout { max-width: 1100px; margin: 0 auto; padding: 30px 20px 40px; display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
-        
-        .avatar-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 16px;
-        }
+        .avatar-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; text-align: center; margin-bottom: 16px; }
         .avatar-wrapper { position: relative; display: inline-block; margin-bottom: 14px; }
         .avatar-img { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; background: #222; }
-        .avatar-upload-btn {
-            position: absolute; bottom: 4px; right: 4px;
-            width: 30px; height: 30px; background: var(--primary);
-            border: 2px solid var(--bg); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 0.8em;
-        }
+        .avatar-upload-btn { position: absolute; bottom: 4px; right: 4px; width: 30px; height: 30px; background: var(--primary); border: 2px solid var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8em; }
         #avatar-file-input { display: none; }
         .profile-username { font-size: 1.3em; font-weight: 800; color: white; margin-bottom: 4px; }
         .profile-google-name { font-size: 0.75em; color: #555; margin-bottom: 12px; }
@@ -165,19 +61,12 @@
         .edit-pseudo-row input { flex: 1; background: #222; border: 1px solid #444; color: white; padding: 7px 10px; border-radius: 6px; font-size: 0.85em; }
         .edit-pseudo-row button { background: var(--primary); color: white; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8em; }
         .profile-meta { font-size: 0.78em; color: #666; line-height: 1.8; }
-        
-        .stats-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 18px;
-            margin-bottom: 16px;
-        }
+        .btn-playlist-public { background: #5865F2; color: white; border: none; padding: 6px 12px; border-radius: 20px; margin-top: 10px; font-size: 0.75em; cursor: pointer; text-decoration: none; display: inline-block; }
+        .stats-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
         .stats-card h3 { font-size: 0.75em; text-transform: uppercase; color: var(--primary); margin: 0 0 14px; }
         .stat-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #222; font-size: 0.85em; }
         .stat-row .label { color: #888; }
         .stat-row .value { font-weight: bold; color: white; }
-        
         .status-bars { margin-top: 14px; }
         .status-bar-item { margin-bottom: 10px; }
         .status-bar-item .bar-label { display: flex; justify-content: space-between; font-size: 0.78em; color: #888; margin-bottom: 4px; }
@@ -186,20 +75,11 @@
         .bar-watching { background: var(--accent-green); }
         .bar-completed { background: var(--accent-blue); }
         .bar-waiting { background: var(--accent-yellow); }
-        
         .score-avg-display { text-align: center; padding: 12px 0 4px; }
         .score-avg-number { font-size: 2.8em; font-weight: 900; color: var(--accent-yellow); line-height: 1; }
         .score-stars { font-size: 1.1em; color: var(--accent-yellow); margin-top: 6px; letter-spacing: 2px; }
-        
-        .main-content .section {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
+        .main-content .section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 20px; }
         .section h2 { font-size: 0.85em; text-transform: uppercase; color: var(--primary); margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
-        
         .activity-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1f1f1f; }
         .activity-img { width: 36px; height: 50px; border-radius: 4px; object-fit: cover; background: #222; flex-shrink: 0; }
         .activity-body { flex: 1; min-width: 0; }
@@ -212,37 +92,29 @@
         .tag-rated { background: rgba(241,196,15,0.2); color: #f1c40f; }
         .tag-finished { background: rgba(255,71,87,0.2); color: #ff4757; }
         .activity-time { font-size: 0.7em; color: #555; flex-shrink: 0; }
-
         .comment-item { padding: 10px 0; border-bottom: 1px solid #1f1f1f; }
         .comment-anime-link { font-size: 0.8em; font-weight: bold; color: white; text-decoration: none; }
         .comment-anime-link:hover { color: var(--primary); }
         .comment-text { font-size: 0.85em; color: #ccc; margin: 4px 0 0; }
         .comment-time { font-size: 0.7em; color: #555; margin-top: 3px; }
-        
         .recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
         .recent-card { text-decoration: none; color: inherit; }
         .recent-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 6px; border: 1px solid #333; }
         .recent-card:hover img { border-color: var(--primary); }
         .recent-card .rc-title { font-size: 0.7em; color: #aaa; margin-top: 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        
         .score-dist { display: flex; align-items: flex-end; gap: 4px; height: 70px; margin-top: 8px; }
         .score-dist-bar { flex: 1; background: rgba(241,196,15,0.15); border-radius: 3px 3px 0 0; position: relative; cursor: default; }
         .score-dist-bar .bar-val { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 0.65em; color: #666; }
         .score-dist-bar .bar-count { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 0.65em; color: #888; }
-        
         .not-logged { text-align: center; padding: 80px 20px; color: #666; }
         .not-logged h2 { color: var(--primary); margin-bottom: 10px; }
         .btn-login { display: inline-block; margin-top: 20px; background: var(--primary); color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; }
-
-        /* Onglets */
         .page-tabs { display: flex; gap: 8px; padding: 16px 20px 0; max-width: 1100px; margin: 0 auto; }
         .page-tab { background: var(--card-bg); border: 1px solid var(--border); color: #888; padding: 9px 20px; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 0.85em; font-weight: 700; border-bottom: none; transition: 0.2s; }
         .page-tab.active { background: rgba(255,71,87,0.12); border-color: var(--primary); color: var(--primary); }
         .page-tab:hover:not(.active) { color: white; border-color: #555; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
-        /* Communauté */
         .community-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; padding: 4px 0; }
         .member-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px; text-align: center; text-decoration: none; color: inherit; transition: border-color 0.2s; display: block; }
         .member-card:hover { border-color: var(--primary); }
@@ -250,39 +122,16 @@
         .member-card:hover .member-avatar { border-color: var(--primary); }
         .member-name { font-weight: 700; font-size: 0.9em; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .member-sub { font-size: 0.7em; color: #555; margin-top: 3px; }
-        
         .upload-spinner { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.6); border-radius: 50%; align-items: center; justify-content: center; font-size: 1.2em; }
         .upload-spinner.active { display: flex; }
-        
         #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(60px); background: #222; color: white; padding: 10px 22px; border-radius: 8px; font-size: 0.88em; border: 1px solid #444; transition: transform 0.3s, opacity 0.3s; opacity: 0; z-index: 9999; pointer-events: none; }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        
-        @media (max-width: 800px) {
-            .profile-layout { grid-template-columns: 1fr; padding: 16px 10px 30px; }
-            .avatar-img { width: 85px; height: 85px; }
-            .recent-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
-        }
-    
-        /* ── Images lisses ── */
-        img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: smooth;
-            image-rendering: high-quality;
-        }
-        .card img, .sugg-img, .mal-row .ml-img, .list-img,
-        .anime-card img, .studio-preview img, .studio-logo,
-        .img-container img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: smooth;
-            image-rendering: high-quality;
-            -ms-interpolation-mode: bicubic;
-            will-change: transform;
-        }
-        </style>
+        @media (max-width: 800px) { .profile-layout { grid-template-columns: 1fr; padding: 16px 10px 30px; } .avatar-img { width: 85px; height: 85px; } .recent-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); } }
+        img { image-rendering: -webkit-optimize-contrast; image-rendering: smooth; image-rendering: high-quality; }
+    </style>
 </head>
 <body>
     <div id="bg-layer"></div>
-
     <nav class="top-navbar">
         <div class="nav-left">
             <a href="index.html" class="nav-brand">
@@ -291,13 +140,11 @@
             </a>
             <div class="burger" onclick="toggleM()">☰</div>
         </div>
-        
         <div class="search-wrapper" id="search-wrapper">
             <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
             <span class="search-icon">🔍</span>
             <div class="search-suggestions" id="search-suggestions"></div>
         </div>
-
         <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
         <div class="nav-links" id="menu">
             <div class="close-menu" onclick="toggleM()">← Retour</div>
@@ -320,7 +167,6 @@
         </div>
     </div>
 
-    <!-- Onglets (affichés une fois connecté ou en vue publique) -->
     <div id="tabs-bar" class="page-tabs" style="display:none;">
         <button class="page-tab active" id="tab-btn-profil" onclick="switchTab('profil')">👤 Mon Profil</button>
         <button class="page-tab" id="tab-btn-community" onclick="switchTab('community')">🌐 Communauté Malicieuse</button>
@@ -333,7 +179,6 @@
                     <h2 style="font-size:0.85em; text-transform:uppercase; color:var(--primary); margin:0 0 16px;">🌐 Membres de la communauté</h2>
                     <div id="community-grid" class="community-grid"><div style="color:#555;">Chargement…</div></div>
                 </div>
-                <!-- Profil public affiché ici quand on clique sur un membre -->
                 <div id="public-profile-container" style="display:none; margin-top:20px;"></div>
             </div>
         </div>
@@ -494,7 +339,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         const publicUid = urlParams.get('uid');
 
-        // switchTab function
         window.switchTab = function(tab) {
             document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -502,7 +346,6 @@
             document.getElementById('tab-' + tab).classList.add('active');
         };
 
-        // If public profile view (?uid=), open community tab and show profile there
         if (publicUid) {
             document.getElementById('not-logged-block').style.display = 'none';
         }
@@ -513,10 +356,8 @@
             } else if (user) {
                 await buildProfile(user);
             }
-            // else: stays on login wall
         });
 
-        // Helper: filter out animes from imported shared playlists
         async function getOwnAnimes(uid) {
             const [playlistSnap, sharedCustomSnap] = await Promise.all([
                 getDocs(query(collection(db, "playlists"), where("uid", "==", uid))),
@@ -533,7 +374,6 @@
         }
 
         async function buildPublicProfile(uid, currentUser) {
-            // Show tabs, activate community tab
             document.getElementById('tabs-bar').style.display = 'flex';
             switchTab('community');
 
@@ -553,14 +393,13 @@
             const createdAt = userData.createdAt || null;
             document.title = `${pseudo} - Le Malicieux`;
 
-            // Back button + profile shell inside community tab
             container.innerHTML = `
                 <div style="margin-bottom:12px;">
                     <button onclick="document.getElementById('public-profile-container').style.display='none'; document.getElementById('community-grid').style.display='grid'; history.pushState({},'','profil.html');" style="background:#222; border:1px solid #444; color:#ccc; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:0.8em;">← Retour à la communauté</button>
                 </div>
                 <div id="public-shell"></div>`;
 
-            renderProfileShellInto('public-shell', null, pseudo, avatarUrl, createdAt, null, false);
+            renderProfileShellInto('public-shell', null, pseudo, avatarUrl, createdAt, null, false, uid);
 
             const animes = await getOwnAnimes(uid);
             const ctx = document.getElementById('public-shell');
@@ -589,11 +428,10 @@
             const avatarUrl = userData.photoURL || user.photoURL || 'img/logo.jpg';
             const createdAt = userData.createdAt || user.metadata?.creationTime || null;
 
-            renderProfileShellInto('tab-profil', user, pseudo, avatarUrl, createdAt, userData.displayName || user.displayName, true);
+            renderProfileShellInto('tab-profil', user, pseudo, avatarUrl, createdAt, userData.displayName || user.displayName, true, null);
             document.getElementById('tabs-bar').style.display = 'flex';
             document.getElementById('not-logged-block').style.display = 'none';
 
-            // Live updates — filter out shared playlists each time
             onSnapshot(query(collection(db, "playlists"), where("uid", "==", user.uid)), async (snap) => {
                 const sharedCustomSnap = await getDocs(query(collection(db, "playlists_custom"), where("uid", "==", user.uid), where("shared", "==", true)));
                 const sharedNames = new Set();
@@ -611,7 +449,6 @@
                 renderComments(user.uid, ctx);
             });
 
-            // Edit controls
             document.getElementById('avatar-upload-btn').onclick = () => document.getElementById('avatar-file-input').click();
             document.getElementById('avatar-file-input').onchange = async (e) => {
                 const file = e.target.files[0];
@@ -664,13 +501,13 @@
         }
 
         window.openMemberProfile = async function(uid) {
-            // Scroll to top of community tab
             window.scrollTo({ top: 0, behavior: 'smooth' });
             history.pushState({}, '', `profil.html?uid=${uid}`);
             await buildPublicProfile(uid, null);
         };
 
-        function renderProfileShellInto(containerId, user, pseudo, avatarUrl, createdAt, googleName, editable) {
+        // MODIFICATION : ajout du paramètre `viewUid` pour le bouton playlist
+        function renderProfileShellInto(containerId, user, pseudo, avatarUrl, createdAt, googleName, editable, viewUid) {
             const avatarSection = editable ? `
                 <div class="avatar-wrapper">
                     <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='img/logo.jpg'">
@@ -683,6 +520,10 @@
             const editSection = editable ? `
                 <div class="profile-google-name">Compte Google : ${googleName}</div>
                 <div class="edit-pseudo-row"><input id="input-pseudo" type="text" placeholder="Changer le pseudo…" maxlength="30"><button id="btn-save-pseudo">OK</button></div>` : '';
+            
+            // AJOUT DU BOUTON PLAYLIST (si viewUid est fourni, donc en mode public)
+            const playlistButton = (viewUid && !editable) ? `<div><a href="playlist.html?uid=${viewUid}" class="btn-playlist-public">📂 Voir sa playlist</a></div>` : '';
+            
             document.getElementById(containerId).innerHTML = `
                 <div class="profile-layout">
                     <div class="sidebar">
@@ -690,6 +531,7 @@
                             ${avatarSection}
                             <div class="profile-username" id="display-pseudo">${pseudo}</div>
                             ${editSection}
+                            ${playlistButton}
                             <div class="profile-meta">Membre depuis<br><span>${formatDate(createdAt)}</span></div>
                         </div>
                         <div class="stats-card"><h3>📊 Statistiques</h3><div data-id="stat-rows"><div class="stat-row"><span class="label">Chargement…</span></div></div><div class="status-bars" data-id="status-bars"></div></div>

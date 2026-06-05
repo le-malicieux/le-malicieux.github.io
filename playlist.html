@@ -67,6 +67,28 @@
             .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
             body { padding-top: 106px; }
         }
+        /* Bannière de visualisation publique */
+        .view-banner {
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .view-banner .back-btn {
+            background: #333;
+            color: #ff4757;
+            border: 1px solid #ff4757;
+            padding: 5px 12px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85em;
+        }
         .playlist-header { padding: 20px 20px 10px; text-align: center; }
         .controls-row { display: flex; justify-content: center; gap: 8px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
         .playlist-select { background: #222; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; font-size: 0.8em; min-width: 130px; }
@@ -140,6 +162,12 @@
         </a>
     </nav>
 
+    <!-- Bannière si visualisation d'une playlist publique -->
+    <div id="view-mode-banner" class="view-banner" style="display:none;">
+        <span id="viewer-info">Visualisation de la playlist de <strong id="viewer-name"></strong></span>
+        <a id="back-to-profile-btn" class="back-btn" href="#">← Retour au profil</a>
+    </div>
+
     <div class="playlist-header">
         <div class="controls-row">
             <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
@@ -179,11 +207,22 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, query, where, onSnapshot, addDoc, doc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, addDoc, doc, deleteDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
         const app = initializeApp(firebaseConfig); const db = getFirestore(app); const auth = getAuth(app);
-        let currentUser=null, userAnimes=[], csvDataMap={}, searchQuery='';
+        
+        // Récupération de l'UID depuis l'URL (mode visualisation publique)
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUid = urlParams.get('uid');
+        let isViewMode = !!targetUid;
+        let targetUserPseudo = '';
+        
+        let currentUser = null;
+        let userAnimes = [];
+        let csvDataMap = {};
+        let searchQuery = '';
+        
         function normalize(s){ return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[-_.:;,!?()'"&~#|]/g,' ').replace(/\s+/g,' ').trim(); }
         function getRealImgPath(n){ if(!n) return "img/logo.jpg"; const m=n.match(/\d+/); return m?`img/anime-${m[0]}.jpg`:"img/logo.jpg"; }
         window.handleImgErr=function(img,n){ if(!img.dataset.step){ img.dataset.step="1"; const m=n.match(/\d+/); img.src=m?`img/anime-${m[0]}.png`:"img/logo.jpg"; } else img.onerror=null; };
@@ -224,32 +263,125 @@
         function restoreScroll(){ const p=sessionStorage.getItem('playlistScrollPos'); if(p){ window.scrollTo(0,parseInt(p)); sessionStorage.removeItem('playlistScrollPos'); } }
         async function setBackground(){ const isMobile=window.innerWidth<=1000; try{ const res=await fetch('backgrounds.json'); const data=await res.json(); const list=isMobile?data.mobile:data.desktop; if(!list||!list.length)return; const file=list[Math.floor(Math.random()*list.length)]; document.getElementById('bg-layer').style.backgroundImage=`url('img/${file}')`; }catch(e){} }
         setBackground();
-        
-        // Pas de applyParallaxZoom, on a retiré l'écouteur
 
         async function loadCSV(){ const r=await fetch('animes.csv'); const t=await r.text(); t.split(/\r?\n/).slice(1).forEach(l=>{ const c=l.split(';'); const cl=s=>s?s.trim().replace(/^"|"$/g,''):""; if(c[0]) csvDataMap[cl(c[0])]={ pop:cl(c[1]), score:cl(c[2]), sortie:cl(c[3]), epMax:cl(c[4]), censure:cl(c[5]), editeur:cl(c[14]) }; }); }
-        onAuthStateChanged(auth,async(u)=>{ if(u){ currentUser=u; await loadCSV(); updateTabUI(); const cp=sessionStorage.getItem('userPseudo'), ca=sessionStorage.getItem('userAvatar'); if(cp) document.getElementById('nav-pseudo').textContent=cp, document.getElementById('nav-pseudo').style.display='inline'; if(ca||u.photoURL) document.getElementById('nav-avatar').src=ca||u.photoURL, document.getElementById('nav-avatar').style.display='inline-block';
-            onSnapshot(query(collection(db,"playlists_custom"),where("uid","==",u.uid)),(snap)=>{ const sel=document.getElementById('custom-selector'), cur=sel.value; let my='', shared=''; snap.forEach(d=>{ const opt=`<option value="${d.data().name}">${d.data().name}</option>`; d.data().shared?shared+=opt:my+=opt; }); let html='<option value="all">Toutes mes playlists</option>'; if(my) html+=my; if(shared) html+=`<optgroup label="── Playlists reçues ──">${shared}</optgroup>`; sel.innerHTML=html; sel.value=cur||'all'; toggleDeleteBtn(); });
-            onSnapshot(query(collection(db,"playlists"),where("uid","==",u.uid)),(snap)=>{ userAnimes=[]; snap.forEach(d=>{ const data=d.data(), csv=csvDataMap[data.anime]||{}; userAnimes.push({ id:d.id, ...data, ...csv }); }); refreshDisplay(); });
-        }});
+        
+        // Chargement des données en mode visualisation publique ou mode perso
+        async function loadPlaylistForUid(uid) {
+            // Récupérer le pseudo de l'utilisateur
+            const userDoc = await getDoc(doc(db, "users", uid));
+            if (userDoc.exists()) {
+                targetUserPseudo = userDoc.data().pseudo || userDoc.data().displayName || 'Utilisateur';
+                document.getElementById('viewer-name').textContent = targetUserPseudo;
+                document.title = `Playlist de ${targetUserPseudo} - Le Malicieux`;
+            } else {
+                targetUserPseudo = 'Utilisateur inconnu';
+                document.getElementById('viewer-name').textContent = targetUserPseudo;
+            }
+            document.getElementById('view-mode-banner').style.display = 'flex';
+            // Cacher les contrôles d'édition
+            document.getElementById('btn-del-playlist').style.display = 'none';
+            // Désactiver les sélecteurs de playlist custom (on affiche toutes ses playlists)
+            const customSelect = document.getElementById('custom-selector');
+            customSelect.innerHTML = '<option value="all">Toutes ses playlists</option>';
+            customSelect.disabled = true;
+            
+            // Récupérer les animes de l'utilisateur (playlists collection)
+            const playlistSnap = await getDocs(query(collection(db, "playlists"), where("uid", "==", uid)));
+            // Récupérer les noms des playlists partagées (pour les exclure ? on affiche tout)
+            const sharedCustomSnap = await getDocs(query(collection(db, "playlists_custom"), where("uid", "==", uid), where("shared", "==", true)));
+            const sharedNames = new Set();
+            sharedCustomSnap.forEach(d => sharedNames.add(d.data().name));
+            
+            userAnimes = [];
+            playlistSnap.forEach(d => {
+                const data = d.data();
+                const csv = csvDataMap[data.anime] || {};
+                // On inclut tous les animes (même ceux partagés ? pour la vue publique on les affiche)
+                userAnimes.push({ id: d.id, ...data, ...csv });
+            });
+            refreshDisplay();
+        }
+        
+        async function initPlaylist() {
+            await loadCSV();
+            if (isViewMode) {
+                await loadPlaylistForUid(targetUid);
+                // Désactiver l'ajout/suppression
+                // Le bouton retour
+                const backBtn = document.getElementById('back-to-profile-btn');
+                backBtn.href = `profil.html?uid=${targetUid}`;
+                backBtn.onclick = (e) => { e.preventDefault(); window.location.href = backBtn.href; };
+                // Masquer le profil utilisateur dans la navbar
+                document.getElementById('nav-profil-link').style.display = 'none';
+            } else {
+                // Mode normal : connecté
+                onAuthStateChanged(auth, async (u) => {
+                    if (u) {
+                        currentUser = u;
+                        updateTabUI();
+                        const cp = sessionStorage.getItem('userPseudo'), ca = sessionStorage.getItem('userAvatar');
+                        if(cp) document.getElementById('nav-pseudo').textContent = cp, document.getElementById('nav-pseudo').style.display = 'inline';
+                        if(ca || u.photoURL) document.getElementById('nav-avatar').src = ca || u.photoURL, document.getElementById('nav-avatar').style.display = 'inline-block';
+                        
+                        onSnapshot(query(collection(db, "playlists_custom"), where("uid", "==", u.uid)), (snap) => {
+                            const sel = document.getElementById('custom-selector'), cur = sel.value;
+                            let my = '', shared = '';
+                            snap.forEach(d => {
+                                const opt = `<option value="${d.data().name}">${d.data().name}</option>`;
+                                d.data().shared ? shared += opt : my += opt;
+                            });
+                            let html = '<option value="all">Toutes mes playlists</option>';
+                            if (my) html += my;
+                            if (shared) html += `<optgroup label="── Playlists reçues ──">${shared}</optgroup>`;
+                            sel.innerHTML = html;
+                            sel.value = cur || 'all';
+                            toggleDeleteBtn();
+                        });
+                        
+                        onSnapshot(query(collection(db, "playlists"), where("uid", "==", u.uid)), (snap) => {
+                            userAnimes = [];
+                            snap.forEach(d => {
+                                const data = d.data(), csv = csvDataMap[data.anime] || {};
+                                userAnimes.push({ id: d.id, ...data, ...csv });
+                            });
+                            refreshDisplay();
+                        });
+                    } else {
+                        // Non connecté, rediriger vers index pour connexion
+                        window.location.href = 'index.html';
+                    }
+                });
+            }
+        }
+        
         function updateTabUI(){ document.querySelectorAll('.select-card').forEach(c=>c.classList.toggle('active',c.dataset.status===currentStatus)); }
         function showConfirm(msg,onConfirm){ const ov=document.getElementById('confirm-modal'); document.getElementById('modal-msg').innerHTML=msg; ov.classList.add('active'); document.getElementById('modal-confirm').onclick=()=>{ ov.classList.remove('active'); onConfirm(); }; document.getElementById('modal-cancel').onclick=()=>ov.classList.remove('active'); }
-        window.removeAnime=async(e,id)=>{ e.preventDefault(); showConfirm('Supprimer cet anime ?',async()=>await deleteDoc(doc(db,"playlists",id))); };
-        document.getElementById('btn-del-playlist').onclick=()=>{ const n=document.getElementById('custom-selector').value; if(n==="all") return; showConfirm(`Supprimer la playlist <strong>${n}</strong> ?`,async()=>{ const qC=query(collection(db,"playlists_custom"),where("uid","==",currentUser.uid),where("name","==",n)); (await getDocs(qC)).forEach(async d=>await deleteDoc(doc(db,"playlists_custom",d.id))); const qA=query(collection(db,"playlists"),where("uid","==",currentUser.uid),where("playlistTarget","==",n)); (await getDocs(qA)).forEach(async d=>await deleteDoc(doc(db,"playlists",d.id))); document.getElementById('custom-selector').value="all"; toggleDeleteBtn(); }); };
-        function toggleDeleteBtn(){ const sel=document.getElementById('custom-selector'); document.getElementById('btn-del-playlist').style.display=(sel.value==="all")?"none":"inline-block"; }
+        window.removeAnime=async(e,id)=>{ if(isViewMode) return; e.preventDefault(); showConfirm('Supprimer cet anime ?',async()=>await deleteDoc(doc(db,"playlists",id))); };
+        
+        function toggleDeleteBtn(){ if(isViewMode) return; const sel=document.getElementById('custom-selector'); document.getElementById('btn-del-playlist').style.display=(sel.value==="all")?"none":"inline-block"; }
+        
         document.querySelectorAll('.select-card').forEach(c=>{ c.onclick=()=>{ currentStatus=c.dataset.status; localStorage.setItem('playlistTab',currentStatus); updateTabUI(); refreshDisplay(); }; });
-        document.getElementById('custom-selector').onchange=()=>{ toggleDeleteBtn(); refreshDisplay(); };
+        
+        if (!isViewMode) {
+            document.getElementById('custom-selector').onchange=()=>{ toggleDeleteBtn(); refreshDisplay(); };
+            document.getElementById('btn-del-playlist').onclick=()=>{ const n=document.getElementById('custom-selector').value; if(n==="all") return; showConfirm(`Supprimer la playlist <strong>${n}</strong> ?`,async()=>{ const qC=query(collection(db,"playlists_custom"),where("uid","==",currentUser.uid),where("name","==",n)); (await getDocs(qC)).forEach(async d=>await deleteDoc(doc(db,"playlists_custom",d.id))); const qA=query(collection(db,"playlists"),where("uid","==",currentUser.uid),where("playlistTarget","==",n)); (await getDocs(qA)).forEach(async d=>await deleteDoc(doc(db,"playlists",d.id))); document.getElementById('custom-selector').value="all"; toggleDeleteBtn(); }); };
+        }
+        
         document.getElementById('display-mode').onchange=e=>{ localStorage.setItem('playlistDisplayMode',e.target.value); refreshDisplay(); };
         document.getElementById('sort-selector').onchange=refreshDisplay;
         const searchInput=document.getElementById('playlist-search');
         searchInput.addEventListener('input',function(){ searchQuery=this.value.trim(); refreshDisplay(); });
+        
         function refreshDisplay(){
-            const selectedList=document.getElementById('custom-selector').value, mode=document.getElementById('display-mode').value, sortVal=document.getElementById('sort-selector').value;
-            const sharedNames=new Set(Array.from(document.getElementById('custom-selector').querySelectorAll('optgroup option')).map(o=>o.value));
-            let filtered=userAnimes.filter(a=>a.status===currentStatus);
+            const selectedList = isViewMode ? 'all' : document.getElementById('custom-selector').value;
+            const mode = document.getElementById('display-mode').value;
+            const sortVal = document.getElementById('sort-selector').value;
+            
+            let filtered = userAnimes.filter(a=>a.status===currentStatus);
             if(searchQuery) filtered=filtered.filter(a=>normalize(a.anime).includes(normalize(searchQuery)));
-            if(selectedList==='all') filtered=filtered.filter(a=>!a.playlistTarget||!sharedNames.has(a.playlistTarget));
-            else filtered=filtered.filter(a=>a.playlistTarget===selectedList);
+            if(!isViewMode && selectedList!=='all') filtered=filtered.filter(a=>a.playlistTarget===selectedList);
+            
             filtered.sort((a,b)=>{
                 if(sortVal==="nom") return a.anime.localeCompare(b.anime);
                 if(sortVal==="date"){ const ta=a.addedAt?.seconds||0, tb=b.addedAt?.seconds||0; return tb-ta; }
@@ -261,6 +393,7 @@
                 if(sortVal==="editeur") return (a.editeur||'').localeCompare(b.editeur||'');
                 return 0;
             });
+            
             const grid=document.getElementById('playlist-grid'), table=document.getElementById('playlist-table'), listBody=document.getElementById('list-body');
             if(filtered.length===0){
                 grid.innerHTML='<div class="empty-msg">Aucun anime trouvé.</div>';
@@ -269,22 +402,33 @@
             const hl=v=>sortVal===v?'class="highlight"':'';
             if(mode==="grid"){
                 grid.style.display="grid"; table.classList.remove('active'); listBody.innerHTML='';
-                grid.innerHTML=filtered.map(a=>{ let hlLine=''; if(sortVal==='score_mal') hlLine=`<div style="font-size:0.7em;color:var(--primary);">⭐ ${a.score||'N/A'}</div>`; else if(sortVal==='popularite') hlLine=`<div style="font-size:0.7em;color:var(--primary);">📈 ${a.pop||'N/A'}</div>`; else if(sortVal==='sortie') hlLine=`<div class="highlight" style="font-size:0.7em;">📅 ${a.sortie||'?'}</div>`; else if(sortVal==='episodes') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🎞️ ${a.epMax||'?'}</div>`; else if(sortVal==='editeur') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🏢 ${a.editeur||'—'}</div>`;
+                grid.innerHTML=filtered.map(a=>{
+                    let hlLine='';
+                    if(sortVal==='score_mal') hlLine=`<div style="font-size:0.7em;color:var(--primary);">⭐ ${a.score||'N/A'}</div>`;
+                    else if(sortVal==='popularite') hlLine=`<div style="font-size:0.7em;color:var(--primary);">📈 ${a.pop||'N/A'}</div>`;
+                    else if(sortVal==='sortie') hlLine=`<div class="highlight" style="font-size:0.7em;">📅 ${a.sortie||'?'}</div>`;
+                    else if(sortVal==='episodes') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🎞️ ${a.epMax||'?'}</div>`;
+                    else if(sortVal==='editeur') hlLine=`<div style="font-size:0.7em;color:var(--primary);">🏢 ${a.editeur||'—'}</div>`;
                     const addedStr=formatAddedAt(a.addedAt), modifStr=formatAddedAt(getLastModified(a));
-                    return `<div class="card"><button class="delete-btn-overlay" onclick="removeAnime(event,'${a.id}')">🗑️</button><a href="video.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;"><img src="${getRealImgPath(a.img)}" onerror="handleImgErr(this,'${a.img}')"><div class="card-info"><div class="card-title">${a.anime}</div><div style="font-size:0.75em; color:#ccc;">⭐ ${a.rating}/10 • Ep: ${a.epSeen}</div>${hlLine}${addedStr?`<div style="font-size:0.62em;color:#555;margin-top:3px;">➕ ${addedStr}</div>`:''}${modifStr?`<div style="font-size:0.62em;color:#555;margin-top:1px;">✏️ ${modifStr}</div>`:''}</div></a></div>`;
+                    const deleteBtn = isViewMode ? '' : `<button class="delete-btn-overlay" onclick="removeAnime(event,'${a.id}')">🗑️</button>`;
+                    return `<div class="card">${deleteBtn}<a href="video.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;"><img src="${getRealImgPath(a.img)}" onerror="handleImgErr(this,'${a.img}')"><div class="card-info"><div class="card-title">${a.anime}</div><div style="font-size:0.75em; color:#ccc;">⭐ ${a.rating}/10 • Ep: ${a.epSeen}</div>${hlLine}${addedStr?`<div style="font-size:0.62em;color:#555;margin-top:3px;">➕ ${addedStr}</div>`:''}${modifStr?`<div style="font-size:0.62em;color:#555;margin-top:1px;">✏️ ${modifStr}</div>`:''}</div></a></div>`;
                 }).join('');
             }else{
                 grid.style.display="none"; grid.innerHTML=''; table.classList.add('active');
-                listBody.innerHTML=filtered.map((a,i)=>`<tr><td class="status-bar status-${a.status}-bg"></td><td>${i+1}</td><td><img src="${getRealImgPath(a.img)}" class="list-img" onerror="handleImgErr(this,'${a.img}')"></td><td><a href="video.html?name=${encodeURIComponent(a.anime)}" style="color:white; text-decoration:none;">${a.anime}</a></td><td>⭐ ${a.rating||0}</td><td ${hl('episodes')}>${a.epSeen}/${a.epMax||'?'}</td><td ${hl('score_mal')}>${a.score||'N/A'}</td><td ${hl('popularite')}>${a.pop||'N/A'}</td><td ${hl('sortie')}>${sortVal==='sortie'?(a.sortie||'?'):((a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie||'?')}</td><td>${a.censure||''}</td><td ${hl('editeur')}>${a.editeur||'—'}</td><td style="color:#666;font-size:0.75em;white-space:nowrap;">${formatAddedAt(a.addedAt)||'—'}<td><td style="color:#666;font-size:0.75em;white-space:nowrap;">${formatAddedAt(getLastModified(a))||'—'}</td><td><button onclick="removeAnime(event,'${a.id}')" style="background:none;border:none;color:#ff4757;cursor:pointer;">🗑️</button></td></tr>`).join('');
+                listBody.innerHTML=filtered.map((a,i)=>`<tr><td class="status-bar status-${a.status}-bg"></td><td>${i+1}</td><td><img src="${getRealImgPath(a.img)}" class="list-img" onerror="handleImgErr(this,'${a.img}')"></td><td><a href="video.html?name=${encodeURIComponent(a.anime)}" style="color:white; text-decoration:none;">${a.anime}</a></td><td>⭐ ${a.rating||0}</td><td ${hl('episodes')}>${a.epSeen}/${a.epMax||'?'}</td><td ${hl('score_mal')}>${a.score||'N/A'}</td><td ${hl('popularite')}>${a.pop||'N/A'}</td><td ${hl('sortie')}>${sortVal==='sortie'?(a.sortie||'?'):((a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie||'?')}</td><td>${a.censure||''}</td><td ${hl('editeur')}>${a.editeur||'—'}<td><td style="color:#666;font-size:0.75em;white-space:nowrap;">${formatAddedAt(a.addedAt)||'—'}</td><td style="color:#666;font-size:0.75em;white-space:nowrap;">${formatAddedAt(getLastModified(a))||'—'}</td>
+                    ${isViewMode ? '' : `<td><button onclick="removeAnime(event,'${a.id}')" style="background:none;border:none;color:#ff4757;cursor:pointer;">🗑️</button></td>`}
+                </tr>`).join('');
             }
             requestAnimationFrame(restoreScroll);
         }
+        
         function toggleM(){ const m=document.getElementById('menu'), ov=document.getElementById('overlay'); const isOpen=m.classList.toggle('active'); ov.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }
         window.toggleM=toggleM;
+        window.removeAnime = window.removeAnime;
+        
+        initPlaylist();
     </script>
-
     <script>
-    /* ── Mémoire des tris ─────────────────────────────── */
     (function() {
         var KEY = 'sortmem_playlist';
         var IDS = ['sort-selector'];
