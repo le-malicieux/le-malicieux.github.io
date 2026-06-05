@@ -204,15 +204,33 @@
         .discord-footer-link { background: #5865F2; color: white; text-decoration: none; padding: 8px 18px; border-radius: 30px; font-size: 0.9em; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .discord-footer-link::before { content: '💬'; font-size: 1em; }
 
+        /* -------------------- CORRECTION CARROUSEL MOBILE -------------------- */
         @media (max-width: 1000px) {
+            .carousel-container {
+                overflow-x: auto !important;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                scroll-snap-type: x mandatory;
+            }
+            .carousel-container::-webkit-scrollbar {
+                display: none;
+            }
+            .carousel-track {
+                width: max-content;
+                gap: 8px;
+            }
+            .card {
+                scroll-snap-align: start;
+            }
+            .carousel-btn {
+                display: none;
+            }
             .card { width: 140px; }
             .hero-section { height: 45vh; }
             .main-title { font-size: 2em; }
             .section-title { font-size: 1.2em; }
             .carousel-wrapper { padding: 0 5px; }
-            .carousel-btn { display: none; } /* masquer les flèches sur mobile */
-            .carousel-track { gap: 8px; }
-/* auto-fill gère les colonnes */
         }
         @media (max-width: 480px) {
             .card { width: 120px; }
@@ -248,37 +266,6 @@
         #search-results-grid {
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
         }
-        
-        /* ── Carrousel mobile: scroll natif fluide ───────── */
-        @media (max-width: 1000px) {
-            .carousel-container {
-                overflow-x: scroll !important;
-                overflow-y: hidden;
-                -webkit-overflow-scrolling: touch;
-                scroll-snap-type: x mandatory;
-                scrollbar-width: none;
-            }
-            .carousel-container::-webkit-scrollbar { display: none; }
-            .carousel-track {
-                will-change: scroll-position;
-            }
-            .card { scroll-snap-align: start; }
-        }
-        
-        /* ── Bouton Voir tout ─────────────────────────────── */
-        .voir-tout-wrap {
-            max-width: 1400px; margin: 6px auto 0;
-            padding: 0 44px;
-            display: flex; justify-content: flex-end;
-        }
-        .voir-tout-btn {
-            background: transparent;
-            border: 1px solid rgba(255,71,87,0.5);
-            color: #ff6b7a; padding: 3px 12px; border-radius: 20px;
-            font-size: 0.75em; font-weight: bold; text-decoration: none;
-            transition: 0.2s;
-        }
-        .voir-tout-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
         </style>
 </head>
 <body>
