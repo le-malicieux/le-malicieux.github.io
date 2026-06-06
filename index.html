@@ -170,7 +170,7 @@
         }
         .carousel-container {
             overflow: hidden;
-            touch-action: pan-x pan-y;
+            touch-action: pan-y;
         }
         .carousel-track {
             display: flex;
@@ -212,7 +212,6 @@
                 -webkit-overflow-scrolling: touch;
                 scroll-snap-type: x mandatory;
                 scrollbar-width: none;
-                touch-action: pan-x;
             }
             .carousel-container::-webkit-scrollbar {
                 display: none;
@@ -278,7 +277,7 @@
         
         /* ── Zoom 80% ── */
         html {
-            /* zoom: 0.8 retiré — il décale les coordonnées tactiles et casse le scroll horizontal sur mobile */
+            zoom: 0.8;
         }
         body {
             width: 100%;
@@ -348,7 +347,7 @@
             <div class="carousel-container"><div class="carousel-track" id="carousel-random-track"></div></div>
             <button class="carousel-btn carousel-next" data-target="carousel-random-track">›</button>
         </div>
-        <div class="voir-tout-wrap"><a href="index_old.html" class="voir-tout-btn">Voir tout →</a></div>
+        <div class="voir-tout-wrap"><a href="index_old.html?sort=" class="voir-tout-btn">Voir tout →</a></div>
 
         <div class="section-title-wrapper"><h2 class="section-title">🆕 Derniers ajouts</h2></div>
         <div class="carousel-wrapper" id="carousel-recent-wrapper">
@@ -681,7 +680,7 @@
                     document.getElementById('tag-pill-link').textContent = rTag.nom;
                     document.getElementById('tag-pill-link').href = `tags.html?tag=${encodeURIComponent(rTag.nom)}`;
                     const _vtt = document.getElementById('voir-tout-tag-btn');
-                    if (_vtt) _vtt.href = 'tags.html?tag=' + encodeURIComponent(rTag.nom);
+                    if (_vtt) _vtt.href = 'tags.html?tags=' + encodeURIComponent(rTag.nom);
                     document.getElementById('tag-description-text').textContent = rTag.description || 'Découvrez les animes associés à ce tag.';
                     const tagAnimes = allAnimes.filter(a => a.tags && a.tags.toLowerCase().includes(rTag.nom.toLowerCase()));
                     buildCarousel('carousel-tag-track', shuffle(tagAnimes).slice(0, 20));

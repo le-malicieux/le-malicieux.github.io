@@ -370,6 +370,13 @@
                     currentSearch = searchParam;
                 }
 
+                // Appliquer le tri depuis l'URL (priorité sur sessionStorage)
+                const sortParam = urlParams.get('sort');
+                if (sortParam !== null) {
+                    const sel = document.getElementById('sort');
+                    if (sel) sel.value = sortParam;
+                }
+
                 runFilterAndSort();
                 
                 const searchInput = document.getElementById('search');
@@ -558,15 +565,7 @@ function displayAnimes(list, sortMode) {
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var param = new URLSearchParams(window.location.search).get('sort');
-        if (param) {
-            var sel = document.getElementById('sort');
-            if (sel) {
-                sel.value = param;
-                sel.dispatchEvent(new Event("change"));
-                sel.dispatchEvent(new Event('change'));
-            }
-        }
+        // Le paramètre ?sort= est maintenant appliqué directement dans init() après le chargement des données.
     });
     </script>
 </body>

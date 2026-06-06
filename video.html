@@ -125,23 +125,7 @@
             .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
             .bottom-controls { grid-template-columns: 1fr; }
         }
-    
-        /* ── Images lisses (anti-pixelisation maximale) ─── */
-        img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: smooth;
-            image-rendering: high-quality;
-        }
-        .card img, .sugg-img, .mal-row .ml-img, .list-img,
-        .anime-card img, .studio-preview img, .studio-logo,
-        .img-container img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: smooth;
-            image-rendering: high-quality;
-            -ms-interpolation-mode: bicubic;
-            will-change: transform;
-        }
-        </style>
+    </style>
 </head>
 <body>
     <div id="bg-layer"></div>
@@ -327,7 +311,7 @@
                 const epMatches=anime.ep.match(/\d+/g);
                 const maxEp=epMatches?parseInt(epMatches[epMatches.length-1]):0;
                 let epOptions=""; for(let i=0;i<=maxEp;i++) epOptions+=`<option value="${i}">${i}</option>`;
-                const tagsHtml=anime.tags.length?anime.tags.map(t=>`<a href="tags.html?tag=${encodeURIComponent(t)}" style="display:inline-block; background:rgba(255,255,255,0.05); color:#aaa; text-decoration:none; font-size:0.7em; padding:4px 6px; border-radius:4px; border:1px solid #333; margin:2px;">${t}</a>`).join('') : '<div style="color:#555; font-size:0.7em;">Aucun tag</div>';
+                const tagsHtml=anime.tags.length?anime.tags.map(t=>`<a href="tags.html?tags=${encodeURIComponent(t)}" style="display:inline-block; background:rgba(255,255,255,0.05); color:#aaa; text-decoration:none; font-size:0.7em; padding:4px 6px; border-radius:4px; border:1px solid #333; margin:2px;">${t}</a>`).join('') : '<div style="color:#555; font-size:0.7em;">Aucun tag</div>';
                 const imgIndex={};
                 for(const line of lines){
                     const c2=line.split(';');
