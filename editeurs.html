@@ -7,24 +7,15 @@
     <link rel="stylesheet" href="mobile.css">
     <title>Éditeurs & Studios - Le Malicieux</title>
     <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.92); --text: #eee; --nav-bg: rgba(15,15,15,0.85); --blue: #2e86de; }
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.92); --text: #eee; --nav-bg: rgba(15,15,15,0.85); }
         * { box-sizing: border-box; }
 
-        /* ── Fond ── */
-        #bg-layer {
-            position: fixed; inset: 0; z-index: -2; pointer-events: none;
-            background-size: cover; background-position: center center; background-repeat: no-repeat;
-        }
+        #bg-layer { position: fixed; inset: 0; z-index: -2; pointer-events: none; background-size: cover; background-position: center center; background-repeat: no-repeat; }
         body::after { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: -1; pointer-events: none; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; padding-top: 52px; }
 
         /* ── Navbar ── */
-        .top-navbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px);
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1); gap: 12px; flex-wrap: wrap;
-        }
+        .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--nav-bg); backdrop-filter: blur(10px); position: fixed; top: 0; left: 0; right: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); gap: 12px; flex-wrap: wrap; }
         .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
         .nav-logo-small { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
@@ -38,7 +29,7 @@
         .nav-links a, .nav-links button { background: var(--primary); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8em; text-decoration: none; cursor: pointer; white-space: nowrap; font-weight: bold; }
         .nav-links .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; white-space: nowrap; border: 2px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; gap: 5px; }
         .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
-        .nav-links .discord-btn:hover { background: #4752c4; border-color: rgba(255,255,255,0.3); }
+        .nav-links .discord-btn:hover { background: #4752c4; }
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
         .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
 
@@ -48,7 +39,7 @@
             .nav-links { order: 2; }
             .burger { display: block; order: 1; }
             .close-menu { display: block; }
-            .nav-links { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch; overflow-y: auto; left: auto; right: -100%; }
+            .nav-links { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch; overflow-y: auto; left: auto; }
             .nav-links.active { right: 0; left: auto; }
             .nav-links a, .nav-links button, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
             .mobile-overlay.active { display: block; }
@@ -61,109 +52,98 @@
         #view-list { display: block; }
         #view-producer { display: none; }
 
-        /* ── En-tête liste ── */
-        .list-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 16px; }
+        /* ── En-tête ── */
+        .list-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
         .list-header h1 { font-size: 1.5em; font-weight: 900; color: var(--primary); margin: 0; }
-        .list-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         .sort-select { background: #1a1a1a; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
 
-        /* ── Compteurs catégories ── */
-        .category-stats {
-            display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px;
-        }
-        .cat-badge {
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 10px; padding: 10px 16px;
-        }
-        .cat-badge.hentai { border-left: 3px solid var(--primary); }
-        .cat-badge.erotica { border-left: 3px solid #f39c12; }
-        .cat-badge-icon { font-size: 1.4em; }
-        .cat-badge-info { line-height: 1.3; }
-        .cat-badge-count { font-size: 1.2em; font-weight: 900; color: white; display: block; }
-        .cat-badge-label { font-size: 0.7em; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
+        /* ── Compteurs ── */
+        .category-stats { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+        .cat-badge { display: flex; align-items: center; gap: 10px; background: rgba(255,71,87,0.06); border: 1px solid rgba(255,71,87,0.18); border-left: 3px solid var(--primary); border-radius: 10px; padding: 10px 16px; }
+        .cat-badge-count { font-size: 1.25em; font-weight: 900; color: white; display: block; line-height: 1; }
+        .cat-badge-label { font-size: 0.68em; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
 
-        /* ── Section titre ── */
-        .section-title {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 1em; font-weight: 800; color: #ccc;
-            margin: 0 0 12px 0; padding-bottom: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+        /* ── Section separator ── */
+        .section-sep {
+            display: flex; align-items: center; gap: 12px;
+            margin: 0 0 14px 0;
         }
-        .section-title .badge {
+        .section-sep-line {
+            flex: 1; height: 1px; background: rgba(255,71,87,0.25);
+        }
+        .section-sep-label {
+            font-size: 0.78em; font-weight: 800; color: var(--primary);
+            text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap;
+            display: flex; align-items: center; gap: 7px;
+        }
+        .section-sep-count {
             background: var(--primary); color: white;
-            font-size: 0.75em; padding: 2px 8px; border-radius: 20px; font-weight: 700;
+            font-size: 0.78em; padding: 1px 8px; border-radius: 20px; font-weight: 700;
         }
-        .section-title.erotica-title .badge { background: #f39c12; }
+
+        /* Séparation entre Hentai et Erotica */
+        .erotica-separator {
+            display: flex; align-items: center; gap: 14px;
+            margin: 36px 0 18px;
+        }
+        .erotica-separator-line { flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+        .erotica-separator-label {
+            font-size: 0.75em; font-weight: 700; color: #777;
+            text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap;
+            border: 1px solid #333; background: #111; padding: 4px 14px; border-radius: 20px;
+        }
 
         /* ── Grille studios ── */
-        .studios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-bottom: 10px; }
+        .studios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-bottom: 10px; }
 
         /* ── Studio card ── */
         .studio-card {
             background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px;
-            padding: 14px 14px; cursor: pointer; transition: border-color 0.2s, transform 0.2s;
-            display: flex; gap: 12px; align-items: center;
+            cursor: pointer; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            display: flex; flex-direction: column; overflow: hidden;
         }
-        .studio-card:hover { border-color: var(--primary); transform: translateY(-3px); }
-        .studio-card.erotica-card:hover { border-color: #f39c12; }
+        .studio-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(255,71,87,0.12); }
+
+        /* Logo zone : grand, fond blanc pour voir les logos rectangulaires */
         .studio-logo-wrap {
-            flex-shrink: 0; width: 52px; height: 52px; border-radius: 10px; overflow: hidden;
-            background: #181818; display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 100px;
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; flex-shrink: 0;
+            border-radius: 12px 12px 0 0;
         }
-        .studio-logo { width: 100%; height: 100%; object-fit: contain; }
+        .studio-logo {
+            width: 100%; height: 100%; 
+            object-fit: contain;
+            padding: 10px;
+        }
         .studio-logo-fallback {
-            font-size: 1.2em; font-weight: 900; color: var(--primary); text-transform: uppercase;
-            display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1a0008, #2d0014);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2em; font-weight: 900; color: var(--primary);
+            text-transform: uppercase; letter-spacing: 0.05em;
         }
-        .studio-card.erotica-card .studio-logo-fallback { color: #f39c12; }
-        .studio-card-body { flex: 1; min-width: 0; }
-        .studio-name { font-weight: 800; font-size: 0.88em; color: white; word-break: break-word; line-height: 1.3; margin-bottom: 3px; }
-        .studio-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .studio-card-body { padding: 10px 12px 12px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+        .studio-name { font-weight: 800; font-size: 0.88em; color: white; line-height: 1.3; }
+        .studio-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
         .studio-count { font-size: 0.72em; color: #888; }
         .studio-count span { color: var(--primary); font-weight: bold; }
-        .studio-card.erotica-card .studio-count span { color: #f39c12; }
         .studio-score { font-size: 0.68em; color: #f1c40f; }
-
-        /* ── Accordéon Erotica ── */
-        .erotica-accordion {
-            margin-top: 30px;
-        }
-        .erotica-toggle {
-            display: flex; align-items: center; justify-content: space-between;
-            background: rgba(243,156,18,0.08); border: 1px solid rgba(243,156,18,0.25);
-            border-radius: 12px; padding: 14px 18px; cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
-            user-select: none;
-        }
-        .erotica-toggle:hover { background: rgba(243,156,18,0.14); border-color: rgba(243,156,18,0.45); }
-        .erotica-toggle-left { display: flex; align-items: center; gap: 12px; }
-        .erotica-toggle-icon { font-size: 1.3em; }
-        .erotica-toggle-text { font-weight: 800; font-size: 0.95em; color: #f39c12; }
-        .erotica-toggle-sub { font-size: 0.72em; color: #888; margin-top: 2px; }
-        .erotica-chevron {
-            font-size: 1em; color: #f39c12; transition: transform 0.3s;
-        }
-        .erotica-accordion.open .erotica-chevron { transform: rotate(180deg); }
-        .erotica-body {
-            max-height: 0; overflow: hidden;
-            transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
-        }
-        .erotica-accordion.open .erotica-body { max-height: 9999px; }
-        .erotica-inner { padding-top: 16px; }
-        .erotica-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
 
         /* ── Vue producteur ── */
         .producer-header { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
         .producer-banner { height: 100px; background: linear-gradient(135deg, #1a0008 0%, #2d0014 40%, #0a000f 100%); position: relative; display: flex; align-items: flex-end; padding: 0 20px; }
-        .producer-banner.erotica-banner { background: linear-gradient(135deg, #1a0f00 0%, #2d1a00 40%, #0f0800 100%); }
-        .producer-avatar { width: 72px; height: 72px; border-radius: 14px; background: linear-gradient(135deg, #ff4757, #c0392b); border: 3px solid var(--bg); display: flex; align-items: center; justify-content: center; font-size: 1.8em; font-weight: 900; color: white; position: relative; z-index: 1; transform: translateY(36px); flex-shrink: 0; overflow: hidden; }
-        .producer-avatar.erotica-avatar { background: linear-gradient(135deg, #f39c12, #d68910); }
+        .producer-avatar { width: 72px; height: 72px; border-radius: 14px; background: #fff; border: 3px solid var(--bg); position: relative; z-index: 1; transform: translateY(36px); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .producer-avatar img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+        .producer-avatar-fallback { width: 100%; height: 100%; background: linear-gradient(135deg, #ff4757, #c0392b); display: flex; align-items: center; justify-content: center; font-size: 1.6em; font-weight: 900; color: white; }
         .producer-info-wrap { padding: 44px 20px 16px; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
         .producer-name { font-size: 1.5em; font-weight: 900; color: white; margin: 0; }
-        .producer-category-tag { display: inline-block; font-size: 0.62em; padding: 2px 8px; border-radius: 20px; font-weight: 700; margin-top: 4px; vertical-align: middle; }
-        .producer-category-tag.hentai { background: rgba(255,71,87,0.2); color: var(--primary); border: 1px solid rgba(255,71,87,0.3); }
-        .producer-category-tag.erotica { background: rgba(243,156,18,0.2); color: #f39c12; border: 1px solid rgba(243,156,18,0.3); }
+        .producer-sub-row { display: flex; align-items: center; gap: 8px; margin-top: 5px; flex-wrap: wrap; }
+        .producer-category-tag { display: inline-block; font-size: 0.65em; padding: 2px 10px; border-radius: 20px; font-weight: 700; background: rgba(255,71,87,0.18); color: var(--primary); border: 1px solid rgba(255,71,87,0.3); }
+        .producer-category-tag.erotica { background: rgba(255,255,255,0.06); color: #aaa; border-color: #444; }
+        .mal-studio-link { display: inline-flex; align-items: center; gap: 4px; font-size: 0.65em; color: #2e86de; text-decoration: none; border: 1px solid rgba(46,134,222,0.3); border-radius: 20px; padding: 2px 10px; transition: 0.2s; }
+        .mal-studio-link:hover { background: rgba(46,134,222,0.12); border-color: #2e86de; }
         .producer-stats-row { display: flex; gap: 10px; flex-wrap: wrap; }
         .pstat { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 6px 14px; text-align: center; }
         .pstat-val { font-size: 1.15em; font-weight: 800; color: var(--primary); display: block; }
@@ -190,17 +170,18 @@
         img { image-rendering: -webkit-optimize-contrast; image-rendering: smooth; image-rendering: high-quality; }
         html { zoom: 0.8; }
         body { width: 100%; margin-left: auto; margin-right: auto; }
+        .studios-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; }
         .producer-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; }
-        .studios-grid, .erotica-grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)) !important; }
 
         @media (max-width: 700px) {
             .producer-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
             .producer-name { font-size: 1.2em; }
-            .producer-banner { height: auto; padding: 0; flex-direction: column; align-items: flex-start; }
-            .producer-avatar { width: 60px; height: 60px; margin: 0 0 10px 15px; }
-            .producer-info-wrap { padding: 10px 15px 15px; }
+            .producer-banner { height: auto; flex-direction: column; align-items: flex-start; padding: 0; }
+            .producer-avatar { width: 60px; height: 60px; margin: 0 0 10px 15px; transform: translateY(30px); }
+            .producer-info-wrap { padding: 38px 15px 14px; }
             .category-stats { gap: 10px; }
-            .cat-badge { padding: 8px 12px; }
+            .studios-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important; }
+            .studio-logo-wrap { height: 75px; }
         }
     </style>
 </head>
@@ -235,11 +216,12 @@
     </nav>
 
     <div class="page-wrap">
-        <!-- ── Vue liste ── -->
+
+        <!-- ════════════════════════════════ VUE LISTE ════════════════════════════════ -->
         <div id="view-list">
             <div class="list-header">
                 <h1>🏢 Éditeurs & Studios</h1>
-                <div class="list-controls">
+                <div>
                     <select class="sort-select" id="studio-sort">
                         <option value="count">Trier : Nb titres ↓</option>
                         <option value="nom">Trier : A → Z</option>
@@ -249,65 +231,59 @@
                 </div>
             </div>
 
-            <!-- Compteurs catégories -->
+            <!-- Compteurs -->
             <div class="category-stats">
-                <div class="cat-badge hentai">
-                    <div class="cat-badge-icon">🔴</div>
-                    <div class="cat-badge-info">
+                <div class="cat-badge">
+                    <div>
                         <span class="cat-badge-count" id="count-hentai">—</span>
                         <span class="cat-badge-label">Studios Hentai</span>
                     </div>
                 </div>
-                <div class="cat-badge erotica">
-                    <div class="cat-badge-icon">🟠</div>
-                    <div class="cat-badge-info">
+                <div class="cat-badge" style="border-color:rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);border-left-color:#555;">
+                    <div>
                         <span class="cat-badge-count" id="count-erotica">—</span>
                         <span class="cat-badge-label">Studios Erotica</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Studios Hentai (prioritaires) -->
-            <div class="section-title">
-                <span>🔴 Studios Hentai</span>
-                <span class="badge" id="badge-hentai">—</span>
+            <!-- ── Studios Hentai ── -->
+            <div class="section-sep">
+                <div class="section-sep-label">
+                    Studios Hentai
+                    <span class="section-sep-count" id="badge-hentai">—</span>
+                </div>
+                <div class="section-sep-line"></div>
             </div>
-            <div class="studios-grid" id="studios-grid-hentai"><div class="empty-state">Chargement…</div></div>
+            <div class="studios-grid" id="studios-grid-hentai">
+                <div class="empty-state">Chargement…</div>
+            </div>
 
-            <!-- Studios Erotica (accordéon) -->
-            <div class="erotica-accordion" id="erotica-accordion">
-                <div class="erotica-toggle" onclick="toggleErotica()">
-                    <div class="erotica-toggle-left">
-                        <span class="erotica-toggle-icon">🟠</span>
-                        <div>
-                            <div class="erotica-toggle-text">Studios Erotica</div>
-                            <div class="erotica-toggle-sub">Cliquer pour afficher / masquer</div>
-                        </div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <span id="badge-erotica" style="background:#f39c12;color:#000;font-size:0.75em;padding:2px 10px;border-radius:20px;font-weight:700;">—</span>
-                        <span class="erotica-chevron">▼</span>
-                    </div>
-                </div>
-                <div class="erotica-body">
-                    <div class="erotica-inner">
-                        <div class="erotica-grid" id="studios-grid-erotica"><div class="empty-state">Chargement…</div></div>
-                    </div>
-                </div>
+            <!-- ── Séparateur Erotica ── -->
+            <div class="erotica-separator">
+                <div class="erotica-separator-line"></div>
+                <div class="erotica-separator-label">Studios Erotica · <span id="badge-erotica">—</span></div>
+                <div class="erotica-separator-line"></div>
+            </div>
+            <div class="studios-grid" id="studios-grid-erotica">
+                <div class="empty-state">Chargement…</div>
             </div>
         </div>
 
-        <!-- ── Vue producteur ── -->
+        <!-- ════════════════════════════════ VUE PRODUCTEUR ════════════════════════════════ -->
         <div id="view-producer">
             <a class="btn-back-list" onclick="showList()">← Tous les éditeurs</a>
             <div class="producer-header">
                 <div class="producer-banner" id="prod-banner">
-                    <div class="producer-avatar" id="prod-avatar">?</div>
+                    <div class="producer-avatar" id="prod-avatar"></div>
                 </div>
                 <div class="producer-info-wrap">
                     <div>
                         <div class="producer-name" id="prod-name">—</div>
-                        <span class="producer-category-tag" id="prod-cat-tag">—</span>
+                        <div class="producer-sub-row">
+                            <span class="producer-category-tag" id="prod-cat-tag">—</span>
+                            <a class="mal-studio-link" id="prod-mal-link" href="#" target="_blank" style="display:none;">🔗 MyAnimeList</a>
+                        </div>
                     </div>
                     <div class="producer-stats-row">
                         <div class="pstat"><span class="pstat-val" id="prod-total">—</span><span class="pstat-lbl">Titres</span></div>
@@ -341,44 +317,114 @@
     </div>
 
     <script>
-        /* ── Chargement du fond en priorité ── */
-        (async function(){
-            const isMobile = window.innerWidth <= 1000;
+        /* ─────────────────── Fond en priorité ─────────────────── */
+        (async () => {
             try {
                 const res = await fetch('backgrounds.json');
                 const data = await res.json();
-                const list = isMobile ? data.mobile : data.desktop;
-                if (!list || !list.length) return;
+                const list = (window.innerWidth <= 1000 ? data.mobile : data.desktop) || [];
+                if (!list.length) return;
                 const file = list[Math.floor(Math.random() * list.length)];
-                const bg = document.getElementById('bg-layer');
                 const img = new Image();
-                img.onload = () => bg.style.backgroundImage = `url('img/${file}')`;
+                img.onload = () => document.getElementById('bg-layer').style.backgroundImage = `url('img/${file}')`;
                 img.src = `img/${file}`;
             } catch(e) {}
         })();
 
-        /* ── Données ── */
+        /* ─────────────────── État global ─────────────────── */
         let allAnimes = [], currentStudio = null;
-        let eroticastudios = new Set(); // noms des studios erotica
+        let eroticaSet = new Set();
 
-        /* ── Liste des studios erotica (chargée depuis CSV) ── */
+        /* ─────────────────── CSV Studios Erotica ─────────────────── */
         async function loadEroticaStudios() {
             try {
                 const resp = await fetch('studios_erotica.csv');
                 if (!resp.ok) return;
                 const text = await resp.text();
-                text.split(/\r?\n/).slice(1).forEach(line => {
-                    const name = line.trim();
-                    if (name) eroticastudios.add(name);
-                });
+                text.split(/\r?\n/).slice(1).forEach(l => { const n = l.trim(); if (n) eroticaSet.add(n); });
             } catch(e) {}
         }
+        const isErotica = s => eroticaSet.has(s);
 
-        function isErotica(studioName) {
-            return eroticastudios.has(studioName);
+        /* ─────────────────── MAL : lien studio ─────────────────── */
+        const malStudioCache = {};
+        async function fetchMALStudioLink(studioName) {
+            if (malStudioCache[studioName] !== undefined) return malStudioCache[studioName];
+            malStudioCache[studioName] = null; // optimistic lock
+            try {
+                // 1. Cherche dans /producers (liste des studios MAL)
+                const q = encodeURIComponent(studioName.split('/')[0].trim());
+                const resp = await fetch(`https://api.jikan.moe/v4/producers?q=${q}&limit=5`);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const target = norm(studioName);
+                    const match = (json.data || []).find(p =>
+                        norm(p.titles?.[0]?.title || p.name || '') === target ||
+                        (p.titles || []).some(t => norm(t.title) === target)
+                    ) || json.data?.[0];
+                    if (match) {
+                        const url = `https://myanimelist.net/anime/producer/${match.mal_id}`;
+                        malStudioCache[studioName] = url;
+                        return url;
+                    }
+                }
+            } catch(e) {}
+            return null;
         }
 
-        /* ── Init ── */
+        /* ─────────────────── MAL : scores animes ─────────────────── */
+        async function fetchStudioScoresFromMAL(animes) {
+            document.getElementById('prod-avg').textContent = '…';
+            document.getElementById('prod-best').textContent = '…';
+            const scores = [];
+            for (const a of animes.slice(0, 6)) {
+                try {
+                    await new Promise(r => setTimeout(r, 400));
+                    const q = encodeURIComponent(a.nom.split('/')[0].trim());
+                    const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${q}&limit=1&sfw=false`);
+                    if (!resp.ok) continue;
+                    const json = await resp.json();
+                    const s = json.data?.[0]?.score;
+                    if (s) scores.push(parseFloat(s));
+                } catch(e) {}
+            }
+            if (!scores.length) {
+                document.getElementById('prod-avg').textContent = '—';
+                document.getElementById('prod-best').textContent = '—';
+                return;
+            }
+            document.getElementById('prod-avg').textContent = '⭐ ' + (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(2);
+            document.getElementById('prod-best').textContent = '⭐ ' + Math.max(...scores).toFixed(2);
+        }
+
+        /* ─────────────────── Helpers ─────────────────── */
+        function dateToTs(s) {
+            if (!s) return 0; s = s.trim();
+            const mois = {'janv.':1,'févr.':2,'mars':3,'avr.':4,'mai':5,'juin':6,'juil.':7,'août':8,'sept.':9,'oct.':10,'nov.':11,'déc.':12,'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
+            const parts = s.split(' au '); const last = parts[parts.length-1].trim();
+            const m1 = last.match(/(\d{1,2})\s+([a-zéûôA-Z.]+)\s+(\d{4})/); if(m1){const mo=mois[m1[2]]||1;return new Date(+m1[3],mo-1,+m1[1]).getTime();}
+            const m2 = last.match(/([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})/); if(m2){const mo=mois[m2[1]]||1;return new Date(+m2[3],mo-1,+m2[2]).getTime();}
+            const m3 = last.match(/\d{4}/g); if(m3) return new Date(+m3[m3.length-1],0,1).getTime();
+            return 0;
+        }
+
+        function buildStudioMap() {
+            const m = {};
+            allAnimes.forEach(a => {
+                a.editeur.split(',').map(e => e.trim()).filter(Boolean).forEach(ed => {
+                    if (!m[ed]) m[ed] = [];
+                    m[ed].push(a);
+                });
+            });
+            return m;
+        }
+
+        function studioInitials(name) {
+            return name.split(/[\s\-_]+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
+        }
+
+        /* ─────────────────── Init ─────────────────── */
         async function init() {
             await loadEroticaStudios();
             const resp = await fetch('animes.csv');
@@ -397,36 +443,7 @@
             document.getElementById('studio-search').addEventListener('input', e => renderList(e.target.value));
         }
 
-        /* ── dateToTs ── */
-        function dateToTs(s) {
-            if (!s) return 0; s = s.trim();
-            const mois = {'janv.':1,'févr.':2,'mars':3,'avr.':4,'mai':5,'juin':6,'juil.':7,'août':8,'sept.':9,'oct.':10,'nov.':11,'déc.':12,'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
-            const parts = s.split(' au '); const last = parts[parts.length-1].trim();
-            const m1 = last.match(/(\d{1,2})\s+([a-zéûôA-Z.]+)\s+(\d{4})/); if(m1){ const mo=mois[m1[2]]||1; return new Date(+m1[3],mo-1,+m1[1]).getTime(); }
-            const m2 = last.match(/([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})/); if(m2){ const mo=mois[m2[1]]||1; return new Date(+m2[3],mo-1,+m2[2]).getTime(); }
-            const m3 = (last.match(/\d{4}/g)||[]); if(m3.length) return new Date(+m3[m3.length-1],0,1).getTime();
-            return 0;
-        }
-
-        /* ── buildStudioMap ── */
-        function buildStudioMap() {
-            const m = {};
-            allAnimes.forEach(a => {
-                a.editeur.split(',').map(e => e.trim()).filter(Boolean).forEach(ed => {
-                    if (!m[ed]) m[ed] = [];
-                    m[ed].push(a);
-                });
-            });
-            return m;
-        }
-
-        /* ── Accordéon Erotica ── */
-        function toggleErotica() {
-            document.getElementById('erotica-accordion').classList.toggle('open');
-        }
-        window.toggleErotica = toggleErotica;
-
-        /* ── renderList ── */
+        /* ─────────────────── renderList ─────────────────── */
         function renderList(f = '') {
             document.getElementById('view-list').style.display = 'block';
             document.getElementById('view-producer').style.display = 'none';
@@ -438,39 +455,37 @@
             const sortMode = document.getElementById('studio-sort')?.value || 'count';
 
             let studios = Object.keys(map).filter(s => !q || s.toLowerCase().includes(q));
-
             studios.sort((a, b) => {
-                if (sortMode === 'nom') return a.localeCompare(b, 'fr');
+                if (sortMode === 'nom')      return a.localeCompare(b, 'fr');
                 if (sortMode === 'nom-desc') return b.localeCompare(a, 'fr');
                 if (sortMode === 'score') {
-                    const avg = arr => { const sc = arr.map(x => parseFloat(x.score.replace(',','.'))).filter(Boolean); return sc.length ? sc.reduce((s,v) => s+v, 0)/sc.length : 0; };
+                    const avg = arr => { const sc = arr.map(x => parseFloat(x.score.replace(',','.'))).filter(Boolean); return sc.length ? sc.reduce((s,v)=>s+v,0)/sc.length : 0; };
                     return avg(map[b]) - avg(map[a]);
                 }
                 return map[b].length - map[a].length;
             });
 
-            const hentaiStudios = studios.filter(s => !isErotica(s));
-            const erotiStudios  = studios.filter(s => isErotica(s));
+            const hentai  = studios.filter(s => !isErotica(s));
+            const erotica = studios.filter(s =>  isErotica(s));
 
-            // Compteurs
-            document.getElementById('count-hentai').textContent = hentaiStudios.length;
-            document.getElementById('count-erotica').textContent = erotiStudios.length;
-            document.getElementById('badge-hentai').textContent = hentaiStudios.length;
-            document.getElementById('badge-erotica').textContent = erotiStudios.length;
+            document.getElementById('count-hentai').textContent  = hentai.length;
+            document.getElementById('count-erotica').textContent = erotica.length;
+            document.getElementById('badge-hentai').textContent  = hentai.length;
+            document.getElementById('badge-erotica').textContent = erotica.length;
 
-            function buildCard(studio, isErot) {
+            function buildCard(studio) {
                 const animes = map[studio];
                 const slug = studio.replace(/\s+/g, '-');
                 const avgSc = (() => {
                     const sc = animes.map(x => parseFloat(x.score.replace(',','.'))).filter(Boolean);
-                    return sc.length ? (sc.reduce((s,v) => s+v, 0)/sc.length).toFixed(1) : null;
+                    return sc.length ? (sc.reduce((s,v)=>s+v,0)/sc.length).toFixed(1) : null;
                 })();
-                const cardClass = isErot ? 'studio-card erotica-card' : 'studio-card';
-                return `<div class="${cardClass}" onclick="showProducer('${studio.replace(/'/g, "\\'")}')">
+                const initials = studioInitials(studio);
+                const safe = studio.replace(/'/g, "\\'");
+                return `<div class="studio-card" onclick="showProducer('${safe}')">
                     <div class="studio-logo-wrap">
                         <img class="studio-logo" loading="lazy" src="img/${slug}.jpg"
-                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <div class="studio-logo-fallback" style="display:none;">${studio.split(/[\s\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase()}</div>
+                            onerror="this.parentElement.innerHTML='<div class=\\'studio-logo-fallback\\'>${initials}</div>'">
                     </div>
                     <div class="studio-card-body">
                         <div class="studio-name">${studio}</div>
@@ -483,145 +498,137 @@
             }
 
             const gridH = document.getElementById('studios-grid-hentai');
-            if (hentaiStudios.length === 0) gridH.innerHTML = '<div class="empty-state">Aucun studio trouvé.</div>';
-            else gridH.innerHTML = hentaiStudios.map(s => buildCard(s, false)).join('');
+            gridH.innerHTML = hentai.length ? hentai.map(buildCard).join('') : '<div class="empty-state">Aucun studio trouvé.</div>';
 
             const gridE = document.getElementById('studios-grid-erotica');
-            if (erotiStudios.length === 0) gridE.innerHTML = '<div class="empty-state">Aucun studio trouvé.</div>';
-            else gridE.innerHTML = erotiStudios.map(s => buildCard(s, true)).join('');
+            gridE.innerHTML = erotica.length ? erotica.map(buildCard).join('') : '<div class="empty-state">Aucun studio trouvé.</div>';
         }
 
         document.getElementById('studio-sort').onchange = () => {
             sessionStorage.setItem('ed_sort', document.getElementById('studio-sort').value);
             renderList(document.getElementById('studio-search').value);
         };
-        (function() {
-            const s = sessionStorage.getItem('ed_sort');
-            if (s) { const el = document.getElementById('studio-sort'); if (el) el.value = s; }
-        })();
+        (() => { const s = sessionStorage.getItem('ed_sort'); if (s) { const el = document.getElementById('studio-sort'); if (el) el.value = s; } })();
 
-        /* ── showProducer ── */
+        /* ─────────────────── showProducer ─────────────────── */
         function showProducer(studio) {
             currentStudio = studio;
-            const isErot = isErotica(studio);
+            const erot = isErotica(studio);
             document.getElementById('view-list').style.display = 'none';
             document.getElementById('view-producer').style.display = 'block';
             document.title = studio + ' - Le Malicieux';
             history.pushState({ studio }, '', `editeurs.html?studio=${encodeURIComponent(studio)}`);
 
             const slug = studio.replace(/\s+/g, '-');
+            const initials = studioInitials(studio);
             const avatarEl = document.getElementById('prod-avatar');
-            avatarEl.className = 'producer-avatar' + (isErot ? ' erotica-avatar' : '');
-            avatarEl.innerHTML = `<img src="img/${slug}.jpg" style="width:100%;height:100%;object-fit:cover"
-                onerror="this.parentElement.innerHTML='<span style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;\\'>'+
-                '${studio.split(/[\s\-_]+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase()}' +'</span>'">`;;
+            avatarEl.innerHTML = `<img src="img/${slug}.jpg" style="width:100%;height:100%;object-fit:contain;padding:4px;"
+                onerror="this.parentElement.innerHTML='<div class=\\'producer-avatar-fallback\\'>${initials}</div>'">`;
 
-            document.getElementById('prod-banner').className = 'producer-banner' + (isErot ? ' erotica-banner' : '');
             document.getElementById('prod-name').textContent = studio;
-
             const catTag = document.getElementById('prod-cat-tag');
-            catTag.className = 'producer-category-tag ' + (isErot ? 'erotica' : 'hentai');
-            catTag.textContent = isErot ? '🟠 Studio Erotica' : '🔴 Studio Hentai';
+            catTag.className = 'producer-category-tag' + (erot ? ' erotica' : '');
+            catTag.textContent = erot ? 'Studio Erotica' : 'Studio Hentai';
+
+            // Lien MAL studio (asynchrone)
+            const malLink = document.getElementById('prod-mal-link');
+            malLink.style.display = 'none';
+            fetchMALStudioLink(studio).then(url => {
+                if (url) { malLink.href = url; malLink.style.display = 'inline-flex'; }
+            });
 
             const map = buildStudioMap();
             const coStudios = [...new Set((map[studio]||[]).flatMap(a => a.editeur.split(',').map(e => e.trim())).filter(e => e && e !== studio))].sort();
-            const coSel = document.getElementById('prod-costudio-filter');
-            coSel.innerHTML = '<option value="">🏢 Tous les studios</option>' + coStudios.map(s => `<option value="${s}">${s}</option>`).join('');
+            document.getElementById('prod-costudio-filter').innerHTML =
+                '<option value="">🏢 Tous les studios</option>' + coStudios.map(s => `<option value="${s}">${s}</option>`).join('');
+
             renderProducerGrid();
         }
 
-        /* ── renderProducerGrid ── */
+        /* ─────────────────── renderProducerGrid ─────────────────── */
         function renderProducerGrid() {
             const map = buildStudioMap();
             let animes = map[currentStudio] || [];
-            const filterVal = document.getElementById('prod-filter').value;
+            const filterVal   = document.getElementById('prod-filter').value;
             const coStudioVal = document.getElementById('prod-costudio-filter').value;
-            if (filterVal === 'oui' || filterVal === 'non') animes = animes.filter(a => a.censure.toLowerCase() === filterVal);
-            else if (filterVal === 'terminé') animes = animes.filter(a => a.etat.toLowerCase().includes('termin') || a.etat.toLowerCase().includes('fini'));
-            else if (filterVal === 'en cours') animes = animes.filter(a => a.etat.toLowerCase().includes('cours') || a.etat.toLowerCase().includes('airing'));
-            if (coStudioVal) animes = animes.filter(a => a.editeur.split(',').map(e => e.trim()).includes(coStudioVal));
+
+            if (filterVal === 'oui' || filterVal === 'non')
+                animes = animes.filter(a => a.censure.toLowerCase() === filterVal);
+            else if (filterVal === 'terminé')
+                animes = animes.filter(a => a.etat.toLowerCase().includes('termin') || a.etat.toLowerCase().includes('fini'));
+            else if (filterVal === 'en cours')
+                animes = animes.filter(a => a.etat.toLowerCase().includes('cours') || a.etat.toLowerCase().includes('airing'));
+
+            if (coStudioVal)
+                animes = animes.filter(a => a.editeur.split(',').map(e => e.trim()).includes(coStudioVal));
+
             const sortVal = document.getElementById('prod-sort').value;
             animes = [...animes].sort((a, b) => {
-                if (sortVal === 'score') return parseFloat(b.score.replace(',','.')||0) - parseFloat(a.score.replace(',','.')||0);
-                if (sortVal === 'pop') return (parseInt(a.pop.replace('#',''))||99999) - (parseInt(b.pop.replace('#',''))||99999);
-                if (sortVal === 'année') return dateToTs(b.sortie) - dateToTs(a.sortie);
-                if (sortVal === 'nom') return a.nom.localeCompare(b.nom);
-                if (sortVal === 'episodes') { const na=parseInt((a.ep||'').match(/\d+/g)?.pop()||0), nb=parseInt((b.ep||'').match(/\d+/g)?.pop()||0); return nb-na; }
+                if (sortVal === 'score')   return parseFloat(b.score.replace(',','.')||0) - parseFloat(a.score.replace(',','.')||0);
+                if (sortVal === 'pop')     return (parseInt(a.pop.replace('#',''))||99999) - (parseInt(b.pop.replace('#',''))||99999);
+                if (sortVal === 'année')   return dateToTs(b.sortie) - dateToTs(a.sortie);
+                if (sortVal === 'nom')     return a.nom.localeCompare(b.nom);
+                if (sortVal === 'episodes'){ const na=parseInt((a.ep||'').match(/\d+/g)?.pop()||0),nb=parseInt((b.ep||'').match(/\d+/g)?.pop()||0);return nb-na; }
                 if (sortVal === 'censure') return (a.censure||'').localeCompare(b.censure||'');
-                if (sortVal === 'etat') return (a.etat||'').localeCompare(b.etat||'');
+                if (sortVal === 'etat')    return (a.etat||'').localeCompare(b.etat||'');
                 return 0;
             });
+
             const allForStudio = map[currentStudio] || [];
             document.getElementById('prod-total').textContent = allForStudio.length;
             document.getElementById('prod-count').textContent = `${animes.length} titre${animes.length > 1 ? 's' : ''} affiché${animes.length > 1 ? 's' : ''}`;
             fetchStudioScoresFromMAL(allForStudio);
+
             const grid = document.getElementById('producer-grid');
-            if (animes.length === 0) { grid.innerHTML = '<div class="empty-state">Aucun anime pour ces critères.</div>'; return; }
+            if (!animes.length) { grid.innerHTML = '<div class="empty-state">Aucun anime pour ces critères.</div>'; return; }
+
             const isHl = f => sortVal === f;
-            const sp = (f, content) => isHl(f) ? `<span class="highlight">${content}</span>` : `<span>${content}</span>`;
+            const sp   = (f, content) => isHl(f) ? `<span class="highlight">${content}</span>` : `<span>${content}</span>`;
             grid.innerHTML = animes.map(a => {
                 const scoreNum = parseFloat(a.score.replace(',','.'));
                 const scoreBadge = scoreNum ? `<div class="score-badge">⭐ ${a.score}</div>` : '';
                 const coStudios = a.editeur.split(',').map(e => e.trim()).filter(e => e && e !== currentStudio);
                 const coStudioBadge = coStudios.length ? `<div style="font-size:0.62em;color:#888;margin-top:2px;">🤝 ${coStudios.join(', ')}</div>` : '';
-                const line1 = `${sp('année','📅 '+(sortVal==='année'?(a.sortie||''):((a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie)))} · ${sp('episodes','🎞️ '+a.ep)} · ${sp('censure','🔞 '+a.censure)} · ${sp('etat',a.etat)}`;
-                const line2parts = [];
-                if (a.pop) line2parts.push(sp('pop','📈 '+a.pop));
-                if (isHl('score') && a.score) line2parts.push(sp('score','⭐ '+a.score));
+                const yr = sortVal === 'année' ? (a.sortie||'') : ((a.sortie||'').match(/\d{4}/g)?.pop() || a.sortie);
+                const line1 = `${sp('année','📅 '+yr)} · ${sp('episodes','🎞️ '+a.ep)} · ${sp('censure','🔞 '+a.censure)} · ${sp('etat',a.etat)}`;
+                const line2 = [a.pop ? sp('pop','📈 '+a.pop) : '', isHl('score') && a.score ? sp('score','⭐ '+a.score) : ''].filter(Boolean);
                 return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card">
-                    <div class="img-wrap">
-                        <img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">
-                        ${scoreBadge}
-                    </div>
+                    <div class="img-wrap"><img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">${scoreBadge}</div>
                     <div class="ac-info">
                         <div class="ac-title">${a.nom}</div>
-                        <div class="ac-meta" style="flex-wrap:wrap;line-height:1.6;">${line1}</div>
-                        ${line2parts.length ? `<div class="ac-meta">${line2parts.join(' · ')}</div>` : ''}
+                        <div class="ac-meta" style="line-height:1.6;">${line1}</div>
+                        ${line2.length ? `<div class="ac-meta">${line2.join(' · ')}</div>` : ''}
                         ${coStudioBadge}
                     </div>
                 </a>`;
             }).join('');
         }
 
-        /* ── MAL scores ── */
-        async function fetchStudioScoresFromMAL(animes) {
-            document.getElementById('prod-avg').textContent = '…';
-            document.getElementById('prod-best').textContent = '…';
-            const scores = [];
-            const sample = animes.slice(0, 6);
-            for (const a of sample) {
-                try {
-                    await new Promise(r => setTimeout(r, 400));
-                    const q = a.nom.split('/')[0].trim();
-                    const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`);
-                    if (!resp.ok) continue;
-                    const json = await resp.json();
-                    const s = json.data?.[0]?.score;
-                    if (s) scores.push(parseFloat(s));
-                } catch(e) {}
-            }
-            if (scores.length === 0) { document.getElementById('prod-avg').textContent = '—'; document.getElementById('prod-best').textContent = '—'; return; }
-            document.getElementById('prod-avg').textContent = '⭐ ' + (scores.reduce((a,b) => a+b, 0)/scores.length).toFixed(2);
-            document.getElementById('prod-best').textContent = '⭐ ' + Math.max(...scores).toFixed(2);
-        }
-
-        /* ── helpers ── */
-        function showList() { currentStudio = null; renderList(document.getElementById('studio-search').value); }
-        function studioRandom() { const map = buildStudioMap(); const studios = Object.keys(map); if (studios.length) showProducer(studios[Math.floor(Math.random()*studios.length)]); }
-        window.studioRandom = studioRandom;
-        window.showList = showList;
-        window.showProducer = showProducer;
-
+        /* ─────────────────── Events ─────────────────── */
         document.getElementById('prod-sort').onchange = renderProducerGrid;
         document.getElementById('prod-filter').onchange = renderProducerGrid;
         document.getElementById('prod-costudio-filter').onchange = renderProducerGrid;
 
-        window.addEventListener('popstate', (e) => {
-            if (e.state && e.state.studio) showProducer(e.state.studio);
+        function showList() {
+            currentStudio = null;
+            renderList(document.getElementById('studio-search').value);
+        }
+        function studioRandom() {
+            const map = buildStudioMap();
+            const studios = Object.keys(map);
+            if (studios.length) showProducer(studios[Math.floor(Math.random() * studios.length)]);
+        }
+
+        window.showList = showList;
+        window.showProducer = showProducer;
+        window.studioRandom = studioRandom;
+
+        window.addEventListener('popstate', e => {
+            if (e.state?.studio) showProducer(e.state.studio);
             else { currentStudio = null; renderList(document.getElementById('studio-search').value); document.getElementById('view-list').style.display='block'; document.getElementById('view-producer').style.display='none'; document.title='Éditeurs & Studios - Le Malicieux'; }
         });
 
-        function toggleM() { const m=document.getElementById('menu'), ov=document.getElementById('overlay'); const isOpen=m.classList.toggle('active'); ov.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }
+        function toggleM() { const m=document.getElementById('menu'),ov=document.getElementById('overlay'); const o=m.classList.toggle('active'); ov.classList.toggle('active'); document.body.style.overflow=o?'hidden':''; }
         window.toggleM = toggleM;
 
         init();
