@@ -170,7 +170,7 @@
         }
         .carousel-container {
             overflow: hidden;
-            touch-action: pan-y;
+            touch-action: pan-x pan-y;
         }
         .carousel-track {
             display: flex;
@@ -212,6 +212,7 @@
                 -webkit-overflow-scrolling: touch;
                 scroll-snap-type: x mandatory;
                 scrollbar-width: none;
+                touch-action: pan-x;
             }
             .carousel-container::-webkit-scrollbar {
                 display: none;
@@ -277,7 +278,7 @@
         
         /* ── Zoom 80% ── */
         html {
-            zoom: 0.8;
+            /* zoom: 0.8 retiré — il décale les coordonnées tactiles et casse le scroll horizontal sur mobile */
         }
         body {
             width: 100%;
