@@ -111,13 +111,15 @@
         .modal-btn-confirm { background: var(--primary); color: white; }
         .comments-section { margin-top: 20px; background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; }
         .seekstreaming-section { margin-top: 20px; background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; }
-        .seekstreaming-section h3 { font-size: 1.1em; margin: 0 0 15px; color: var(--text); }
+        .seekstreaming-section h3 { font-size: 1.1em; margin: 0 0 15px; color: var(--text); display: flex; align-items: center; justify-content: space-between; }
         .seek-episode-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
         .seek-ep-btn { background: #222; border: 2px solid #444; color: #ccc; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.95em; font-weight: 600; transition: all 0.2s; letter-spacing: 0.02em; }
         .seek-ep-btn:hover { border-color: var(--primary); color: white; background: rgba(255,71,87,0.12); transform: translateY(-1px); }
         .seek-ep-btn.active { background: var(--primary); border-color: var(--primary); color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(255,71,87,0.4); transform: translateY(-1px); }
         .seek-player-wrap { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 10px; overflow: hidden; background: #000; border: 1px solid #333; margin-top: 12px; }
         .seek-player-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+        .close-player-btn { background: #333; color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; transition: 0.2s; }
+        .close-player-btn:hover { background: #ff4757; }
         @media (max-width: 800px) {
             .top-info { flex-direction: column; gap: 15px; }
             .poster { width: 100%; max-width: 200px; margin: 0 auto; }
@@ -233,15 +235,12 @@
             const moisEN={'Jan':'janv.','Feb':'févr.','Mar':'mars','Apr':'avr.','May':'mai','Jun':'juin','Jul':'juil.','Aug':'août','Sep':'sept.','Oct':'oct.','Nov':'nov.','Dec':'déc.'};
             const parseDate = s => {
                 s = s.trim();
-                // Format "Apr 7, 2019"
                 const m = s.match(/^([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})$/);
                 if(m) return `${parseInt(m[2])} ${moisEN[m[1]]||m[1]} ${m[3]}`;
-                // Format "Apr 2019" (sans jour)
                 const m2 = s.match(/^([A-Za-z]{3})\s+(\d{4})$/);
                 if(m2) return `${moisEN[m2[1]]||m2[1]} ${m2[2]}`;
-                return s; // année seule ou format inconnu → inchangé
+                return s;
             };
-            // Format "Apr 7, 2019 to Jun 30, 2019"
             const rangeMatch = raw.match(/^(.+?)\s+to\s+(.+)$/i);
             if(rangeMatch) return `${parseDate(rangeMatch[1])} au ${parseDate(rangeMatch[2])}`;
             return parseDate(raw);
@@ -440,7 +439,7 @@
         }
         load();
 
-        // ── SeekStreaming integration ──────────────────────────────────────
+        // ── SeekStreaming integration améliorée (supporte les épisodes spéciaux, ignore les tirets) ──
         async function loadSeekstreaming() {
             if (!animeName) return;
             try {
@@ -449,93 +448,142 @@
                 const text = await resp.text();
                 const lines = text.split(/\r?\n/).slice(1).filter(l => l.trim());
 
-                // ── Normalisation : minuscules, sans accents, sans ponctuation, espaces normalisés
+                // Normalisation : minuscules, sans accents, ignore tirets et séparateurs
                 const norm = s => s.toLowerCase()
                     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                    .replace(/[^a-z0-9\s]/g, ' ')
+                    .replace(/[-_\s]+/g, ' ')           // les tirets deviennent des espaces
+                    .replace(/[^a-z0-9\s]/g, '')
                     .replace(/\s+/g, ' ').trim();
 
-                // ── Parse CSV (title, poster, resolution, watch)
+                // Mots-clés spéciaux
+                const specialKeywords = [
+                    'deleted scenes', 'special', 'bonus', 'extra', 'ova', 'omake',
+                    'trailer', 'pv', 'music video', 'chapter', 'ex', 'uncensored'
+                ];
+
+                const cleanRawTitle = raw => {
+                    return raw
+                        .replace(/\[[^\]]*\]/g, '')
+                        .replace(/\.(mkv|mp4|avi|mov)$/i, '')
+                        .replace(/[-_]+/g, ' ')
+                        .trim();
+                };
+
+                const parseEnhanced = raw => {
+                    let cleaned = cleanRawTitle(raw);
+                    // Pattern saison + épisode : "s1 02"
+                    let mSeason = cleaned.match(/^(.*?)\s+s(\d+)\s+(\d+)\s*(vostfr|vf|sub|vo|fr)/i);
+                    if (mSeason) {
+                        return {
+                            animeTitle: mSeason[1].trim(),
+                            season: parseInt(mSeason[2]),
+                            episode: parseInt(mSeason[3]),
+                            specialType: null,
+                            specialNumber: null
+                        };
+                    }
+                    // Épisode normal ou spécial
+                    let mEp = cleaned.match(/^(.*?)\s+(\d+)\s*(vostfr|vf|sub|vo|fr)/i);
+                    if (mEp) {
+                        let titlePart = mEp[1].trim();
+                        let epNum = parseInt(mEp[2]);
+                        let foundSpecial = null;
+                        for (let kw of specialKeywords) {
+                            let regex = new RegExp(`\\b${kw}\\s*(\\d*)\\b`, 'i');
+                            let match = titlePart.match(regex);
+                            if (match) {
+                                foundSpecial = { type: kw, num: match[1] ? parseInt(match[1]) : epNum };
+                                titlePart = titlePart.replace(regex, '').trim();
+                                break;
+                            }
+                        }
+                        if (foundSpecial) {
+                            return {
+                                animeTitle: titlePart,
+                                season: 1,
+                                episode: null,
+                                specialType: foundSpecial.type,
+                                specialNumber: foundSpecial.num
+                            };
+                        } else {
+                            return {
+                                animeTitle: titlePart,
+                                season: 1,
+                                episode: epNum,
+                                specialType: null,
+                                specialNumber: null
+                            };
+                        }
+                    }
+                    return {
+                        animeTitle: cleaned.trim(),
+                        season: 1,
+                        episode: null,
+                        specialType: null,
+                        specialNumber: null
+                    };
+                };
+
+                // Ignorer les tirets lors de la comparaison
+                const normalizeForMatch = title => {
+                    let t = title.toLowerCase();
+                    for (let kw of specialKeywords) {
+                        t = t.replace(new RegExp(`\\b${kw}\\s*\\d*\\b`, 'g'), '');
+                    }
+                    t = t.replace(/\b\d+\b/g, '');
+                    return norm(t);  // la fonction norm gère déjà les tirets
+                };
+
+                // Lecture CSV
                 const rows = lines.map(line => {
                     const parts = line.split(',');
                     if (parts.length < 4) return null;
-                    const watch      = parts[parts.length - 1].trim();
+                    const watch = parts[parts.length - 1].trim();
                     const resolution = parts[parts.length - 2].trim();
-                    const title      = parts[0].trim();
-                    const poster     = parts.slice(1, parts.length - 2).join(',').trim();
+                    const title = parts[0].trim();
+                    const poster = parts.slice(1, parts.length - 2).join(',').trim();
                     return { title, poster, resolution, watch };
                 }).filter(Boolean);
 
-                // ── Extraction saison + épisode + titre-anime depuis le titre CSV
-                //
-                //  Schémas reconnus (insensible à la casse) :
-                //    • "Titre sN NN vostfr"  → saison N, épisode NN, titre = tout avant "sN"
-                //    • "Titre NN vostfr"      → saison 1, épisode = le nombre juste avant vostfr/vf/…
-                //
-                //  Règle : le numéro d'épisode est TOUJOURS le nombre juste avant vostfr/vf/sub/vo.
-                //  S'il y a un "sN", tout ce qui précède est le titre de l'anime.
-                //  S'il n'y a pas de "sN", tout ce qui précède le numéro d'épisode est le titre.
-                //
-                //  Nettoyage du titre de base :
-                //    • "Titre/Autre Nom" → on garde uniquement "Titre" (avant le /)
-                //    • "Titre 1-2"       → on supprime le "1-2" final (saisons regroupées)
-                const cleanBaseTitle = t => t
-                    .split('/')[0]                          // prendre avant le "/"
-                    .replace(/\s+\d+-\d+\s*$/, '')         // supprimer "1-2" en fin
-                    .trim();
+                rows.forEach(r => {
+                    const parsed = parseEnhanced(r.title);
+                    r.animeTitle = parsed.animeTitle;
+                    r.season = parsed.season;
+                    r.episode = parsed.episode;
+                    r.specialType = parsed.specialType;
+                    r.specialNumber = parsed.specialNumber;
+                    r.normAnime = normalizeForMatch(r.animeTitle);
+                });
 
-                const parseTitle = raw => {
-                    // Cherche d'abord "sN NN (vostfr|vf|sub|vo)"
-                    const mS = raw.match(/^(.*?)\s+s(\d+)\s+(\d+)\s*(vostfr|vf|sub|vo)?/i);
-                    if (mS) {
-                        return {
-                            animeTitle: cleanBaseTitle(mS[1].trim()),
-                            season: parseInt(mS[2], 10),
-                            ep: parseInt(mS[3], 10)
-                        };
-                    }
-                    // Sinon cherche "NN (vostfr|vf|sub|vo)" — le nombre juste avant le tag langue
-                    // Regex greedy (.*) : capture le plus long titre possible, donc prend
-                    // le DERNIER nombre avant vostfr/vf/… (et non le premier chiffre du titre)
-                    const mE = raw.match(/^(.*)\s+(\d+)\s*(vostfr|vf|sub|vo)/i);
-                    if (mE) {
-                        return {
-                            animeTitle: cleanBaseTitle(mE[1].trim()),
-                            season: 1,
-                            ep: parseInt(mE[2], 10)
-                        };
-                    }
-                    // Fallback : pas d'épisode détectable
-                    return { animeTitle: cleanBaseTitle(raw.trim()), season: 1, ep: null };
-                };
-
-                // Enrichir chaque row
-                rows.forEach(r => Object.assign(r, parseTitle(r.title)));
-
-                // ── Correspondance exacte normalisée entre animeName (URL) et animeTitle (CSV)
-                // animeName peut aussi contenir un "/" ou un "1-2", on applique le même nettoyage
-                const normAnime = norm(cleanBaseTitle(animeName));
-                const matched = rows.filter(r => norm(r.animeTitle) === normAnime);
-
+                const pageNorm = normalizeForMatch(animeName);
+                const matched = rows.filter(r => r.normAnime === pageNorm);
                 if (matched.length === 0) return;
 
-                // ── Tri : saison croissante, puis épisode croissant
-                matched.sort((a, b) => (a.season - b.season) || ((a.ep ?? 999) - (b.ep ?? 999)));
+                const priority = { null: 0, 'special': 1, 'bonus': 2, 'deleted scenes': 3, 'extra': 4, 'ova': 5, 'omake': 6 };
+                matched.sort((a, b) => {
+                    if (a.season !== b.season) return a.season - b.season;
+                    let prioA = priority[a.specialType] ?? 99;
+                    let prioB = priority[b.specialType] ?? 99;
+                    if (prioA !== prioB) return prioA - prioB;
+                    let numA = a.specialNumber ?? a.episode ?? 0;
+                    let numB = b.specialNumber ?? b.episode ?? 0;
+                    return numA - numB;
+                });
 
-                // ── Détecter multi-saisons
-                const seasons = [...new Set(matched.map(r => r.season))].sort((a, b) => a - b);
-                const multiSeason = seasons.length > 1;
-
-                // ── Récupération des éléments DOM
-                const section  = document.getElementById('seekstreaming-section');
-                const list     = document.getElementById('seek-episode-list');
-                const wrap     = document.getElementById('seek-player-wrap');
-                const iframe   = document.getElementById('seek-iframe');
+                const section = document.getElementById('seekstreaming-section');
+                const list = document.getElementById('seek-episode-list');
+                const wrap = document.getElementById('seek-player-wrap');
+                const iframe = document.getElementById('seek-iframe');
 
                 section.style.display = '';
                 list.innerHTML = '';
 
-                // ── Charger un épisode : ouvre le lecteur si fermé, remplace sinon
+                function closePlayer() {
+                    iframe.src = '';
+                    wrap.style.display = 'none';
+                    document.querySelectorAll('.seek-ep-btn').forEach(b => b.classList.remove('active'));
+                }
+
                 function loadEpisode(row, btn) {
                     document.querySelectorAll('.seek-ep-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
@@ -543,7 +591,16 @@
                     wrap.style.display = '';
                 }
 
-                // ── Créer un bouton épisode
+                // Ajout du bouton fermer
+                const header = section.querySelector('h3');
+                if (header && !section.querySelector('.close-player-btn')) {
+                    const closeBtn = document.createElement('button');
+                    closeBtn.textContent = '❌ Fermer le lecteur';
+                    closeBtn.className = 'close-player-btn';
+                    closeBtn.onclick = closePlayer;
+                    header.appendChild(closeBtn);
+                }
+
                 function makeEpBtn(row, label) {
                     const btn = document.createElement('button');
                     btn.className = 'seek-ep-btn';
@@ -553,7 +610,10 @@
                     return btn;
                 }
 
-                if (multiSeason) {
+                const seasons = [...new Set(matched.map(r => r.season))].sort((a,b)=>a-b);
+                const isMultiSeason = seasons.length > 1;
+
+                if (isMultiSeason) {
                     list.style.flexDirection = 'column';
                     list.style.gap = '16px';
                     seasons.forEach(s => {
@@ -564,26 +624,39 @@
                         list.appendChild(seasonLabel);
                         const epGroup = document.createElement('div');
                         epGroup.style.cssText = 'display:flex; flex-wrap:wrap; gap:8px;';
-                        seasonRows.forEach((row, idx) => {
-                            const label = row.ep !== null ? `Ep. ${String(row.ep).padStart(2, '0')}` : `Ep. ${idx + 1}`;
+                        seasonRows.forEach(row => {
+                            let label = '';
+                            if (row.specialType) {
+                                let typeCapitalized = row.specialType.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                                label = `${typeCapitalized} ${String(row.specialNumber).padStart(2, '0')}`;
+                            } else if (row.episode !== null) {
+                                label = `Épisode ${String(row.episode).padStart(2, '0')}`;
+                            } else {
+                                label = `Film / OAV`;
+                            }
                             epGroup.appendChild(makeEpBtn(row, label));
                         });
                         list.appendChild(epGroup);
                     });
                 } else {
-                    list.style.flexDirection = '';
-                    matched.forEach((row, idx) => {
-                        const label = row.ep !== null ? `Épisode ${String(row.ep).padStart(2, '0')}` : `Épisode ${idx + 1}`;
+                    matched.forEach(row => {
+                        let label = '';
+                        if (row.specialType) {
+                            let typeCapitalized = row.specialType.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                            label = `${typeCapitalized} ${String(row.specialNumber).padStart(2, '0')}`;
+                        } else if (row.episode !== null) {
+                            label = `Épisode ${String(row.episode).padStart(2, '0')}`;
+                        } else {
+                            label = `Film / OAV`;
+                        }
                         list.appendChild(makeEpBtn(row, label));
                     });
                 }
-
             } catch (e) {
                 console.warn('SeekStreaming load error:', e);
             }
         }
         loadSeekstreaming();
-        // ──────────────────────────────────────────────────────────────────
 
         function toggleM(){ const menu=document.getElementById('menu'), overlay=document.getElementById('overlay'); const isOpen=menu.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }
         window.toggleM=toggleM;
