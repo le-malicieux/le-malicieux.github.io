@@ -118,8 +118,8 @@
         .seek-ep-btn.active { background: var(--primary); border-color: var(--primary); color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(255,71,87,0.4); transform: translateY(-1px); }
         .seek-player-wrap { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 10px; overflow: hidden; background: #000; border: 1px solid #333; margin-top: 12px; }
         .seek-player-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
-        .close-player-btn, .fullscreen-player-btn { background: #333; color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; transition: 0.2s; margin-left: 8px; }
-        .close-player-btn:hover, .fullscreen-player-btn:hover { background: #ff4757; }
+        .close-player-btn { background: #333; color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; transition: 0.2s; }
+        .close-player-btn:hover { background: #ff4757; }
         @media (max-width: 800px) {
             .top-info { flex-direction: column; gap: 15px; }
             .poster { width: 100%; max-width: 200px; margin: 0 auto; }
@@ -491,7 +491,7 @@
                 const parseEnhanced = raw => {
                     let cleaned = cleanRawTitle(raw);
                     // Pattern saison + épisode : "s1 02" ou "s1 08.5"
-                    let mSeason = cleaned.match(/^(.*?)\s+s(\d+)\s+(\d+(?:\.\d+)?)\s*(vostfr|vf|sub|vo|fr)/i);
+                    let mSeason = cleaned.match(/^(.*?)\s+s(\d+)\s+(\d+(?:\.\d+)?)(?:\s*(vostfr|vf|sub|vo|fr))?\s*$/i);
                     if (mSeason) {
                         return {
                             animeTitle: mSeason[1].trim(),
@@ -504,7 +504,7 @@
                     // Pattern saison + épisode SANS "s" : "Titre 2 02 vostfr"
                     // Le premier nombre (sans zéro devant, 1-2 chiffres) = saison,
                     // le second nombre (souvent avec zéro devant) = épisode.
-                    let mSeasonBare = cleaned.match(/^(.*?)\s+([1-9]\d?)\s+(\d{1,4}(?:\.\d+)?)\s*(vostfr|vf|sub|vo|fr)/i);
+                    let mSeasonBare = cleaned.match(/^(.*?)\s+([1-9]\d?)\s+(\d{1,4}(?:\.\d+)?)(?:\s*(vostfr|vf|sub|vo|fr))?\s*$/i);
                     if (mSeasonBare) {
                         return {
                             animeTitle: mSeasonBare[1].trim(),
@@ -515,7 +515,7 @@
                         };
                     }
                     // Épisode normal ou spécial (accepte les décimales : 08.5, 07.0...)
-                    let mEp = cleaned.match(/^(.*?)\s+(\d+(?:\.\d+)?)\s*(vostfr|vf|sub|vo|fr)/i);
+                    let mEp = cleaned.match(/^(.*?)\s+(\d+(?:\.\d+)?)(?:\s*(vostfr|vf|sub|vo|fr))?\s*$/i);
                     if (mEp) {
                         let titlePart = mEp[1].trim();
                         let epNum = parseFloat(mEp[2]);
@@ -588,7 +588,28 @@
                 });
 
                 const pageNorm = normalizeForMatch(animeName);
-                const matched = rows.filter(r => r.normAnime === pageNorm);
+
+                // Si plusieurs fichiers correspondent au même épisode/catégorie
+                // (ex: plusieurs qualités disponibles), ne garder que celui en plus
+                // haute résolution : c'est celui-là qui se chargera par défaut.
+                function resArea(resStr) {
+                    const m = String(resStr).match(/(\d+)\s*x\s*(\d+)/i);
+                    if (!m) return 0;
+                    return parseInt(m[1], 10) * parseInt(m[2], 10);
+                }
+                function dedupeByBestResolution(list) {
+                    const map = new Map();
+                    list.forEach(r => {
+                        const key = [r.season, r.episode, r.specialType, r.specialNumber].join('|');
+                        const existing = map.get(key);
+                        if (!existing || resArea(r.resolution) > resArea(existing.resolution)) {
+                            map.set(key, r);
+                        }
+                    });
+                    return Array.from(map.values());
+                }
+
+                const matched = dedupeByBestResolution(rows.filter(r => r.normAnime === pageNorm));
                 if (matched.length === 0) return;
 
                 const priority = { null: 0, 'special': 1, 'bonus': 2, 'deleted scenes': 3, 'art gallery': 4 };
@@ -637,16 +658,7 @@
                     hardSetIframeSrc(row.watch);
                 }
 
-                // Plein écran fiable : on ne dépend plus du bouton interne du lecteur
-                // distant (qui peut être cassé par le problème de rechargement ci-dessus),
-                // on pilote directement l'API Fullscreen sur notre propre conteneur.
-                function goFullscreen() {
-                    const req = wrap.requestFullscreen || wrap.webkitRequestFullscreen
-                        || wrap.mozRequestFullScreen || wrap.msRequestFullscreen;
-                    if (req) req.call(wrap);
-                }
-
-                // Ajout des boutons fermer / plein écran
+                // Ajout du bouton fermer
                 const header = section.querySelector('h3');
                 if (header && !section.querySelector('.close-player-btn')) {
                     const closeBtn = document.createElement('button');
@@ -655,12 +667,14 @@
                     closeBtn.onclick = closePlayer;
                     header.appendChild(closeBtn);
                 }
-                if (header && !section.querySelector('.fullscreen-player-btn')) {
-                    const fsBtn = document.createElement('button');
-                    fsBtn.textContent = '⛶ Plein écran';
-                    fsBtn.className = 'fullscreen-player-btn';
-                    fsBtn.onclick = goFullscreen;
-                    header.appendChild(fsBtn);
+
+                // Info : le téléchargement de la vidéo est disponible directement depuis le lecteur
+                if (!section.querySelector('.seek-download-note')) {
+                    const note = document.createElement('div');
+                    note.className = 'seek-download-note';
+                    note.style.cssText = 'font-size:0.8em; color:#999; margin-bottom:10px;';
+                    note.textContent = '📥 Le téléchargement de la vidéo est disponible directement depuis le lecteur.';
+                    section.insertBefore(note, list);
                 }
 
                 function labelFor(row) {
