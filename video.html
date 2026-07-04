@@ -118,8 +118,8 @@
         .seek-ep-btn.active { background: var(--primary); border-color: var(--primary); color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(255,71,87,0.4); transform: translateY(-1px); }
         .seek-player-wrap { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 10px; overflow: hidden; background: #000; border: 1px solid #333; margin-top: 12px; }
         .seek-player-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
-        .close-player-btn { background: #333; color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; transition: 0.2s; }
-        .close-player-btn:hover { background: #ff4757; }
+        .close-player-btn, .fullscreen-player-btn { background: #333; color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; transition: 0.2s; margin-left: 8px; }
+        .close-player-btn:hover, .fullscreen-player-btn:hover { background: #ff4757; }
         @media (max-width: 800px) {
             .top-info { flex-direction: column; gap: 15px; }
             .poster { width: 100%; max-width: 200px; margin: 0 auto; }
@@ -167,7 +167,7 @@
             <h3>🎬 Regarder en streaming</h3>
             <div class="seek-episode-list" id="seek-episode-list"></div>
             <div class="seek-player-wrap" id="seek-player-wrap" style="display:none;">
-                <iframe id="seek-iframe" allowfullscreen allow="autoplay; fullscreen"></iframe>
+                <iframe id="seek-iframe" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
         </div>
         <div class="comments-section">
@@ -566,14 +566,14 @@
                     return norm(t);  // la fonction norm gère déjà les tirets
                 };
 
-                // Lecture CSV
+                // Lecture CSV : title,poster,resolution,download,watch (5 colonnes)
                 const rows = lines.map(line => {
                     const parts = line.split(',');
-                    if (parts.length < 4) return null;
+                    if (parts.length < 5) return null;
                     const watch = parts[parts.length - 1].trim();
-                    const resolution = parts[parts.length - 2].trim();
+                    const resolution = parts[parts.length - 3].trim();
                     const title = parts[0].trim();
-                    const poster = parts.slice(1, parts.length - 2).join(',').trim();
+                    const poster = parts.slice(1, parts.length - 3).join(',').trim();
                     return { title, poster, resolution, watch };
                 }).filter(Boolean);
 
@@ -612,8 +612,20 @@
                 list.style.flexDirection = 'column';
                 list.style.gap = '14px';
 
+                // Les liens "watch" (ex: https://.../embedseek.com/#xxxxx) ne diffèrent
+                // souvent que par le fragment "#xxxxx". Or changer uniquement le fragment
+                // d'une iframe déjà chargée ne force PAS un vrai rechargement du document
+                // (le navigateur traite ça comme une simple navigation interne) : le lecteur
+                // distant doit alors détecter lui-même le changement, ce qui échoue une fois
+                // sur deux (écran noir, épisode qui ne change pas, résolution qui suit pas).
+                // On force donc systématiquement un rechargement complet de l'iframe.
+                function hardSetIframeSrc(url) {
+                    iframe.src = 'about:blank';
+                    setTimeout(() => { iframe.src = url; }, 30);
+                }
+
                 function closePlayer() {
-                    iframe.src = '';
+                    iframe.src = 'about:blank';
                     wrap.style.display = 'none';
                     document.querySelectorAll('.seek-ep-btn').forEach(b => b.classList.remove('active'));
                 }
@@ -621,11 +633,20 @@
                 function loadEpisode(row, btn) {
                     document.querySelectorAll('.seek-ep-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    iframe.src = row.watch;
                     wrap.style.display = '';
+                    hardSetIframeSrc(row.watch);
                 }
 
-                // Ajout du bouton fermer
+                // Plein écran fiable : on ne dépend plus du bouton interne du lecteur
+                // distant (qui peut être cassé par le problème de rechargement ci-dessus),
+                // on pilote directement l'API Fullscreen sur notre propre conteneur.
+                function goFullscreen() {
+                    const req = wrap.requestFullscreen || wrap.webkitRequestFullscreen
+                        || wrap.mozRequestFullScreen || wrap.msRequestFullscreen;
+                    if (req) req.call(wrap);
+                }
+
+                // Ajout des boutons fermer / plein écran
                 const header = section.querySelector('h3');
                 if (header && !section.querySelector('.close-player-btn')) {
                     const closeBtn = document.createElement('button');
@@ -633,6 +654,13 @@
                     closeBtn.className = 'close-player-btn';
                     closeBtn.onclick = closePlayer;
                     header.appendChild(closeBtn);
+                }
+                if (header && !section.querySelector('.fullscreen-player-btn')) {
+                    const fsBtn = document.createElement('button');
+                    fsBtn.textContent = '⛶ Plein écran';
+                    fsBtn.className = 'fullscreen-player-btn';
+                    fsBtn.onclick = goFullscreen;
+                    header.appendChild(fsBtn);
                 }
 
                 function labelFor(row) {
