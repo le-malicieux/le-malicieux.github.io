@@ -256,24 +256,76 @@
             return from||null;
         }
 
-        async function fetchMALData(nom,malId){
+        // Jikan (MyAnimeList) : API publique gratuite mais peu fiable (rate-limit
+        // strict, pannes serveur fréquentes). On ajoute : un cache local (évite de
+        // re-solliciter l'API à chaque visite), un timeout (pas de blocage si Jikan
+        // traîne), et plusieurs tentatives avec pause en cas d'erreur temporaire.
+        const MAL_CACHE_TTL = 12 * 60 * 60 * 1000; // 12h
+        function malCacheGet(key){
             try{
+                const raw = localStorage.getItem('malcache:'+key);
+                if(!raw) return null;
+                const obj = JSON.parse(raw);
+                if(!obj || (Date.now() - obj.t) > MAL_CACHE_TTL) return null;
+                return obj.data;
+            }catch(e){ return null; }
+        }
+        function malCacheSet(key, data){
+            try{ localStorage.setItem('malcache:'+key, JSON.stringify({t:Date.now(), data})); }catch(e){}
+        }
+        async function fetchJikanOnce(url, timeoutMs=8000){
+            const controller = new AbortController();
+            const timer = setTimeout(()=>controller.abort(), timeoutMs);
+            try{
+                return await fetch(url, { signal: controller.signal });
+            } finally {
+                clearTimeout(timer);
+            }
+        }
+        async function fetchJikanWithRetry(url, attempts=3){
+            let lastErr = null;
+            for(let i=0; i<attempts; i++){
+                try{
+                    const resp = await fetchJikanOnce(url);
+                    if(resp.ok) return resp;
+                    // 429 (rate-limit) ou erreur serveur temporaire : on retente après une pause
+                    if((resp.status===429 || resp.status>=500) && i<attempts-1){
+                        await new Promise(r=>setTimeout(r, 500*(i+1)));
+                        continue;
+                    }
+                    return resp; // erreur définitive (404 etc.) : inutile de retenter
+                }catch(e){
+                    lastErr = e;
+                    if(i<attempts-1){ await new Promise(r=>setTimeout(r, 500*(i+1))); continue; }
+                }
+            }
+            if(lastErr) throw lastErr;
+            return null;
+        }
+
+        async function fetchMALData(nom,malId){
+            const cacheKey = (malId && malId.trim()) ? 'id:'+malId.trim() : 'q:'+nom.split('/')[0].trim().toLowerCase();
+            const cached = malCacheGet(cacheKey);
+            if(cached) return cached;
+            try{
+                let item=null;
                 if(malId && malId.trim()){
-                    const resp=await fetch(`https://api.jikan.moe/v4/anime/${malId.trim()}`);
-                    if(!resp.ok) return null;
+                    const resp=await fetchJikanWithRetry(`https://api.jikan.moe/v4/anime/${malId.trim()}`);
+                    if(!resp || !resp.ok) return null;
                     const json=await resp.json();
                     if(!json.data) return null;
-                    const item=json.data;
-                    return { score:item.score, popularity:item.popularity, status:item.status, malUrl:item.url, aired:item.aired };
+                    item=json.data;
                 }else{
                     const q=nom.split('/')[0].trim();
-                    const resp=await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`);
-                    if(!resp.ok) return null;
+                    const resp=await fetchJikanWithRetry(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`);
+                    if(!resp || !resp.ok) return null;
                     const json=await resp.json();
                     if(!json.data || json.data.length===0) return null;
-                    const item=json.data[0];
-                    return { score:item.score, popularity:item.popularity, status:item.status, malUrl:item.url, aired:item.aired };
+                    item=json.data[0];
                 }
+                const result={ score:item.score, popularity:item.popularity, status:item.status, malUrl:item.url, aired:item.aired };
+                malCacheSet(cacheKey, result);
+                return result;
             }catch(e){ return null; }
         }
         function applyMALStats(malData, updateDate=true){
