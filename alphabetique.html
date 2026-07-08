@@ -164,18 +164,14 @@
             .card-meta-row { font-size: 0.65em; gap: 2px; } 
         }
     
-        /* ── Images lisses (anti-pixelisation maximale) ─── */
+        /* ── Images lisses ── */
         img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: smooth;
-            image-rendering: high-quality;
+            image-rendering: auto;
         }
         .card img, .sugg-img, .mal-row .ml-img, .list-img,
         .anime-card img, .studio-preview img, .studio-logo,
         .img-container img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: smooth;
-            image-rendering: high-quality;
+            image-rendering: auto;
             -ms-interpolation-mode: bicubic;
             will-change: transform;
         }
