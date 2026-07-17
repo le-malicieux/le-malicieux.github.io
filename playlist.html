@@ -206,11 +206,23 @@
     <div class="modal-overlay" id="confirm-modal"><div class="modal-box"><p id="modal-msg"></p><div class="modal-actions"><button class="modal-btn modal-btn-cancel" id="modal-cancel">Annuler</button><button class="modal-btn modal-btn-confirm" id="modal-confirm">Supprimer</button></div></div></div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, query, where, onSnapshot, addDoc, doc, deleteDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
-        const app = initializeApp(firebaseConfig); const db = getFirestore(app); const auth = getAuth(app);
+        // Firebase chargé en tâche de fond (import() dynamique) pour ne pas bloquer
+        // l'affichage. Les variables sont déclarées ici et peuplées une fois le SDK
+        // chargé ; tout code qui en dépend attend "await firebaseReady" avant de s'en servir.
+        let getFirestore, collection, query, where, onSnapshot, addDoc, doc, deleteDoc, getDocs, getDoc;
+        let getAuth, onAuthStateChanged;
+        let app, db, auth;
+        const firebaseReady = (async () => {
+            const [appMod, fsMod, authMod] = await Promise.all([
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"),
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"),
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js")
+            ]);
+            ({ collection, query, where, onSnapshot, addDoc, doc, deleteDoc, getDocs, getDoc, getFirestore } = fsMod);
+            ({ getAuth, onAuthStateChanged } = authMod);
+            const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
+            app = appMod.initializeApp(firebaseConfig); db = getFirestore(app); auth = getAuth(app);
+        })();
         
         // Récupération de l'UID depuis l'URL (mode visualisation publique)
         const urlParams = new URLSearchParams(window.location.search);
@@ -305,6 +317,7 @@
         
         async function initPlaylist() {
             await loadCSV();
+            await firebaseReady;
             if (isViewMode) {
                 await loadPlaylistForUid(targetUid);
                 // Désactiver l'ajout/suppression

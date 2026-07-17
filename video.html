@@ -180,14 +180,24 @@
     <div class="modal-overlay" id="confirm-modal"><div class="modal-box"><p id="modal-msg"></p><div class="modal-actions"><button class="modal-btn modal-btn-cancel" id="modal-cancel">Annuler</button><button class="modal-btn modal-btn-confirm" id="modal-confirm">Supprimer</button></div></div></div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, addDoc, query, where, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        // Firebase chargé en tâche de fond (import() dynamique) pour ne pas bloquer
+        // l'affichage de la vidéo/des épisodes. Les variables sont peuplées une fois
+        // le SDK chargé ; le code qui en dépend (playlist, commentaires) attend
+        // "await firebaseReady" / "firebaseReady.then(...)" avant de s'en servir.
+        let doc, getDoc, setDoc, deleteDoc, collection, addDoc, query, where, getDocs, onSnapshot, serverTimestamp, getFirestore;
+        let getAuth, onAuthStateChanged;
+        let app, db, auth;
+        const firebaseReady = (async () => {
+            const [appMod, fsMod, authMod] = await Promise.all([
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"),
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"),
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js")
+            ]);
+            ({ getFirestore, doc, getDoc, setDoc, deleteDoc, collection, addDoc, query, where, getDocs, onSnapshot, serverTimestamp } = fsMod);
+            ({ getAuth, onAuthStateChanged } = authMod);
+            const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
+            app = appMod.initializeApp(firebaseConfig); db = getFirestore(app); auth = getAuth(app);
+        })();
 
         const params = new URLSearchParams(window.location.search);
         const animeName = params.get('name');
@@ -423,6 +433,7 @@
                 if(_ref.includes('playlist.html')) _bl.innerText='← Retour à la playlist';
                 else if(_ref.includes('tags.html')) _bl.innerText='← Retour aux tags';
                 const updateStars=v=>document.querySelectorAll('#stars span').forEach(s=>s.classList.toggle('active',s.dataset.v<=v));
+                await firebaseReady;
                 onAuthStateChanged(auth,async(u)=>{
                     currentUser=u;
                     if(u){

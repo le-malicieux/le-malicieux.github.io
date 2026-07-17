@@ -250,23 +250,11 @@
         // On garde le script intact, seule la partie setBackground est modifiée pour ne plus faire de parallax.
         // Nous avons aussi retiré l'appel à applyParallax() dans init().
 
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        const firebaseConfig = { apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk", authDomain: "le-malicieux-v2.firebaseapp.com", projectId: "le-malicieux-v2", storageBucket: "le-malicieux-v2.firebasestorage.app", messagingSenderId: "938147445933", appId: "1:938147445933:web:86f9c65ee0737e66a9da24" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
         let allAnimes = [];
         let currentFiltered = [];
         let currentDisplayMode = localStorage.getItem('alphaDisplayMode') || 'grid';
 
         document.getElementById('display-mode').value = currentDisplayMode;
-
-        onAuthStateChanged(auth, async (user) => {});
 
         window.handleImgError = function(img, fileNameFromCSV) {
             if (!img.dataset.attempt) img.dataset.attempt = "1";
