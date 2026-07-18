@@ -416,9 +416,8 @@
                 anime.stream.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('stream-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link">${getDomainLabel(l,'▶')} ↗</a>`);
                 if(anime.stream.some(l=>l.includes('hentainyaa.com'))){
                     const note=document.createElement('div');
-                    note.style.cssText='font-size:0.7em;color:#888;margin-top:2px;';
-                    note.title='Redirige vers hentainyaa.com';
-                    note.textContent='*';
+                    note.style.cssText='font-size:0.75em;color:#999;margin-top:4px;line-height:1.4;';
+                    note.innerHTML='<span style="color:var(--primary);font-weight:bold;">*</span> Pour que les sous-titres de hentainyaa soient disponibles dans votre langue, vous avez juste à traduire l\'interface du site (dans la navbar).';
                     document.getElementById('stream-area').insertAdjacentElement('afterend', note);
                 }
                 if(anime.infoV && anime.infoV.trim()){
