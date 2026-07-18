@@ -414,6 +414,13 @@
                 }
                 anime.dl.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('dl-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link" style="flex:1;">${getDomainLabel(l,'⬇️')} ↗</a>`);
                 anime.stream.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('stream-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link">${getDomainLabel(l,'▶')} ↗</a>`);
+                if(anime.stream.some(l=>l.includes('hentainyaa.com'))){
+                    const note=document.createElement('div');
+                    note.style.cssText='font-size:0.7em;color:#888;margin-top:2px;';
+                    note.title='Redirige vers hentainyaa.com';
+                    note.textContent='*';
+                    document.getElementById('stream-area').insertAdjacentElement('afterend', note);
+                }
                 if(anime.infoV && anime.infoV.trim()){
                     const infovArea=document.getElementById('infov-area');
                     if(infovArea){

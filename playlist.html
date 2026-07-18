@@ -168,7 +168,14 @@
         <a id="back-to-profile-btn" class="back-btn" href="#">← Retour au profil</a>
     </div>
 
-    <div class="playlist-header">
+    <!-- Écran affiché si l'utilisateur n'est pas connecté -->
+    <div id="not-logged-screen" style="display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:16px; padding:80px 20px; min-height:50vh;">
+        <div style="font-size:2.5em;">🔒</div>
+        <p style="font-size:1.1em; color:#eee; max-width:400px;">Vous devez vous connecter avec votre compte Google Malicieux pour continuer.</p>
+        <a href="index.html" style="background:#5865F2; color:white; padding:10px 20px; border-radius:6px; text-decoration:none; font-size:0.9em;">Retour à l'accueil pour se connecter</a>
+    </div>
+
+    <div class="playlist-header" id="playlist-header">
         <div class="controls-row">
             <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
                 <label style="font-size:0.65em;color:#888;text-transform:uppercase;letter-spacing:0.05em;">Playlist</label>
@@ -196,7 +203,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="container" id="playlist-container">
         <div id="playlist-grid" class="grid"></div>
         <table id="playlist-table" class="list-table">
             <thead><tr><th class="status-bar"></th><th>#</th><th>Image</th><th>Titre</th><th>Note</th><th>Progrès</th><th>Score MAL</th><th>Pop.</th><th>Année</th><th>Censure</th><th>Éditeur</th><th>Ajouté le</th><th>Modifié le</th><th>Action</th></tr></thead>
@@ -361,8 +368,10 @@
                             refreshDisplay();
                         });
                     } else {
-                        // Non connecté, rediriger vers index pour connexion
-                        window.location.href = 'index.html';
+                        // Non connecté : afficher un écran de connexion requise plutôt que de rediriger
+                        document.getElementById('playlist-header').style.display = 'none';
+                        document.getElementById('playlist-container').style.display = 'none';
+                        document.getElementById('not-logged-screen').style.display = 'flex';
                     }
                 });
             }
