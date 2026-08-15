@@ -127,7 +127,27 @@
             .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
             .bottom-controls { grid-template-columns: 1fr; }
         }
-    </style>
+    
+        /* ── Catégories de liens de visionnage ────────────── */
+        .links-category-title {
+            font-size: 0.7em; font-weight: bold; color: var(--primary);
+            text-transform: uppercase; letter-spacing: 0.06em;
+            margin: 0 0 6px; display: flex; align-items: center; gap: 6px;
+        }
+        .links-category-title::after {
+            content: ''; flex: 1; height: 1px; background: rgba(255,71,87,0.25);
+        }
+        .links-category-title.vosta-title { color: #a29bfe; }
+        .links-category-title.vosta-title::after { background: rgba(162,155,254,0.25); }
+        .stream-section { margin-bottom: 10px; }
+        .stream-section:empty { display: none; }
+        #stream-area-vostfr, #stream-area-vosta {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 4px;
+        }
+        .btn-link-vosta { border-color: #555; }
+        .btn-link-vosta:hover { background: #a29bfe; border-color: #a29bfe; }
+
+        </style>
 </head>
 <body>
     <div id="bg-layer"></div>
@@ -400,7 +420,15 @@
                             <div id="completed-at-label" style="font-size:0.65em; color:#2e86de; margin-top:2px; text-align:center; display:none;"></div>
                             <button class="btn-delete" id="delete-btn">Retirer de ma liste</button></div>
                             <div class="link-box"><div class="link-title">📥 Téléchargement</div><div id="dl-area" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
-                            <div class="link-title">🎬 Visionnage</div><div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px;"></div>
+                            <div class="link-title">🎬 Visionnage</div>
+                            <div class="stream-section">
+                                <div class="links-category-title">🇫🇷 Liens VOSTFR</div>
+                                <div id="stream-area-vostfr"></div>
+                            </div>
+                            <div class="stream-section">
+                                <div class="links-category-title vosta-title">🌐 Liens VOSTA / VOSTE / RAW</div>
+                                <div id="stream-area-vosta"></div>
+                            </div>
                             <div id="infov-area"></div></div>
                         </div>
                     </div>`;
@@ -413,12 +441,42 @@
                     }
                 }
                 anime.dl.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('dl-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link" style="flex:1;">${getDomainLabel(l,'⬇️')} ↗</a>`);
-                anime.stream.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('stream-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link">${getDomainLabel(l,'▶')} ↗</a>`);
+                // Domaines VOSTA/VOSTE/RAW — tout sauf VOSTFR
+                const VOSTA_DOMAINS = [
+                    'hanime.tv', 'aki-h.com', 'muchohentai.com',
+                    'hstream.moe', 'eshentai.tv', 'underhentai.net'
+                ];
+                function isVosta(url) {
+                    try {
+                        const h = new URL(url).hostname.replace('www.', '');
+                        return VOSTA_DOMAINS.some(d => h === d || h.endsWith('.' + d));
+                    } catch(e) { return false; }
+                }
+                const streamLinks = anime.stream.filter(l => l.trim());
+                const vostfrLinks = streamLinks.filter(l => !isVosta(l));
+                const vostaLinks  = streamLinks.filter(l =>  isVosta(l));
+
+                const areaVostfr = document.getElementById('stream-area-vostfr');
+                const areaVosta  = document.getElementById('stream-area-vosta');
+
+                vostfrLinks.forEach(l => {
+                    areaVostfr.innerHTML += `<a href="${l}" target="_blank" class="btn-link">${getDomainLabel(l,'▶')} ↗</a>`;
+                });
+                vostaLinks.forEach(l => {
+                    areaVosta.innerHTML += `<a href="${l}" target="_blank" class="btn-link btn-link-vosta">${getDomainLabel(l,'▶')} ↗</a>`;
+                });
+
+                // Masquer les sections vides
+                const secVostfr = areaVostfr.closest('.stream-section');
+                const secVosta  = areaVosta.closest('.stream-section');
+                if (areaVostfr.children.length === 0 && secVostfr) secVostfr.style.display = 'none';
+                if (areaVosta.children.length  === 0 && secVosta)  secVosta.style.display  = 'none';
+
                 if(anime.stream.some(l=>l.includes('hentainyaa.com'))){
                     const note=document.createElement('div');
                     note.style.cssText='font-size:0.75em;color:#999;margin-top:4px;line-height:1.4;';
                     note.innerHTML='<span style="color:var(--primary);font-weight:bold;">*</span> Pour que les sous-titres de hentainyaa soient disponibles dans votre langue, vous avez juste à traduire l\'interface du site (dans la navbar).';
-                    document.getElementById('stream-area').insertAdjacentElement('afterend', note);
+                    areaVostfr.insertAdjacentElement('afterend', note);
                 }
                 if(anime.infoV && anime.infoV.trim()){
                     const infovArea=document.getElementById('infov-area');
