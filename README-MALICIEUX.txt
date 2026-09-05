@@ -88,7 +88,7 @@ https://eshentai.tv/en/
 
 Ce site est assez récent me semble t-il, il propose un grand catalogue ciblé en VOSTA et VOSTE. Mais la qualité vidéo ne dépasse rarement 1080p et atteind
 souvent le 480p.
-
+Il s'est avéré que ce site ait fermé peu de temps après la publication de ce readme, tous les liens vers ce site sont donc morts
 ----------------------------------------------------------------------------------
 
 J'Espère que ce fichier vous aura aidé à vous repérer dans l'univers malicieux (https://le-malicieux.github.io/) et vers les autres site qu'il utilise.
