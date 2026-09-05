@@ -128,25 +128,16 @@
             .bottom-controls { grid-template-columns: 1fr; }
         }
     
-        /* ── Catégories de liens de visionnage ────────────── */
-        .links-category-title {
-            font-size: 0.7em; font-weight: bold; color: var(--primary);
-            text-transform: uppercase; letter-spacing: 0.06em;
-            margin: 0 0 6px; display: flex; align-items: center; gap: 6px;
+        /* ── Bannière épisodes disponibles ───────────────── */
+        .seek-available-banner {
+            display: none;
+            background: linear-gradient(90deg, rgba(255,71,87,0.12), rgba(255,71,87,0.05));
+            border: 1px solid rgba(255,71,87,0.35);
+            border-radius: 8px; padding: 9px 14px;
+            font-size: 0.8em; color: #ccc; line-height: 1.5;
+            margin-bottom: 18px;
         }
-        .links-category-title::after {
-            content: ''; flex: 1; height: 1px; background: rgba(255,71,87,0.25);
-        }
-        .links-category-title.vosta-title { color: #a29bfe; }
-        .links-category-title.vosta-title::after { background: rgba(162,155,254,0.25); }
-        .stream-section { margin-bottom: 10px; }
-        .stream-section:empty { display: none; }
-        #stream-area-vostfr, #stream-area-vosta {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 4px;
-        }
-        .btn-link-vosta { border-color: #555; }
-        .btn-link-vosta:hover { background: #a29bfe; border-color: #a29bfe; }
-
+        .seek-available-banner strong { color: var(--primary); }
         </style>
 </head>
 <body>
@@ -182,6 +173,7 @@
 
     <div class="container">
         <a href="index.html" id="back-link" class="back-btn" onclick="handleBack(event)">← Retour au catalogue</a>
+        <div id="seek-banner" class="seek-available-banner">🎬 <strong>Épisodes disponibles</strong> sous-titrés en VOSTFR / VOSTE / VOSTA en 1080p (ou parfois 720p) — directement sur ce site, voir plus bas.</div>
         <div id="anime-details">Chargement des données...</div>
         <div id="seekstreaming-section" class="seekstreaming-section" style="display:none;">
             <h3>🎬 Regarder en streaming</h3>
@@ -413,22 +405,14 @@
                         ${relatedSection}
                         <div class="bottom-controls">
                             <div class="playlist-box"><label style="font-size:0.65em; color:var(--primary);">Ma Progression</label>
-                            <select id="user-status"><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
+                            <select id="user-status"><option value="none">— Pas dans la liste</option><option value="watching">En cours</option><option value="waiting">En attente</option><option value="completed">Terminé</option></select>
                             <div class="ep-row"><span>Vu :</span><select id="user-ep">${epOptions}</select><span>/ ${maxEp}</span></div>
                             <div class="star-rating" id="stars">${Array.from({length:10},(_,i)=>`<span data-v="${i+1}">★</span>`).join('')}</div>
                             <div id="added-at-label" style="font-size:0.65em; color:#666; margin-top:4px; text-align:center;"></div>
                             <div id="completed-at-label" style="font-size:0.65em; color:#2e86de; margin-top:2px; text-align:center; display:none;"></div>
                             <button class="btn-delete" id="delete-btn">Retirer de ma liste</button></div>
                             <div class="link-box"><div class="link-title">📥 Téléchargement</div><div id="dl-area" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
-                            <div class="link-title">🎬 Visionnage</div>
-                            <div class="stream-section">
-                                <div class="links-category-title">🇫🇷 Liens VOSTFR</div>
-                                <div id="stream-area-vostfr"></div>
-                            </div>
-                            <div class="stream-section">
-                                <div class="links-category-title vosta-title">🌐 Liens VOSTA / VOSTE / RAW</div>
-                                <div id="stream-area-vosta"></div>
-                            </div>
+                            <div class="link-title" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">🎬 Visionnage <a href="https://github.com/le-malicieux/le-malicieux.github.io/blob/main/README-MALICIEUX.txt" target="_blank" style="font-size:0.85em; font-weight:normal; color:#a29bfe; text-decoration:none; white-space:nowrap;" title="Guide ultime du visionnage">📖 Guide pratique ↗</a></div><div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px;"></div>
                             <div id="infov-area"></div></div>
                         </div>
                     </div>`;
@@ -441,42 +425,18 @@
                     }
                 }
                 anime.dl.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('dl-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link" style="flex:1;">${getDomainLabel(l,'⬇️')} ↗</a>`);
-                // Domaines VOSTA/VOSTE/RAW — tout sauf VOSTFR
-                const VOSTA_DOMAINS = [
-                    'hanime.tv', 'aki-h.com', 'muchohentai.com',
-                    'hstream.moe', 'eshentai.tv', 'underhentai.net'
-                ];
-                function isVosta(url) {
-                    try {
-                        const h = new URL(url).hostname.replace('www.', '');
-                        return VOSTA_DOMAINS.some(d => h === d || h.endsWith('.' + d));
-                    } catch(e) { return false; }
-                }
-                const streamLinks = anime.stream.filter(l => l.trim());
-                const vostfrLinks = streamLinks.filter(l => !isVosta(l));
-                const vostaLinks  = streamLinks.filter(l =>  isVosta(l));
-
-                const areaVostfr = document.getElementById('stream-area-vostfr');
-                const areaVosta  = document.getElementById('stream-area-vosta');
-
-                vostfrLinks.forEach(l => {
-                    areaVostfr.innerHTML += `<a href="${l}" target="_blank" class="btn-link">${getDomainLabel(l,'▶')} ↗</a>`;
-                });
-                vostaLinks.forEach(l => {
-                    areaVosta.innerHTML += `<a href="${l}" target="_blank" class="btn-link btn-link-vosta">${getDomainLabel(l,'▶')} ↗</a>`;
-                });
-
-                // Masquer les sections vides
-                const secVostfr = areaVostfr.closest('.stream-section');
-                const secVosta  = areaVosta.closest('.stream-section');
-                if (areaVostfr.children.length === 0 && secVostfr) secVostfr.style.display = 'none';
-                if (areaVosta.children.length  === 0 && secVosta)  secVosta.style.display  = 'none';
-
+                anime.stream.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('stream-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link">${getDomainLabel(l,'▶')} ↗</a>`);
                 if(anime.stream.some(l=>l.includes('hentainyaa.com'))){
                     const note=document.createElement('div');
                     note.style.cssText='font-size:0.75em;color:#999;margin-top:4px;line-height:1.4;';
                     note.innerHTML='<span style="color:var(--primary);font-weight:bold;">*</span> Pour que les sous-titres de hentainyaa soient disponibles dans votre langue, vous avez juste à traduire l\'interface du site (dans la navbar).';
-                    areaVostfr.insertAdjacentElement('afterend', note);
+                    document.getElementById('stream-area').insertAdjacentElement('afterend', note);
+                }
+                if(anime.stream.some(l=>l.includes('hstream.moe'))){
+                    const noteHstream=document.createElement('div');
+                    noteHstream.style.cssText='font-size:0.75em;color:#999;margin-top:4px;line-height:1.4;';
+                    noteHstream.innerHTML='<span style="color:var(--primary);font-weight:bold;">*</span> Sous-titres en plusieurs langues dont le français et l\'espagnol et résolution vidéo ajustable de 720p jusqu\'à 2160p (4K) dans les paramètres du lecteur (roue dentée).';
+                    document.getElementById('stream-area').insertAdjacentElement('afterend', noteHstream);
                 }
                 if(anime.infoV && anime.infoV.trim()){
                     const infovArea=document.getElementById('infov-area');
@@ -525,6 +485,9 @@
                             document.getElementById('user-ep').value=d.epSeen||0;
                             userRating=d.rating||0;
                             updateStars(userRating);
+                        } else {
+                            // Anime pas encore dans la liste : sélectionner "Pas dans la liste"
+                            document.getElementById('user-status').value='none';
                         }
                         const isNew=!snap.exists();
                         function showConfirm(msg,onConfirm){ const ov=document.getElementById('confirm-modal'); document.getElementById('modal-msg').innerHTML=msg; ov.classList.add('active'); document.getElementById('modal-confirm').onclick=()=>{ ov.classList.remove('active'); onConfirm(); }; document.getElementById('modal-cancel').onclick=()=>ov.classList.remove('active'); }
@@ -543,7 +506,12 @@
                         }
                         if(snap.exists()) refreshAddedAt(snap.data());
                         const autoSave=async()=>{
-                            const statusVal=document.getElementById('user-status').value, epVal=parseInt(document.getElementById('user-ep').value);
+                            const statusVal=document.getElementById('user-status').value;
+                            // "Terminé" → mettre automatiquement tous les épisodes en vu
+                            if(statusVal==='completed' && maxEp > 0){
+                                document.getElementById('user-ep').value=maxEp;
+                            }
+                            const epVal=parseInt(document.getElementById('user-ep').value);
                             const prevData=snap.exists()?snap.data():{}, now=serverTimestamp();
                             const updates={ uid:u.uid, anime:animeName, img:anime.img, status:statusVal, epSeen:epVal, rating:userRating, epMax:maxEp };
                             if(isNew||!prevData.addedAt) updates.addedAt=now;
@@ -756,6 +724,9 @@
                 const iframe = document.getElementById('seek-iframe');
 
                 section.style.display = '';
+                // Afficher la bannière en haut de page
+                const seekBanner = document.getElementById('seek-banner');
+                if (seekBanner) seekBanner.style.display = 'block';
                 list.innerHTML = '';
                 list.style.flexDirection = 'column';
                 list.style.gap = '14px';
