@@ -7,6 +7,15 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M65SBS3C');</script>
     <meta charset="UTF-8">
+    <script>
+    /* Applique le thème avant le premier rendu (pas de flash) */
+    (function () {
+        try {
+            var t = localStorage.getItem('theme-fond');
+            if (t === 'gris') document.documentElement.setAttribute('data-theme', 'gris');
+        } catch (e) {}
+    })();
+    </script>
     <link rel="icon" href="img/logo.jpg" type="image/jpeg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="stylesheet" href="mobile.css">
@@ -35,6 +44,37 @@
         }
 
         /* ═══════════════ EN-TÊTE — barre unique ═══════════════ */
+        /* Thème d'affichage : sombre (défaut) ou gris */
+        html[data-theme="gris"] {
+            --page-bg: #a9a9a9;
+            --panel-bg: rgba(238,238,238,0.94);
+            --panel-border: #8d8d8d;
+            --panel-head: rgba(0,0,0,0.05);
+            --txt: #1c1c1c;
+            --txt-dim: #4a4a4a;
+            --card-surface: #f4f4f4;
+        }
+        html[data-theme="gris"] body {
+            background-image: none !important;
+            background-color: var(--page-bg) !important;
+        }
+        html[data-theme="gris"] .section-block { background: var(--panel-bg); border-color: var(--panel-border); }
+        html[data-theme="gris"] .section-title-wrapper { background: var(--panel-head); border-bottom-color: var(--panel-border); }
+        html[data-theme="gris"] .section-title { color: var(--txt); }
+        html[data-theme="gris"] .card { background: var(--card-surface); border-color: #b4b4b4; color: var(--txt); }
+        html[data-theme="gris"] .card-title { color: var(--txt); }
+        html[data-theme="gris"] .card-meta-row { color: var(--txt-dim); }
+        html[data-theme="gris"] .meta-badge { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.15); color: #3a3a3a; }
+        html[data-theme="gris"] .meta-editeur { color: #666; }
+        html[data-theme="gris"] .tag-section-box { background: rgba(0,0,0,0.04); border-bottom-color: var(--panel-border); }
+        html[data-theme="gris"] .tag-description { color: var(--txt-dim); }
+        html[data-theme="gris"] .carousel-btn { background: #efefef; border-color: #9a9a9a; color: #333; }
+        html[data-theme="gris"] .carousel-btn:hover { background: var(--primary); color: #fff; }
+        html[data-theme="gris"] .hero-section { background: rgba(255,255,255,0.35); }
+        html[data-theme="gris"] .main-title, html[data-theme="gris"] .main-slogan { color: #1c1c1c; text-shadow: none; }
+        html[data-theme="gris"] .anime-count { background: rgba(255,255,255,0.8); }
+        html[data-theme="gris"] #search-results-count { color: #4a4a4a; }
+
         .site-header {
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
             background: #121214;
@@ -108,11 +148,24 @@
 
         .discord-btn {
             display: flex; align-items: center; justify-content: center;
-            width: 38px; height: 38px; border-radius: 2px; overflow: hidden;
+            height: 34px; width: auto; border-radius: 2px; overflow: hidden;
             border: 1px solid #3a3a3f; flex-shrink: 0; transition: border-color 0.15s;
+            background: #5865F2; padding: 0;
         }
-        .discord-btn:hover { border-color: #5865F2; }
-        .discord-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .discord-btn:hover { border-color: #8b95ff; }
+        .discord-btn img {
+            height: 100%; width: auto; display: block;
+            object-fit: contain;
+        }
+
+        .theme-toggle { display: flex; align-items: center; gap: 7px; }
+        .theme-swatch {
+            width: 13px; height: 13px; border-radius: 2px;
+            border: 1px solid rgba(255,255,255,0.45);
+            background: #121214; flex-shrink: 0; transition: background 0.2s;
+        }
+        html[data-theme="gris"] .theme-swatch { background: #a9a9a9; border-color: rgba(0,0,0,0.4); }
+        html[data-theme="gris"] .nav-action { border-color: #4a4a4f; }
 
         #login-btn {
             background: #5865F2; border: none; color: white; padding: 8px 13px;
@@ -173,7 +226,8 @@
 
         .content-area { padding: 18px 8px 40px; }
         #search-results-count { color: #8a8a90; font-size: 0.78em; margin: 0; }
-        .discord-footer-link img { width: 18px; height: 18px; border-radius: 2px; object-fit: cover; vertical-align: -4px; margin-right: 6px; }
+        .discord-footer-link { display: inline-flex; align-items: center; padding: 0; background: #5865F2; border-radius: 2px; overflow: hidden; height: 30px; }
+        .discord-footer-link img { height: 100%; width: auto; display: block; object-fit: contain; }
         .voir-tout-wrap { display: none; }
 
         /* Bloc de section : cadre net, titre en bandeau, comme les panneaux MAL */
@@ -220,12 +274,12 @@
             margin-right: 5px;
         }
 
-        /* ========== CARROUSELS (scroll natif) ========== */
+        /* ========== CARROUSELS (scroll natif, largeur adaptative) ========== */
         .carousel-wrapper {
             position: relative;
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 44px;
+            padding: 0 40px;
         }
         .carousel-container {
             overflow-x: auto;
@@ -241,7 +295,7 @@
         .carousel-container::-webkit-scrollbar { display: none; }
         .carousel-track {
             display: flex;
-            gap: 10px;
+            gap: var(--gap, 10px);
             width: max-content;
             padding: 2px 0 4px;
         }
@@ -249,29 +303,32 @@
 
         .carousel-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
-            background: #17171a; border: 1px solid #3a3a3a; color: #ddd;
-            font-size: 1.5em; width: 34px; height: 64px; line-height: 1;
+            background: #17171a; border: 1px solid #3a3a3f; color: #ddd;
+            font-size: 1.5em; width: 30px; height: 60px; line-height: 1;
             border-radius: 2px; cursor: pointer; z-index: 5;
             display: flex; align-items: center; justify-content: center;
             transition: background 0.15s, color 0.15s, opacity 0.2s;
+            padding: 0;
         }
         .carousel-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-        .carousel-btn[disabled] { opacity: 0.25; cursor: default; }
-        .carousel-btn[disabled]:hover { background: #17171a; color: #ddd; border-color: #3a3a3a; }
-        .carousel-prev { left: 4px; }
-        .carousel-next { right: 4px; }
+        .carousel-btn[disabled] { opacity: 0.22; cursor: default; }
+        .carousel-btn[disabled]:hover { background: #17171a; color: #ddd; border-color: #3a3a3f; }
+        .carousel-prev { left: 2px; }
+        .carousel-next { right: 2px; }
 
+        /* Les flèches restent visibles sur mobile, simplement plus compactes */
         @media (max-width: 1000px) {
-            .carousel-wrapper { padding: 0 12px; }
-            .carousel-track { gap: 8px; }
-            .card { width: 140px; }
-            .carousel-btn { display: none; }
+            .carousel-wrapper { padding: 0 26px; }
+            .carousel-btn { width: 22px; height: 48px; font-size: 1.2em; }
+            .carousel-prev { left: 0; }
+            .carousel-next { right: 0; }
             .hero-section { height: 45vh; }
             .main-title { font-size: 2em; }
-            .section-title { font-size: 1.15em; }
+            .section-title { font-size: 0.95em; }
         }
         @media (max-width: 480px) {
-            .card { width: 120px; }
+            .carousel-wrapper { padding: 0 22px; }
+            .carousel-btn { width: 20px; height: 44px; }
         }
         /* ========== FIN CARROUSELS ========== */
 
@@ -279,7 +336,7 @@
             background: var(--card-bg); border-radius: 2px; overflow: hidden; transition: 0.2s;
             border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em;
             display: flex; flex-direction: column; flex-shrink: 0;
-            width: 160px;
+            width: var(--card-w, 160px);
         }
         .card:hover { transform: translateY(-6px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
@@ -296,9 +353,10 @@
         .mal-score { color: #ffc94d; font-weight: 600; }
 
         #search-results-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(104px, 14vw, 165px), 1fr));
             gap: 10px; max-width: 1400px; margin: 0 auto; padding: 0 8px;
         }
+        #search-results-grid .card { width: auto; }
         #search-results-count { color: #aaa; margin: 5px 15px; font-size: 0.9em; }
         .anime-count { text-align: center; padding: 12px 20px; color: var(--primary); font-size: 1em; font-weight: bold; background: rgba(0, 0, 0, 0.75); display: inline-block; border-radius: 2px; }
         .anime-count-wrapper { text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; margin-top: 40px; display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; }
@@ -324,7 +382,7 @@
         }
         
         #search-results-grid {
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+            grid-template-columns: repeat(auto-fill, minmax(clamp(104px, 14vw, 165px), 1fr)) !important;
         }
     </style>
 </head>
@@ -360,6 +418,9 @@
                 <a href="profil.html" class="nav-tab" data-page="profil.html">Profil</a>
                 <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
                 <button class="nav-action" onclick="randomAnime()">Au hasard</button>
+                <button class="nav-action theme-toggle" onclick="toggleTheme()">
+                    <span class="theme-swatch"></span><span class="theme-label">Fond : sombre</span>
+                </button>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
                     <img src="logo-discord.jpg" alt="Discord">
                 </a>
@@ -372,6 +433,9 @@
                     <div class="search-suggestions" id="search-suggestions"></div>
                 </div>
                 <button class="nav-action" onclick="randomAnime()">Au hasard</button>
+                <button class="nav-action theme-toggle" onclick="toggleTheme()" title="Changer la couleur de fond">
+                    <span class="theme-swatch"></span><span class="theme-label">Sombre</span>
+                </button>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
                     <img src="logo-discord.jpg" alt="Discord">
                 </a>
@@ -447,8 +511,47 @@
 
     <div class="anime-count-wrapper">
         <div class="anime-count" id="anime-count"></div>
-        <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-footer-link"><img src="logo-discord.jpg" alt=""> Discord</a>
+        <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-footer-link" title="Rejoindre le Discord"><img src="logo-discord.jpg" alt="Discord"></a>
     </div>
+
+    <script>
+    /* ═══════════ THÈME D'AFFICHAGE (autonome, sans dépendance réseau) ═══════════
+       localStorage donne l'effet immédiat ; Firestore le rétablit à la reconnexion
+       même après un effacement du cache. */
+    (function () {
+        function readTheme() {
+            try { return localStorage.getItem('theme-fond') === 'gris' ? 'gris' : 'sombre'; }
+            catch (e) { return 'sombre'; }
+        }
+
+        window.applyTheme = function (theme) {
+            const gris = theme === 'gris';
+            if (gris) document.documentElement.setAttribute('data-theme', 'gris');
+            else document.documentElement.removeAttribute('data-theme');
+            document.querySelectorAll('.theme-label').forEach(function (el) {
+                el.textContent = el.closest('#menu')
+                    ? ('Fond : ' + (gris ? 'gris' : 'sombre'))
+                    : (gris ? 'Gris' : 'Sombre');
+            });
+        };
+
+        window.getTheme = readTheme;
+
+        window.setTheme = function (theme, push) {
+            window.applyTheme(theme);
+            try { localStorage.setItem('theme-fond', theme); } catch (e) {}
+            if (push && window.__syncTheme) window.__syncTheme(theme);
+        };
+
+        window.toggleTheme = function () {
+            window.setTheme(readTheme() === 'gris' ? 'sombre' : 'gris', true);
+        };
+
+        function init() { window.applyTheme(readTheme()); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
+    })();
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -512,10 +615,30 @@
             });
         }, { rootMargin: '200px' });
 
+        let currentUser = null;
+
+        // Synchronisation du thème vers le compte (la logique d'affichage est autonome, plus haut)
+        window.__syncTheme = async (theme) => {
+            if (!currentUser) return;
+            try { await setDoc(doc(db, "users", currentUser.uid), { themeFond: theme }, { merge: true }); }
+            catch (e) { console.warn('Thème non synchronisé :', e); }
+        };
+
         onAuthStateChanged(auth, async (user) => {
             const authUi = document.getElementById('auth-ui');
             if (user) {
+                currentUser = user;
                 await setDoc(doc(db, "users", user.uid), { uid: user.uid, email: user.email, displayName: user.displayName || '', photoURL: user.photoURL || '', lastSeen: new Date().toISOString() }, { merge: true });
+                // Le thème enregistré sur le compte fait foi (survit à l'effacement du cache)
+                try {
+                    const tSnap = await getDoc(doc(db, "users", user.uid));
+                    if (tSnap.exists() && tSnap.data().themeFond) {
+                        window.applyTheme(tSnap.data().themeFond);
+                        try { localStorage.setItem('theme-fond', tSnap.data().themeFond); } catch (e) {}
+                    } else {
+                        await setDoc(doc(db, "users", user.uid), { themeFond: window.getTheme() }, { merge: true });
+                    }
+                } catch (e) { console.warn('Thème non récupéré :', e); }
                 const cachedPseudo = sessionStorage.getItem('userPseudo');
                 let displayName = cachedPseudo || user.displayName;
                 if (!cachedPseudo) {
@@ -527,6 +650,7 @@
                 authUi.innerHTML = `<a href="profil.html" style="display:flex;align-items:center;gap:6px;text-decoration:none;"><img src="${avatarUrl}" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--primary);object-fit:cover;" onerror="this.src='img/logo.jpg'"><span style="color:white;font-size:0.8em;">${displayName}</span></a><button id="logout-btn" style="background:#333; color:white; border:none; cursor:pointer; padding:5px 8px; border-radius:5px; font-size:0.75em;">Quitter</button>`;
                 document.getElementById('logout-btn').onclick = () => signOut(auth);
             } else {
+                currentUser = null;
                 authUi.innerHTML = `<button id="login-btn" style="background:#5865F2; border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:0.8em;">Connexion</button>`;
                 document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
             }
@@ -641,6 +765,28 @@
             </a>`;
         }
 
+        /* Nombre de fiches visibles calculé depuis la largeur réelle du conteneur.
+           Plus la fenêtre est large (ou plus on dézoome), plus il y a de fiches. */
+        const CARD_TARGET = 170;   // largeur idéale d'une fiche en px CSS
+        const CARD_MIN    = 104;   // en dessous, on retire une colonne
+        const CARD_MAX    = 205;   // au dessus, on en ajoute une
+        const CARD_GAP    = 10;
+
+        function cardWidthFor(avail, n) { return (avail - (n - 1) * CARD_GAP) / n; }
+
+        function layoutCarousel(container, track) {
+            const avail = container.clientWidth;
+            if (!avail) return;
+            let n = Math.max(1, Math.round((avail + CARD_GAP) / (CARD_TARGET + CARD_GAP)));
+            // On garde des fiches lisibles : ni trop étroites, ni démesurées
+            while (n > 1 && cardWidthFor(avail, n) < CARD_MIN) n--;
+            while (cardWidthFor(avail, n) > CARD_MAX) n++;
+            const w = Math.floor(cardWidthFor(avail, n));
+            track.style.setProperty('--card-w', w + 'px');
+            track.style.setProperty('--gap', CARD_GAP + 'px');
+            track._perView = n;
+        }
+
         function buildCarousel(trackId, animeList) {
             const track = document.getElementById(trackId);
             if (!track) return;
@@ -655,19 +801,25 @@
             const prevBtn = wrapper.querySelector('.carousel-prev');
             const nextBtn = wrapper.querySelector('.carousel-next');
 
-            // Largeur d'un "pas" = largeur visible moins une carte, pour garder un repère visuel
             function step() {
                 const card = track.querySelector('.card');
-                const cardW = card ? card.getBoundingClientRect().width + 10 : 170;
-                const visible = Math.max(1, Math.floor(container.clientWidth / cardW));
-                return cardW * Math.max(1, visible - 1);
+                const cardW = card ? card.getBoundingClientRect().width + CARD_GAP : CARD_TARGET + CARD_GAP;
+                const n = track._perView || 1;
+                // On avance d'une page entière, en laissant une fiche de repère si possible
+                return cardW * Math.max(1, n > 2 ? n - 1 : n);
             }
 
             function refreshButtons() {
                 if (!prevBtn || !nextBtn) return;
                 const max = container.scrollWidth - container.clientWidth;
-                prevBtn.disabled = container.scrollLeft <= 2;
-                nextBtn.disabled = container.scrollLeft >= max - 2;
+                const noScroll = max <= 2;
+                prevBtn.disabled = noScroll || container.scrollLeft <= 2;
+                nextBtn.disabled = noScroll || container.scrollLeft >= max - 2;
+            }
+
+            function relayout() {
+                layoutCarousel(container, track);
+                refreshButtons();
             }
 
             if (prevBtn) prevBtn.onclick = () => container.scrollBy({ left: -step(), behavior: 'smooth' });
@@ -678,13 +830,21 @@
                 container._sT = setTimeout(refreshButtons, 60);
             }, { passive: true });
 
-            window.addEventListener('resize', () => {
-                clearTimeout(container._rT);
-                container._rT = setTimeout(refreshButtons, 150);
-            });
+            // ResizeObserver suit aussi les changements de zoom, pas seulement le resize fenêtre
+            if (window.ResizeObserver) {
+                const ro = new ResizeObserver(() => {
+                    clearTimeout(container._rT);
+                    container._rT = setTimeout(relayout, 80);
+                });
+                ro.observe(container);
+            } else {
+                window.addEventListener('resize', () => {
+                    clearTimeout(container._rT);
+                    container._rT = setTimeout(relayout, 150);
+                });
+            }
 
-            refreshButtons();
-            // Les images en lazy-load changent la largeur totale : on recalcule après chargement
+            relayout();
             track.querySelectorAll('img').forEach(img => img.addEventListener('load', refreshButtons, { once: true }));
         }
 

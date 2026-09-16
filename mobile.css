@@ -66,6 +66,7 @@ img {
     .card-info {
         padding: 5px !important;
     }
+    /* La largeur est calculée en JS (--card-w) : on ne la fige pas ici */
     .card-title {
         font-size: 0.78em !important;
         height: 2.2em !important;
