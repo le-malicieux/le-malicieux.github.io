@@ -7,15 +7,6 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M65SBS3C');</script>
     <meta charset="UTF-8">
-    <script>
-    /* Applique le thème avant le premier rendu (pas de flash) */
-    (function () {
-        try {
-            var t = localStorage.getItem('theme-fond');
-            if (t === 'gris') document.documentElement.setAttribute('data-theme', 'gris');
-        } catch (e) {}
-    })();
-    </script>
     <link rel="icon" href="img/logo.jpg" type="image/jpeg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="stylesheet" href="mobile.css">
@@ -23,13 +14,26 @@
     <style>
         :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --text-bright: #ffffff; --text-secondary: #ccc; --nav-bg: rgba(15, 15, 15, 0.85); }
 
+        /* Le fond est dimensionné sur la PLUS GRANDE hauteur de viewport (100lvh).
+           Avec inset:0, la hauteur suivait le viewport visuel, qui se réduit quand la
+           barre d'URL mobile apparaît : l'image « cover » était alors remise à l'échelle
+           à chaque défilement. En figeant la hauteur, elle ne bouge plus. */
+        #bg-layer, #bg-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;      /* valeurs de départ, verrouillées ensuite en JS */
+            height: 100lvh;
+            z-index: -2; pointer-events: none;
+        }
         #bg-layer {
-            position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
             background-repeat: no-repeat;
+            will-change: auto;
+            transition: none;
         }
         #bg-overlay {
-            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            z-index: -1;
             background: black; opacity: 0;
             transition: none;
         }
@@ -44,37 +48,6 @@
         }
 
         /* ═══════════════ EN-TÊTE — barre unique ═══════════════ */
-        /* Thème d'affichage : sombre (défaut) ou gris */
-        html[data-theme="gris"] {
-            --page-bg: #a9a9a9;
-            --panel-bg: rgba(238,238,238,0.94);
-            --panel-border: #8d8d8d;
-            --panel-head: rgba(0,0,0,0.05);
-            --txt: #1c1c1c;
-            --txt-dim: #4a4a4a;
-            --card-surface: #f4f4f4;
-        }
-        html[data-theme="gris"] body {
-            background-image: none !important;
-            background-color: var(--page-bg) !important;
-        }
-        html[data-theme="gris"] .section-block { background: var(--panel-bg); border-color: var(--panel-border); }
-        html[data-theme="gris"] .section-title-wrapper { background: var(--panel-head); border-bottom-color: var(--panel-border); }
-        html[data-theme="gris"] .section-title { color: var(--txt); }
-        html[data-theme="gris"] .card { background: var(--card-surface); border-color: #b4b4b4; color: var(--txt); }
-        html[data-theme="gris"] .card-title { color: var(--txt); }
-        html[data-theme="gris"] .card-meta-row { color: var(--txt-dim); }
-        html[data-theme="gris"] .meta-badge { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.15); color: #3a3a3a; }
-        html[data-theme="gris"] .meta-editeur { color: #666; }
-        html[data-theme="gris"] .tag-section-box { background: rgba(0,0,0,0.04); border-bottom-color: var(--panel-border); }
-        html[data-theme="gris"] .tag-description { color: var(--txt-dim); }
-        html[data-theme="gris"] .carousel-btn { background: #efefef; border-color: #9a9a9a; color: #333; }
-        html[data-theme="gris"] .carousel-btn:hover { background: var(--primary); color: #fff; }
-        html[data-theme="gris"] .hero-section { background: rgba(255,255,255,0.35); }
-        html[data-theme="gris"] .main-title, html[data-theme="gris"] .main-slogan { color: #1c1c1c; text-shadow: none; }
-        html[data-theme="gris"] .anime-count { background: rgba(255,255,255,0.8); }
-        html[data-theme="gris"] #search-results-count { color: #4a4a4a; }
-
         .site-header {
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
             background: #121214;
@@ -83,7 +56,7 @@
         }
         .navbar {
             display: flex; align-items: stretch; gap: 0;
-            max-width: 1500px; margin: 0 auto; padding: 0 18px;
+            width: 100%; margin: 0; padding: 0 18px; box-sizing: border-box;
             height: 62px;
         }
         .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-right: 22px; }
@@ -146,26 +119,22 @@
         }
         .nav-action:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
 
+        /* Rectangle au ratio natif de l'image (409x102) : c'est l'image qui fixe la
+           largeur, donc aucune déformation ni rognage quel que soit le contexte. */
         .discord-btn {
-            display: flex; align-items: center; justify-content: center;
-            height: 34px; width: auto; border-radius: 2px; overflow: hidden;
-            border: 1px solid #3a3a3f; flex-shrink: 0; transition: border-color 0.15s;
-            background: #5865F2; padding: 0;
+            display: inline-flex; flex-shrink: 0;
+            height: 34px; width: auto;
+            border-radius: 2px; overflow: hidden;
+            border: none; padding: 0; margin: 0;
+            background: #5865F2;
+            line-height: 0; box-sizing: content-box;
+            transition: opacity 0.15s;
         }
-        .discord-btn:hover { border-color: #8b95ff; }
+        .discord-btn:hover { opacity: 0.85; }
         .discord-btn img {
             height: 100%; width: auto; display: block;
             object-fit: contain;
         }
-
-        .theme-toggle { display: flex; align-items: center; gap: 7px; }
-        .theme-swatch {
-            width: 13px; height: 13px; border-radius: 2px;
-            border: 1px solid rgba(255,255,255,0.45);
-            background: #121214; flex-shrink: 0; transition: background 0.2s;
-        }
-        html[data-theme="gris"] .theme-swatch { background: #a9a9a9; border-color: rgba(0,0,0,0.4); }
-        html[data-theme="gris"] .nav-action { border-color: #4a4a4f; }
 
         #login-btn {
             background: #5865F2; border: none; color: white; padding: 8px 13px;
@@ -209,9 +178,8 @@
                 border-radius: 0; margin: 0; padding: 13px 2px; display: block;
             }
             .nav-tab.active { border-bottom-color: rgba(255,255,255,0.07); background: rgba(255,71,87,0.12); color: var(--primary); }
-            .nav-links .nav-action,
-            .nav-links .discord-btn { display: flex; width: 100%; margin-top: 12px; box-sizing: border-box; justify-content: center; }
-            .nav-links .discord-btn { height: 42px; align-items: center; gap: 8px; padding: 0; }
+            .nav-links .nav-action { display: flex; width: 100%; margin-top: 12px; box-sizing: border-box; justify-content: center; }
+            .nav-links .discord-btn { display: inline-flex; align-self: flex-start; width: auto; height: 38px; margin-top: 14px; }
             .mobile-overlay.active { display: block; }
             body { padding-top: 58px; }
         }
@@ -224,15 +192,19 @@
         .main-title { font-size: 2.8em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
         .main-slogan { font-size: 1.3em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
 
-        .content-area { padding: 18px 8px 40px; }
+        .content-area { padding: 18px 0 40px; }
         #search-results-count { color: #8a8a90; font-size: 0.78em; margin: 0; }
-        .discord-footer-link { display: inline-flex; align-items: center; padding: 0; background: #5865F2; border-radius: 2px; overflow: hidden; height: 30px; }
+        .discord-footer-link {
+            display: inline-flex; padding: 0 !important; margin: 0; border: none;
+            background: #5865F2; border-radius: 2px; overflow: hidden;
+            height: 30px; width: auto; line-height: 0; box-sizing: content-box;
+        }
         .discord-footer-link img { height: 100%; width: auto; display: block; object-fit: contain; }
         .voir-tout-wrap { display: none; }
 
         /* Bloc de section : cadre net, titre en bandeau, comme les panneaux MAL */
         .section-block {
-            max-width: 1400px; margin: 26px auto 0;
+            margin: 22px 0 0;
             background: rgba(14,14,16,0.82);
             border: 1px solid #2c2c31;
             border-radius: 2px;
@@ -277,9 +249,10 @@
         /* ========== CARROUSELS (scroll natif, largeur adaptative) ========== */
         .carousel-wrapper {
             position: relative;
-            max-width: 1400px;
+            width: 100%;
             margin: 0 auto;
             padding: 0 40px;
+            box-sizing: border-box;
         }
         .carousel-container {
             overflow-x: auto;
@@ -354,7 +327,7 @@
 
         #search-results-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(104px, 14vw, 165px), 1fr));
-            gap: 10px; max-width: 1400px; margin: 0 auto; padding: 0 8px;
+            gap: 10px; margin: 0 auto; padding: 0 8px;
         }
         #search-results-grid .card { width: auto; }
         #search-results-count { color: #aaa; margin: 5px 15px; font-size: 0.9em; }
@@ -362,7 +335,7 @@
         .anime-count-wrapper { text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; margin-top: 40px; display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; }
         .discord-footer-link { background: #5865F2; color: white; text-decoration: none; padding: 8px 18px; border-radius: 30px; font-size: 0.9em; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         
-        .voir-tout-wrap { max-width: 1400px; margin: 6px auto 0; padding: 0 44px; display: flex; justify-content: flex-end; }
+        .voir-tout-wrap { margin: 6px auto 0; padding: 0 44px; display: flex; justify-content: flex-end; }
         .voir-tout-btn { background: transparent; border: 1px solid rgba(255,71,87,0.5); color: #ff6b7a; padding: 3px 11px; border-radius: 2px; font-size: 0.75em; font-weight: bold; text-decoration: none; transition: 0.2s; }
         .voir-tout-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
     
@@ -418,9 +391,6 @@
                 <a href="profil.html" class="nav-tab" data-page="profil.html">Profil</a>
                 <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
                 <button class="nav-action" onclick="randomAnime()">Au hasard</button>
-                <button class="nav-action theme-toggle" onclick="toggleTheme()">
-                    <span class="theme-swatch"></span><span class="theme-label">Fond : sombre</span>
-                </button>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
                     <img src="logo-discord.jpg" alt="Discord">
                 </a>
@@ -433,9 +403,6 @@
                     <div class="search-suggestions" id="search-suggestions"></div>
                 </div>
                 <button class="nav-action" onclick="randomAnime()">Au hasard</button>
-                <button class="nav-action theme-toggle" onclick="toggleTheme()" title="Changer la couleur de fond">
-                    <span class="theme-swatch"></span><span class="theme-label">Sombre</span>
-                </button>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
                     <img src="logo-discord.jpg" alt="Discord">
                 </a>
@@ -515,41 +482,47 @@
     </div>
 
     <script>
-    /* ═══════════ THÈME D'AFFICHAGE (autonome, sans dépendance réseau) ═══════════
-       localStorage donne l'effet immédiat ; Firestore le rétablit à la reconnexion
-       même après un effacement du cache. */
+    /* ═══════════ VERROUILLAGE DU FOND ═══════════
+       Sur mobile, la barre d'URL qui se rétracte au défilement modifie la hauteur du
+       viewport. Comme #bg-layer était en position fixe avec inset:0 et background-size:
+       cover, l'image était remise à l'échelle à chaque variation, d'où l'effet de
+       grossissement. On fige donc ses dimensions en pixels, et on ne les recalcule que
+       si la LARGEUR change (rotation, redimensionnement réel), jamais sur la hauteur.
+       Le calcul divise par le zoom CSS de <html>, sans quoi les px seraient réduits. */
     (function () {
-        function readTheme() {
-            try { return localStorage.getItem('theme-fond') === 'gris' ? 'gris' : 'sombre'; }
-            catch (e) { return 'sombre'; }
+        var lastW = null;
+
+        function zoomFactor() {
+            var z = parseFloat(getComputedStyle(document.documentElement).zoom);
+            return (!z || isNaN(z)) ? 1 : z;
         }
 
-        window.applyTheme = function (theme) {
-            const gris = theme === 'gris';
-            if (gris) document.documentElement.setAttribute('data-theme', 'gris');
-            else document.documentElement.removeAttribute('data-theme');
-            document.querySelectorAll('.theme-label').forEach(function (el) {
-                el.textContent = el.closest('#menu')
-                    ? ('Fond : ' + (gris ? 'gris' : 'sombre'))
-                    : (gris ? 'Gris' : 'Sombre');
+        function lockBackground(force) {
+            var layers = [document.getElementById('bg-layer'), document.getElementById('bg-overlay')];
+            if (!layers[0]) return;
+            var w = document.documentElement.clientWidth;
+            if (!force && lastW !== null && Math.abs(w - lastW) < 2) return; // hauteur seule : on ignore
+            lastW = w;
+
+            var z = zoomFactor();
+            // Hauteur de référence = la plus grande que le viewport puisse prendre
+            var h = Math.max(
+                window.innerHeight || 0,
+                document.documentElement.clientHeight || 0,
+                (window.screen && window.screen.height) || 0
+            );
+            layers.forEach(function (el) {
+                if (!el) return;
+                el.style.width = (w / z) + 'px';
+                el.style.height = (h / z) + 'px';
             });
-        };
+        }
 
-        window.getTheme = readTheme;
+        window.addEventListener('resize', function () { lockBackground(false); });
+        window.addEventListener('orientationchange', function () { setTimeout(function () { lockBackground(true); }, 250); });
 
-        window.setTheme = function (theme, push) {
-            window.applyTheme(theme);
-            try { localStorage.setItem('theme-fond', theme); } catch (e) {}
-            if (push && window.__syncTheme) window.__syncTheme(theme);
-        };
-
-        window.toggleTheme = function () {
-            window.setTheme(readTheme() === 'gris' ? 'sombre' : 'gris', true);
-        };
-
-        function init() { window.applyTheme(readTheme()); }
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-        else init();
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { lockBackground(true); });
+        else lockBackground(true);
     })();
     </script>
 
@@ -617,28 +590,11 @@
 
         let currentUser = null;
 
-        // Synchronisation du thème vers le compte (la logique d'affichage est autonome, plus haut)
-        window.__syncTheme = async (theme) => {
-            if (!currentUser) return;
-            try { await setDoc(doc(db, "users", currentUser.uid), { themeFond: theme }, { merge: true }); }
-            catch (e) { console.warn('Thème non synchronisé :', e); }
-        };
-
         onAuthStateChanged(auth, async (user) => {
             const authUi = document.getElementById('auth-ui');
             if (user) {
                 currentUser = user;
                 await setDoc(doc(db, "users", user.uid), { uid: user.uid, email: user.email, displayName: user.displayName || '', photoURL: user.photoURL || '', lastSeen: new Date().toISOString() }, { merge: true });
-                // Le thème enregistré sur le compte fait foi (survit à l'effacement du cache)
-                try {
-                    const tSnap = await getDoc(doc(db, "users", user.uid));
-                    if (tSnap.exists() && tSnap.data().themeFond) {
-                        window.applyTheme(tSnap.data().themeFond);
-                        try { localStorage.setItem('theme-fond', tSnap.data().themeFond); } catch (e) {}
-                    } else {
-                        await setDoc(doc(db, "users", user.uid), { themeFond: window.getTheme() }, { merge: true });
-                    }
-                } catch (e) { console.warn('Thème non récupéré :', e); }
                 const cachedPseudo = sessionStorage.getItem('userPseudo');
                 let displayName = cachedPseudo || user.displayName;
                 if (!cachedPseudo) {

@@ -11,22 +11,18 @@ html {
 }
 body {
     overflow-x: hidden;
-    max-width: 100vw;
+    /* Pas de max-width: 100vw ici — vw ignore le zoom CSS appliqué à <html>,
+       ce qui plafonnait la page à 80 % de la largeur de l'écran. */
 }
 * {
     -webkit-tap-highlight-color: transparent;
     min-width: 0; /* empêche flex/grid items de forcer un overflow */
 }
 
-/* ── 2. Fond mobile : scroll, cover, centré haut pour portraits ── */
-@media (max-width: 1000px) {
-    body {
-        background-attachment: scroll !important;
-        background-size: cover !important;
-        background-position: center top !important;
-        background-repeat: no-repeat !important;
-    }
-}
+/* ── 2. Fond mobile ──
+   Le fond n'est plus peint sur <body> mais sur #bg-layer, en position fixe et
+   dimensionné en 100lvh, pour qu'il ne se redimensionne pas quand la barre
+   d'URL du navigateur se rétracte au défilement. Rien à surcharger ici. */
 
 /* ── 3. Images : chargement différé optimisé ── */
 img {
@@ -50,11 +46,8 @@ img {
     .nav-title {
         font-size: 0.95em !important;
     }
-    /* Boutons de la navbar trop larges */
-    .discord-btn {
-        padding: 5px 10px !important;
-        font-size: 0.78em !important;
-    }
+    /* Le bouton Discord garde son ratio natif (aspect-ratio dans index.html) :
+       aucun padding ici, sinon l'image est déformée. */
     .btn-red {
         padding: 5px 10px !important;
         font-size: 0.8em !important;
