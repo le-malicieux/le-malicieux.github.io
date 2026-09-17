@@ -54,7 +54,78 @@ img {
     }
 }
 
-/* ── 5. Cartes anime compactes ── */
+/* ── 4bis. NAVIGATION MOBILE — bloc de référence unique, commun à toutes les pages ──
+   Ces règles sont volontairement en !important : mobile.css est censé être inclus
+   partout, et ces déclarations doivent l'emporter sur n'importe quel style propre
+   à une page pour garantir que le burger reste toujours à gauche et que le menu a
+   toujours exactement la même interface, quelle que soit la page.
+   Pour fonctionner, une page doit réutiliser les mêmes classes que index.html :
+   .navbar / .nav-left / .burger / .nav-links / .nav-tab / .nav-action / .discord-btn /
+   .close-menu / .mobile-overlay / #auth-ui / #auth-ui-mobile (.auth-ui-slot). */
+
+/* Le bloc compte du menu mobile est toujours masqué en dehors de la vue mobile,
+   et le bloc compte du bureau est toujours masqué en dessous de 900px : un seul
+   des deux est visible à la fois, jamais les deux. */
+#auth-ui-mobile { display: none; }
+
+@media (max-width: 900px) {
+    .navbar { height: 58px !important; padding: 0 12px !important; }
+
+    /* Le burger reste toujours le premier élément visuel, donc toujours à gauche,
+       quel que soit son ordre dans le HTML de la page. */
+    .nav-left { display: flex !important; padding-right: 10px !important; gap: 8px !important; }
+    .burger { display: flex !important; order: -999 !important; }
+    .nav-logo-small { width: 32px !important; height: 32px !important; }
+    .nav-title { font-size: 0.92em !important; }
+
+    .nav-right { flex: 1 !important; justify-content: flex-end !important; padding-left: 8px !important; }
+    .search-wrapper { flex: 1 !important; width: auto !important; max-width: 260px !important; }
+    /* Le compte passe dans le menu : sur mobile, on ne le montre plus dans la barre,
+       ce qui laisse toute la place à la recherche (c'était la cause du carré qui
+       mangeait le nom de compte). */
+    .nav-right .nav-action,
+    .nav-right .discord-btn,
+    #auth-ui { display: none !important; }
+
+    /* Panneau du menu : toujours identique, ancré du même côté que le burger (gauche) */
+    .nav-links {
+        position: fixed !important; top: 0 !important; left: -100% !important; right: auto !important;
+        width: 280px !important; height: 100vh !important;
+        background: #131315 !important; flex-direction: column !important; align-items: stretch !important;
+        padding: 26px 18px !important; flex: none !important; overflow-y: auto !important;
+        transition: left 0.35s cubic-bezier(0.4,0,0.2,1) !important;
+        border-right: 1px solid #2a2a2e !important; border-left: none !important;
+        z-index: 1100 !important;
+    }
+    .nav-links.active { left: 0 !important; }
+    .close-menu { display: block !important; }
+
+    .nav-tab {
+        color: #fff !important; border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+        border-radius: 0 !important; margin: 0 !important; padding: 13px 2px !important; display: block !important;
+    }
+    .nav-tab.active { background: rgba(255,71,87,0.12) !important; color: #ff4757 !important; }
+
+    .nav-links .nav-action { display: flex !important; width: 100% !important; margin-top: 12px !important; box-sizing: border-box !important; justify-content: center !important; }
+    .nav-links .discord-btn { display: inline-flex !important; align-self: flex-start !important; width: auto !important; height: 38px !important; margin-top: 14px !important; }
+    .mobile-overlay.active { display: block !important; }
+    body { padding-top: 58px !important; }
+
+    /* Bloc compte déplacé dans le menu, au lieu de la navbar */
+    .menu-account {
+        display: flex !important; align-items: center !important; gap: 10px !important;
+        padding-bottom: 16px !important; margin-bottom: 10px !important;
+        border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    #auth-ui-mobile { display: flex !important; }
+    .menu-account .auth-login-btn { display: block !important; width: 100% !important; text-align: center !important; padding: 10px !important; }
+    .menu-account .auth-account { flex: 1 !important; gap: 10px !important; min-width: 0 !important; }
+    .menu-account .auth-avatar { width: 38px !important; height: 38px !important; }
+    .menu-account .auth-name { font-size: 0.92em !important; font-weight: 700 !important; }
+    .menu-account .auth-logout-btn { flex-shrink: 0 !important; }
+}
+
+
 @media (max-width: 1000px) {
     .card-info {
         padding: 5px !important;
@@ -241,6 +312,15 @@ img {
     .main-slogan {
         font-size: 0.95em !important;
         margin-top: 6px !important;
+    }
+}
+/* Écrans très étroits (≤380px) : marge de sécurité supplémentaire. La propriété
+   CSS zoom (utilisée pour l'agrandissement à 110%) peut, sur certains rendus,
+   faire déborder le texte centré de quelques pixels au-delà de sa boîte ; une
+   taille un peu plus petite évite que ce débordement touche le bord de l'écran. */
+@media (max-width: 380px) {
+    .main-title {
+        font-size: 1.32em !important;
     }
 }
 
