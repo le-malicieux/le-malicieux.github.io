@@ -161,7 +161,7 @@
            grilles de fiches) vit désormais entièrement dans mobile.css, commun à
            toutes les pages du site : voir ce fichier pour ces règles. */
 
-.content-area { position: relative; z-index: 1; padding: 20px 15px; min-height: 100vh; max-width: 1400px; margin: 0 auto; }
+.content-area { position: relative; z-index: 1; padding: 20px 15px; min-height: 100vh; margin: 0 auto; }
         .letter-anchor { display: flex; align-items: center; gap: 12px; margin: 30px 0 12px 0; }
         .letter-badge { font-size: 1.1em; font-weight: 900; color: var(--primary); min-width: 50px; height: 50px; padding: 0 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,71,87,0.1); border: 2px solid var(--primary); border-radius: 10px; flex-shrink: 0; white-space: nowrap; }
         .letter-line { flex: 1; height: 1px; background: linear-gradient(to right, rgba(255,71,87,0.4), transparent); }
@@ -188,7 +188,7 @@
         #no-result { text-align: center; color: #ccc; padding: 40px; font-size: 1.1em; display: none; }
 
         .display-mode-bar {
-            display: flex; align-items: center; gap: 8px; padding: 0 15px; max-width: 1400px; margin: 0 auto 15px;
+            display: flex; align-items: center; gap: 8px; padding: 0 15px; margin: 0 auto 15px;
             flex-wrap: wrap;
         }
         .display-mode-bar select {
@@ -197,7 +197,7 @@
         }
         .display-mode-bar label { font-size: 0.75em; color: #888; }
 
-        .list-table-wrap { display: none; max-width: 1400px; margin: 0 auto; padding: 0 15px; }
+        .list-table-wrap { display: none; margin: 0 auto; padding: 0 15px; }
         .list-table-wrap.active { display: block; }
         .anime-list.table-hidden { display: none; }
         /* Vue liste style MAL : image à gauche, titre à droite */
@@ -710,6 +710,12 @@
             const lists = document.querySelectorAll('.anime-list');
             if (!container || !lists.length) return;
             const cs = getComputedStyle(container);
+            // clientWidth (largeur « logique », en pixels CSS) est la bonne mesure ici :
+            // dézoomer ne change pas la taille physique de l'écran (donc la largeur VISUELLE
+            // reste ~constante), mais fait tenir davantage de pixels CSS dans cet espace —
+            // c'est justement cet espace logique libéré qu'on veut exploiter avec plus de
+            // colonnes. Mesurer la largeur visuelle (getBoundingClientRect) donnerait un
+            // nombre de colonnes constant quel que soit le zoom, ce qui est l'inverse du but.
             const avail = container.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
             if (avail <= 0) return;
             const n = computeGridCols(avail);
