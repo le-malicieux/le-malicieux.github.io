@@ -161,7 +161,7 @@
            grilles de fiches) vit désormais entièrement dans mobile.css, commun à
            toutes les pages du site : voir ce fichier pour ces règles. */
 
-.content-area { position: relative; z-index: 1; padding: 20px 15px; min-height: 100vh; margin: 0 auto; }
+.content-area { position: relative; z-index: 1; padding: 20px clamp(16px, 3vw, 64px) 40px; min-height: 100vh; margin: 0 auto; }
         .letter-anchor { display: flex; align-items: center; gap: 12px; margin: 30px 0 12px 0; }
         .letter-badge { font-size: 1.1em; font-weight: 900; color: var(--primary); min-width: 50px; height: 50px; padding: 0 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,71,87,0.1); border: 2px solid var(--primary); border-radius: 10px; flex-shrink: 0; white-space: nowrap; }
         .letter-line { flex: 1; height: 1px; background: linear-gradient(to right, rgba(255,71,87,0.4), transparent); }
@@ -197,7 +197,7 @@
         }
         .display-mode-bar label { font-size: 0.75em; color: #888; }
 
-        .list-table-wrap { display: none; margin: 0 auto; padding: 0 15px; }
+        .list-table-wrap { display: none; margin: 0 auto; padding: 0 clamp(16px, 3vw, 64px); }
         .list-table-wrap.active { display: block; }
         .anime-list.table-hidden { display: none; }
         /* Vue liste style MAL : image à gauche, titre à droite */
@@ -227,9 +227,9 @@
             will-change: transform;
         }
         
-        /* ── Zoom 110% ───────────────────────────── */
+        /* ── Zoom 88% ───────────────────────────── */
         html {
-            zoom: 1.1;
+            zoom: 0.88;
         }
         body {
             width: 100%;

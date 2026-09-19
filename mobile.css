@@ -315,7 +315,7 @@ img {
     }
 }
 /* Écrans très étroits (≤380px) : marge de sécurité supplémentaire. La propriété
-   CSS zoom (utilisée pour l'agrandissement à 110%) peut, sur certains rendus,
+   CSS zoom (utilisée pour l'agrandissement/réduction par défaut) peut, sur certains rendus,
    faire déborder le texte centré de quelques pixels au-delà de sa boîte ; une
    taille un peu plus petite évite que ce débordement touche le bord de l'écran. */
 @media (max-width: 380px) {
