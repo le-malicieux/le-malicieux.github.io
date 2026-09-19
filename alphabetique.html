@@ -685,6 +685,55 @@
                 navGroups[k].push(a);
             }
             buildAlphaNav(navGroups);
+            relayoutAnimeGrids();
+        }
+
+        /* ═══════════ COLONNES DE LA GRILLE PILOTÉES PAR JS ═══════════
+           grid-template-columns: repeat(auto-fill, minmax(...)) se recalcule bien au
+           redimensionnement de fenêtre, mais PAS avec le zoom natif du navigateur
+           (Ctrl +/-) : contrairement à un simple resize, le zoom change l'échelle de
+           rendu sans que Chrome ne relance systématiquement l'algorithme auto-fill de la
+           même façon. ResizeObserver, lui, mesure la taille RÉELLEMENT rendue du
+           conteneur et se déclenche de façon fiable dans les deux cas — on calcule donc
+           le nombre de colonnes nous-mêmes plutôt que de laisser le CSS seul s'en charger. */
+        const GRID_GAP = 14, GRID_TARGET = 170, GRID_MIN = 130, GRID_MAX = 230;
+
+        function computeGridCols(availWidth) {
+            let n = Math.max(1, Math.round((availWidth + GRID_GAP) / (GRID_TARGET + GRID_GAP)));
+            while (n > 1 && (availWidth - (n - 1) * GRID_GAP) / n < GRID_MIN) n--;
+            while ((availWidth - (n - 1) * GRID_GAP) / n > GRID_MAX) n++;
+            return n;
+        }
+
+        function relayoutAnimeGrids() {
+            const container = document.getElementById('groups-container');
+            const lists = document.querySelectorAll('.anime-list');
+            if (!container || !lists.length) return;
+            const cs = getComputedStyle(container);
+            const avail = container.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+            if (avail <= 0) return;
+            const n = computeGridCols(avail);
+            lists.forEach(list => { list.style.gridTemplateColumns = `repeat(${n}, 1fr)`; });
+        }
+
+        if (window.ResizeObserver) {
+            const gridRO = new ResizeObserver(() => {
+                clearTimeout(window.__gridRT);
+                window.__gridRT = setTimeout(relayoutAnimeGrids, 60);
+            });
+            document.addEventListener('DOMContentLoaded', () => {
+                const c = document.getElementById('groups-container');
+                if (c) gridRO.observe(c);
+            });
+            if (document.readyState !== 'loading') {
+                const c = document.getElementById('groups-container');
+                if (c) gridRO.observe(c);
+            }
+        } else {
+            window.addEventListener('resize', () => {
+                clearTimeout(window.__gridRT);
+                window.__gridRT = setTimeout(relayoutAnimeGrids, 150);
+            });
         }
 
         async function setBackground() {
