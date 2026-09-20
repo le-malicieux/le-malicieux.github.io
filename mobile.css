@@ -67,6 +67,9 @@ img {
    et le bloc compte du bureau est toujours masqué en dessous de 900px : un seul
    des deux est visible à la fois, jamais les deux. */
 #auth-ui-mobile { display: none; }
+/* Règle générique : tout élément « compte » du menu mobile (qu'il porte l'id
+   #auth-ui-mobile ou non) reste caché en dehors du menu mobile par défaut. */
+.menu-account { display: none; }
 
 @media (max-width: 900px) {
     .navbar { height: 58px !important; padding: 0 12px !important; }
