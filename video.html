@@ -14,59 +14,148 @@
         })();
     </script>
     <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; }
+        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #eee; --text-bright: #f5f5f5; }
+
+        #bg-layer, #bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw;
+            height: 100vh; height: 100lvh;
+            z-index: -2; pointer-events: none;
+        }
         #bg-layer {
-            position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background-size: cover; background-position: center center;
-            background-repeat: no-repeat;
+            background-repeat: no-repeat; transition: none;
         }
-        body::after {
-            content: ''; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.5); z-index: -1; pointer-events: none;
-        }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding-top: 60px; overflow-x: hidden; }
-        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
-        .top-navbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 16px; background: rgba(15,15,15,0.95); backdrop-filter: blur(10px);
+        #bg-overlay { z-index: -1; background: black; opacity: 0; transition: none; }
+
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding-top: 62px; overflow-x: hidden; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px clamp(20px, 5vw, 100px); }
+        html { zoom: 0.88; }
+        /* ═══════════════ EN-TÊTE — barre unique ═══════════════ */
+        .site-header {
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            gap: 12px; flex-wrap: wrap;
+            background: #121214;
+            border-bottom: 3px solid var(--primary);
+            box-shadow: 0 1px 8px rgba(0,0,0,0.5);
         }
-        .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-        .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-        .nav-logo-small { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--primary); font-weight: bold; font-size: 0.95em; white-space: nowrap; }
-        .burger { display: none; font-size: 28px; cursor: pointer; color: white; margin-left: 5px; flex-shrink: 0; }
-        .search-wrapper { position: relative; flex: 1; min-width: 180px; max-width: 280px; }
-        .search-wrapper input { width: 100%; background: #1a1a1a; border: 2px solid #333; color: white; padding: 6px 30px 6px 10px; border-radius: 5px; font-size: 0.8em; outline: none; }
-        .search-wrapper input:focus { border-color: var(--primary); }
-        .search-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #888; font-size: 0.9em; pointer-events: none; }
-        .search-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: #1a1a1a; border: 1px solid #333; border-radius: 0 0 5px 5px; max-height: 250px; overflow-y: auto; display: none; z-index: 2000; }
+        .navbar {
+            display: flex; align-items: stretch; gap: 0;
+            width: 100%; margin: 0; padding: 0 18px; box-sizing: border-box;
+            height: 62px;
+        }
+        .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-right: 22px; }
+        .nav-brand { display: flex; align-items: center; gap: 9px; text-decoration: none; cursor: pointer; }
+        .nav-logo-small { width: 38px; height: 38px; border-radius: 3px; border: 1px solid var(--primary); object-fit: cover; }
+        .nav-title { color: var(--text-bright); font-weight: 800; font-size: 1.05em; letter-spacing: 0.6px; white-space: nowrap; }
+
+        #back-home { font-size: 0.72em; color: #ff6b7a; text-decoration: none; display: none; cursor: pointer; margin-left: 4px; }
+
+        .burger { display: none; background: none; border: none; padding: 4px; cursor: pointer; align-items: center; }
+        .burger svg { width: 26px; height: 26px; stroke: var(--text-bright); }
+
+        /* Onglets, alignés dans la même barre */
+        /* overflow-x: auto + flex-shrink: 0 sur les onglets : si la place manque
+           (petite fenêtre, zoom élevé, écran étroit...), la barre défile au lieu de
+           comprimer les onglets jusqu'au chevauchement du texte. */
+        .nav-links {
+            display: flex; align-items: stretch; flex: 1; min-width: 0;
+            overflow-x: auto; overflow-y: hidden;
+            scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .nav-links::-webkit-scrollbar { display: none; }
+        .nav-tab {
+            display: flex; align-items: center; flex-shrink: 0;
+            color: #b9b9bd; text-decoration: none; cursor: pointer;
+            font-size: 0.82em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 0 14px; border-bottom: 3px solid transparent; margin-bottom: -3px;
+            white-space: nowrap; transition: color 0.15s, background 0.15s;
+        }
+        .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .nav-tab.active { color: #fff; border-bottom-color: var(--primary); background: rgba(255,71,87,0.09); }
+
+        .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-left: 14px; }
+
+        .search-wrapper { position: relative; width: clamp(150px, 16vw, 250px); flex-shrink: 0; }
+        .search-wrapper input {
+            width: 100%; background: #1c1c1f; border: 1px solid #38383d; color: white;
+            padding: 8px 34px 8px 11px; border-radius: 2px; font-size: 0.85em;
+            box-sizing: border-box; outline: none; transition: border-color 0.15s;
+        }
+        .search-wrapper input:focus { border-color: var(--primary); background: #202024; }
+        .search-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; display: flex; }
+        .search-icon svg { width: 15px; height: 15px; stroke: #8a8a90; }
+        .search-suggestions {
+            position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: #1a1a1d; border: 1px solid #38383d;
+            max-height: 340px; overflow-y: auto; display: none; z-index: 2000;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.55);
+        }
         .search-suggestions.active { display: block; }
-        .search-suggestions .suggestion-item { padding: 6px 10px; cursor: pointer; color: #ccc; font-size: 0.75em; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px; }
-        .search-suggestions .suggestion-item:hover { background: #2a2a2a; }
-        .search-suggestions .suggestion-item .sugg-img { width: 22px; height: 32px; border-radius: 3px; object-fit: cover; }
-        .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .nav-links a, .nav-links button { background: var(--primary); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75em; text-decoration: none; cursor: pointer; white-space: nowrap; font-weight: bold; }
-        .nav-links .discord-btn { background: #5865F2; color: white; text-decoration: none; padding: 5px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; white-space: nowrap; border: 2px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; gap: 5px; }
-        .nav-links .discord-btn::before { content: '💬'; font-size: 0.9em; }
-        .nav-links .discord-btn:hover { background: #4752c4; border-color: rgba(255,255,255,0.3); }
-        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
-        .close-menu { display: none; font-size: 24px; color: var(--primary); cursor: pointer; margin-bottom: 20px; align-self: flex-start; background: none !important; }
-        @media (max-width: 900px) {
-            body { padding-top: 100px; }
-            .top-navbar { flex-wrap: wrap; }
-            .search-wrapper { order: 3; width: 100%; max-width: none; margin-top: 8px; }
-            .nav-links { order: 2; }
-            .burger { display: block; }
-            .close-menu { display: block; }
-            .nav-links { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0f0f0f; flex-direction: column; padding: 30px 20px; transition: 0.4s cubic-bezier(0.4,0,0.2,1); z-index: 1100; align-items: stretch; overflow-y: auto; left: auto; right: -100%; }
-            .nav-links.active { right: 0; left: auto; }
-            .nav-links a, .nav-links button, .nav-links .discord-btn { margin: 5px 0; text-align: center; }
-            .mobile-overlay.active { display: block; }
-            .nav-links .discord-btn { margin-top: auto; border-radius: 20px; justify-content: center; }
+        .search-suggestions .suggestion-item {
+            padding: 7px 10px; cursor: pointer; color: #ccc; font-size: 0.85em;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; gap: 10px;
         }
+        .search-suggestions .suggestion-item:last-child { border-bottom: none; }
+        .search-suggestions .suggestion-item:hover,
+        .search-suggestions .suggestion-item.hl { background: #2b2b30; color: white; }
+        .search-suggestions .sugg-img { width: 30px; height: 42px; border-radius: 2px; object-fit: cover; flex-shrink: 0; background: #333; }
+        .search-suggestions .sugg-meta { font-size: 0.78em; color: #8a8a90; display: block; margin-top: 2px; }
+        .search-suggestions .sugg-empty { padding: 12px 10px; color: #8a8a90; font-size: 0.85em; }
+        .search-suggestions mark { background: none; color: var(--primary); font-weight: 700; }
+
+        .nav-action {
+            background: none; color: #b9b9bd; border: 1px solid #3a3a3f; cursor: pointer;
+            font-size: 0.76em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+            padding: 8px 13px; border-radius: 2px; white-space: nowrap; transition: 0.15s;
+        }
+        .nav-action:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        /* Rectangle au ratio natif de l'image (409x102) : c'est l'image qui fixe la
+           largeur, donc aucune déformation ni rognage quel que soit le contexte. */
+        .discord-btn {
+            display: inline-flex; flex-shrink: 0;
+            height: 34px; width: auto;
+            border-radius: 2px; overflow: hidden;
+            border: none; padding: 0; margin: 0;
+            background: #5865F2;
+            line-height: 0; box-sizing: content-box;
+            transition: opacity 0.15s;
+        }
+        .discord-btn:hover { opacity: 0.85; }
+        .discord-btn img {
+            height: 100%; width: auto; display: block;
+            object-fit: contain;
+        }
+
+        .auth-login-btn {
+            background: #5865F2; border: none; color: white; padding: 8px 13px;
+            border-radius: 2px; cursor: pointer; font-size: 0.78em; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
+        }
+        .auth-login-btn:hover { background: #4752c4; }
+        .auth-account { display: flex; align-items: center; gap: 6px; text-decoration: none; min-width: 0; }
+        .auth-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; flex-shrink: 0; }
+        .auth-name { color: white; font-size: 0.8em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .auth-logout-btn {
+            background: #2a2a2e; color: white; border: 1px solid #3a3a3f; cursor: pointer;
+            padding: 5px 9px; border-radius: 2px; font-size: 0.72em; flex-shrink: 0;
+        }
+        .auth-logout-btn:hover { background: #3a3a3f; }
+        #auth-ui { display: flex; align-items: center; gap: 8px; }
+
+        .nav-links .nav-action, .nav-links .discord-btn { display: none; }
+
+        .close-menu { display: none; font-size: 0.85em; color: var(--primary); cursor: pointer; margin-bottom: 18px; background: none !important; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
+
+        @media (max-width: 1100px) {
+            .nav-tab { padding: 0 10px; font-size: 0.78em; }
+        }
+
+        /* Le comportement mobile de la navbar (burger, panneau du menu, compte,
+           grilles de fiches) vit désormais entièrement dans mobile.css, commun à
+           toutes les pages du site : voir ce fichier pour ces règles. */
+
         .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; font-size: 0.85em; }
         .back-btn:hover { background: var(--primary); color: white; }
         .anime-header { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
@@ -121,11 +210,17 @@
         .close-player-btn { background: #333; color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; transition: 0.2s; }
         .close-player-btn:hover { background: #ff4757; }
         @media (max-width: 800px) {
-            .top-info { flex-direction: column; gap: 15px; }
-            .poster { width: 100%; max-width: 200px; margin: 0 auto; }
-            .anime-title { font-size: 1.5em; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            /* Image réduite et gardée à côté des infos (au lieu d'un empilement
+               vertical) : la page reste beaucoup plus courte sur mobile. */
+            .top-info { flex-direction: row; gap: 12px; align-items: flex-start; margin-bottom: 16px; }
+            .poster { width: 110px; max-width: 110px; flex-shrink: 0; margin: 0; }
+            .anime-title { font-size: 1.15em; line-height: 1.25; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; }
             .bottom-controls { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 420px) {
+            .poster { width: 88px; max-width: 88px; }
+            .anime-title { font-size: 1.02em; }
         }
     
         /* ── Bannière épisodes disponibles ───────────────── */
@@ -142,41 +237,66 @@
 </head>
 <body>
     <div id="bg-layer"></div>
-    <div class="top-navbar">
-        <div class="nav-left">
-            <a href="index.html" class="nav-brand">
-                <img src="img/logo.jpg" class="nav-logo-small">
-                <span class="nav-title">LE MALICIEUX</span>
-            </a>
+    <div id="bg-overlay"></div>
+    <header class="site-header">
+        <div class="navbar">
+            <div class="nav-left">
+                <button class="burger" onclick="toggleM()" aria-label="Ouvrir le menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <a class="nav-brand" href="index.html">
+                    <img src="img/logo.jpg" class="nav-logo-small" alt="Logo Le Malicieux">
+                    <span class="nav-title">LE MALICIEUX</span>
+                </a>
+            </div>
+
+            <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
+
+            <nav class="nav-links" id="menu">
+                <div class="close-menu" onclick="toggleM()">Fermer</div>
+                <div class="menu-account js-hidden" id="menu-account-wrap">
+                    <a href="profil.html" id="nav-profil-link-mobile" class="auth-account" style="text-decoration:none;">
+                        <img id="nav-avatar-mobile" src="img/logo.jpg" class="auth-avatar" style="display:none;">
+                        <span id="nav-pseudo-mobile" class="auth-name" style="display:none;"></span>
+                    </a>
+                </div>
+                <a href="index.html" class="nav-tab" data-page="index.html">Accueil</a>
+                <a href="tags.html" class="nav-tab" data-page="tags.html">Tags</a>
+                <a href="alphabetique.html" class="nav-tab" data-page="alphabetique.html">A-Z</a>
+                <a href="playlist.html" class="nav-tab" data-page="playlist.html">Playlist</a>
+                <a href="editeurs.html" class="nav-tab" data-page="editeurs.html">Studios</a>
+                <a href="profil.html" class="nav-tab" data-page="profil.html">Profil</a>
+                <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
+                <button class="nav-action" onclick="randomAnime()">Au hasard</button>
+                <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
+                    <img src="logo-discord.jpg" alt="Discord">
+                </a>
+            </nav>
+
+            <div class="nav-right">
+                <div class="search-wrapper" id="search-wrapper">
+                    <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
+                    <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                    <div class="search-suggestions" id="search-suggestions"></div>
+                </div>
+                <button class="nav-action" onclick="randomAnime()">Au hasard</button>
+                <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
+                    <img src="logo-discord.jpg" alt="Discord">
+                </a>
+                <a href="profil.html" id="nav-profil-link" class="auth-account" style="text-decoration:none;">
+                    <img id="nav-avatar" src="img/logo.jpg" class="auth-avatar" style="display:none;">
+                    <span id="nav-pseudo" class="auth-name" style="display:none;"></span>
+                </a>
+            </div>
         </div>
-        <div class="search-wrapper">
-            <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
-            <span class="search-icon">🔍</span>
-            <div class="search-suggestions" id="search-suggestions"></div>
-        </div>
-        <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
-        <div class="nav-links" id="menu">
-            <div class="close-menu" onclick="toggleM()">← Retour</div>
-            <a href="index.html">🏠 Accueil</a>
-            <a href="tags.html">🏷️ Tags</a>
-            <a href="alphabetique.html">📖 A-Z</a>
-            <a href="playlist.html">📂 Playlist</a>
-            <a href="editeurs.html">🏢 Studios</a>
-            <a href="share.html">🔗 Partager</a>
-            <a href="profil.html">👤 Profil</a>
-            <a href="index_old.html">🕰️ Ancien Index</a>
-            <button onclick="randomAnime()">🎲 Random</button>
-            <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn">Discord</a>
-        </div>
-        <div class="burger" onclick="toggleM()">☰</div>
-    </div>
+    </header>
 
     <div class="container">
-        <a href="index.html" id="back-link" class="back-btn" onclick="handleBack(event)">← Retour au catalogue</a>
-        <div id="seek-banner" class="seek-available-banner">🎬 <strong>Épisodes disponibles</strong> sous-titrés en VOSTFR / VOSTE / VOSTA en 1080p (ou parfois 720p) — directement sur ce site, voir plus bas.</div>
+        <a href="index.html" id="back-link" class="back-btn" onclick="handleBack(event)">Retour au catalogue</a>
+        <div id="seek-banner" class="seek-available-banner"><strong>Épisodes disponibles</strong> sous-titrés en VOSTFR / VOSTE / VOSTA en 1080p (ou parfois 720p) — directement sur ce site, voir plus bas.</div>
         <div id="anime-details">Chargement des données...</div>
         <div id="seekstreaming-section" class="seekstreaming-section" style="display:none;">
-            <h3>🎬 Regarder en streaming</h3>
+            <h3>Regarder en streaming</h3>
             <div class="seek-episode-list" id="seek-episode-list"></div>
             <div class="seek-player-wrap" id="seek-player-wrap" style="display:none;">
                 <iframe id="seek-iframe" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture" referrerpolicy="no-referrer-when-downgrade"></iframe>
@@ -191,6 +311,50 @@
     </div>
     <div class="modal-overlay" id="confirm-modal"><div class="modal-box"><p id="modal-msg"></p><div class="modal-actions"><button class="modal-btn modal-btn-cancel" id="modal-cancel">Annuler</button><button class="modal-btn modal-btn-confirm" id="modal-confirm">Supprimer</button></div></div></div>
 
+<script>
+    /* ═══════════ VERROUILLAGE DU FOND ═══════════
+       Sur mobile, la barre d'URL qui se rétracte au défilement modifie la hauteur du
+       viewport. Comme #bg-layer était en position fixe avec inset:0 et background-size:
+       cover, l'image était remise à l'échelle à chaque variation, d'où l'effet de
+       grossissement. On fige donc ses dimensions en pixels, et on ne les recalcule que
+       si la LARGEUR change (rotation, redimensionnement réel), jamais sur la hauteur.
+       Le calcul divise par le zoom CSS de <html>, sans quoi les px seraient réduits. */
+    (function () {
+        var lastW = null;
+
+        function zoomFactor() {
+            var z = parseFloat(getComputedStyle(document.documentElement).zoom);
+            return (!z || isNaN(z)) ? 1 : z;
+        }
+
+        function lockBackground(force) {
+            var layers = [document.getElementById('bg-layer'), document.getElementById('bg-overlay')];
+            if (!layers[0]) return;
+            var w = document.documentElement.clientWidth;
+            if (!force && lastW !== null && Math.abs(w - lastW) < 2) return; // hauteur seule : on ignore
+            lastW = w;
+
+            var z = zoomFactor();
+            // Hauteur de référence = la plus grande que le viewport puisse prendre
+            var h = Math.max(
+                window.innerHeight || 0,
+                document.documentElement.clientHeight || 0,
+                (window.screen && window.screen.height) || 0
+            );
+            layers.forEach(function (el) {
+                if (!el) return;
+                el.style.width = (w / z) + 'px';
+                el.style.height = (h / z) + 'px';
+            });
+        }
+
+        window.addEventListener('resize', function () { lockBackground(false); });
+        window.addEventListener('orientationchange', function () { setTimeout(function () { lockBackground(true); }, 250); });
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { lockBackground(true); });
+        else lockBackground(true);
+    })();
+    </script>
     <script type="module">
         // Firebase chargé en tâche de fond (import() dynamique) pour ne pas bloquer
         // l'affichage de la vidéo/des épisodes. Les variables sont peuplées une fois
@@ -354,10 +518,10 @@
             if(!malData) return;
             const popEl=document.getElementById('stat-pop'), scoreEl=document.getElementById('stat-score'), etatEl=document.getElementById('stat-etat'), sortieEl=document.getElementById('stat-sortie'), malBadge=document.getElementById('mal-badge');
             if(popEl && malData.popularity!=null){ popEl.textContent=formatPop(malData.popularity); popEl.closest('.stat-item').classList.add('mal-live'); }
-            if(scoreEl && malData.score!=null){ scoreEl.textContent='⭐ '+formatScore(malData.score); scoreEl.closest('.stat-item').classList.add('mal-live'); }
+            if(scoreEl && malData.score!=null){ scoreEl.textContent=formatScore(malData.score); scoreEl.closest('.stat-item').classList.add('mal-live'); }
             if(etatEl && malData.status){ etatEl.textContent=traduitStatutMAL(malData.status); etatEl.closest('.stat-item').classList.add('mal-live'); }
             if(updateDate && sortieEl && malData.aired){ const d=formatAiredJikan(malData.aired); if(d){ sortieEl.textContent=d; sortieEl.closest('.stat-item').classList.add('mal-live'); } }
-            if(malBadge && malData.malUrl) malBadge.innerHTML=`<a href="${malData.malUrl}" target="_blank" class="mal-link">🔗 Voir sur MyAnimeList</a>`;
+            if(malBadge && malData.malUrl) malBadge.innerHTML=`<a href="${malData.malUrl}" target="_blank" class="mal-link">Voir sur MyAnimeList</a>`;
         }
 
         async function load(){
@@ -392,13 +556,13 @@
                     const im=c2[8]?c2[8].trim().replace(/^"|"$/g,'') : '';
                     if(n && im) imgIndex[n]=im;
                 }
-                const makeRelatedCards=list=>list.map(name=>{ const imgFile=imgIndex[name]||'', imgBase=imgFile?imgFile.replace(/\.[^.]+$/,'') : ''; const imgTag=imgBase?`<img src="img/${imgBase}.jpg" onerror="this.src='img/${imgBase}.png'">`:`<div style="width:48px;height:66px;background:#333;border-radius:4px;display:flex;align-items:center;justify-content:center;">🎬</div>`; return `<a href="video.html?name=${encodeURIComponent(name)}" class="related-card">${imgTag}<span>${name}</span></a>`; }).join('');
-                const relatedSection=(anime.prequels.length||anime.sequels.length)?`<div class="related-row">${anime.prequels.length?`<div class="related-section"><div class="related-label">⬅️ Préquel(s)</div>${makeRelatedCards(anime.prequels)}</div>`:''}${anime.sequels.length?`<div class="related-section"><div class="related-label">➡️ Suite(s)</div>${makeRelatedCards(anime.sequels)}</div>`:''}</div>`:'';
+                const makeRelatedCards=list=>list.map(name=>{ const imgFile=imgIndex[name]||'', imgBase=imgFile?imgFile.replace(/\.[^.]+$/,'') : ''; const imgTag=imgBase?`<img src="img/${imgBase}.jpg" onerror="this.src='img/${imgBase}.png'">`:`<div style="width:48px;height:66px;background:#333;border-radius:4px;display:flex;align-items:center;justify-content:center;">&nbsp;</div>`; return `<a href="video.html?name=${encodeURIComponent(name)}" class="related-card">${imgTag}<span>${name}</span></a>`; }).join('');
+                const relatedSection=(anime.prequels.length||anime.sequels.length)?`<div class="related-row">${anime.prequels.length?`<div class="related-section"><div class="related-label">Préquel(s)</div>${makeRelatedCards(anime.prequels)}</div>`:''}${anime.sequels.length?`<div class="related-section"><div class="related-label">Suite(s)</div>${makeRelatedCards(anime.sequels)}</div>`:''}</div>`:'';
                 display.innerHTML=`
                     <div class="anime-header">
                         <div class="top-info"><div class="poster"><img src="img/${anime.img.split('.')[0]}.jpg" onerror="this.src='img/${anime.img.split('.')[0]}.png'"></div>
                         <div class="main-details"><h1 class="anime-title">${anime.nom}</h1>
-                        <div class="stats-grid"><div class="stat-item"><small>Pop.</small><span id="stat-pop">${anime.pop}</span></div><div class="stat-item"><small>Score</small><span id="stat-score">⭐ ${anime.score}</span></div><div class="stat-item"><small>Sortie</small><span id="stat-sortie">${formatDateFR(anime.year)}</span></div><div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div><div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div><div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div><div class="stat-item" style="grid-column: span 2; cursor:${anime.editeur?'pointer':'default'};" ${anime.editeur?`onclick="window.location='editeurs.html?studio='+encodeURIComponent('${anime.editeur.split(',')[0].trim()}')"`:''}><small>Éditeur${anime.editeur&&anime.editeur.includes(',')?'s':''}</small><span>${anime.editeur?anime.editeur.split(',').map(e=>e.trim()).map((e,i,arr)=>arr.length>1?`<a href="editeurs.html?studio=${encodeURIComponent(e)}" style="color:var(--primary);">${e}</a>`:e).join(' / ') : '—'}</span></div></div>
+                        <div class="stats-grid"><div class="stat-item"><small>Pop.</small><span id="stat-pop">${anime.pop}</span></div><div class="stat-item"><small>Score</small><span id="stat-score">${anime.score}</span></div><div class="stat-item"><small>Sortie</small><span id="stat-sortie">${formatDateFR(anime.year)}</span></div><div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div><div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div><div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div><div class="stat-item" style="grid-column: span 2; cursor:${anime.editeur?'pointer':'default'};" ${anime.editeur?`onclick="window.location='editeurs.html?studio='+encodeURIComponent('${anime.editeur.split(',')[0].trim()}')"`:''}><small>Éditeur${anime.editeur&&anime.editeur.includes(',')?'s':''}</small><span>${anime.editeur?anime.editeur.split(',').map(e=>e.trim()).map((e,i,arr)=>arr.length>1?`<a href="editeurs.html?studio=${encodeURIComponent(e)}" style="color:var(--primary);">${e}</a>`:e).join(' / ') : '—'}</span></div></div>
                         <div id="mal-badge"><span class="mal-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span>Chargement MAL…</span></div>
                         <p style="font-size:0.85em; color:#ccc; line-height:1.5;">${anime.desc}</p></div></div>
                         <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:${relatedSection?'10px':'15px'};">${tagsHtml}</div>
@@ -411,8 +575,8 @@
                             <div id="added-at-label" style="font-size:0.65em; color:#666; margin-top:4px; text-align:center;"></div>
                             <div id="completed-at-label" style="font-size:0.65em; color:#2e86de; margin-top:2px; text-align:center; display:none;"></div>
                             <button class="btn-delete" id="delete-btn">Retirer de ma liste</button></div>
-                            <div class="link-box"><div class="link-title">📥 Téléchargement</div><div id="dl-area" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
-                            <div class="link-title" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">🎬 Visionnage <a href="https://github.com/le-malicieux/le-malicieux.github.io/blob/main/README-MALICIEUX.txt" target="_blank" style="font-size:0.85em; font-weight:normal; color:#a29bfe; text-decoration:none; white-space:nowrap;" title="Guide ultime du visionnage">📖 Guide pratique ↗</a></div><div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px;"></div>
+                            <div class="link-box"><div class="link-title">Téléchargement</div><div id="dl-area" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
+                            <div class="link-title" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">Visionnage <a href="https://github.com/le-malicieux/le-malicieux.github.io/blob/main/README-MALICIEUX.txt" target="_blank" style="font-size:0.85em; font-weight:normal; color:#a29bfe; text-decoration:none; white-space:nowrap;" title="Guide ultime du visionnage">Guide pratique</a></div><div id="stream-area" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px;"></div>
                             <div id="infov-area"></div></div>
                         </div>
                     </div>`;
@@ -424,8 +588,8 @@
                         return `${prefix} Lien`;
                     }
                 }
-                anime.dl.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('dl-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link" style="flex:1;">${getDomainLabel(l,'⬇️')} ↗</a>`);
-                anime.stream.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('stream-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link">${getDomainLabel(l,'▶')} ↗</a>`);
+                anime.dl.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('dl-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link" style="flex:1;">${getDomainLabel(l,'')} </a>`);
+                anime.stream.filter(l=>l.trim()).forEach((l,i)=>document.getElementById('stream-area').innerHTML+=`<a href="${l}" target="_blank" class="btn-link">${getDomainLabel(l,'')} </a>`);
                 if(anime.stream.some(l=>l.includes('hentainyaa.com'))){
                     const note=document.createElement('div');
                     note.style.cssText='font-size:0.75em;color:#999;margin-top:4px;line-height:1.4;';
@@ -441,7 +605,7 @@
                 if(anime.infoV && anime.infoV.trim()){
                     const infovArea=document.getElementById('infov-area');
                     if(infovArea){
-                        const t=document.createElement('div'); t.className='link-title'; t.textContent='ℹ️ Informations de visionnage';
+                        const t=document.createElement('div'); t.className='link-title'; t.textContent='Informations de visionnage';
                         const b=document.createElement('div'); b.style.cssText='background:rgba(255,255,255,0.04);border:1px solid #333;border-radius:6px;padding:8px 10px;font-size:0.8em;color:#ccc;line-height:1.6;white-space:pre-line;margin-top:4px;';
                         b.textContent=anime.infoV;
                         infovArea.appendChild(t); infovArea.appendChild(b);
@@ -454,13 +618,20 @@
                 const shouldRefreshDate = yearIsOnlyYear || (isEnCours && isRecent);
                 fetchMALData(anime.nom,anime.malId).then(md=>{ applyMALStats(md, shouldRefreshDate); if(!md){ const badge=document.getElementById('mal-badge'); if(badge) badge.innerHTML='<span style="font-size:0.7em;color:#555;">Données MAL indisponibles</span>'; } });
                 const _ref=document.referrer, _bl=document.getElementById('back-link');
-                if(_ref.includes('playlist.html')) _bl.innerText='← Retour à la playlist';
-                else if(_ref.includes('tags.html')) _bl.innerText='← Retour aux tags';
+                if(_ref.includes('playlist.html')) _bl.innerText='Retour à la playlist';
+                else if(_ref.includes('tags.html')) _bl.innerText='Retour aux tags';
                 const updateStars=v=>document.querySelectorAll('#stars span').forEach(s=>s.classList.toggle('active',s.dataset.v<=v));
                 await firebaseReady;
                 onAuthStateChanged(auth,async(u)=>{
                     currentUser=u;
                     if(u){
+                        const cachedPseudo = sessionStorage.getItem('userPseudo');
+                        const cachedAvatar = sessionStorage.getItem('userAvatar');
+                        const displayName = cachedPseudo || u.displayName || '';
+                        const avatarUrl = cachedAvatar || u.photoURL || 'img/logo.jpg';
+                        ['nav-pseudo','nav-pseudo-mobile'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.textContent=displayName; el.style.display='inline'; } });
+                        ['nav-avatar','nav-avatar-mobile'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.src=avatarUrl; el.style.display='inline-block'; } });
+                        const wrap=document.getElementById('menu-account-wrap'); if(wrap) wrap.classList.remove('js-hidden');
                         const docRef=doc(db,"playlists",u.uid+"_"+animeName);
                         let snap=await getDoc(docRef);
                         if(!snap.exists()){
@@ -499,9 +670,9 @@
                         }
                         function refreshAddedAt(data){
                             const el=document.getElementById('added-at-label');
-                            if(el && data && data.addedAt) el.textContent=`➕ Ajouté le ${formatAddedAt(data.addedAt)}`;
+                            if(el && data && data.addedAt) el.textContent=`Ajouté le ${formatAddedAt(data.addedAt)}`;
                             const cel=document.getElementById('completed-at-label');
-                            if(cel && data && data.completedAt){ cel.textContent=`✅ Terminé le ${formatAddedAt(data.completedAt)}`; cel.style.display='block'; }
+                            if(cel && data && data.completedAt){ cel.textContent=`Terminé le ${formatAddedAt(data.completedAt)}`; cel.style.display='block'; }
                             else if(cel){ cel.style.display='none'; }
                         }
                         if(snap.exists()) refreshAddedAt(snap.data());
@@ -760,7 +931,7 @@
                 const header = section.querySelector('h3');
                 if (header && !section.querySelector('.close-player-btn')) {
                     const closeBtn = document.createElement('button');
-                    closeBtn.textContent = '❌ Fermer le lecteur';
+                    closeBtn.textContent = 'Fermer le lecteur';
                     closeBtn.className = 'close-player-btn';
                     closeBtn.onclick = closePlayer;
                     header.appendChild(closeBtn);
@@ -771,7 +942,7 @@
                     const note = document.createElement('div');
                     note.className = 'seek-download-note';
                     note.style.cssText = 'font-size:0.8em; color:#999; margin-bottom:10px;';
-                    note.textContent = '📥 Le téléchargement de la vidéo est disponible directement depuis le lecteur.';
+                    note.textContent = 'Le téléchargement de la vidéo est disponible directement depuis le lecteur.';
                     section.insertBefore(note, list);
                 }
 
@@ -849,6 +1020,11 @@
 
         function toggleM(){ const menu=document.getElementById('menu'), overlay=document.getElementById('overlay'); const isOpen=menu.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow=isOpen?'hidden':''; }
         window.toggleM=toggleM;
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const bg = document.getElementById('bg-overlay');
+            if (bg) bg.style.opacity = Math.min(scrollY / 600, 0.65);
+        });
     </script>
 </body>
 </html>
