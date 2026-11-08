@@ -561,7 +561,13 @@
         if (sorted.length === 0) { grid.innerHTML = `<div style="color:#555;">Aucun anime ajouté.</div>`; return; }
         grid.innerHTML = sorted.map(a => {
             const cover = csvDataMap[a.anime] ? getCoverPath(csvDataMap[a.anime].ordreAjout, 1) : IMG_LOGO;
-            return `<a href="fiche.html?name=${encodeURIComponent(a.anime)}" class="recent-card"><img src="${cover}" onerror="this.onerror=null;this.src='${IMG_LOGO}'"><div class="rc-title">${a.anime}</div>${a.addedAt?`<div style="font-size:0.62em;color:#555;margin-top:2px;">${formatAddedAt(a.addedAt)}</div>`:''}</a>`;
+            return `<a href="fiche.html?name=${encodeURIComponent(a.anime)}" class="recent-card">
+                <img src="${cover}" onerror="this.onerror=null;this.src='${IMG_LOGO}'">
+                <div class="rc-title" style="margin-bottom:4px;">${a.anime}</div>
+                <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:2px; justify-content:center;">
+                    <span class="meta-badge" style="font-size:0.6em; padding:1px 4px;">${a.status === 'watching' ? 'En cours' : a.status === 'completed' ? 'Terminé' : 'En attente'}</span>
+                </div>
+            </a>`;
         }).join('');
     }
 

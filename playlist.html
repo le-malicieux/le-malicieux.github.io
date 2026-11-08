@@ -255,7 +255,6 @@
                             document.getElementById('nav-avatar-mobile').style.display = 'inline-block'; 
                         }
                         
-                        // Playlists customs
                         getDocs(query(collection(db, "playlists_custom"), where("uid", "==", u.uid))).then(snap => {
                             const sel = document.getElementById('custom-selector'), cur = sel.value;
                             let my = '', shared = '';
@@ -271,7 +270,6 @@
                             toggleDeleteBtn();
                         });
                         
-                        // Animes
                         getDocs(query(collection(db, "playlists"), where("uid", "==", u.uid))).then(snap => {
                             userAnimes = [];
                             snap.forEach(d => {
@@ -389,16 +387,25 @@
                 let hlLine='';
                 if(sortVal==='score_mal') hlLine=`<div style="font-size:0.7em;color:var(--primary);">Score MAL : ${a.score||'N/A'}</div>`;
                 else if(sortVal==='popularite') hlLine=`<div style="font-size:0.7em;color:var(--primary);">Popularité : ${a.pop||'N/A'}</div>`;
-                else if(sortVal==='sortie') hlLine=`<div class="highlight" style="font-size:0.7em;">${a.sortie||'?'}</div>`;
-                else if(sortVal==='episodes') hlLine=`<div style="font-size:0.7em;color:var(--primary);">${a.ep||'?'} ép.</div>`;
-                else if(sortVal==='editeur') hlLine=`<div style="font-size:0.7em;color:var(--primary);">${a.editeur||'—'}</div>`;
                 
                 const addedStr=formatAddedAt(a.addedAt), modifStr=formatAddedAt(getLastModified(a));
                 const deleteBtn = isViewMode ? '' : `<button class="delete-btn-overlay" onclick="removeAnime(event,'${a.id}')" title="Supprimer" aria-label="Supprimer">&times;</button>`;
                 const cover = a.ordreAjout ? getCoverPath(a.ordreAjout, 1) : IMG_LOGO;
                 const coverFile = a.ordreAjout ? `${a.ordreAjout}-1.webp` : '';
+                const year = (a.sortie||'').match(/\d{4}/g)?.pop() || a.sortie || '—';
 
-                return `<div class="card">${deleteBtn}<a href="fiche.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;"><img src="${cover}" onerror="handleImgError(this,'${coverFile}')"><div class="card-info"><div class="card-title">${a.anime}</div><div style="font-size:0.75em; color:#ccc;">Note : ${a.rating}/10 • Ép. ${a.epSeen}</div>${hlLine}${addedStr?`<div style="font-size:0.62em;color:#555;margin-top:3px;">Ajouté : ${addedStr}</div>`:''}${modifStr?`<div style="font-size:0.62em;color:#555;margin-top:1px;">Modifié : ${modifStr}</div>`:''}</div></a></div>`;
+                return `<div class="card">${deleteBtn}<a href="fiche.html?name=${encodeURIComponent(a.anime)}" style="text-decoration:none; color:inherit;"><img src="${cover}" onerror="handleImgError(this,'${coverFile}')"><div class="card-info">
+                    <div class="card-title">${a.anime}</div>
+                    <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:4px;">
+                        <span class="meta-badge">Note : ${a.rating}/10</span>
+                        <span class="meta-badge">Vu : ${a.epSeen}/${a.ep||'?'}</span>
+                    </div>
+                    <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:5px;">
+                        <span class="meta-badge"><strong>Censure :</strong> ${a.censure||'—'}</span>
+                        <span class="meta-badge"><strong>Statut :</strong> ${a.etat||'—'}</span>
+                    </div>
+                    ${addedStr?`<div style="font-size:0.62em;color:#555;margin-top:6px;">Ajouté : ${addedStr}</div>`:''}
+                </div></a></div>`;
             }).join('');
         } else {
             grid.style.display="none"; grid.innerHTML=''; table.classList.add('active');

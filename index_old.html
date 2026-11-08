@@ -186,16 +186,17 @@
                 </div>
                 <div class="card-info">
                     <div class="card-title">${titleHtml}</div>
-                    <div class="card-meta-row">
-                        <span ${hl('sortie')}>${sortMode==='sortie'?(a.sortie||''):year}</span>
-                        <span ${hl('score')} class="mal-score">★ ${a.score}</span>
-                        <span ${hl('popularite')} class="mal-pop">${a.pop}</span>
+                    <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:4px;">
+                        <span class="meta-badge" ${hl('sortie')}>${sortMode==='sortie'?(a.sortie||''):year}</span>
+                        <span class="meta-badge mal-score" ${hl('score')}>★ ${a.score}</span>
+                        <span class="meta-badge" ${hl('popularite')}>${a.pop}</span>
+                        <span class="meta-badge" ${hl('episodes')}>${a.ep} ép.</span>
                     </div>
-                    <div class="card-meta-row">
-                        <span ${hl('episodes')}>${a.ep} ép.</span>
+                    <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:5px;">
+                        <span class="meta-badge"><strong>Censure :</strong> ${a.censure}</span>
+                        <span class="meta-badge"><strong>Statut :</strong> ${a.etat}</span>
                     </div>
-                    ${renderMetaBadges(a)}
-                    ${a.editeur ? `<div class="card-meta-row"><span ${hl('editeur')} style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.editeur}</span></div>` : ''}
+                    ${a.editeur ? `<div class="card-meta-row" style="margin-top:6px;"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#888; font-size:0.78em;">${a.editeur}</span></div>` : ''}
                 </div>
             </a>`;
         }).join('');

@@ -479,8 +479,6 @@
             const coStudios = a.editeur.split(',').map(e => e.trim()).filter(e => e && e !== currentStudio);
             const coStudioBadge = coStudios.length ? `<div style="font-size:0.62em;color:#888;margin-top:2px;">Avec : ${coStudios.join(', ')}</div>` : '';
             const yr = sortVal === 'année' ? (a.sortie||'') : ((a.sortie||'').match(/\d{4}/g)?.pop() || a.sortie);
-            const line1 = `${sp('année',yr)} · ${sp('episodes',a.ep+' ép.')} · ${sp('censure',a.censure)} · ${sp('etat',a.etat)}`;
-            const line2 = [a.pop ? sp('pop',a.pop) : '', isHl('score') && a.score ? sp('score',a.score) : ''].filter(Boolean);
             
             const cover = getCoverPath(a.ordreAjout, 1);
             const coverFile = `${a.ordreAjout}-1.webp`;
@@ -489,8 +487,15 @@
                 <div class="img-wrap"><img src="${cover}" loading="lazy" onerror="handleImgError(this,'${coverFile}')">${scoreBadge}</div>
                 <div class="ac-info">
                     <div class="ac-title">${a.nom}</div>
-                    <div class="ac-meta" style="line-height:1.6;">${line1}</div>
-                    ${line2.length ? `<div class="ac-meta">${line2.join(' · ')}</div>` : ''}
+                    <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:4px;">
+                        <span class="meta-badge" ${isHl('année')?'class="highlight"':''}>${yr}</span>
+                        <span class="meta-badge" ${isHl('episodes')?'class="highlight"':''}>${a.ep} ép.</span>
+                        <span class="meta-badge">★ ${a.score}</span>
+                    </div>
+                    <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:5px;">
+                        <span class="meta-badge"><strong>Censure :</strong> ${a.censure}</span>
+                        <span class="meta-badge"><strong>Statut :</strong> ${a.etat}</span>
+                    </div>
                     ${coStudioBadge}
                 </div>
             </a>`;
