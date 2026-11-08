@@ -33,9 +33,9 @@
         .carousel-wrapper { position: relative; width: 100%; margin: 0 auto; padding: 0 40px; box-sizing: border-box; }
         .carousel-container { overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; scrollbar-width: none; -ms-overflow-style: none; touch-action: pan-x pan-y; overscroll-behavior-x: contain; }
         .carousel-container::-webkit-scrollbar { display: none; }
-        .carousel-track { display: flex; gap: var(--gap, 10px); width: max-content; padding: 2px 0 4px; }
+        .carousel-track { display: flex; gap: var(--gap, 12px); width: max-content; padding: 2px 0 4px; }
         .carousel-track .card { scroll-snap-align: start; }
-        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: #17171a; border: 1px solid #3a3a3f; color: #ddd; font-size: 1.5em; width: 30px; height: 60px; line-height: 1; border-radius: 2px; cursor: pointer; z-index: 5; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s, opacity 0.2s; padding: 0; }
+        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: #17171a; border: 1px solid #3a3a3f; color: #ddd; font-size: 1.5em; width: 34px; height: 70px; line-height: 1; border-radius: 2px; cursor: pointer; z-index: 5; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s, opacity 0.2s; padding: 0; }
         .carousel-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
         .carousel-btn[disabled] { opacity: 0.22; cursor: default; }
         .carousel-btn[disabled]:hover { background: #17171a; color: #ddd; border-color: #3a3a3f; }
@@ -43,7 +43,7 @@
         .carousel-next { right: 2px; }
         @media (max-width: 1000px) {
             .carousel-wrapper { padding: 0 26px; }
-            .carousel-btn { width: 22px; height: 48px; font-size: 1.2em; }
+            .carousel-btn { width: 26px; height: 56px; font-size: 1.2em; }
             .carousel-prev { left: 0; }
             .carousel-next { right: 0; }
             .hero-section { height: 58vh; }
@@ -52,18 +52,21 @@
         }
         @media (max-width: 480px) {
             .carousel-wrapper { padding: 0 22px; }
-            .carousel-btn { width: 20px; height: 44px; }
+            .carousel-btn { width: 22px; height: 50px; }
         }
-        .card { background: var(--card-bg); border-radius: 2px; overflow: hidden; transition: 0.2s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em; display: flex; flex-direction: column; flex-shrink: 0; width: var(--card-w, 160px); }
+        
+        /* CARTES PLUS GRANDES ET TEXTE PLUS LISIBLE */
+        .card { background: var(--card-bg); border-radius: 4px; overflow: hidden; transition: 0.2s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 1.05em; display: flex; flex-direction: column; flex-shrink: 0; width: var(--card-w, 220px); }
         .card:hover { transform: translateY(-6px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { padding: 7px 8px; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
+        .card-info { padding: 10px 12px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 6px; height: 2.4em; overflow: hidden; font-size: 1.15em; line-height: 1.2; }
         .card-title .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 1px; }
-        .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #ddd; margin-top: 2px; }
+        .card-meta-row { display: flex; flex-wrap: wrap; gap: 5px; font-size: 0.8em; color: #ddd; margin-top: 4px; }
         .mal-score { color: #ffc94d; font-weight: 600; }
-        #search-results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(96px, 26vw, 165px), 1fr)); gap: 10px; margin: 0 auto; padding: 0 8px; }
+        
+        #search-results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 28vw, 220px), 1fr)); gap: 14px; margin: 0 auto; padding: 0 8px; }
         #search-results-grid .card { width: auto; }
         .anime-count { text-align: center; padding: 12px 20px; color: var(--primary); font-size: 1em; font-weight: bold; background: rgba(0, 0, 0, 0.75); display: inline-block; border-radius: 2px; }
         .anime-count-wrapper { text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; margin-top: 40px; display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; }
@@ -228,23 +231,30 @@
             <div class="img-container"><img src="${cover}" loading="lazy" onerror="handleImgError(this, '${coverFile}')"></div>
             <div class="card-info">
                 <div class="card-title">${titleHtml}</div>
-                <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:2px;">
+                <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:4px;">
                     <span class="meta-badge">${year}</span>
                     <span class="meta-badge mal-score">★ ${a.score}</span>
                     <span class="meta-badge">${a.pop}</span>
                     <span class="meta-badge">${a.ep} ép.</span>
                 </div>
-                <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+                <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:5px;">
                     <span class="meta-badge"><strong>Censure :</strong> ${a.censure}</span>
                     <span class="meta-badge"><strong>Statut :</strong> ${a.etat}</span>
                 </div>
-                ${a.editeur ? `<div class="card-meta-row" style="margin-top:4px; color:#888; font-size:0.72em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.editeur}</div>` : ''}
+                ${a.editeur ? `<div class="card-meta-row" style="margin-top:6px; color:#888; font-size:0.78em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.editeur}</div>` : ''}
             </div>
         </a>`;
     }
 
-    const CARD_TARGET = 170, CARD_MIN = 96, CARD_MAX = 205, CARD_GAP = 10, MOBILE_MIN_COLS = 3;
+    // AUGMENTATION DE LA TAILLE CIBLE DES CARTES
+    const CARD_TARGET = 240; // Largeur idéale passe de 170 à 240px
+    const CARD_MIN = 160;    // Largeur minimale pour ne pas être trop petit
+    const CARD_MAX = 300;    // Largeur maximale
+    const CARD_GAP = 14;     // Espace entre les cartes
+    const MOBILE_MIN_COLS = 2; // 2 cartes par ligne sur mobile au lieu de 3
+
     function cardWidthFor(avail, n) { return (avail - (n - 1) * CARD_GAP) / n; }
+    
     function layoutCarousel(container, track) {
         const avail = container.clientWidth;
         if (!avail) return;
@@ -262,7 +272,7 @@
         const track = document.getElementById(trackId);
         if (!track) return;
         if (!animeList || animeList.length === 0) {
-            track.innerHTML = '<p style="color:#ff6b7a;padding:20px;font-size:0.85em;">Aucun anime.</p>';
+            track.innerHTML = '<p style="color:#ff6b7a;padding:20px;font-size:0.9em;">Aucun anime.</p>';
             return;
         }
         track.innerHTML = animeList.map(a => createCardHTML(a)).join('');
@@ -271,6 +281,7 @@
         if (!container || !wrapper) return;
         const prevBtn = wrapper.querySelector('.carousel-prev');
         const nextBtn = wrapper.querySelector('.carousel-next');
+        
         function step() {
             const card = track.querySelector('.card');
             const cardW = card ? card.getBoundingClientRect().width + CARD_GAP : CARD_TARGET + CARD_GAP;
@@ -285,6 +296,7 @@
             nextBtn.disabled = noScroll || container.scrollLeft >= max - 2;
         }
         function relayout() { layoutCarousel(container, track); refreshButtons(); }
+        
         prevBtn.onclick = () => container.scrollBy({ left: -step(), behavior: 'smooth' });
         nextBtn.onclick = () => container.scrollBy({ left: step(), behavior: 'smooth' });
         container.addEventListener('scroll', () => {
