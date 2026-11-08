@@ -21,13 +21,13 @@
         .content-area { padding: 20px clamp(20px, 5vw, 100px); min-height: 500px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin: 0 auto; }
         
-        .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em; display: flex; flex-direction: column; }
+        .card { background: var(--card-bg); border-radius: 3px; overflow: hidden; transition: 0.2s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.85em; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-6px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { padding: 6px; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 3px; height: 2.2em; overflow: hidden; font-size: 0.95em; line-height: 1.2; }
-        .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.65em; color: #bbb; margin-top: 2px; }
+        .card-info { padding: 8px 9px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.0em; line-height: 1.2; }
+        .card-meta-row { display: flex; flex-wrap: wrap; gap: 5px; color: #ddd; margin-top: 4px; }
         .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; font-weight: bold; }
         .mal-updated { color: #5dade2; }
         
@@ -35,7 +35,7 @@
         .sort-select { background: #1e1e1e; border: 1px solid #3a3a3a; color: white; padding: 6px 10px; border-radius: 5px; font-size: 0.85em; cursor: pointer; }
         
         @media (max-width: 480px) { .card-title { font-size: 0.85em; } }
-        @media (max-width: 700px) { .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; } }
+        @media (max-width: 700px) { .grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; } }
     </style>
 </head>
 <body>
@@ -203,7 +203,7 @@
         relayoutGrid();
     }
 
-    const GRID_GAP = 15, GRID_TARGET = 170, GRID_MIN = 130, GRID_MAX = 230;
+    const GRID_GAP = 12, GRID_TARGET = 190, GRID_MIN = 135, GRID_MAX = 240;
     function computeGridCols(avail) {
         let n = Math.max(1, Math.round((avail + GRID_GAP) / (GRID_TARGET + GRID_GAP)));
         while (n > 1 && (avail - (n - 1) * GRID_GAP) / n < GRID_MIN) n--;

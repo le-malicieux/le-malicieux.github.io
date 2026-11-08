@@ -23,13 +23,13 @@
         .letter-badge { font-size: 1.1em; font-weight: 900; color: var(--primary); min-width: 50px; height: 50px; padding: 0 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,71,87,0.1); border: 2px solid var(--primary); border-radius: 10px; flex-shrink: 0; white-space: nowrap; }
         .letter-line { flex: 1; height: 1px; background: linear-gradient(to right, rgba(255,71,87,0.4), transparent); }
         .anime-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 10px; }
-        .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.8em; display: flex; flex-direction: column; }
-        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
+        .card { background: var(--card-bg); border-radius: 3px; overflow: hidden; transition: 0.2s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.85em; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-6px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.05em; line-height: 1.2; }
-        .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72em; color: #bbb; margin-top: 2px; }
+        .card-info { padding: 8px 9px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; height: 2.4em; overflow: hidden; font-size: 1.0em; line-height: 1.2; }
+        .card-meta-row { display: flex; flex-wrap: wrap; gap: 5px; color: #ddd; margin-top: 4px; }
         .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; font-weight: bold; }
         .alpha-nav { position: fixed; top: 62px; left: 0; right: 0; z-index: 998; display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 4px; padding: 4px 16px; background: rgba(15,15,15,0.97); backdrop-filter: blur(10px); border-bottom: 1px solid #1a1a1a; height: 36px; align-items: center; scrollbar-width: none; box-sizing: border-box; }
         @media (max-width: 900px) {
@@ -54,6 +54,10 @@
         .mal-row:hover { border-color: var(--primary); background: rgba(255,71,87,0.05); }
         .mal-row .ml-img { width: 36px; height: 52px; object-fit: cover; border-radius: 4px; flex-shrink: 0; background: #111; }
         .mal-row .ml-title { font-size: 0.85em; font-weight: bold; color: var(--primary); flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        
+        @media (max-width: 700px) {
+            .anime-list { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+        }
     </style>
 </head>
 <body>
@@ -230,20 +234,23 @@
                 const cards = groups[key].map(a => {
                     const cover = getCoverPath(a.ordreAjout, 1);
                     const coverFile = `${a.ordreAjout}-1.webp`;
+                    const year = (a.sortie || '').match(/\d{4}/g)?.pop() || a.sortie;
+
                     return `<a href="fiche.html?name=${encodeURIComponent(a.nom)}" class="card">
                         <div class="img-container"><img src="${cover}" loading="lazy" onerror="handleImgError(this, '${coverFile}')"></div>
                         <div class="card-info">
                             <div class="card-title">${a.nom}</div>
-                            <div class="card-meta-row">
-                                <span ${hl('sortie')}>${sortMode === 'sortie' ? a.sortie : ((a.sortie || '').match(/\d{4}/g)?.pop() || a.sortie)}</span>
-                                <span ${hl('score')}>★${a.score}</span>
-                                <span ${hl('popularite')}>${a.pop}</span>
+                            <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:4px;">
+                                <span class="meta-badge" ${hl('sortie')}>${sortMode === 'sortie' ? a.sortie : year}</span>
+                                <span class="meta-badge mal-score" ${hl('score')}>★${a.score}</span>
+                                <span class="meta-badge" ${hl('popularite')}>${a.pop}</span>
+                                <span class="meta-badge" ${hl('episodes')}>${a.ep} ép.</span>
                             </div>
-                            <div class="card-meta-row">
-                                <span ${hl('episodes')}>${a.ep} ép.</span>
+                            <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:5px;">
+                                <span class="meta-badge"><strong>Censure :</strong> ${a.censure}</span>
+                                <span class="meta-badge"><strong>Statut :</strong> ${a.etat}</span>
                             </div>
-                            ${renderMetaBadges(a)}
-                            ${a.editeur ? `<div class="card-meta-row"><span ${hl('editeur')} style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.editeur}</span></div>` : ''}
+                            ${a.editeur ? `<div class="card-meta-row" style="margin-top:6px;"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#888; font-size:0.78em;">${a.editeur}</span></div>` : ''}
                         </div>
                     </a>`;
                 }).join('');
@@ -273,8 +280,7 @@
         relayoutGrids();
     }
 
-    // Colonnes calculées via JS (zoom-friendly)
-    const GRID_GAP = 14, GRID_TARGET = 170, GRID_MIN = 130, GRID_MAX = 230;
+    const GRID_GAP = 12, GRID_TARGET = 190, GRID_MIN = 135, GRID_MAX = 240;
     function computeGridCols(avail) {
         let n = Math.max(1, Math.round((avail + GRID_GAP) / (GRID_TARGET + GRID_GAP)));
         while (n > 1 && (avail - (n - 1) * GRID_GAP) / n < GRID_MIN) n--;
@@ -343,7 +349,6 @@
             const urlSort = new URLSearchParams(window.location.search).get('sort') || '';
             render(savedSearch, urlSort);
 
-            // Construit la navbar alphabétique globale
             const allGroups = {};
             for (const a of allAnimes) { const k = getGroupKey(a.nom); if (!allGroups[k]) allGroups[k] = []; allGroups[k].push(a); }
             buildAlphaNav(allGroups);
