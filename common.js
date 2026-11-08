@@ -36,8 +36,10 @@ export {
 
 // ── Constantes ──
 // On utilise jsDelivr pour éviter le Rate Limit de GitHub Pages.
-// Si tu changes de compte ou de nom de dépôt, modifie "le-malicieux/le-malicieux.github.io".
+// Vérifie bien que le nom d'utilisateur est "le-malicieux" (sans "e" au début).
 const CDN_BASE = 'https://cdn.jsdelivr.net/gh/le-malicieux/le-malicieux.github.io@main';
+
+// Si tu as converti tes logos en .webp, change l'extension ici.
 export const IMG_LOGO = `${CDN_BASE}/img/bannieres_icones/logo.jpg`;
 export const IMG_DISCORD = `${CDN_BASE}/img/bannieres_icones/logo-discord.jpg`;
 export const DEFAULT_COVER_NUM = 1;
@@ -56,16 +58,19 @@ export function getTranche(ordreAjout) {
 export function getCoverPath(ordreAjout, num = DEFAULT_COVER_NUM) {
     const n = parseInt(ordreAjout, 10);
     if (!n || n < 1) return IMG_LOGO;
+    // Utilisation de .webp
     return `${CDN_BASE}/img/covers/${getTranche(n)}/${n}-${num}.webp`;
 }
 
 export function getPlsPath(slug) {
     if (!slug) return IMG_LOGO;
+    // Utilisation de .webp
     return `${CDN_BASE}/img/pls/${slug}.webp`;
 }
 
 export function getBackgroundUrl(kind, filename) {
     if (!filename) return '';
+    // Assure-toi que les noms de fichiers dans ton backgrounds.json ont bien l'extension .webp
     return kind === 'mobile'
         ? `${CDN_BASE}/img/fonds_mobiles/${filename}`
         : `${CDN_BASE}/img/fonds_desktop/${filename}`;
@@ -92,6 +97,7 @@ export function handleImgError(img, filename) {
     tried.push(ext);
     img.dataset.tried = tried.join(',');
 
+    // Si le .webp échoue, il tente le .jpg, etc. (C'est ce qui a créé les requêtes .jpg dans ta console)
     const chain = {
         webp: ['jpg', 'jpeg', 'png'],
         jpg: ['jpeg', 'png', 'webp'],
