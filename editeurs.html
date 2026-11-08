@@ -2,223 +2,40 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="img/logo.jpg" type="image/jpeg">
+    <link rel="icon" href="img/bannieres_icones/logo.jpg" type="image/jpeg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="common.css">
     <title>Éditeurs & Studios - Le Malicieux</title>
     <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20,20,20,0.92); --text: #eee; --text-bright: #f5f5f5; --nav-bg: rgba(15,15,15,0.85); }
-        * { box-sizing: border-box; }
-
-        #bg-layer, #bg-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw;
-            height: 100vh; height: 100lvh;
-            z-index: -2; pointer-events: none;
-        }
-        #bg-layer {
-            background-size: cover; background-position: center center;
-            background-repeat: no-repeat; transition: none;
-        }
-        #bg-overlay { z-index: -1; background: black; opacity: 0; transition: none; }
-
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; padding-top: 62px; }
-        /* ═══════════════ EN-TÊTE — barre unique ═══════════════ */
-        .site-header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            background: #121214;
-            border-bottom: 3px solid var(--primary);
-            box-shadow: 0 1px 8px rgba(0,0,0,0.5);
-        }
-        .navbar {
-            display: flex; align-items: stretch; gap: 0;
-            width: 100%; margin: 0; padding: 0 18px; box-sizing: border-box;
-            height: 62px;
-        }
-        .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-right: 22px; }
-        .nav-brand { display: flex; align-items: center; gap: 9px; text-decoration: none; cursor: pointer; }
-        .nav-logo-small { width: 38px; height: 38px; border-radius: 3px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--text-bright); font-weight: 800; font-size: 1.05em; letter-spacing: 0.6px; white-space: nowrap; }
-
-        #back-home { font-size: 0.72em; color: #ff6b7a; text-decoration: none; display: none; cursor: pointer; margin-left: 4px; }
-
-        .burger { display: none; background: none; border: none; padding: 4px; cursor: pointer; align-items: center; }
-        .burger svg { width: 26px; height: 26px; stroke: var(--text-bright); }
-
-        /* Onglets, alignés dans la même barre */
-        /* overflow-x: auto + flex-shrink: 0 sur les onglets : si la place manque
-           (petite fenêtre, zoom élevé, écran étroit...), la barre défile au lieu de
-           comprimer les onglets jusqu'au chevauchement du texte. */
-        .nav-links {
-            display: flex; align-items: stretch; flex: 1; min-width: 0;
-            overflow-x: auto; overflow-y: hidden;
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .nav-links::-webkit-scrollbar { display: none; }
-        .nav-tab {
-            display: flex; align-items: center; flex-shrink: 0;
-            color: #b9b9bd; text-decoration: none; cursor: pointer;
-            font-size: 0.82em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-            padding: 0 14px; border-bottom: 3px solid transparent; margin-bottom: -3px;
-            white-space: nowrap; transition: color 0.15s, background 0.15s;
-        }
-        .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.05); }
-        .nav-tab.active { color: #fff; border-bottom-color: var(--primary); background: rgba(255,71,87,0.09); }
-
-        .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-left: 14px; }
-
-        .search-wrapper { position: relative; width: clamp(150px, 16vw, 250px); flex-shrink: 0; }
-        .search-wrapper input {
-            width: 100%; background: #1c1c1f; border: 1px solid #38383d; color: white;
-            padding: 8px 34px 8px 11px; border-radius: 2px; font-size: 0.85em;
-            box-sizing: border-box; outline: none; transition: border-color 0.15s;
-        }
-        .search-wrapper input:focus { border-color: var(--primary); background: #202024; }
-        .search-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; display: flex; }
-        .search-icon svg { width: 15px; height: 15px; stroke: #8a8a90; }
-        .search-suggestions {
-            position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-            background: #1a1a1d; border: 1px solid #38383d;
-            max-height: 340px; overflow-y: auto; display: none; z-index: 2000;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.55);
-        }
-        .search-suggestions.active { display: block; }
-        .search-suggestions .suggestion-item {
-            padding: 7px 10px; cursor: pointer; color: #ccc; font-size: 0.85em;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex; align-items: center; gap: 10px;
-        }
-        .search-suggestions .suggestion-item:last-child { border-bottom: none; }
-        .search-suggestions .suggestion-item:hover,
-        .search-suggestions .suggestion-item.hl { background: #2b2b30; color: white; }
-        .search-suggestions .sugg-img { width: 30px; height: 42px; border-radius: 2px; object-fit: cover; flex-shrink: 0; background: #333; }
-        .search-suggestions .sugg-meta { font-size: 0.78em; color: #8a8a90; display: block; margin-top: 2px; }
-        .search-suggestions .sugg-empty { padding: 12px 10px; color: #8a8a90; font-size: 0.85em; }
-        .search-suggestions mark { background: none; color: var(--primary); font-weight: 700; }
-
-        .nav-action {
-            background: none; color: #b9b9bd; border: 1px solid #3a3a3f; cursor: pointer;
-            font-size: 0.76em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
-            padding: 8px 13px; border-radius: 2px; white-space: nowrap; transition: 0.15s;
-        }
-        .nav-action:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-        /* Rectangle au ratio natif de l'image (409x102) : c'est l'image qui fixe la
-           largeur, donc aucune déformation ni rognage quel que soit le contexte. */
-        .discord-btn {
-            display: inline-flex; flex-shrink: 0;
-            height: 34px; width: auto;
-            border-radius: 2px; overflow: hidden;
-            border: none; padding: 0; margin: 0;
-            background: #5865F2;
-            line-height: 0; box-sizing: content-box;
-            transition: opacity 0.15s;
-        }
-        .discord-btn:hover { opacity: 0.85; }
-        .discord-btn img {
-            height: 100%; width: auto; display: block;
-            object-fit: contain;
-        }
-
-        .auth-login-btn {
-            background: #5865F2; border: none; color: white; padding: 8px 13px;
-            border-radius: 2px; cursor: pointer; font-size: 0.78em; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
-        }
-        .auth-login-btn:hover { background: #4752c4; }
-        .auth-account { display: flex; align-items: center; gap: 6px; text-decoration: none; min-width: 0; }
-        .auth-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; flex-shrink: 0; }
-        .auth-name { color: white; font-size: 0.8em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .auth-logout-btn {
-            background: #2a2a2e; color: white; border: 1px solid #3a3a3f; cursor: pointer;
-            padding: 5px 9px; border-radius: 2px; font-size: 0.72em; flex-shrink: 0;
-        }
-        .auth-logout-btn:hover { background: #3a3a3f; }
-        #auth-ui { display: flex; align-items: center; gap: 8px; }
-
-        .nav-links .nav-action, .nav-links .discord-btn { display: none; }
-
-        .close-menu { display: none; font-size: 0.85em; color: var(--primary); cursor: pointer; margin-bottom: 18px; background: none !important; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
-
-        @media (max-width: 1100px) {
-            .nav-tab { padding: 0 10px; font-size: 0.78em; }
-        }
-
-        /* Le comportement mobile de la navbar (burger, panneau du menu, compte,
-           grilles de fiches) vit désormais entièrement dans mobile.css, commun à
-           toutes les pages du site : voir ce fichier pour ces règles. */
-
-
-        /* ── Layout ── */
+        
         .page-wrap { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 20px clamp(20px, 5vw, 100px) 60px; }
         #view-list { display: block; }
         #view-producer { display: none; }
 
-        /* ── En-tête ── */
         .list-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
         .list-header h1 { font-size: 1.5em; font-weight: 900; color: var(--primary); margin: 0; }
         .sort-select { background: #1a1a1a; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
 
-        /* ── Compteurs ── */
         .category-stats { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
         .cat-badge { display: flex; align-items: center; gap: 10px; background: rgba(255,71,87,0.06); border: 1px solid rgba(255,71,87,0.18); border-left: 3px solid var(--primary); border-radius: 10px; padding: 10px 16px; }
         .cat-badge-count { font-size: 1.25em; font-weight: 900; color: white; display: block; line-height: 1; }
         .cat-badge-label { font-size: 0.68em; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
 
-        /* ── Section separator ── */
-        .section-sep {
-            display: flex; align-items: center; gap: 12px;
-            margin: 0 0 14px 0;
-        }
-        .section-sep-line {
-            flex: 1; height: 1px; background: rgba(255,71,87,0.25);
-        }
-        .section-sep-label {
-            font-size: 0.78em; font-weight: 800; color: var(--primary);
-            text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap;
-            display: flex; align-items: center; gap: 7px;
-        }
-        .section-sep-count {
-            background: var(--primary); color: white;
-            font-size: 0.78em; padding: 1px 8px; border-radius: 20px; font-weight: 700;
-        }
-
-        /* Séparation Erotica — même style que Hentai */
+        .section-sep { display: flex; align-items: center; gap: 12px; margin: 0 0 14px 0; }
+        .section-sep-line { flex: 1; height: 1px; background: rgba(255,71,87,0.25); }
+        .section-sep-label { font-size: 0.78em; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; display: flex; align-items: center; gap: 7px; }
+        .section-sep-count { background: var(--primary); color: white; font-size: 0.78em; padding: 1px 8px; border-radius: 20px; font-weight: 700; }
         .erotica-separator { margin: 36px 0 14px 0; }
 
-        /* ── Grille studios ── */
-        .studios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-bottom: 10px; }
-
-        /* ── Studio card ── */
-        .studio-card {
-            background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px;
-            padding: 12px 14px;
-            cursor: pointer; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-            display: flex; flex-direction: row; align-items: center; gap: 12px;
-        }
+        .studios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 10px; }
+        .studio-card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: row; align-items: center; gap: 12px; }
         .studio-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255,71,87,0.1); }
 
-        /* Logo zone : carré, motif entièrement visible (jamais rogné), zoomé au maximum sans bord blanc */
-        .studio-logo-wrap {
-            width: 62px; height: 62px;
-            flex-shrink: 0;
-            background: var(--card-bg);
-            border-radius: 10px;
-            overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .studio-logo {
-            width: 100%; height: 100%;
-            object-fit: contain;
-            object-position: center;
-        }
-        .studio-logo-fallback {
-            width: 100%; height: 100%;
-            background: linear-gradient(135deg, #1a0008, #2d0014);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.3em; font-weight: 900; color: var(--primary);
-            text-transform: uppercase; letter-spacing: 0.05em;
-        }
+        .studio-logo-wrap { width: 62px; height: 62px; flex-shrink: 0; background: var(--card-bg); border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .studio-logo { width: 100%; height: 100%; object-fit: contain; object-position: center; }
+        .studio-logo-fallback { width: 100%; height: 100%; background: linear-gradient(135deg, #1a0008, #2d0014); display: flex; align-items: center; justify-content: center; font-size: 1.3em; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; }
         .studio-card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
         .studio-name { font-weight: 800; font-size: 0.88em; color: white; line-height: 1.3; }
         .studio-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
@@ -226,7 +43,6 @@
         .studio-count span { color: var(--primary); font-weight: bold; }
         .studio-score { font-size: 0.68em; color: #f1c40f; }
 
-        /* ── Vue producteur ── */
         .producer-header { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
         .producer-banner { height: 100px; background: linear-gradient(135deg, #1a0008 0%, #2d0014 40%, #0a000f 100%); position: relative; display: flex; align-items: flex-end; padding: 0 20px; }
         .producer-avatar { width: 72px; height: 72px; border-radius: 14px; background: var(--card-bg); border: 3px solid var(--bg); position: relative; z-index: 1; transform: translateY(36px); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
@@ -243,14 +59,15 @@
         .pstat { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 6px 14px; text-align: center; }
         .pstat-val { font-size: 1.15em; font-weight: 800; color: var(--primary); display: block; }
         .pstat-lbl { font-size: 0.65em; color: #666; text-transform: uppercase; }
+        
         .btn-back-list { display: inline-flex; align-items: center; gap: 6px; color: #aaa; font-size: 0.85em; cursor: pointer; border: 1px solid #333; background: #1a1a1a; padding: 5px 12px; border-radius: 6px; margin-bottom: 15px; }
         .btn-back-list:hover { color: var(--primary); border-color: var(--primary); }
+        
         .producer-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
         .ctrl-select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
         .result-count { font-size: 0.8em; color: #666; margin-left: auto; }
         .producer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
 
-        /* ── Anime card ── */
         .anime-card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; transition: 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
         .anime-card:hover { border-color: var(--primary); transform: translateY(-4px); }
         .anime-card .img-wrap { width: 100%; aspect-ratio: 2/3; background: #111; position: relative; }
@@ -262,14 +79,7 @@
         .empty-state { text-align: center; color: #555; padding: 40px 20px; grid-column: 1/-1; }
         .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; font-weight: bold; }
 
-        img { image-rendering: auto; }
-        html { zoom: 0.88; }
-        body { width: 100%; margin-left: auto; margin-right: auto; }
-        .studios-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; }
-        .producer-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; }
-
         @media (max-width: 700px) {
-            /* 3 fiches d'anime exactement sur mobile (pas les studios, cf. .studios-grid) */
             .producer-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
             .producer-name { font-size: 1.2em; }
             .producer-banner { height: auto; flex-direction: column; align-items: flex-start; padding: 0; }
@@ -283,6 +93,7 @@
 <body>
     <div id="bg-layer"></div>
     <div id="bg-overlay"></div>
+    
     <header class="site-header">
         <div class="navbar">
             <div class="nav-left">
@@ -290,13 +101,11 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                 </button>
                 <a class="nav-brand" href="index.html">
-                    <img src="img/logo.jpg" class="nav-logo-small" alt="Logo Le Malicieux">
+                    <img src="img/bannieres_icones/logo.jpg" class="nav-logo-small" alt="Logo Le Malicieux">
                     <span class="nav-title">LE MALICIEUX</span>
                 </a>
             </div>
-
             <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
-
             <nav class="nav-links" id="menu">
                 <div class="close-menu" onclick="toggleM()">Fermer</div>
                 <a href="index.html" class="nav-tab" data-page="index.html">Accueil</a>
@@ -308,10 +117,9 @@
                 <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
                 <button class="nav-action" onclick="studioRandom()">Studio au hasard</button>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
-                    <img src="logo-discord.jpg" alt="Discord">
+                    <img src="img/bannieres_icones/logo-discord.jpg" alt="Discord">
                 </a>
             </nav>
-
             <div class="nav-right">
                 <div class="search-wrapper" id="search-wrapper">
                     <input type="text" id="studio-search" placeholder="Rechercher un studio..." autocomplete="off">
@@ -319,15 +127,13 @@
                 </div>
                 <button class="nav-action" onclick="studioRandom()">Studio au hasard</button>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
-                    <img src="logo-discord.jpg" alt="Discord">
+                    <img src="img/bannieres_icones/logo-discord.jpg" alt="Discord">
                 </a>
             </div>
         </div>
     </header>
 
     <div class="page-wrap">
-
-        <!-- ════════════════════════════════ VUE LISTE ════════════════════════════════ -->
         <div id="view-list">
             <div class="list-header">
                 <h1>Éditeurs &amp; Studios</h1>
@@ -341,7 +147,6 @@
                 </div>
             </div>
 
-            <!-- Compteurs -->
             <div class="category-stats">
                 <div class="cat-badge">
                     <div>
@@ -357,7 +162,6 @@
                 </div>
             </div>
 
-            <!-- ── Studios Hentai ── -->
             <div class="section-sep">
                 <div class="section-sep-label">
                     Studios Hentai
@@ -369,7 +173,6 @@
                 <div class="empty-state">Chargement…</div>
             </div>
 
-            <!-- ── Séparateur Erotica ── -->
             <div class="section-sep erotica-separator">
                 <div class="section-sep-label">
                     Studios Erotica
@@ -382,7 +185,6 @@
             </div>
         </div>
 
-        <!-- ════════════════════════════════ VUE PRODUCTEUR ════════════════════════════════ -->
         <div id="view-producer">
             <a class="btn-back-list" onclick="showList()">Tous les éditeurs</a>
             <div class="producer-header">
@@ -428,379 +230,297 @@
         </div>
     </div>
 
-<script>
-    /* ═══════════ VERROUILLAGE DU FOND ═══════════
-       Sur mobile, la barre d'URL qui se rétracte au défilement modifie la hauteur du
-       viewport. Comme #bg-layer était en position fixe avec inset:0 et background-size:
-       cover, l'image était remise à l'échelle à chaque variation, d'où l'effet de
-       grossissement. On fige donc ses dimensions en pixels, et on ne les recalcule que
-       si la LARGEUR change (rotation, redimensionnement réel), jamais sur la hauteur.
-       Le calcul divise par le zoom CSS de <html>, sans quoi les px seraient réduits. */
-    (function () {
-        var lastW = null;
+<script type="module">
+    import {
+        initCommon, loadAnimes, getCoverPath, handleImgError, IMG_LOGO,
+        searchAnimes
+    } from './common.js';
 
-        function zoomFactor() {
-            var z = parseFloat(getComputedStyle(document.documentElement).zoom);
-            return (!z || isNaN(z)) ? 1 : z;
-        }
+    initCommon();
 
-        function lockBackground(force) {
-            var layers = [document.getElementById('bg-layer'), document.getElementById('bg-overlay')];
-            if (!layers[0]) return;
-            var w = document.documentElement.clientWidth;
-            if (!force && lastW !== null && Math.abs(w - lastW) < 2) return; // hauteur seule : on ignore
-            lastW = w;
+    let allAnimes = [], currentStudio = null;
+    let eroticaSet = new Set();
 
-            var z = zoomFactor();
-            // Hauteur de référence = la plus grande que le viewport puisse prendre
-            var h = Math.max(
-                window.innerHeight || 0,
-                document.documentElement.clientHeight || 0,
-                (window.screen && window.screen.height) || 0
-            );
-            layers.forEach(function (el) {
-                if (!el) return;
-                el.style.width = (w / z) + 'px';
-                el.style.height = (h / z) + 'px';
-            });
-        }
-
-        window.addEventListener('resize', function () { lockBackground(false); });
-        window.addEventListener('orientationchange', function () { setTimeout(function () { lockBackground(true); }, 250); });
-
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { lockBackground(true); });
-        else lockBackground(true);
-    })();
-    </script>
-    <script>
-        /* ─────────────────── Fond en priorité ─────────────────── */
-        (async () => {
-            try {
-                const res = await fetch('backgrounds.json');
-                const data = await res.json();
-                const list = (window.innerWidth <= 1000 ? data.mobile : data.desktop) || [];
-                if (!list.length) return;
-                const file = list[Math.floor(Math.random() * list.length)];
-                const img = new Image();
-                img.onload = () => document.getElementById('bg-layer').style.backgroundImage = `url('img/${file}')`;
-                img.src = `img/${file}`;
-            } catch(e) {}
-        })();
-
-        /* ─────────────────── État global ─────────────────── */
-        let allAnimes = [], currentStudio = null;
-        let eroticaSet = new Set();
-
-        /* ─────────────────── CSV Studios Erotica ─────────────────── */
-        async function loadEroticaStudios() {
-            try {
-                const resp = await fetch('studios_erotica.csv');
-                if (!resp.ok) return;
-                const text = await resp.text();
-                text.split(/\r?\n/).slice(1).forEach(l => { const n = l.trim(); if (n) eroticaSet.add(n); });
-            } catch(e) {}
-        }
-        const isErotica = s => eroticaSet.has(s);
-
-        /* ─────────────────── MAL : lien studio ─────────────────── */
-        const malStudioCache = {};
-        async function fetchMALStudioLink(studioName) {
-            if (malStudioCache[studioName] !== undefined) return malStudioCache[studioName];
-            malStudioCache[studioName] = null; // optimistic lock
-            try {
-                // 1. Cherche dans /producers (liste des studios MAL)
-                const q = encodeURIComponent(studioName.split('/')[0].trim());
-                const resp = await fetch(`https://api.jikan.moe/v4/producers?q=${q}&limit=5`);
-                if (resp.ok) {
-                    const json = await resp.json();
-                    const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-                    const target = norm(studioName);
-                    const match = (json.data || []).find(p =>
-                        norm(p.titles?.[0]?.title || p.name || '') === target ||
-                        (p.titles || []).some(t => norm(t.title) === target)
-                    ) || json.data?.[0];
-                    if (match) {
-                        const url = `https://myanimelist.net/anime/producer/${match.mal_id}`;
-                        malStudioCache[studioName] = url;
-                        return url;
-                    }
-                }
-            } catch(e) {}
-            return null;
-        }
-
-        /* ─────────────────── MAL : scores animes ─────────────────── */
-        async function fetchStudioScoresFromMAL(animes) {
-            document.getElementById('prod-avg').textContent = '…';
-            document.getElementById('prod-best').textContent = '…';
-            const scores = [];
-            for (const a of animes.slice(0, 6)) {
-                try {
-                    await new Promise(r => setTimeout(r, 400));
-                    const q = encodeURIComponent(a.nom.split('/')[0].trim());
-                    const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${q}&limit=1&sfw=false`);
-                    if (!resp.ok) continue;
-                    const json = await resp.json();
-                    const s = json.data?.[0]?.score;
-                    if (s) scores.push(parseFloat(s));
-                } catch(e) {}
-            }
-            if (!scores.length) {
-                document.getElementById('prod-avg').textContent = '—';
-                document.getElementById('prod-best').textContent = '—';
-                return;
-            }
-            document.getElementById('prod-avg').textContent = (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(2);
-            document.getElementById('prod-best').textContent = Math.max(...scores).toFixed(2);
-        }
-
-        /* ─────────────────── Helpers ─────────────────── */
-        function dateToTs(s) {
-            if (!s) return 0; s = s.trim();
-            const mois = {'janv.':1,'févr.':2,'mars':3,'avr.':4,'mai':5,'juin':6,'juil.':7,'août':8,'sept.':9,'oct.':10,'nov.':11,'déc.':12,'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
-            const parts = s.split(' au '); const last = parts[parts.length-1].trim();
-            const m1 = last.match(/(\d{1,2})\s+([a-zéûôA-Z.]+)\s+(\d{4})/); if(m1){const mo=mois[m1[2]]||1;return new Date(+m1[3],mo-1,+m1[1]).getTime();}
-            const m2 = last.match(/([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})/); if(m2){const mo=mois[m2[1]]||1;return new Date(+m2[3],mo-1,+m2[2]).getTime();}
-            const m3 = last.match(/\d{4}/g); if(m3) return new Date(+m3[m3.length-1],0,1).getTime();
-            return 0;
-        }
-
-        function buildStudioMap() {
-            const m = {};
-            allAnimes.forEach(a => {
-                a.editeur.split(',').map(e => e.trim()).filter(Boolean).forEach(ed => {
-                    if (!m[ed]) m[ed] = [];
-                    m[ed].push(a);
-                });
-            });
-            return m;
-        }
-
-        function studioInitials(name) {
-            return name.split(/[\s\-_]+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
-        }
-
-        /* ─────────────────── Init ─────────────────── */
-        async function init() {
-            await loadEroticaStudios();
-            const resp = await fetch('animes.csv');
+    async function loadEroticaStudios() {
+        try {
+            const resp = await fetch('plsero_liste.csv');
+            if (!resp.ok) return;
             const text = await resp.text();
-            allAnimes = text.split(/\r?\n/).slice(1).map(line => {
-                const c = line.split(';');
-                if (!c[0] || c.length < 9) return null;
-                const cl = s => s ? s.trim().replace(/^"|"$/g, '') : '';
-                return { nom: cl(c[0]), pop: cl(c[1]), score: cl(c[2]), sortie: cl(c[3]), ep: cl(c[4]), censure: cl(c[5]), etat: cl(c[6]), img: cl(c[8]), editeur: cl(c[14]) };
-            }).filter(a => a && a.editeur);
+            text.split(/\r?\n/).slice(1).forEach(l => { const n = l.trim(); if (n) eroticaSet.add(n); });
+        } catch(e) {}
+    }
+    const isErotica = s => eroticaSet.has(s);
 
-            const param = new URLSearchParams(window.location.search).get('studio');
-            if (param) showProducer(decodeURIComponent(param));
-            else renderList('');
-
-            document.getElementById('studio-search').addEventListener('input', e => renderList(e.target.value));
-        }
-
-        /* ─────────────────── renderList ─────────────────── */
-        function renderList(f = '') {
-            document.getElementById('view-list').style.display = 'block';
-            document.getElementById('view-producer').style.display = 'none';
-            document.title = 'Éditeurs & Studios - Le Malicieux';
-            history.replaceState(null, '', 'editeurs.html');
-
-            const map = buildStudioMap();
-            const q = f.toLowerCase();
-            const sortMode = document.getElementById('studio-sort')?.value || 'count';
-
-            let studios = Object.keys(map).filter(s => !q || s.toLowerCase().includes(q));
-            studios.sort((a, b) => {
-                if (sortMode === 'nom')      return a.localeCompare(b, 'fr');
-                if (sortMode === 'nom-desc') return b.localeCompare(a, 'fr');
-                if (sortMode === 'score') {
-                    const avg = arr => { const sc = arr.map(x => parseFloat(x.score.replace(',','.'))).filter(Boolean); return sc.length ? sc.reduce((s,v)=>s+v,0)/sc.length : 0; };
-                    return avg(map[b]) - avg(map[a]);
+    const malStudioCache = {};
+    async function fetchMALStudioLink(studioName) {
+        if (malStudioCache[studioName] !== undefined) return malStudioCache[studioName];
+        malStudioCache[studioName] = null;
+        try {
+            const q = encodeURIComponent(studioName.split('/')[0].trim());
+            const resp = await fetch(`https://api.jikan.moe/v4/producers?q=${q}&limit=5`);
+            if (resp.ok) {
+                const json = await resp.json();
+                const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const target = norm(studioName);
+                const match = (json.data || []).find(p =>
+                    norm(p.titles?.[0]?.title || p.name || '') === target ||
+                    (p.titles || []).some(t => norm(t.title) === target)
+                ) || json.data?.[0];
+                if (match) {
+                    const url = `https://myanimelist.net/anime/producer/${match.mal_id}`;
+                    malStudioCache[studioName] = url;
+                    return url;
                 }
-                return map[b].length - map[a].length;
-            });
-
-            const hentai  = studios.filter(s => !isErotica(s));
-            const erotica = studios.filter(s =>  isErotica(s));
-
-            document.getElementById('count-hentai').textContent  = hentai.length;
-            document.getElementById('count-erotica').textContent = erotica.length;
-            document.getElementById('badge-hentai').textContent  = hentai.length;
-            document.getElementById('badge-erotica').textContent = erotica.length;
-
-            function buildCard(studio) {
-                const animes = map[studio];
-                const slug = studio.replace(/\s+/g, '-');
-                const avgSc = (() => {
-                    const sc = animes.map(x => parseFloat(x.score.replace(',','.'))).filter(Boolean);
-                    return sc.length ? (sc.reduce((s,v)=>s+v,0)/sc.length).toFixed(1) : null;
-                })();
-                const initials = studioInitials(studio);
-                const safe = studio.replace(/'/g, "\\'");
-                return `<div class="studio-card" onclick="showProducer('${safe}')">
-                    <div class="studio-logo-wrap">
-                        <img class="studio-logo" loading="lazy" src="img/${slug}.jpg"
-                            onerror="this.parentElement.innerHTML='<div class=\\'studio-logo-fallback\\'>${initials}</div>'">
-                    </div>
-                    <div class="studio-card-body">
-                        <div class="studio-name">${studio}</div>
-                        <div class="studio-meta">
-                            <span class="studio-count"><span>${animes.length}</span> titre${animes.length > 1 ? 's' : ''}</span>
-                            ${avgSc ? `<span class="studio-score">· ${avgSc}</span>` : ''}
-                        </div>
-                    </div>
-                </div>`;
             }
+        } catch(e) {}
+        return null;
+    }
 
-            const gridH = document.getElementById('studios-grid-hentai');
-            gridH.innerHTML = hentai.length ? hentai.map(buildCard).join('') : '<div class="empty-state">Aucun studio trouvé.</div>';
-
-            const gridE = document.getElementById('studios-grid-erotica');
-            gridE.innerHTML = erotica.length ? erotica.map(buildCard).join('') : '<div class="empty-state">Aucun studio trouvé.</div>';
+    async function fetchStudioScoresFromMAL(animes) {
+        document.getElementById('prod-avg').textContent = '…';
+        document.getElementById('prod-best').textContent = '…';
+        const scores = [];
+        for (const a of animes.slice(0, 6)) {
+            try {
+                await new Promise(r => setTimeout(r, 400));
+                const q = encodeURIComponent(a.nom.split('/')[0].trim());
+                const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${q}&limit=1&sfw=false`);
+                if (!resp.ok) continue;
+                const json = await resp.json();
+                const s = json.data?.[0]?.score;
+                if (s) scores.push(parseFloat(s));
+            } catch(e) {}
         }
+        if (!scores.length) {
+            document.getElementById('prod-avg').textContent = '—';
+            document.getElementById('prod-best').textContent = '—';
+            return;
+        }
+        document.getElementById('prod-avg').textContent = (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(2);
+        document.getElementById('prod-best').textContent = Math.max(...scores).toFixed(2);
+    }
 
-        document.getElementById('studio-sort').onchange = () => {
-            sessionStorage.setItem('ed_sort', document.getElementById('studio-sort').value);
-            renderList(document.getElementById('studio-search').value);
-        };
-        (() => { const s = sessionStorage.getItem('ed_sort'); if (s) { const el = document.getElementById('studio-sort'); if (el) el.value = s; } })();
+    function dateToTs(s) {
+        if (!s) return 0; s = s.trim();
+        const mois = {'janv.':1,'févr.':2,'mars':3,'avr.':4,'mai':5,'juin':6,'juil.':7,'août':8,'sept.':9,'oct.':10,'nov.':11,'déc.':12,'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
+        const parts = s.split(' au '); const last = parts[parts.length-1].trim();
+        const m1 = last.match(/(\d{1,2})\s+([a-zéûôA-Z.]+)\s+(\d{4})/); if(m1){const mo=mois[m1[2]]||1;return new Date(+m1[3],mo-1,+m1[1]).getTime();}
+        const m2 = last.match(/([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})/); if(m2){const mo=mois[m2[1]]||1;return new Date(+m2[3],mo-1,+m2[2]).getTime();}
+        const m3 = last.match(/\d{4}/g); if(m3) return new Date(+m3[m3.length-1],0,1).getTime();
+        return 0;
+    }
 
-        /* ─────────────────── showProducer ─────────────────── */
-        function showProducer(studio) {
-            currentStudio = studio;
-            const erot = isErotica(studio);
-            document.getElementById('view-list').style.display = 'none';
-            document.getElementById('view-producer').style.display = 'block';
-            document.title = studio + ' - Le Malicieux';
-            history.pushState({ studio }, '', `editeurs.html?studio=${encodeURIComponent(studio)}`);
+    function buildStudioMap() {
+        const m = {};
+        allAnimes.forEach(a => {
+            a.editeur.split(',').map(e => e.trim()).filter(Boolean).forEach(ed => {
+                if (!m[ed]) m[ed] = [];
+                m[ed].push(a);
+            });
+        });
+        return m;
+    }
 
+    function studioInitials(name) {
+        return name.split(/[\s\-_]+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
+    }
+
+    async function init() {
+        await loadEroticaStudios();
+        allAnimes = await loadAnimes();
+
+        const param = new URLSearchParams(window.location.search).get('studio');
+        if (param) showProducer(decodeURIComponent(param));
+        else renderList('');
+
+        document.getElementById('studio-search').addEventListener('input', e => renderList(e.target.value));
+    }
+
+    function renderList(f = '') {
+        document.getElementById('view-list').style.display = 'block';
+        document.getElementById('view-producer').style.display = 'none';
+        document.title = 'Éditeurs & Studios - Le Malicieux';
+        history.replaceState(null, '', 'editeurs.html');
+
+        const map = buildStudioMap();
+        const q = f.toLowerCase();
+        const sortMode = document.getElementById('studio-sort')?.value || 'count';
+
+        let studios = Object.keys(map).filter(s => !q || s.toLowerCase().includes(q));
+        studios.sort((a, b) => {
+            if (sortMode === 'nom')      return a.localeCompare(b, 'fr');
+            if (sortMode === 'nom-desc') return b.localeCompare(a, 'fr');
+            if (sortMode === 'score') {
+                const avg = arr => { const sc = arr.map(x => parseFloat(x.score.replace(',','.'))).filter(Boolean); return sc.length ? sc.reduce((s,v)=>s+v,0)/sc.length : 0; };
+                return avg(map[b]) - avg(map[a]);
+            }
+            return map[b].length - map[a].length;
+        });
+
+        const hentai  = studios.filter(s => !isErotica(s));
+        const erotica = studios.filter(s =>  isErotica(s));
+
+        document.getElementById('count-hentai').textContent  = hentai.length;
+        document.getElementById('count-erotica').textContent = erotica.length;
+        document.getElementById('badge-hentai').textContent  = hentai.length;
+        document.getElementById('badge-erotica').textContent = erotica.length;
+
+        function buildCard(studio) {
+            const animes = map[studio];
             const slug = studio.replace(/\s+/g, '-');
+            const avgSc = (() => {
+                const sc = animes.map(x => parseFloat(x.score.replace(',','.'))).filter(Boolean);
+                return sc.length ? (sc.reduce((s,v)=>s+v,0)/sc.length).toFixed(1) : null;
+            })();
             const initials = studioInitials(studio);
-            const avatarEl = document.getElementById('prod-avatar');
-            avatarEl.innerHTML = `<img src="img/${slug}.jpg" style="width:100%;height:100%;object-fit:contain;padding:4px;"
-                onerror="this.parentElement.innerHTML='<div class=\\'producer-avatar-fallback\\'>${initials}</div>'">`;
-
-            document.getElementById('prod-name').textContent = studio;
-            const catTag = document.getElementById('prod-cat-tag');
-            catTag.className = 'producer-category-tag' + (erot ? ' erotica' : '');
-            catTag.textContent = erot ? 'Studio Erotica' : 'Studio Hentai';
-
-            // Lien MAL studio (asynchrone)
-            const malLink = document.getElementById('prod-mal-link');
-            malLink.style.display = 'none';
-            fetchMALStudioLink(studio).then(url => {
-                if (url) { malLink.href = url; malLink.style.display = 'inline-flex'; }
-            });
-
-            const map = buildStudioMap();
-            const coStudios = [...new Set((map[studio]||[]).flatMap(a => a.editeur.split(',').map(e => e.trim())).filter(e => e && e !== studio))].sort();
-            document.getElementById('prod-costudio-filter').innerHTML =
-                '<option value="">Tous les studios</option>' + coStudios.map(s => `<option value="${s}">${s}</option>`).join('');
-
-            renderProducerGrid();
-        }
-
-        /* ─────────────────── renderProducerGrid ─────────────────── */
-        function renderProducerGrid() {
-            const map = buildStudioMap();
-            let animes = map[currentStudio] || [];
-            const filterVal   = document.getElementById('prod-filter').value;
-            const coStudioVal = document.getElementById('prod-costudio-filter').value;
-
-            if (filterVal === 'oui' || filterVal === 'non')
-                animes = animes.filter(a => a.censure.toLowerCase() === filterVal);
-            else if (filterVal === 'terminé')
-                animes = animes.filter(a => a.etat.toLowerCase().includes('termin') || a.etat.toLowerCase().includes('fini'));
-            else if (filterVal === 'en cours')
-                animes = animes.filter(a => a.etat.toLowerCase().includes('cours') || a.etat.toLowerCase().includes('airing'));
-
-            if (coStudioVal)
-                animes = animes.filter(a => a.editeur.split(',').map(e => e.trim()).includes(coStudioVal));
-
-            const sortVal = document.getElementById('prod-sort').value;
-            animes = [...animes].sort((a, b) => {
-                if (sortVal === 'score')   return parseFloat(b.score.replace(',','.')||0) - parseFloat(a.score.replace(',','.')||0);
-                if (sortVal === 'pop')     return (parseInt(a.pop.replace('#',''))||99999) - (parseInt(b.pop.replace('#',''))||99999);
-                if (sortVal === 'année')   return dateToTs(b.sortie) - dateToTs(a.sortie);
-                if (sortVal === 'nom')     return a.nom.localeCompare(b.nom);
-                if (sortVal === 'episodes'){ const na=parseInt((a.ep||'').match(/\d+/g)?.pop()||0),nb=parseInt((b.ep||'').match(/\d+/g)?.pop()||0);return nb-na; }
-                if (sortVal === 'censure') return (a.censure||'').localeCompare(b.censure||'');
-                if (sortVal === 'etat')    return (a.etat||'').localeCompare(b.etat||'');
-                return 0;
-            });
-
-            const allForStudio = map[currentStudio] || [];
-            document.getElementById('prod-total').textContent = allForStudio.length;
-            document.getElementById('prod-count').textContent = `${animes.length} titre${animes.length > 1 ? 's' : ''} affiché${animes.length > 1 ? 's' : ''}`;
-            fetchStudioScoresFromMAL(allForStudio);
-
-            const grid = document.getElementById('producer-grid');
-            if (!animes.length) { grid.innerHTML = '<div class="empty-state">Aucun anime pour ces critères.</div>'; return; }
-
-            const isHl = f => sortVal === f;
-            const sp   = (f, content) => isHl(f) ? `<span class="highlight">${content}</span>` : `<span>${content}</span>`;
-            grid.innerHTML = animes.map(a => {
-                const scoreNum = parseFloat(a.score.replace(',','.'));
-                const scoreBadge = scoreNum ? `<div class="score-badge">${a.score}</div>` : '';
-                const coStudios = a.editeur.split(',').map(e => e.trim()).filter(e => e && e !== currentStudio);
-                const coStudioBadge = coStudios.length ? `<div style="font-size:0.62em;color:#888;margin-top:2px;">Avec : ${coStudios.join(', ')}</div>` : '';
-                const yr = sortVal === 'année' ? (a.sortie||'') : ((a.sortie||'').match(/\d{4}/g)?.pop() || a.sortie);
-                const line1 = `${sp('année',yr)} · ${sp('episodes',a.ep+' ép.')} · ${sp('censure',a.censure)} · ${sp('etat',a.etat)}`;
-                const line2 = [a.pop ? sp('pop',a.pop) : '', isHl('score') && a.score ? sp('score',a.score) : ''].filter(Boolean);
-                return `<a href="video.html?name=${encodeURIComponent(a.nom)}" class="anime-card">
-                    <div class="img-wrap"><img src="img/${a.img}" loading="lazy" onerror="this.src='img/logo.jpg'">${scoreBadge}</div>
-                    <div class="ac-info">
-                        <div class="ac-title">${a.nom}</div>
-                        <div class="ac-meta" style="line-height:1.6;">${line1}</div>
-                        ${line2.length ? `<div class="ac-meta">${line2.join(' · ')}</div>` : ''}
-                        ${coStudioBadge}
+            const safe = studio.replace(/'/g, "\\'");
+            return `<div class="studio-card" onclick="showProducer('${safe}')">
+                <div class="studio-logo-wrap">
+                    <img class="studio-logo" loading="lazy" src="img/${slug}.jpg"
+                        onerror="this.parentElement.innerHTML='<div class=\\'studio-logo-fallback\\'>${initials}</div>'">
+                </div>
+                <div class="studio-card-body">
+                    <div class="studio-name">${studio}</div>
+                    <div class="studio-meta">
+                        <span class="studio-count"><span>${animes.length}</span> titre${animes.length > 1 ? 's' : ''}</span>
+                        ${avgSc ? `<span class="studio-score">· ${avgSc}</span>` : ''}
                     </div>
-                </a>`;
-            }).join('');
+                </div>
+            </div>`;
         }
 
-        /* ─────────────────── Events ─────────────────── */
-        document.getElementById('prod-sort').onchange = renderProducerGrid;
-        document.getElementById('prod-filter').onchange = renderProducerGrid;
-        document.getElementById('prod-costudio-filter').onchange = renderProducerGrid;
+        const gridH = document.getElementById('studios-grid-hentai');
+        gridH.innerHTML = hentai.length ? hentai.map(buildCard).join('') : '<div class="empty-state">Aucun studio trouvé.</div>';
 
-        function showList() {
-            currentStudio = null;
-            renderList(document.getElementById('studio-search').value);
-        }
-        function studioRandom() {
-            const map = buildStudioMap();
-            const studios = Object.keys(map);
-            if (studios.length) showProducer(studios[Math.floor(Math.random() * studios.length)]);
-        }
+        const gridE = document.getElementById('studios-grid-erotica');
+        gridE.innerHTML = erotica.length ? erotica.map(buildCard).join('') : '<div class="empty-state">Aucun studio trouvé.</div>';
+    }
 
-        window.showList = showList;
-        window.showProducer = showProducer;
-        window.studioRandom = studioRandom;
+    document.getElementById('studio-sort').onchange = () => {
+        sessionStorage.setItem('ed_sort', document.getElementById('studio-sort').value);
+        renderList(document.getElementById('studio-search').value);
+    };
+    (() => { const s = sessionStorage.getItem('ed_sort'); if (s) { const el = document.getElementById('studio-sort'); if (el) el.value = s; } })();
 
-        window.addEventListener('popstate', e => {
-            if (e.state?.studio) showProducer(e.state.studio);
-            else { currentStudio = null; renderList(document.getElementById('studio-search').value); document.getElementById('view-list').style.display='block'; document.getElementById('view-producer').style.display='none'; document.title='Éditeurs & Studios - Le Malicieux'; }
+    function showProducer(studio) {
+        currentStudio = studio;
+        const erot = isErotica(studio);
+        document.getElementById('view-list').style.display = 'none';
+        document.getElementById('view-producer').style.display = 'block';
+        document.title = studio + ' - Le Malicieux';
+        history.pushState({ studio }, '', `editeurs.html?studio=${encodeURIComponent(studio)}`);
+
+        const slug = studio.replace(/\s+/g, '-');
+        const initials = studioInitials(studio);
+        const avatarEl = document.getElementById('prod-avatar');
+        avatarEl.innerHTML = `<img src="img/${slug}.jpg" style="width:100%;height:100%;object-fit:contain;padding:4px;"
+            onerror="this.parentElement.innerHTML='<div class=\\'producer-avatar-fallback\\'>${initials}</div>'">`;
+
+        document.getElementById('prod-name').textContent = studio;
+        const catTag = document.getElementById('prod-cat-tag');
+        catTag.className = 'producer-category-tag' + (erot ? ' erotica' : '');
+        catTag.textContent = erot ? 'Studio Erotica' : 'Studio Hentai';
+
+        const malLink = document.getElementById('prod-mal-link');
+        malLink.style.display = 'none';
+        fetchMALStudioLink(studio).then(url => {
+            if (url) { malLink.href = url; malLink.style.display = 'inline-flex'; }
         });
 
-        function toggleM() { const m=document.getElementById('menu'),ov=document.getElementById('overlay'); const o=m.classList.toggle('active'); ov.classList.toggle('active'); document.body.style.overflow=o?'hidden':''; }
-        window.toggleM = toggleM;
+        const map = buildStudioMap();
+        const coStudios = [...new Set((map[studio]||[]).flatMap(a => a.editeur.split(',').map(e => e.trim())).filter(e => e && e !== studio))].sort();
+        document.getElementById('prod-costudio-filter').innerHTML =
+            '<option value="">Tous les studios</option>' + coStudios.map(s => `<option value="${s}">${s}</option>`).join('');
 
-        (function markActiveTab() {
-            const current = window.location.pathname.split('/').pop() || 'index.html';
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                if (tab.dataset.page === current) tab.classList.add('active');
-            });
-        })();
+        renderProducerGrid();
+    }
 
-        window.addEventListener('scroll', () => {
-            const scrollY = window.scrollY;
-            const bg = document.getElementById('bg-overlay');
-            if (bg) bg.style.opacity = Math.min(scrollY / 600, 0.65);
+    function renderProducerGrid() {
+        const map = buildStudioMap();
+        let animes = map[currentStudio] || [];
+        const filterVal   = document.getElementById('prod-filter').value;
+        const coStudioVal = document.getElementById('prod-costudio-filter').value;
+
+        if (filterVal === 'oui' || filterVal === 'non')
+            animes = animes.filter(a => a.censure.toLowerCase() === filterVal);
+        else if (filterVal === 'terminé')
+            animes = animes.filter(a => a.etat.toLowerCase().includes('termin') || a.etat.toLowerCase().includes('fini'));
+        else if (filterVal === 'en cours')
+            animes = animes.filter(a => a.etat.toLowerCase().includes('cours') || a.etat.toLowerCase().includes('airing'));
+
+        if (coStudioVal)
+            animes = animes.filter(a => a.editeur.split(',').map(e => e.trim()).includes(coStudioVal));
+
+        const sortVal = document.getElementById('prod-sort').value;
+        animes = [...animes].sort((a, b) => {
+            if (sortVal === 'score')   return parseFloat(b.score.replace(',','.')||0) - parseFloat(a.score.replace(',','.')||0);
+            if (sortVal === 'pop')     return (parseInt(a.pop.replace('#',''))||99999) - (parseInt(b.pop.replace('#',''))||99999);
+            if (sortVal === 'année')   return dateToTs(b.sortie) - dateToTs(a.sortie);
+            if (sortVal === 'nom')     return a.nom.localeCompare(b.nom);
+            if (sortVal === 'episodes'){ const na=parseInt((a.ep||'').match(/\d+/g)?.pop()||0),nb=parseInt((b.ep||'').match(/\d+/g)?.pop()||0);return nb-na; }
+            if (sortVal === 'censure') return (a.censure||'').localeCompare(b.censure||'');
+            if (sortVal === 'etat')    return (a.etat||'').localeCompare(b.etat||'');
+            return 0;
         });
 
-        init();
-    </script>
+        const allForStudio = map[currentStudio] || [];
+        document.getElementById('prod-total').textContent = allForStudio.length;
+        document.getElementById('prod-count').textContent = `${animes.length} titre${animes.length > 1 ? 's' : ''} affiché${animes.length > 1 ? 's' : ''}`;
+        fetchStudioScoresFromMAL(allForStudio);
+
+        const grid = document.getElementById('producer-grid');
+        if (!animes.length) { grid.innerHTML = '<div class="empty-state">Aucun anime pour ces critères.</div>'; return; }
+
+        const isHl = f => sortVal === f;
+        const sp   = (f, content) => isHl(f) ? `<span class="highlight">${content}</span>` : `<span>${content}</span>`;
+        grid.innerHTML = animes.map(a => {
+            const scoreNum = parseFloat(a.score.replace(',','.'));
+            const scoreBadge = scoreNum ? `<div class="score-badge">${a.score}</div>` : '';
+            const coStudios = a.editeur.split(',').map(e => e.trim()).filter(e => e && e !== currentStudio);
+            const coStudioBadge = coStudios.length ? `<div style="font-size:0.62em;color:#888;margin-top:2px;">Avec : ${coStudios.join(', ')}</div>` : '';
+            const yr = sortVal === 'année' ? (a.sortie||'') : ((a.sortie||'').match(/\d{4}/g)?.pop() || a.sortie);
+            const line1 = `${sp('année',yr)} · ${sp('episodes',a.ep+' ép.')} · ${sp('censure',a.censure)} · ${sp('etat',a.etat)}`;
+            const line2 = [a.pop ? sp('pop',a.pop) : '', isHl('score') && a.score ? sp('score',a.score) : ''].filter(Boolean);
+            
+            const cover = getCoverPath(a.ordreAjout, 1);
+            const coverFile = `${a.ordreAjout}-1.webp`;
+
+            return `<a href="fiche.html?name=${encodeURIComponent(a.nom)}" class="anime-card">
+                <div class="img-wrap"><img src="${cover}" loading="lazy" onerror="handleImgError(this,'${coverFile}')">${scoreBadge}</div>
+                <div class="ac-info">
+                    <div class="ac-title">${a.nom}</div>
+                    <div class="ac-meta" style="line-height:1.6;">${line1}</div>
+                    ${line2.length ? `<div class="ac-meta">${line2.join(' · ')}</div>` : ''}
+                    ${coStudioBadge}
+                </div>
+            </a>`;
+        }).join('');
+    }
+
+    document.getElementById('prod-sort').onchange = renderProducerGrid;
+    document.getElementById('prod-filter').onchange = renderProducerGrid;
+    document.getElementById('prod-costudio-filter').onchange = renderProducerGrid;
+
+    function showList() {
+        currentStudio = null;
+        renderList(document.getElementById('studio-search').value);
+    }
+    function studioRandom() {
+        const map = buildStudioMap();
+        const studios = Object.keys(map);
+        if (studios.length) showProducer(studios[Math.floor(Math.random() * studios.length)]);
+    }
+
+    window.showList = showList;
+    window.showProducer = showProducer;
+    window.studioRandom = studioRandom;
+
+    window.addEventListener('popstate', e => {
+        if (e.state?.studio) showProducer(e.state.studio);
+        else { currentStudio = null; renderList(document.getElementById('studio-search').value); document.getElementById('view-list').style.display='block'; document.getElementById('view-producer').style.display='none'; document.title='Éditeurs & Studios - Le Malicieux'; }
+    });
+
+    init();
+</script>
 </body>
 </html>

@@ -7,182 +7,27 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M65SBS3C');</script>
     <meta charset="UTF-8">
-    <link rel="icon" href="img/logo.jpg" type="image/jpeg">
+    <link rel="icon" href="img/bannieres_icones/logo.jpg" type="image/jpeg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="common.css">
     <title>Le Malicieux - Catalogue d'Animes (ancien index)</title>
     <style>
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.9); --text: #eee; --text-bright: #f5f5f5; }
-
-        #bg-layer, #bg-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw;
-            height: 100vh; height: 100lvh;
-            z-index: -2; pointer-events: none;
-        }
-        #bg-layer {
-            background-size: cover; background-position: center center;
-            background-repeat: no-repeat; transition: none;
-        }
-        #bg-overlay { z-index: -1; background: black; opacity: 0; transition: none; }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            min-height: 100vh;
-            overflow-x: hidden;
-            padding-top: 62px;
-        }
-
-        /* ═══════════════ EN-TÊTE — barre unique ═══════════════ */
-        .site-header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            background: #121214;
-            border-bottom: 3px solid var(--primary);
-            box-shadow: 0 1px 8px rgba(0,0,0,0.5);
-        }
-        .navbar {
-            display: flex; align-items: stretch; gap: 0;
-            width: 100%; margin: 0; padding: 0 18px; box-sizing: border-box;
-            height: 62px;
-        }
-        .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-right: 22px; }
-        .nav-brand { display: flex; align-items: center; gap: 9px; text-decoration: none; cursor: pointer; }
-        .nav-logo-small { width: 38px; height: 38px; border-radius: 3px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--text-bright); font-weight: 800; font-size: 1.05em; letter-spacing: 0.6px; white-space: nowrap; }
-
-        #back-home { font-size: 0.72em; color: #ff6b7a; text-decoration: none; display: none; cursor: pointer; margin-left: 4px; }
-
-        .burger { display: none; background: none; border: none; padding: 4px; cursor: pointer; align-items: center; }
-        .burger svg { width: 26px; height: 26px; stroke: var(--text-bright); }
-
-        /* Onglets, alignés dans la même barre */
-        /* overflow-x: auto + flex-shrink: 0 sur les onglets : si la place manque
-           (petite fenêtre, zoom élevé, écran étroit...), la barre défile au lieu de
-           comprimer les onglets jusqu'au chevauchement du texte. */
-        .nav-links {
-            display: flex; align-items: stretch; flex: 1; min-width: 0;
-            overflow-x: auto; overflow-y: hidden;
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .nav-links::-webkit-scrollbar { display: none; }
-        .nav-tab {
-            display: flex; align-items: center; flex-shrink: 0;
-            color: #b9b9bd; text-decoration: none; cursor: pointer;
-            font-size: 0.82em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-            padding: 0 14px; border-bottom: 3px solid transparent; margin-bottom: -3px;
-            white-space: nowrap; transition: color 0.15s, background 0.15s;
-        }
-        .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.05); }
-        .nav-tab.active { color: #fff; border-bottom-color: var(--primary); background: rgba(255,71,87,0.09); }
-
-        .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-left: 14px; }
-
-        .search-wrapper { position: relative; width: clamp(150px, 16vw, 250px); flex-shrink: 0; }
-        .search-wrapper input {
-            width: 100%; background: #1c1c1f; border: 1px solid #38383d; color: white;
-            padding: 8px 34px 8px 11px; border-radius: 2px; font-size: 0.85em;
-            box-sizing: border-box; outline: none; transition: border-color 0.15s;
-        }
-        .search-wrapper input:focus { border-color: var(--primary); background: #202024; }
-        .search-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; display: flex; }
-        .search-icon svg { width: 15px; height: 15px; stroke: #8a8a90; }
-        .search-suggestions {
-            position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-            background: #1a1a1d; border: 1px solid #38383d;
-            max-height: 340px; overflow-y: auto; display: none; z-index: 2000;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.55);
-        }
-        .search-suggestions.active { display: block; }
-        .search-suggestions .suggestion-item {
-            padding: 7px 10px; cursor: pointer; color: #ccc; font-size: 0.85em;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex; align-items: center; gap: 10px;
-        }
-        .search-suggestions .suggestion-item:last-child { border-bottom: none; }
-        .search-suggestions .suggestion-item:hover,
-        .search-suggestions .suggestion-item.hl { background: #2b2b30; color: white; }
-        .search-suggestions .sugg-img { width: 30px; height: 42px; border-radius: 2px; object-fit: cover; flex-shrink: 0; background: #333; }
-        .search-suggestions .sugg-meta { font-size: 0.78em; color: #8a8a90; display: block; margin-top: 2px; }
-        .search-suggestions .sugg-empty { padding: 12px 10px; color: #8a8a90; font-size: 0.85em; }
-        .search-suggestions mark { background: none; color: var(--primary); font-weight: 700; }
-
-        .nav-action {
-            background: none; color: #b9b9bd; border: 1px solid #3a3a3f; cursor: pointer;
-            font-size: 0.76em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
-            padding: 8px 13px; border-radius: 2px; white-space: nowrap; transition: 0.15s;
-        }
-        .nav-action:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-        /* Rectangle au ratio natif de l'image (409x102) : c'est l'image qui fixe la
-           largeur, donc aucune déformation ni rognage quel que soit le contexte. */
-        .discord-btn {
-            display: inline-flex; flex-shrink: 0;
-            height: 34px; width: auto;
-            border-radius: 2px; overflow: hidden;
-            border: none; padding: 0; margin: 0;
-            background: #5865F2;
-            line-height: 0; box-sizing: content-box;
-            transition: opacity 0.15s;
-        }
-        .discord-btn:hover { opacity: 0.85; }
-        .discord-btn img {
-            height: 100%; width: auto; display: block;
-            object-fit: contain;
-        }
-
-        .auth-login-btn {
-            background: #5865F2; border: none; color: white; padding: 8px 13px;
-            border-radius: 2px; cursor: pointer; font-size: 0.78em; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
-        }
-        .auth-login-btn:hover { background: #4752c4; }
-        .auth-account { display: flex; align-items: center; gap: 6px; text-decoration: none; min-width: 0; }
-        .auth-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; flex-shrink: 0; }
-        .auth-name { color: white; font-size: 0.8em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .auth-logout-btn {
-            background: #2a2a2e; color: white; border: 1px solid #3a3a3f; cursor: pointer;
-            padding: 5px 9px; border-radius: 2px; font-size: 0.72em; flex-shrink: 0;
-        }
-        .auth-logout-btn:hover { background: #3a3a3f; }
-        #auth-ui { display: flex; align-items: center; gap: 8px; }
-
-        .nav-links .nav-action, .nav-links .discord-btn { display: none; }
-
-        .close-menu { display: none; font-size: 0.85em; color: var(--primary); cursor: pointer; margin-bottom: 18px; background: none !important; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
-
-        @media (max-width: 1100px) {
-            .nav-tab { padding: 0 10px; font-size: 0.78em; }
-        }
-
-        /* Le comportement mobile de la navbar (burger, panneau du menu, compte,
-           grilles de fiches) vit désormais entièrement dans mobile.css, commun à
-           toutes les pages du site : voir ce fichier pour ces règles. */
-
-        .hero-section {
-            height: 50vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 20px;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; padding-top: 62px; }
+        .hero-section { height: 50vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
         .main-logo { width: 110px; height: 110px; border-radius: 20px; border: 3px solid var(--primary); margin-bottom: 15px; object-fit: cover; }
         .main-title { font-size: 2.5em; margin: 0; color: white; text-shadow: 2px 2px 12px rgba(0,0,0,0.9); font-weight: 800; }
         .main-slogan { font-size: 1.2em; font-weight: bold; margin-top: 10px; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); }
-
         .content-area { padding: 20px clamp(20px, 5vw, 100px); min-height: 500px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin: 0 auto; }
         
-        .card { 
-            background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; 
-            border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em;
-            display: flex; flex-direction: column;
-        }
+        .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; transition: 0.3s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.75em; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-6px); border-color: var(--primary); }
         .card .img-container { width: 100%; aspect-ratio: 2/3; background: #111; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
         .card-info { padding: 6px; flex-grow: 1; display: flex; flex-direction: column; }
         .card-title { font-weight: bold; color: var(--primary); margin-bottom: 3px; height: 2.2em; overflow: hidden; font-size: 0.95em; line-height: 1.2; }
-        .card-meta-row { display: flex; flex-wrap: wrap; gap: 3px; font-size: 0.65em; color: #bbb; margin-top: 2px; }
+        .card-meta-row { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.65em; color: #bbb; margin-top: 2px; }
         .highlight { background: var(--primary); color: white; padding: 0 2px; border-radius: 3px; font-weight: bold; }
         .mal-updated { color: #5dade2; }
         
@@ -190,28 +35,11 @@
         .sort-select { background: #1e1e1e; border: 1px solid #3a3a3a; color: white; padding: 6px 10px; border-radius: 5px; font-size: 0.85em; cursor: pointer; }
         
         @media (max-width: 480px) { .card-title { font-size: 0.85em; } }
-    
-        img {
-            image-rendering: auto;
-        }
-        html {
-            zoom: 0.88;
-        }
-        body {
-            width: 100%;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        /* Sous 700px : 3 fiches exactement. Au-delà, le nombre de colonnes est calculé
-           en JS (voir relayoutGrid) pour suivre le zoom du navigateur. */
-        @media (max-width: 700px) {
-            .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
-        }
+        @media (max-width: 700px) { .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; } }
     </style>
 </head>
 <body>
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M65SBS3C" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <div id="bg-layer"></div>
     <div id="bg-overlay"></div>
@@ -223,13 +51,11 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                 </button>
                 <a class="nav-brand" href="index.html">
-                    <img src="img/logo.jpg" class="nav-logo-small" alt="Logo Le Malicieux">
+                    <img src="img/bannieres_icones/logo.jpg" class="nav-logo-small" alt="Logo Le Malicieux">
                     <span class="nav-title">LE MALICIEUX</span>
                 </a>
             </div>
-
             <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
-
             <nav class="nav-links" id="menu">
                 <div class="close-menu" onclick="toggleM()">Fermer</div>
                 <a href="index.html" class="nav-tab" data-page="index.html">Accueil</a>
@@ -239,28 +65,28 @@
                 <a href="editeurs.html" class="nav-tab" data-page="editeurs.html">Studios</a>
                 <a href="profil.html" class="nav-tab" data-page="profil.html">Profil</a>
                 <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
-                <button class="nav-action" onclick="randomAnime()">Au hasard</button>
+                <button class="nav-action" onclick="doRandom()">Au hasard</button>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
-                    <img src="logo-discord.jpg" alt="Discord">
+                    <img src="img/bannieres_icones/logo-discord.jpg" alt="Discord">
                 </a>
             </nav>
-
             <div class="nav-right">
                 <div class="search-wrapper" id="search-wrapper">
                     <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
                     <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
                     <div class="search-suggestions" id="search-suggestions"></div>
                 </div>
-                <button class="nav-action" onclick="randomAnime()">Au hasard</button>
+                <button class="nav-action" onclick="doRandom()">Au hasard</button>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
-                    <img src="logo-discord.jpg" alt="Discord">
+                    <img src="img/bannieres_icones/logo-discord.jpg" alt="Discord">
                 </a>
+                <div id="auth-ui" class="auth-ui-slot"><button class="js-login-btn auth-login-btn">Connexion</button></div>
             </div>
         </div>
     </header>
 
     <div class="hero-section">
-        <img src="img/logo.jpg" class="main-logo">
+        <img src="img/bannieres_icones/logo.jpg" class="main-logo">
         <h1 class="main-title">le-malicieux.github.io</h1>
         <p class="main-slogan">Catalogue d'animes malicieux (ancien index)</p>
     </div>
@@ -283,412 +109,202 @@
         <div id="anime-container" class="grid"></div>
     </div>
 
-<script>
-    /* ═══════════ VERROUILLAGE DU FOND ═══════════
-       Sur mobile, la barre d'URL qui se rétracte au défilement modifie la hauteur du
-       viewport. Comme #bg-layer était en position fixe avec inset:0 et background-size:
-       cover, l'image était remise à l'échelle à chaque variation, d'où l'effet de
-       grossissement. On fige donc ses dimensions en pixels, et on ne les recalcule que
-       si la LARGEUR change (rotation, redimensionnement réel), jamais sur la hauteur.
-       Le calcul divise par le zoom CSS de <html>, sans quoi les px seraient réduits. */
-    (function () {
-        var lastW = null;
+<script type="module">
+    import {
+        initCommon, loadAnimes, getCoverPath, renderMetaBadges,
+        handleImgError, IMG_LOGO, searchAnimes, highlightTitle
+    } from './common.js';
 
-        function zoomFactor() {
-            var z = parseFloat(getComputedStyle(document.documentElement).zoom);
-            return (!z || isNaN(z)) ? 1 : z;
-        }
+    initCommon();
 
-        function lockBackground(force) {
-            var layers = [document.getElementById('bg-layer'), document.getElementById('bg-overlay')];
-            if (!layers[0]) return;
-            var w = document.documentElement.clientWidth;
-            if (!force && lastW !== null && Math.abs(w - lastW) < 2) return; // hauteur seule : on ignore
-            lastW = w;
+    let allAnimes = [];
+    let shuffledAnimes = [];
+    let currentSearch = '';
 
-            var z = zoomFactor();
-            // Hauteur de référence = la plus grande que le viewport puisse prendre
-            var h = Math.max(
-                window.innerHeight || 0,
-                document.documentElement.clientHeight || 0,
-                (window.screen && window.screen.height) || 0
-            );
-            layers.forEach(function (el) {
-                if (!el) return;
-                el.style.width = (w / z) + 'px';
-                el.style.height = (h / z) + 'px';
-            });
-        }
+    function dateToTs(s){
+        if(!s) return 0;
+        s = s.trim();
+        const mois={'janv.':1,'févr.':2,'mars':3,'avr.':4,'mai':5,'juin':6,'juil.':7,'août':8,'sept.':9,'oct.':10,'nov.':11,'déc.':12,
+                    'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
+        const parts = s.split(' au ');
+        const last = parts[parts.length-1].trim();
+        const m1 = last.match(/(\d{1,2})\s+([a-zéûôA-Z.]+)\s+(\d{4})/);
+        if(m1){ const mo=mois[m1[2]]||1; return new Date(+m1[3], mo-1, +m1[1]).getTime(); }
+        const m2 = last.match(/([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})/);
+        if(m2){ const mo=mois[m2[1]]||1; return new Date(+m2[3], mo-1, +m2[2]).getTime(); }
+        const m3 = (last.match(/\d{4}/g)||[]);
+        if(m3.length){ return new Date(+m3[m3.length-1], 0, 1).getTime(); }
+        return 0;
+    }
 
-        window.addEventListener('resize', function () { lockBackground(false); });
-        window.addEventListener('orientationchange', function () { setTimeout(function () { lockBackground(true); }, 250); });
-
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { lockBackground(true); });
-        else lockBackground(true);
-    })();
-    </script>
-
-    <script type="module">
-        let allAnimes = [];
-        let shuffledAnimes = [];
-        let currentSearch = '';
-
-        const MAL_TTL = 60 * 60 * 1000;
-        function malCacheGet(nom) { try { const raw = sessionStorage.getItem('mal_cache_' + nom); if (!raw) return null; const obj = JSON.parse(raw); if (Date.now() - obj.ts > MAL_TTL) { sessionStorage.removeItem('mal_cache_' + nom); return null; } return obj; } catch { return null; } }
-        function malCacheSet(nom, data) { try { sessionStorage.setItem('mal_cache_' + nom, JSON.stringify({ ...data, ts: Date.now() })); } catch {} }
-
-        let jikanQueue = [], jikanRunning = false;
-        function jikanEnqueue(task) { jikanQueue.push(task); if (!jikanRunning) jikanDrain(); }
-        async function jikanDrain() { jikanRunning = true; while (jikanQueue.length > 0) { const task = jikanQueue.shift(); await task(); await new Promise(r => setTimeout(r, 400)); } jikanRunning = false; }
+    function runFilterAndSort() {
+        const searchVal = currentSearch;
+        const sortMode = document.getElementById('sort').value;
         
-        function fetchMALForCard(nom, malId, scoreEl, popEl) {
-            const cached = malCacheGet(nom);
-            if (cached) { applyCardMAL(scoreEl, popEl, cached); return; }
-            jikanEnqueue(async () => {
-                try {
-                    let item = null;
-                    if (malId && malId.trim() !== '') {
-                        const resp = await fetch(`https://api.jikan.moe/v4/anime/${malId.trim()}`);
-                        if (resp.ok) { const j = await resp.json(); item = j.data || null; }
-                    } else {
-                        const q = nom.split('/')[0].trim();
-                        const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=false`);
-                        if (resp.ok) { const j = await resp.json(); item = j.data?.[0] || null; }
-                    }
-                    if (item) { const data = { score: item.score, popularity: item.popularity }; malCacheSet(nom, data); applyCardMAL(scoreEl, popEl, data); }
-                } catch(e) {}
-            });
-        }
-
-        function applyCardMAL(scoreEl, popEl, data) {
-            if (!scoreEl || !popEl) return;
-            if (data.score != null) { scoreEl.textContent = '\u2605 ' + parseFloat(data.score).toFixed(2); scoreEl.classList.add('mal-updated'); }
-            if (data.popularity != null) { popEl.textContent = '#' + data.popularity.toLocaleString('fr-FR'); popEl.classList.add('mal-updated'); }
-        }
-
-        const cardObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const card = entry.target;
-                    const nom = card.dataset.nom;
-                    const malId = card.dataset.malid || '';
-                    const scoreEl = card.querySelector('.mal-score');
-                    const popEl = card.querySelector('.mal-pop');
-                    if (nom && scoreEl && popEl) { fetchMALForCard(nom, malId, scoreEl, popEl); }
-                    cardObserver.unobserve(card);
-                }
-            });
-        }, { rootMargin: '200px' });
-
-        function normalize(str) {
-            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/[-_.:;,!?()'"&~#|]/g, ' ').replace(/\s+/g, ' ').trim();
-        }
-
-        window.handleImgError = function(img, fileNameFromCSV) {
-            if (!img.dataset.attempt) img.dataset.attempt = "1";
-            const lastDotIndex = fileNameFromCSV.lastIndexOf('.');
-            const base = lastDotIndex !== -1 ? fileNameFromCSV.substring(0, lastDotIndex) : fileNameFromCSV;
-            if (img.dataset.attempt === "1") { img.dataset.attempt = "2"; img.src = `img/${base}.webp`; } 
-            else if (img.dataset.attempt === "2") { img.dataset.attempt = "3"; img.src = `img/${base}.png`; } 
-            else if (img.dataset.attempt === "3") { img.dataset.attempt = "4"; img.src = `img/${base}.jpg`; } 
-            else { img.onerror = null; img.src = 'img/logo.jpg'; }
-        };
-
-        function highlightTitle(title, query) {
-            if (!query) return title;
-            const normTitle = normalize(title);
-            const normQuery = normalize(query);
-            const index = normTitle.indexOf(normQuery);
-            if (index === -1) return title;
-            let charCount = 0, origIndex = -1;
-            for (let i = 0; i < title.length; i++) {
-                if (normalize(title[i]).length > 0) charCount++;
-                if (charCount > index && origIndex === -1) origIndex = i;
-            }
-            if (origIndex === -1) return title;
-            const endIndex = origIndex + query.length;
-            return title.substring(0, origIndex) + '<span class="highlight">' + title.substring(origIndex, Math.min(endIndex, title.length)) + '</span>' + title.substring(Math.min(endIndex, title.length));
-        }
-
-        async function setBackground() {
-            const isMobile = window.innerWidth <= 1000;
-            try {
-                const res = await fetch('backgrounds.json');
-                const data = await res.json();
-                const list = isMobile ? data.mobile : data.desktop;
-                if (!list || !list.length) return;
-                const file = list[Math.floor(Math.random() * list.length)];
-                document.getElementById('bg-layer').style.backgroundImage = `url('img/${file}')`;
-            } catch(e) {}
-        }
-
-        function updateOverlayOpacity() {
-            const scrollY = window.scrollY;
-            const maxScroll = document.body.scrollHeight - window.innerHeight || 1;
-            const opacity = Math.min(scrollY / 600, 0.65);
-            document.getElementById('bg-overlay').style.opacity = opacity;
-        }
-
-        async function init() {
-            setBackground();
-            window.addEventListener('scroll', updateOverlayOpacity);
-
-            try {
-                const response = await fetch('animes.csv');
-                const rawData = await response.text();
-                allAnimes = rawData.split(/\r?\n/).slice(1).map(line => {
-                    const c = line.split(';');
-                    if (!c[0] || c.length < 9) return null;
-                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    return { 
-                        nom: clean(c[0]), pop: clean(c[1]), score: clean(c[2]), 
-                        sortie: clean(c[3]), ep: clean(c[4]), censure: clean(c[5]), 
-                        etat: clean(c[6]), img: clean(c[8]),
-                        tags: clean(c[12]), malId: clean(c[13]), editeur: clean(c[14]),
-                        ordreAjout: parseInt(clean(c[17])) || 0
-                    };
-                }).filter(a => a !== null);
-
-                shuffledAnimes = [...allAnimes];
-                for (let i = shuffledAnimes.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [shuffledAnimes[i], shuffledAnimes[j]] = [shuffledAnimes[j], shuffledAnimes[i]];
-                }
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const searchParam = urlParams.get('search');
-                if (searchParam) {
-                    document.getElementById('search').value = searchParam;
-                    currentSearch = searchParam;
-                }
-
-                // Appliquer le tri depuis l'URL (priorité sur sessionStorage)
-                const sortParam = urlParams.get('sort');
-                if (sortParam !== null) {
-                    const sel = document.getElementById('sort');
-                    if (sel) sel.value = sortParam;
-                }
-
-                runFilterAndSort();
-                
-                const searchInput = document.getElementById('search');
-                const searchSuggestions = document.getElementById('search-suggestions');
-                
-                searchInput.addEventListener('input', function() {
-                    currentSearch = this.value.trim();
-                    runFilterAndSort();
-                    
-                    if (currentSearch.length >= 2) {
-                        const results = allAnimes.filter(a => normalize(a.nom).includes(normalize(currentSearch))).slice(0, 8);
-                        if (results.length === 0) {
-                            searchSuggestions.innerHTML = '<div class="no-result" style="padding:12px;color:#888;">Aucun résultat</div>';
-                        } else {
-                            searchSuggestions.innerHTML = results.map(a => 
-                                '<div class="suggestion-item" data-name="'+a.nom.replace(/"/g,'&quot;')+'"><img src="img/'+a.img+'" class="sugg-img" onerror="this.src=\'img/logo.jpg\'"><span>'+a.nom+'</span></div>'
-                            ).join('');
-                        }
-                        searchSuggestions.classList.add('active');
-                    } else {
-                        searchSuggestions.classList.remove('active');
-                    }
-                });
-                
-                searchInput.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        searchSuggestions.classList.remove('active');
-                        this.blur();
-                        if (currentSearch) {
-                            window.history.pushState({}, '', `index_old.html?search=${encodeURIComponent(currentSearch)}`);
-                        } else {
-                            window.history.pushState({}, '', `index_old.html`);
-                        }
-                    }
-                });
-                
-                searchSuggestions.addEventListener('click', function(e) {
-                    const item = e.target.closest('.suggestion-item');
-                    if (item && item.dataset.name) {
-                        window.location.href = 'video.html?name=' + encodeURIComponent(item.dataset.name);
-                    }
-                });
-                
-                document.addEventListener('click', function(e) {
-                    if (!e.target.closest('.search-wrapper')) {
-                        searchSuggestions.classList.remove('active');
-                    }
-                });
-                
-            } catch (err) { console.error("Erreur CSV:", err); }
-        }
-
-        function runFilterAndSort() {
-            const searchVal = currentSearch;
-            const sortMode = document.getElementById('sort').value;
-            
-            let base = (searchVal === "" && sortMode === "") ? shuffledAnimes : allAnimes;
-            
-            let filtered = base.filter(a => {
-                const matchSearch = searchVal ? normalize(a.nom).includes(normalize(searchVal)) : true;
-                return matchSearch;
-            });
-
-            if (sortMode) {
-                filtered.sort((a, b) => {
-                    if (sortMode === "ordre_ajout") return (b.ordreAjout || 0) - (a.ordreAjout || 0);
-                    if (sortMode === "score") return parseFloat((b.score||'0').replace(',', '.')) - parseFloat((a.score||'0').replace(',', '.'));
-                    if (sortMode === "episodes") {
-                        const numA = parseInt((a.ep||'').match(/\d+/g)?.pop() || '0');
-                        const numB = parseInt((b.ep||'').match(/\d+/g)?.pop() || '0');
-                        return numB - numA;
-                    }
-                    if (sortMode === "popularite") return (parseInt((a.pop||'').replace('#','')) || 99999) - (parseInt((b.pop||'').replace('#','')) || 99999);
-                    if (sortMode === "sortie") return dateToTs(b.sortie) - dateToTs(a.sortie);
-                    if (sortMode === "editeur") return (a.editeur || '').localeCompare(b.editeur || '');
-                    if (sortMode === "nom") return a.nom.localeCompare(b.nom);
-                    if (sortMode === "censure") return (a.censure || '').localeCompare(b.censure || '');
-                    if (sortMode === "etat") return (a.etat || '').localeCompare(b.etat || '');
-                    return 0;
-                });
-            }
-            displayAnimes(filtered, sortMode);
-        }
-
-        function dateToTs(s){
-            if(!s) return 0;
-            s = s.trim();
-            const mois={'janv.':1,'févr.':2,'mars':3,'avr.':4,'mai':5,'juin':6,'juil.':7,'août':8,'sept.':9,'oct.':10,'nov.':11,'déc.':12,
-                        'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
-            const parts = s.split(' au ');
-            const last = parts[parts.length-1].trim();
-            const m1 = last.match(/(\d{1,2})\s+([a-zéûôA-Z.]+)\s+(\d{4})/);
-            if(m1){ const mo=mois[m1[2]]||1; return new Date(+m1[3], mo-1, +m1[1]).getTime(); }
-            const m2 = last.match(/([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})/);
-            if(m2){ const mo=mois[m2[1]]||1; return new Date(+m2[3], mo-1, +m2[2]).getTime(); }
-            const m3 = (last.match(/\d{4}/g)||[]);
-            if(m3.length){ return new Date(+m3[m3.length-1], 0, 1).getTime(); }
-            return 0;
-        }
-
-function displayAnimes(list, sortMode) {
-            const container = document.getElementById('anime-container');
-            container.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.unobserve(c));
-            const hl = (m) => (sortMode === m) ? 'class="highlight"' : '';
-            
-            container.innerHTML = list.map(a => {
-                const titleHtml = highlightTitle(a.nom, currentSearch);
-                return `
-                <a href="video.html?name=${encodeURIComponent(a.nom)}" class="card" data-nom="${a.nom.replace(/"/g,'&quot;')}" data-malid="${a.malId || ''}">
-                    <div class="img-container">
-                        <img src="img/${a.img}" loading="lazy" onerror="handleImgError(this, '${a.img}')">
-                    </div>
-                    <div class="card-info">
-                        <div class="card-title">${titleHtml}</div>
-                        <div class="card-meta-row">
-                            <span ${hl('sortie')}>${sortMode==='sortie'?(a.sortie||''):((a.sortie||'').match(/\d{4}/g)?.pop()||a.sortie)}</span>
-                            <span ${hl('score')} class="mal-score">\u2605 ${a.score}</span>
-                            <span ${hl('popularite')} class="mal-pop">${a.pop}</span>
-                        </div>
-                        <div class="card-meta-row">
-                            <span ${hl('episodes')}>${a.ep} ép.</span>
-                            <span ${hl('censure')}>${a.censure}</span>
-                            <span ${hl('etat')}>${a.etat}</span>
-                        </div>
-                        ${a.editeur ? `<div class="card-meta-row"><span ${hl('editeur')} style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.editeur}</span></div>` : ''}
-                    </div>
-                </a>`;
-            }).join('');
-            container.querySelectorAll('.card[data-nom]').forEach(c => cardObserver.observe(c));
-            relayoutGrid();
-        }
-
-        const GRID_GAP = 15, GRID_TARGET = 170, GRID_MIN = 130, GRID_MAX = 230;
-        function computeGridCols(avail) {
-            let n = Math.max(1, Math.round((avail + GRID_GAP) / (GRID_TARGET + GRID_GAP)));
-            while (n > 1 && (avail - (n - 1) * GRID_GAP) / n < GRID_MIN) n--;
-            while ((avail - (n - 1) * GRID_GAP) / n > GRID_MAX) n++;
-            return n;
-        }
-        function relayoutGrid() {
-            const g = document.getElementById('anime-container');
-            if (!g) return;
-            const avail = g.clientWidth;
-            if (avail <= 0) return;
-            g.style.gridTemplateColumns = `repeat(${computeGridCols(avail)}, 1fr)`;
-        }
-        if (window.ResizeObserver) {
-            const ro = new ResizeObserver(() => { clearTimeout(window.__gridRT); window.__gridRT = setTimeout(relayoutGrid, 60); });
-            ro.observe(document.getElementById('anime-container'));
-        } else {
-            window.addEventListener('resize', relayoutGrid);
-        }
-
-        window.randomAnime = () => {
-            if(allAnimes.length > 0) {
-                const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
-                window.location.href = `video.html?name=${encodeURIComponent(a.nom)}`;
-            }
-        };
+        let base = (searchVal === "" && sortMode === "") ? shuffledAnimes : allAnimes;
         
-        function toggleM() {
-            const menu = document.getElementById('menu');
-            const overlay = document.getElementById('overlay');
-            const isOpen = menu.classList.toggle('active');
-            overlay.classList.toggle('active');
-            document.body.style.overflow = isOpen ? 'hidden' : '';
-        }
-        window.toggleM = toggleM;
-
-        (function markActiveTab() {
-            const current = window.location.pathname.split('/').pop() || 'index.html';
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                if (tab.dataset.page === current) tab.classList.add('active');
-            });
-        })();
-        
-        document.getElementById('sort').onchange = runFilterAndSort;
-
-        init();
-    </script>
-
-    <script>
-    (function() {
-        var KEY = 'sortmem_index_old';
-        var IDS = ['sort'];
-        function save() {
-            var d = {};
-            IDS.forEach(function(id) {
-                var el = document.getElementById(id);
-                if (el) d[id] = el.value;
-            });
-            try { sessionStorage.setItem(KEY, JSON.stringify(d)); } catch(e) {}
-        }
-        function restore() {
-            try {
-                var raw = sessionStorage.getItem(KEY);
-                if (!raw) return;
-                var d = JSON.parse(raw);
-                IDS.forEach(function(id) {
-                    var el = document.getElementById(id);
-                    if (el && d[id] !== undefined) el.value = d[id];
-                });
-            } catch(e) {}
-        }
-        document.addEventListener('DOMContentLoaded', function() {
-            restore();
-            IDS.forEach(function(id) {
-                var el = document.getElementById(id);
-                if (el) el.addEventListener('change', save);
-            });
+        let filtered = base.filter(a => {
+            const matchSearch = searchVal ? a.nom.toLowerCase().includes(searchVal.toLowerCase()) : true;
+            return matchSearch;
         });
-    })();
-    </script>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Le paramètre ?sort= est maintenant appliqué directement dans init() après le chargement des données.
+        if (sortMode) {
+            filtered.sort((a, b) => {
+                if (sortMode === "ordre_ajout") return (b.ordreAjout || 0) - (a.ordreAjout || 0);
+                if (sortMode === "score") return parseFloat((b.score||'0').replace(',', '.')) - parseFloat((a.score||'0').replace(',', '.'));
+                if (sortMode === "episodes") {
+                    const numA = parseInt((a.ep||'').match(/\d+/g)?.pop() || '0');
+                    const numB = parseInt((b.ep||'').match(/\d+/g)?.pop() || '0');
+                    return numB - numA;
+                }
+                if (sortMode === "popularite") return (parseInt((a.pop||'').replace('#','')) || 99999) - (parseInt((b.pop||'').replace('#','')) || 99999);
+                if (sortMode === "sortie") return dateToTs(b.sortie) - dateToTs(a.sortie);
+                if (sortMode === "editeur") return (a.editeur || '').localeCompare(b.editeur || '');
+                if (sortMode === "nom") return a.nom.localeCompare(b.nom);
+                if (sortMode === "censure") return (a.censure || '').localeCompare(b.censure || '');
+                if (sortMode === "etat") return (a.etat || '').localeCompare(b.etat || '');
+                return 0;
+            });
+        }
+        displayAnimes(filtered, sortMode);
+    }
+
+    function displayAnimes(list, sortMode) {
+        const container = document.getElementById('anime-container');
+        const hl = (m) => (sortMode === m) ? 'class="highlight"' : '';
+        
+        container.innerHTML = list.map(a => {
+            const titleHtml = highlightTitle(a.nom, currentSearch);
+            const cover = getCoverPath(a.ordreAjout, 1);
+            const coverFile = `${a.ordreAjout}-1.webp`;
+            const year = (a.sortie||'').match(/\d{4}/g)?.pop() || a.sortie;
+
+            return `
+            <a href="fiche.html?name=${encodeURIComponent(a.nom)}" class="card">
+                <div class="img-container">
+                    <img src="${cover}" loading="lazy" onerror="handleImgError(this, '${coverFile}')">
+                </div>
+                <div class="card-info">
+                    <div class="card-title">${titleHtml}</div>
+                    <div class="card-meta-row">
+                        <span ${hl('sortie')}>${sortMode==='sortie'?(a.sortie||''):year}</span>
+                        <span ${hl('score')} class="mal-score">★ ${a.score}</span>
+                        <span ${hl('popularite')} class="mal-pop">${a.pop}</span>
+                    </div>
+                    <div class="card-meta-row">
+                        <span ${hl('episodes')}>${a.ep} ép.</span>
+                    </div>
+                    ${renderMetaBadges(a)}
+                    ${a.editeur ? `<div class="card-meta-row"><span ${hl('editeur')} style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.editeur}</span></div>` : ''}
+                </div>
+            </a>`;
+        }).join('');
+        relayoutGrid();
+    }
+
+    const GRID_GAP = 15, GRID_TARGET = 170, GRID_MIN = 130, GRID_MAX = 230;
+    function computeGridCols(avail) {
+        let n = Math.max(1, Math.round((avail + GRID_GAP) / (GRID_TARGET + GRID_GAP)));
+        while (n > 1 && (avail - (n - 1) * GRID_GAP) / n < GRID_MIN) n--;
+        while ((avail - (n - 1) * GRID_GAP) / n > GRID_MAX) n++;
+        return n;
+    }
+    function relayoutGrid() {
+        const g = document.getElementById('anime-container');
+        if (!g) return;
+        const avail = g.clientWidth;
+        if (avail <= 0) return;
+        g.style.gridTemplateColumns = `repeat(${computeGridCols(avail)}, 1fr)`;
+    }
+    if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => { clearTimeout(window.__gridRT); window.__gridRT = setTimeout(relayoutGrid, 60); });
+        ro.observe(document.getElementById('anime-container'));
+    } else {
+        window.addEventListener('resize', relayoutGrid);
+    }
+
+    function doRandom() {
+        if(allAnimes.length > 0) {
+            const a = allAnimes[Math.floor(Math.random()*allAnimes.length)];
+            window.location.href = `fiche.html?name=${encodeURIComponent(a.nom)}`;
+        }
+    }
+    window.doRandom = doRandom;
+
+    // Recherche
+    const searchInput = document.getElementById('search');
+    const searchSuggestions = document.getElementById('search-suggestions');
+    let suggTimer;
+    
+    searchInput.addEventListener('input', function() {
+        currentSearch = this.value.trim();
+        runFilterAndSort();
+        clearTimeout(suggTimer);
+        suggTimer = setTimeout(() => {
+            if (currentSearch.length >= 2) {
+                const results = searchAnimes(currentSearch, allAnimes, 8);
+                if (results.length === 0) {
+                    searchSuggestions.innerHTML = '<div class="sugg-empty">Aucun résultat</div>';
+                } else {
+                    searchSuggestions.innerHTML = results.map(a => 
+                        `<div class="suggestion-item" data-name="${a.nom.replace(/"/g,'&quot;')}"><img src="${getCoverPath(a.ordreAjout, 1)}" class="sugg-img" onerror="this.onerror=null;this.src='${IMG_LOGO}'"><span>${highlightTitle(a.nom, currentSearch)}</span></div>`
+                    ).join('');
+                }
+                searchSuggestions.classList.add('active');
+            } else {
+                searchSuggestions.classList.remove('active');
+            }
+        }, 90);
     });
-    </script>
+    
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchSuggestions.classList.remove('active');
+            this.blur();
+        }
+    });
+    
+    searchSuggestions.addEventListener('click', function(e) {
+        const item = e.target.closest('.suggestion-item');
+        if (item && item.dataset.name) {
+            window.location.href = 'fiche.html?name=' + encodeURIComponent(item.dataset.name);
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-wrapper')) {
+            searchSuggestions.classList.remove('active');
+        }
+    });
+
+    document.getElementById('sort').onchange = runFilterAndSort;
+
+    (async function init() {
+        try {
+            allAnimes = await loadAnimes();
+            shuffledAnimes = [...allAnimes];
+            for (let i = shuffledAnimes.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledAnimes[i], shuffledAnimes[j]] = [shuffledAnimes[j], shuffledAnimes[i]];
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchParam = urlParams.get('search');
+            if (searchParam) {
+                document.getElementById('search').value = searchParam;
+                currentSearch = searchParam;
+            }
+            const sortParam = urlParams.get('sort');
+            if (sortParam !== null) {
+                document.getElementById('sort').value = sortParam;
+            }
+
+            runFilterAndSort();
+        } catch (e) {
+            console.error(e);
+        }
+    })();
+</script>
 </body>
 </html>

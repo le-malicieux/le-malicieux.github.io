@@ -2,153 +2,14 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="img/logo.jpg" type="image/jpeg">
+    <link rel="icon" href="img/bannieres_icones/logo.jpg" type="image/jpeg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="common.css">
     <title>Mon Profil - Le Malicieux</title>
     <style>
-        /* ... (même style que précédemment, inchangé) ... */
-        :root { --primary: #ff4757; --bg: #0f0f0f; --card-bg: rgba(20, 20, 20, 0.88); --text: #eee; --text-bright: #f5f5f5; --border: #2a2a2a; --accent-blue: #2e86de; --accent-green: #2ecc71; --accent-yellow: #f1c40f; }
-        * { box-sizing: border-box; }
-
-        #bg-layer, #bg-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw;
-            height: 100vh; height: 100lvh;
-            z-index: -2; pointer-events: none;
-        }
-        #bg-layer {
-            background-size: cover; background-position: center center;
-            background-repeat: no-repeat; transition: none;
-        }
-        #bg-overlay { z-index: -1; background: black; opacity: 0; transition: none; }
-
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; padding-top: 62px; }
-        /* ═══════════════ EN-TÊTE — barre unique ═══════════════ */
-        .site-header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            background: #121214;
-            border-bottom: 3px solid var(--primary);
-            box-shadow: 0 1px 8px rgba(0,0,0,0.5);
-        }
-        .navbar {
-            display: flex; align-items: stretch; gap: 0;
-            width: 100%; margin: 0; padding: 0 18px; box-sizing: border-box;
-            height: 62px;
-        }
-        .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-right: 22px; }
-        .nav-brand { display: flex; align-items: center; gap: 9px; text-decoration: none; cursor: pointer; }
-        .nav-logo-small { width: 38px; height: 38px; border-radius: 3px; border: 1px solid var(--primary); object-fit: cover; }
-        .nav-title { color: var(--text-bright); font-weight: 800; font-size: 1.05em; letter-spacing: 0.6px; white-space: nowrap; }
-
-        #back-home { font-size: 0.72em; color: #ff6b7a; text-decoration: none; display: none; cursor: pointer; margin-left: 4px; }
-
-        .burger { display: none; background: none; border: none; padding: 4px; cursor: pointer; align-items: center; }
-        .burger svg { width: 26px; height: 26px; stroke: var(--text-bright); }
-
-        /* Onglets, alignés dans la même barre */
-        /* overflow-x: auto + flex-shrink: 0 sur les onglets : si la place manque
-           (petite fenêtre, zoom élevé, écran étroit...), la barre défile au lieu de
-           comprimer les onglets jusqu'au chevauchement du texte. */
-        .nav-links {
-            display: flex; align-items: stretch; flex: 1; min-width: 0;
-            overflow-x: auto; overflow-y: hidden;
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .nav-links::-webkit-scrollbar { display: none; }
-        .nav-tab {
-            display: flex; align-items: center; flex-shrink: 0;
-            color: #b9b9bd; text-decoration: none; cursor: pointer;
-            font-size: 0.82em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-            padding: 0 14px; border-bottom: 3px solid transparent; margin-bottom: -3px;
-            white-space: nowrap; transition: color 0.15s, background 0.15s;
-        }
-        .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.05); }
-        .nav-tab.active { color: #fff; border-bottom-color: var(--primary); background: rgba(255,71,87,0.09); }
-
-        .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-left: 14px; }
-
-        .search-wrapper { position: relative; width: clamp(150px, 16vw, 250px); flex-shrink: 0; }
-        .search-wrapper input {
-            width: 100%; background: #1c1c1f; border: 1px solid #38383d; color: white;
-            padding: 8px 34px 8px 11px; border-radius: 2px; font-size: 0.85em;
-            box-sizing: border-box; outline: none; transition: border-color 0.15s;
-        }
-        .search-wrapper input:focus { border-color: var(--primary); background: #202024; }
-        .search-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; display: flex; }
-        .search-icon svg { width: 15px; height: 15px; stroke: #8a8a90; }
-        .search-suggestions {
-            position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-            background: #1a1a1d; border: 1px solid #38383d;
-            max-height: 340px; overflow-y: auto; display: none; z-index: 2000;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.55);
-        }
-        .search-suggestions.active { display: block; }
-        .search-suggestions .suggestion-item {
-            padding: 7px 10px; cursor: pointer; color: #ccc; font-size: 0.85em;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex; align-items: center; gap: 10px;
-        }
-        .search-suggestions .suggestion-item:last-child { border-bottom: none; }
-        .search-suggestions .suggestion-item:hover,
-        .search-suggestions .suggestion-item.hl { background: #2b2b30; color: white; }
-        .search-suggestions .sugg-img { width: 30px; height: 42px; border-radius: 2px; object-fit: cover; flex-shrink: 0; background: #333; }
-        .search-suggestions .sugg-meta { font-size: 0.78em; color: #8a8a90; display: block; margin-top: 2px; }
-        .search-suggestions .sugg-empty { padding: 12px 10px; color: #8a8a90; font-size: 0.85em; }
-        .search-suggestions mark { background: none; color: var(--primary); font-weight: 700; }
-
-        .nav-action {
-            background: none; color: #b9b9bd; border: 1px solid #3a3a3f; cursor: pointer;
-            font-size: 0.76em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
-            padding: 8px 13px; border-radius: 2px; white-space: nowrap; transition: 0.15s;
-        }
-        .nav-action:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-        /* Rectangle au ratio natif de l'image (409x102) : c'est l'image qui fixe la
-           largeur, donc aucune déformation ni rognage quel que soit le contexte. */
-        .discord-btn {
-            display: inline-flex; flex-shrink: 0;
-            height: 34px; width: auto;
-            border-radius: 2px; overflow: hidden;
-            border: none; padding: 0; margin: 0;
-            background: #5865F2;
-            line-height: 0; box-sizing: content-box;
-            transition: opacity 0.15s;
-        }
-        .discord-btn:hover { opacity: 0.85; }
-        .discord-btn img {
-            height: 100%; width: auto; display: block;
-            object-fit: contain;
-        }
-
-        .auth-login-btn {
-            background: #5865F2; border: none; color: white; padding: 8px 13px;
-            border-radius: 2px; cursor: pointer; font-size: 0.78em; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
-        }
-        .auth-login-btn:hover { background: #4752c4; }
-        .auth-account { display: flex; align-items: center; gap: 6px; text-decoration: none; min-width: 0; }
-        .auth-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; flex-shrink: 0; }
-        .auth-name { color: white; font-size: 0.8em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .auth-logout-btn {
-            background: #2a2a2e; color: white; border: 1px solid #3a3a3f; cursor: pointer;
-            padding: 5px 9px; border-radius: 2px; font-size: 0.72em; flex-shrink: 0;
-        }
-        .auth-logout-btn:hover { background: #3a3a3f; }
-        #auth-ui { display: flex; align-items: center; gap: 8px; }
-
-        .nav-links .nav-action, .nav-links .discord-btn { display: none; }
-
-        .close-menu { display: none; font-size: 0.85em; color: var(--primary); cursor: pointer; margin-bottom: 18px; background: none !important; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1050; }
-
-        @media (max-width: 1100px) {
-            .nav-tab { padding: 0 10px; font-size: 0.78em; }
-        }
-
-        /* Le comportement mobile de la navbar (burger, panneau du menu, compte,
-           grilles de fiches) vit désormais entièrement dans mobile.css, commun à
-           toutes les pages du site : voir ce fichier pour ces règles. */
-
+        
         .profile-layout { padding: 20px; display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
         .avatar-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; text-align: center; margin-bottom: 16px; }
         .avatar-wrapper { position: relative; display: inline-block; margin-bottom: 14px; }
@@ -209,48 +70,18 @@
         .not-logged { text-align: center; padding: 80px 20px; color: #666; }
         .not-logged h2 { color: var(--primary); margin-bottom: 10px; }
         .btn-login { display: inline-block; margin-top: 20px; background: var(--primary); color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; }
-        /* Panneau unique : la barre d'onglets et le contenu actif partagent le même
-           cadre, sans coupure visuelle entre les deux (contrairement aux onglets
-           « pilule » flottants d'origine). */
-        html { zoom: 0.88; }
-        .profile-panel {
-            width: calc(100% - 2 * clamp(12px, 4vw, 40px));
-            max-width: 1100px; margin: 20px auto 0;
-            background: rgba(14,14,16,0.82);
-            border: 1px solid #2c2c31;
-            border-radius: 2px;
-        }
-        .page-tabs {
-            display: flex; gap: 0; padding: 0 4px;
-            background: rgba(255,255,255,0.035);
-            border-bottom: 1px solid #2c2c31;
-        }
-        .page-tab {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: none; border: none; border-radius: 0;
-            color: #b9b9bd; padding: 13px 16px;
-            border-bottom: 3px solid transparent; margin-bottom: -1px;
-            cursor: pointer; font-size: 0.8em; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.5px;
-            transition: color 0.15s, background 0.15s;
-        }
+        
+        .profile-panel { width: calc(100% - 2 * clamp(12px, 4vw, 40px)); max-width: 1100px; margin: 20px auto 0; background: rgba(14,14,16,0.82); border: 1px solid #2c2c31; border-radius: 2px; }
+        .page-tabs { display: flex; gap: 0; padding: 0 4px; background: rgba(255,255,255,0.035); border-bottom: 1px solid #2c2c31; }
+        .page-tab { display: inline-flex; align-items: center; gap: 8px; background: none; border: none; border-radius: 0; color: #b9b9bd; padding: 13px 16px; border-bottom: 3px solid transparent; margin-bottom: -1px; cursor: pointer; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.15s, background 0.15s; }
         .page-tab.active { color: #fff; border-bottom-color: var(--primary); background: rgba(255,71,87,0.09); }
         .page-tab:hover:not(.active) { color: #fff; background: rgba(255,255,255,0.04); }
-        /* Icônes des onglets : pastille sombre et semi-transparente, même langage
-           visuel que les boutons de carrousel de l'accueil (fond quasi noir). */
-        .tab-icon {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 22px; height: 22px; border-radius: 50%;
-            background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08);
-            flex-shrink: 0;
-        }
+        .tab-icon { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
         .tab-icon svg { width: 13px; height: 13px; stroke: currentColor; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .community-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; padding: 4px 0; }
-        @media (max-width: 600px) {
-            .community-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-        }
+        @media (max-width: 600px) { .community-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; } }
         .member-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px; text-align: center; text-decoration: none; color: inherit; transition: border-color 0.2s; display: block; }
         .member-card:hover { border-color: var(--primary); }
         .member-avatar { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; margin: 0 auto 10px; display: block; }
@@ -262,12 +93,12 @@
         #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(60px); background: #222; color: white; padding: 10px 22px; border-radius: 8px; font-size: 0.88em; border: 1px solid #444; transition: transform 0.3s, opacity 0.3s; opacity: 0; z-index: 9999; pointer-events: none; }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         @media (max-width: 800px) { .profile-layout { grid-template-columns: 1fr; padding: 16px 14px 24px; } .avatar-img { width: 85px; height: 85px; } .recent-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); } }
-        img { image-rendering: auto; }
     </style>
 </head>
 <body>
     <div id="bg-layer"></div>
     <div id="bg-overlay"></div>
+    
     <header class="site-header">
         <div class="navbar">
             <div class="nav-left">
@@ -275,13 +106,11 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                 </button>
                 <a class="nav-brand" href="index.html">
-                    <img src="img/logo.jpg" class="nav-logo-small" alt="Logo Le Malicieux">
+                    <img src="img/bannieres_icones/logo.jpg" class="nav-logo-small" alt="Logo Le Malicieux">
                     <span class="nav-title">LE MALICIEUX</span>
                 </a>
             </div>
-
             <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
-
             <nav class="nav-links" id="menu">
                 <div class="close-menu" onclick="toggleM()">Fermer</div>
                 <a href="index.html" class="nav-tab" data-page="index.html">Accueil</a>
@@ -292,10 +121,9 @@
                 <a href="profil.html" class="nav-tab" data-page="profil.html">Profil</a>
                 <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
-                    <img src="logo-discord.jpg" alt="Discord">
+                    <img src="img/bannieres_icones/logo-discord.jpg" alt="Discord">
                 </a>
             </nav>
-
             <div class="nav-right">
                 <div class="search-wrapper" id="search-wrapper">
                     <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
@@ -303,7 +131,7 @@
                     <div class="search-suggestions" id="search-suggestions"></div>
                 </div>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
-                    <img src="logo-discord.jpg" alt="Discord">
+                    <img src="img/bannieres_icones/logo-discord.jpg" alt="Discord">
                 </a>
             </div>
         </div>
@@ -345,528 +173,404 @@
     <div id="toast"></div>
     <input type="file" id="avatar-file-input" accept="image/*">
 
-<script>
-    /* ═══════════ VERROUILLAGE DU FOND ═══════════
-       Sur mobile, la barre d'URL qui se rétracte au défilement modifie la hauteur du
-       viewport. Comme #bg-layer était en position fixe avec inset:0 et background-size:
-       cover, l'image était remise à l'échelle à chaque variation, d'où l'effet de
-       grossissement. On fige donc ses dimensions en pixels, et on ne les recalcule que
-       si la LARGEUR change (rotation, redimensionnement réel), jamais sur la hauteur.
-       Le calcul divise par le zoom CSS de <html>, sans quoi les px seraient réduits. */
-    (function () {
-        var lastW = null;
+<script type="module">
+    import {
+        initCommon, loadAnimes, getCoverPath, handleImgError, IMG_LOGO,
+        auth, db, onAuthStateChanged, signInWithPopup, provider,
+        doc, getDoc, setDoc, collection, query, where, getDocs,
+        getCurrentUser
+    } from './common.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-        function zoomFactor() {
-            var z = parseFloat(getComputedStyle(document.documentElement).zoom);
-            return (!z || isNaN(z)) ? 1 : z;
-        }
+    initCommon();
+    const storage = getStorage();
 
-        function lockBackground(force) {
-            var layers = [document.getElementById('bg-layer'), document.getElementById('bg-overlay')];
-            if (!layers[0]) return;
-            var w = document.documentElement.clientWidth;
-            if (!force && lastW !== null && Math.abs(w - lastW) < 2) return; // hauteur seule : on ignore
-            lastW = w;
+    let allAnimesForSearch = [];
+    let csvDataMap = {};
 
-            var z = zoomFactor();
-            // Hauteur de référence = la plus grande que le viewport puisse prendre
-            var h = Math.max(
-                window.innerHeight || 0,
-                document.documentElement.clientHeight || 0,
-                (window.screen && window.screen.height) || 0
-            );
-            layers.forEach(function (el) {
-                if (!el) return;
-                el.style.width = (w / z) + 'px';
-                el.style.height = (h / z) + 'px';
-            });
-        }
-
-        window.addEventListener('resize', function () { lockBackground(false); });
-        window.addEventListener('orientationchange', function () { setTimeout(function () { lockBackground(true); }, 250); });
-
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { lockBackground(true); });
-        else lockBackground(true);
-    })();
-    </script>
-    <script>
-        (async function() {
-            const isMobile = window.innerWidth <= 1000;
-            try {
-                const res = await fetch('backgrounds.json');
-                const data = await res.json();
-                const list = isMobile ? data.mobile : data.desktop;
-                if (!list || !list.length) return;
-                const file = list[Math.floor(Math.random() * list.length)];
-                document.getElementById('bg-layer').style.backgroundImage = `url('img/${file}')`;
-            } catch(e) {}
-        })();
-    </script>
-
-    <script type="module">
-        // Firebase chargé en tâche de fond (import() dynamique) pour ne pas bloquer
-        // l'affichage. Les variables sont peuplées une fois le SDK chargé ; tout code
-        // qui en dépend attend "await firebaseReady" avant de s'en servir.
-        let doc, getDoc, setDoc, collection, query, where, onSnapshot, orderBy, getDocs, getFirestore;
-        let getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider;
-        let getStorage, ref, uploadBytes, getDownloadURL;
-        let app, db, auth, storage, provider;
-        const firebaseReady = (async () => {
-            const [appMod, fsMod, authMod, storageMod] = await Promise.all([
-                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"),
-                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"),
-                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"),
-                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js")
-            ]);
-            ({ getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, orderBy, getDocs } = fsMod);
-            ({ getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } = authMod);
-            ({ getStorage, ref, uploadBytes, getDownloadURL } = storageMod);
-
-            const firebaseConfig = {
-                apiKey: "AIzaSyCD70a-QR2nJnHBnA-FUoIGHZ7Z3VByPMk",
-                authDomain: "le-malicieux-v2.firebaseapp.com",
-                projectId: "le-malicieux-v2",
-                storageBucket: "le-malicieux-v2.firebasestorage.app",
-                messagingSenderId: "938147445933",
-                appId: "1:938147445933:web:86f9c65ee0737e66a9da24"
-            };
-
-            app = appMod.initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            storage = getStorage(app);
-            provider = new GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
-        })();
-
-        let allAnimesForSearch = [];
-
-        async function loadAnimesForSearch() {
-            try {
-                const resp = await fetch('animes.csv');
-                const data = await resp.text();
-                const lines = data.split(/\r?\n/).slice(1);
-                for (const line of lines) {
-                    const c = line.split(';');
-                    const clean = (s) => s ? s.trim().replace(/^"|"$/g, '') : "";
-                    if (c[0]) allAnimesForSearch.push({ nom: clean(c[0]), img: clean(c[8]) });
-                }
-            } catch(e) {}
-        }
-        loadAnimesForSearch();
-
-        function normalize(str) {
-            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/[-_.:;,!?()'"&~#|]/g, ' ').replace(/\s+/g, ' ').trim();
-        }
-
-        const searchInput = document.getElementById('search');
-        const searchSuggestions = document.getElementById('search-suggestions');
-        searchInput.addEventListener('input', function() {
-            const val = this.value.trim();
-            if (val.length < 2) { searchSuggestions.classList.remove('active'); return; }
-            const results = allAnimesForSearch.filter(a => normalize(a.nom).includes(normalize(val))).slice(0, 8);
-            if (results.length === 0) {
-                searchSuggestions.innerHTML = '<div class="no-result" style="padding:12px;color:#888;">Aucun résultat</div>';
-            } else {
-                searchSuggestions.innerHTML = results.map(a => 
-                    '<div class="suggestion-item" data-name="'+a.nom.replace(/"/g,'&quot;')+'"><img src="img/'+a.img+'" class="sugg-img" onerror="this.src=\'img/logo.jpg\'"><span>'+a.nom+'</span></div>'
-                ).join('');
-            }
-            searchSuggestions.classList.add('active');
-        });
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const val = this.value.trim();
-                if (val) {
-                    const results = allAnimesForSearch.filter(a => normalize(a.nom).includes(normalize(val)));
-                    if (results.length === 1) {
-                        window.location.href = 'video.html?name=' + encodeURIComponent(results[0].nom);
-                    } else if (results.length > 1) {
-                        window.location.href = 'index.html?search=' + encodeURIComponent(val);
-                    }
-                }
-                searchSuggestions.classList.remove('active');
-                this.blur();
-            }
-        });
-        searchSuggestions.addEventListener('click', function(e) {
-            const item = e.target.closest('.suggestion-item');
-            if (item && item.dataset.name) {
-                window.location.href = 'video.html?name=' + encodeURIComponent(item.dataset.name);
-            }
-        });
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.search-wrapper')) searchSuggestions.classList.remove('active');
-        });
-
-        function toast(msg, duration = 2500) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), duration);
-        }
-
-        function timeAgo(ts) {
-            if (!ts) return '';
-            const diff = Date.now() - (ts.seconds ? ts.seconds * 1000 : ts);
-            const m = Math.floor(diff / 60000);
-            if (m < 1) return "à l'instant";
-            if (m < 60) return `il y a ${m} min`;
-            const h = Math.floor(m / 60);
-            if (h < 24) return `il y a ${h}h`;
-            const d = Math.floor(h / 24);
-            if (d < 30) return `il y a ${d}j`;
-            return `il y a ${Math.floor(d/30)} mois`;
-        }
-
-        function getRealImgPath(firebaseImgName) {
-            if (!firebaseImgName) return "img/logo.jpg";
-            const match = firebaseImgName.match(/\d+/);
-            return match ? `img/anime-${match[0]}.jpg` : "img/logo.jpg";
-        }
-
-        function starsHtml(score) {
-            const full = Math.floor(score / 2);
-            const half = (score % 2) >= 1 ? 1 : 0;
-            const empty = 5 - full - half;
-            return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
-        }
-
-        function formatDate(isoOrTs) {
-            if (!isoOrTs) return '—';
-            const d = typeof isoOrTs === 'string' ? new Date(isoOrTs) : new Date(isoOrTs.seconds * 1000);
-            return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
-        }
-
-        function formatAddedAt(ts) {
-            if (!ts) return '';
-            const moisFR = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-            const d = ts.toDate ? ts.toDate() : (ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts));
-            return `${d.getDate()} ${moisFR[d.getMonth()]} ${d.getFullYear()} à ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`;
-        }
-
-        document.getElementById('btn-login-page').onclick = () => signInWithPopup(auth, provider);
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const publicUid = urlParams.get('uid');
-
-        window.switchTab = function(tab) {
-            document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById('tab-btn-' + tab).classList.add('active');
-            document.getElementById('tab-' + tab).classList.add('active');
-        };
-
-        if (publicUid) {
-            document.getElementById('not-logged-block').style.display = 'none';
-        }
-
-        firebaseReady.then(() => {
-        onAuthStateChanged(auth, async (user) => {
-            if (publicUid) {
-                await buildPublicProfile(publicUid, user);
-            } else if (user) {
-                await buildProfile(user);
-            }
-        });
-        });
-
-        async function getOwnAnimes(uid) {
-            const [playlistSnap, sharedCustomSnap] = await Promise.all([
-                getDocs(query(collection(db, "playlists"), where("uid", "==", uid))),
-                getDocs(query(collection(db, "playlists_custom"), where("uid", "==", uid), where("shared", "==", true)))
-            ]);
-            const sharedNames = new Set();
-            sharedCustomSnap.forEach(d => sharedNames.add(d.data().name));
-            const animes = [];
-            playlistSnap.forEach(d => {
-                const a = { id: d.id, ...d.data() };
-                if (!sharedNames.has(a.playlistTarget)) animes.push(a);
-            });
-            return animes;
-        }
-
-        async function buildPublicProfile(uid, currentUser) {
-            document.getElementById('tabs-bar').style.display = 'flex';
-            switchTab('community');
-
-            const container = document.getElementById('public-profile-container');
-            container.style.display = 'block';
-            document.getElementById('community-grid').style.display = 'none';
-            container.innerHTML = `<div style="color:#555; font-size:0.85em; padding:20px;">Chargement…</div>`;
-
-            const userSnap = await getDoc(doc(db, "users", uid));
-            if (!userSnap.exists()) {
-                container.innerHTML = `<div class="not-logged"><h2>Profil introuvable</h2><p>Cet utilisateur n'existe pas.</p></div>`;
-                return;
-            }
-            const userData = userSnap.data();
-            const pseudo = userData.pseudo || userData.displayName || 'Utilisateur';
-            const avatarUrl = userData.photoURL || 'img/logo.jpg';
-            const createdAt = userData.createdAt || null;
-            document.title = `${pseudo} - Le Malicieux`;
-
-            container.innerHTML = `
-                <div style="margin-bottom:12px;">
-                    <button onclick="document.getElementById('public-profile-container').style.display='none'; document.getElementById('community-grid').style.display='grid'; history.pushState({},'','profil.html');" style="background:#222; border:1px solid #444; color:#ccc; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:0.8em;">Retour à la communauté</button>
-                </div>
-                <div id="public-shell"></div>`;
-
-            renderProfileShellInto('public-shell', null, pseudo, avatarUrl, createdAt, null, false, uid);
-
-            const animes = await getOwnAnimes(uid);
-            const ctx = document.getElementById('public-shell');
-            renderStats(animes, ctx);
-            renderActivity(animes, ctx);
-            renderRecentAnimes(animes, ctx);
-            renderScoreDist(animes, ctx);
-            renderComments(uid, ctx);
-            await loadCommunity(currentUser);
-        }
-
-        async function buildProfile(user) {
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-            let userData = userSnap.exists() ? userSnap.data() : {};
-
-            if (!userSnap.exists()) {
-                userData = {
-                    uid: user.uid, email: user.email, displayName: user.displayName || '',
-                    pseudo: '', photoURL: user.photoURL || '', createdAt: new Date().toISOString(), lastSeen: new Date().toISOString(),
-                };
-                await setDoc(userRef, userData);
-            }
-
-            const pseudo = userData.pseudo || userData.displayName || user.displayName || 'Utilisateur';
-            const avatarUrl = userData.photoURL || user.photoURL || 'img/logo.jpg';
-            const createdAt = userData.createdAt || user.metadata?.creationTime || null;
-
-            renderProfileShellInto('tab-profil', user, pseudo, avatarUrl, createdAt, userData.displayName || user.displayName, true, null);
-            document.getElementById('tabs-bar').style.display = 'flex';
-            document.getElementById('not-logged-block').style.display = 'none';
-
-            onSnapshot(query(collection(db, "playlists"), where("uid", "==", user.uid)), async (snap) => {
-                const sharedCustomSnap = await getDocs(query(collection(db, "playlists_custom"), where("uid", "==", user.uid), where("shared", "==", true)));
-                const sharedNames = new Set();
-                sharedCustomSnap.forEach(d => sharedNames.add(d.data().name));
-                const animes = [];
-                snap.forEach(d => {
-                    const a = { id: d.id, ...d.data() };
-                    if (!sharedNames.has(a.playlistTarget)) animes.push(a);
-                });
-                const ctx = document.getElementById('tab-profil');
-                renderStats(animes, ctx);
-                renderActivity(animes, ctx);
-                renderRecentAnimes(animes, ctx);
-                renderScoreDist(animes, ctx);
-                renderComments(user.uid, ctx);
-            });
-
-            document.getElementById('avatar-upload-btn').onclick = () => document.getElementById('avatar-file-input').click();
-            document.getElementById('avatar-file-input').onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const spinner = document.getElementById('avatar-spinner');
-                spinner.classList.add('active');
-                try {
-                    const storageRef = ref(storage, `avatars/${user.uid}`);
-                    await uploadBytes(storageRef, file);
-                    const url = await getDownloadURL(storageRef);
-                    await setDoc(userRef, { photoURL: url }, { merge: true });
-                    document.getElementById('profile-avatar').src = url;
-                    sessionStorage.setItem('userAvatar', url);
-                    toast('Photo de profil mise à jour !');
-                } catch(err) { toast('Erreur lors de l\'upload.'); }
-                finally { spinner.classList.remove('active'); }
-            };
-            document.getElementById('btn-save-pseudo').onclick = async () => {
-                const val = document.getElementById('input-pseudo').value.trim();
-                if (!val) { toast('Le pseudo ne peut pas être vide.'); return; }
-                if (val.length > 30) { toast('30 caractères max.'); return; }
-                await setDoc(userRef, { pseudo: val }, { merge: true });
-                document.getElementById('display-pseudo').textContent = val;
-                sessionStorage.setItem('userPseudo', val);
-                toast('Pseudo mis à jour !');
-            };
-
-            await loadCommunity(user);
-        }
-
-        async function loadCommunity(currentUser) {
-            const snap = await getDocs(collection(db, "users"));
-            const members = [];
-            snap.forEach(d => members.push({ uid: d.id, ...d.data() }));
-            members.sort((a, b) => {
-                const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                return tb - ta;
-            });
-            document.getElementById('community-grid').innerHTML = members.map(m => {
-                const pseudo = m.pseudo || m.displayName || 'Utilisateur';
-                const avatar = m.photoURL || 'img/logo.jpg';
-                const isMe = currentUser && m.uid === currentUser.uid;
-                return `<div class="member-card" onclick="openMemberProfile('${m.uid}')" style="cursor:pointer;">
-                    <img src="${avatar}" class="member-avatar" onerror="this.src='img/logo.jpg'">
-                    <div class="member-name">${pseudo}${isMe ? ' <span style="color:var(--primary);font-size:0.75em;">(moi)</span>' : ''}</div>
-                    <div class="member-sub">Membre depuis ${formatDate(m.createdAt)}</div>
-                </div>`;
-            }).join('');
-        }
-
-        window.openMemberProfile = async function(uid) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            history.pushState({}, '', `profil.html?uid=${uid}`);
-            await buildPublicProfile(uid, null);
-        };
-
-        // MODIFICATION : ajout du paramètre `viewUid` pour le bouton playlist
-        function renderProfileShellInto(containerId, user, pseudo, avatarUrl, createdAt, googleName, editable, viewUid) {
-            const avatarSection = editable ? `
-                <div class="avatar-wrapper">
-                    <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='img/logo.jpg'">
-                    <div id="avatar-upload-btn" class="avatar-upload-btn" title="Changer la photo"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
-                    <div id="avatar-spinner" class="upload-spinner">⏳</div>
-                </div>` : `
-                <div class="avatar-wrapper">
-                    <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='img/logo.jpg'">
-                </div>`;
-            const editSection = editable ? `
-                <div class="profile-google-name">Compte Google : ${googleName}</div>
-                <div class="edit-pseudo-row"><input id="input-pseudo" type="text" placeholder="Changer le pseudo…" maxlength="30"><button id="btn-save-pseudo">OK</button></div>` : '';
-            
-            // AJOUT DU BOUTON PLAYLIST (si viewUid est fourni, donc en mode public)
-            const playlistButton = (viewUid && !editable) ? `<div><a href="playlist.html?uid=${viewUid}" class="btn-playlist-public">Voir sa playlist</a></div>` : '';
-            
-            document.getElementById(containerId).innerHTML = `
-                <div class="profile-layout">
-                    <div class="sidebar">
-                        <div class="avatar-card">
-                            ${avatarSection}
-                            <div class="profile-username" id="display-pseudo">${pseudo}</div>
-                            ${editSection}
-                            ${playlistButton}
-                            <div class="profile-meta">Membre depuis<br><span>${formatDate(createdAt)}</span></div>
-                        </div>
-                        <div class="stats-card"><h3>Statistiques</h3><div data-id="stat-rows"><div class="stat-row"><span class="label">Chargement…</span></div></div><div class="status-bars" data-id="status-bars"></div></div>
-                        <div class="stats-card"><h3>Score moyen</h3><div class="score-avg-display"><div class="score-avg-number" data-id="avg-score">—</div><div class="score-stars" data-id="avg-stars"></div><div class="score-avg-label" data-id="avg-label">Aucune note pour l'instant</div></div></div>
-                    </div>
-                    <div class="main-content">
-                        <div class="section"><h2>Activité récente</h2><div data-id="activity-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
-                        <div class="section"><h2>Derniers animes ajoutés</h2><div data-id="recent-grid" class="recent-grid"></div></div>
-                        <div class="section"><h2>Commentaires</h2><div data-id="comments-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
-                        <div class="section"><h2>Distribution des scores</h2><div class="score-dist" data-id="score-dist"></div><div style="display:flex; gap:4px; margin-top:24px;">${Array.from({length:10},(_,i)=>`<div style="flex:1; text-align:center; font-size:0.65em; color:#555;">${i+1}</div>`).join('')}</div></div>
-                    </div>
-                </div>`;
-        }
-
-        async function renderComments(uid, ctx) {
-            const el = ctx.querySelector('[data-id="comments-feed"]');
-            if (!el) return;
-            try {
-                const snap = await getDocs(query(collection(db, "commentaires"), where("uid", "==", uid)));
-                if (snap.empty) { el.innerHTML = `<div style="color:#555; font-size:0.85em;">Aucun commentaire.</div>`; return; }
-                const docs = snap.docs.map(d => d.data()).sort((a,b) => (b.date?.seconds||0) - (a.date?.seconds||0));
-                el.innerHTML = docs.map(c => `<div class="comment-item">
-                        <a href="video.html?name=${encodeURIComponent(c.anime)}" class="comment-anime-link">${c.anime}</a>
-                        <div class="comment-text">${c.text}</div>
-                        <div class="comment-time">${timeAgo(c.date)}</div>
-                    </div>`).join('');
-            } catch(e) { console.error('comments error', e); el.innerHTML = `<div style="color:#555; font-size:0.85em;">Aucun commentaire.</div>`; }
-        }
-
-        function renderStats(animes, ctx) {
-            const watching = animes.filter(a => a.status === 'watching').length;
-            const completed = animes.filter(a => a.status === 'completed').length;
-            const waiting = animes.filter(a => a.status === 'waiting').length;
-            const total = animes.length;
-            const totalEp = animes.reduce((s, a) => s + (parseInt(a.epSeen) || 0), 0);
-            const rated = animes.filter(a => a.rating && a.rating > 0);
-            const avgScore = rated.length > 0 ? (rated.reduce((s, a) => s + a.rating, 0) / rated.length).toFixed(1) : null;
-
-            ctx.querySelector('[data-id="stat-rows"]').innerHTML = `
-                <div class="stat-row"><span class="label">Total animes</span><span class="value">${total}</span></div>
-                <div class="stat-row"><span class="label" style="color:#2ecc71;">En cours</span><span class="value">${watching}</span></div>
-                <div class="stat-row"><span class="label" style="color:#2e86de;">Terminés</span><span class="value">${completed}</span></div>
-                <div class="stat-row"><span class="label" style="color:#f1c40f;">En attente</span><span class="value">${waiting}</span></div>
-                <div class="stat-row"><span class="label">Épisodes vus</span><span class="value">${totalEp.toLocaleString('fr-FR')}</span></div>
-                <div class="stat-row"><span class="label">Notés</span><span class="value">${rated.length}</span></div>`;
-
-            const pct = (n) => total > 0 ? Math.round((n / total) * 100) : 0;
-            ctx.querySelector('[data-id="status-bars"]').innerHTML = `
-                <div class="status-bar-item"><div class="bar-label"><span style="color:#2ecc71;">En cours</span><span>${watching}</span></div><div class="bar-track"><div class="bar-fill bar-watching" style="width:${pct(watching)}%"></div></div></div>
-                <div class="status-bar-item"><div class="bar-label"><span style="color:#2e86de;">Terminés</span><span>${completed}</span></div><div class="bar-track"><div class="bar-fill bar-completed" style="width:${pct(completed)}%"></div></div></div>
-                <div class="status-bar-item"><div class="bar-label"><span style="color:#f1c40f;">En attente</span><span>${waiting}</span></div><div class="bar-track"><div class="bar-fill bar-waiting" style="width:${pct(waiting)}%"></div></div></div>`;
-
-            if (avgScore) {
-                ctx.querySelector('[data-id="avg-score"]').textContent = avgScore + '/10';
-                ctx.querySelector('[data-id="avg-stars"]').textContent = starsHtml(parseFloat(avgScore));
-                ctx.querySelector('[data-id="avg-label"]').textContent = `Basé sur ${rated.length} note${rated.length > 1 ? 's' : ''}`;
-            }
-        }
-
-        function renderActivity(animes, ctx) {
-            const events = [];
+    async function loadAnimesForSearch() {
+        try {
+            const animes = await loadAnimes();
             animes.forEach(a => {
-                if (a.addedAt) events.push({ type: 'added', anime: a, ts: a.addedAt });
-                if (a.status === 'completed' && a.completedAt) events.push({ type: 'finished', anime: a, ts: a.completedAt });
-                if (a.ratedAt && a.rating) events.push({ type: 'rated', anime: a, ts: a.ratedAt });
-                if (a.epUpdatedAt && a.epSeen > 0) events.push({ type: 'ep', anime: a, ts: a.epUpdatedAt });
+                allAnimesForSearch.push({ nom: a.nom, ordreAjout: a.ordreAjout });
+                csvDataMap[a.nom] = a;
             });
-            events.sort((a, b) => {
-                const ta = a.ts?.seconds ? a.ts.seconds : (a.ts ? new Date(a.ts).getTime() / 1000 : 0);
-                const tb = b.ts?.seconds ? b.ts.seconds : (b.ts ? new Date(b.ts).getTime() / 1000 : 0);
-                return tb - ta;
-            });
-            const recent = events.slice(0, 15);
-            const feed = ctx.querySelector('[data-id="activity-feed"]');
-            if (recent.length === 0) { feed.innerHTML = `<div style="color:#555; text-align:center; padding:20px;">Aucune activité récente.</div>`; return; }
-            const tagMap = { added: { cls: 'tag-added', label: 'Ajouté' }, finished: { cls: 'tag-finished', label: 'Terminé' }, rated: { cls: 'tag-rated', label: 'Noté' }, ep: { cls: 'tag-ep', label: 'Épisode vu' } };
-            feed.innerHTML = recent.map(ev => {
-                const a = ev.anime; const tag = tagMap[ev.type];
-                let detail = '';
-                if (ev.type === 'rated') detail = `Note : ${a.rating}/10`;
-                if (ev.type === 'ep') detail = `Épisode ${a.epSeen} / ${a.epMax || '?'}`;
-                if (ev.type === 'added') detail = `Statut : ${a.status === 'watching' ? 'En cours' : a.status === 'completed' ? 'Terminé' : 'En attente'}`;
-                if (ev.type === 'finished') detail = `Terminé avec ${a.epSeen} épisode${a.epSeen > 1 ? 's' : ''}`;
-                return `<div class="activity-item"><img class="activity-img" src="${getRealImgPath(a.img)}" onerror="this.src='img/logo.jpg'"><div class="activity-body"><a href="video.html?name=${encodeURIComponent(a.anime)}" class="activity-title">${a.anime}</a><div class="activity-detail"><span class="tag ${tag.cls}">${tag.label}</span>${detail}</div></div><div class="activity-time">${timeAgo(ev.ts)}</div></div>`;
-            }).join('');
+        } catch(e) {}
+    }
+    loadAnimesForSearch();
+
+    const searchInput = document.getElementById('search');
+    const searchSuggestions = document.getElementById('search-suggestions');
+    searchInput.addEventListener('input', function() {
+        const val = this.value.trim();
+        if (val.length < 2) { searchSuggestions.classList.remove('active'); return; }
+        const results = allAnimesForSearch.filter(a => a.nom.toLowerCase().includes(val.toLowerCase())).slice(0, 8);
+        if (results.length === 0) {
+            searchSuggestions.innerHTML = '<div class="sugg-empty">Aucun résultat</div>';
+        } else {
+            searchSuggestions.innerHTML = results.map(a => 
+                `<div class="suggestion-item" data-name="${a.nom.replace(/"/g,'&quot;')}"><img src="${getCoverPath(a.ordreAjout, 1)}" class="sugg-img" onerror="this.onerror=null;this.src='${IMG_LOGO}'"><span>${a.nom}</span></div>`
+            ).join('');
+        }
+        searchSuggestions.classList.add('active');
+    });
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const val = this.value.trim();
+            if (val) window.location.href = 'index.html?search=' + encodeURIComponent(val);
+            searchSuggestions.classList.remove('active');
+            this.blur();
+        }
+    });
+    searchSuggestions.addEventListener('click', function(e) {
+        const item = e.target.closest('.suggestion-item');
+        if (item && item.dataset.name) window.location.href = 'fiche.html?name=' + encodeURIComponent(item.dataset.name);
+    });
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-wrapper')) searchSuggestions.classList.remove('active');
+    });
+
+    function toast(msg, duration = 2500) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), duration);
+    }
+
+    function timeAgo(ts) {
+        if (!ts) return '';
+        const diff = Date.now() - (ts.seconds ? ts.seconds * 1000 : ts);
+        const m = Math.floor(diff / 60000);
+        if (m < 1) return "à l'instant";
+        if (m < 60) return `il y a ${m} min`;
+        const h = Math.floor(m / 60);
+        if (h < 24) return `il y a ${h}h`;
+        const d = Math.floor(h / 24);
+        if (d < 30) return `il y a ${d}j`;
+        return `il y a ${Math.floor(d/30)} mois`;
+    }
+
+    function starsHtml(score) {
+        const full = Math.floor(score / 2);
+        const half = (score % 2) >= 1 ? 1 : 0;
+        const empty = 5 - full - half;
+        return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+    }
+
+    function formatDate(isoOrTs) {
+        if (!isoOrTs) return '—';
+        const d = typeof isoOrTs === 'string' ? new Date(isoOrTs) : new Date(isoOrTs.seconds * 1000);
+        return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+
+    function formatAddedAt(ts) {
+        if (!ts) return '';
+        const moisFR = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+        const d = ts.toDate ? ts.toDate() : (ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts));
+        return `${d.getDate()} ${moisFR[d.getMonth()]} ${d.getFullYear()} à ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
+    document.getElementById('btn-login-page').onclick = () => signInWithPopup(auth, provider);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const publicUid = urlParams.get('uid');
+
+    window.switchTab = function(tab) {
+        document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab-btn-' + tab).classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+    };
+
+    if (publicUid) {
+        document.getElementById('not-logged-block').style.display = 'none';
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+        if (publicUid) {
+            await buildPublicProfile(publicUid, user);
+        } else if (user) {
+            await buildProfile(user);
+        }
+    });
+
+    async function getOwnAnimes(uid) {
+        const [playlistSnap, sharedCustomSnap] = await Promise.all([
+            getDocs(query(collection(db, "playlists"), where("uid", "==", uid))),
+            getDocs(query(collection(db, "playlists_custom"), where("uid", "==", uid), where("shared", "==", true)))
+        ]);
+        const sharedNames = new Set();
+        sharedCustomSnap.forEach(d => sharedNames.add(d.data().name));
+        const animes = [];
+        playlistSnap.forEach(d => {
+            const a = { id: d.id, ...d.data() };
+            if (!sharedNames.has(a.playlistTarget)) animes.push(a);
+        });
+        return animes;
+    }
+
+    async function buildPublicProfile(uid, currentUser) {
+        document.getElementById('tabs-bar').style.display = 'flex';
+        switchTab('community');
+
+        const container = document.getElementById('public-profile-container');
+        container.style.display = 'block';
+        document.getElementById('community-grid').style.display = 'none';
+        container.innerHTML = `<div style="color:#555; font-size:0.85em; padding:20px;">Chargement…</div>`;
+
+        const userSnap = await getDoc(doc(db, "users", uid));
+        if (!userSnap.exists()) {
+            container.innerHTML = `<div class="not-logged"><h2>Profil introuvable</h2><p>Cet utilisateur n'existe pas.</p></div>`;
+            return;
+        }
+        const userData = userSnap.data();
+        const pseudo = userData.pseudo || userData.displayName || 'Utilisateur';
+        const avatarUrl = userData.photoURL || IMG_LOGO;
+        const createdAt = userData.createdAt || null;
+        document.title = `${pseudo} - Le Malicieux`;
+
+        container.innerHTML = `
+            <div style="margin-bottom:12px;">
+                <button onclick="document.getElementById('public-profile-container').style.display='none'; document.getElementById('community-grid').style.display='grid'; history.pushState({},'','profil.html');" style="background:#222; border:1px solid #444; color:#ccc; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:0.8em;">Retour à la communauté</button>
+            </div>
+            <div id="public-shell"></div>`;
+
+        renderProfileShellInto('public-shell', null, pseudo, avatarUrl, createdAt, null, false, uid);
+
+        const animes = await getOwnAnimes(uid);
+        const ctx = document.getElementById('public-shell');
+        renderStats(animes, ctx);
+        renderActivity(animes, ctx);
+        renderRecentAnimes(animes, ctx);
+        renderScoreDist(animes, ctx);
+        renderComments(uid, ctx);
+        await loadCommunity(currentUser);
+    }
+
+    async function buildProfile(user) {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        let userData = userSnap.exists() ? userSnap.data() : {};
+
+        if (!userSnap.exists()) {
+            userData = {
+                uid: user.uid, email: user.email, displayName: user.displayName || '',
+                pseudo: '', photoURL: user.photoURL || '', createdAt: new Date().toISOString(), lastSeen: new Date().toISOString(),
+            };
+            await setDoc(userRef, userData);
         }
 
-        function renderRecentAnimes(animes, ctx) {
-            const sorted = [...animes].filter(a => a.addedAt).sort((a, b) => (b.addedAt?.seconds || 0) - (a.addedAt?.seconds || 0)).slice(0, 12);
-            const grid = ctx.querySelector('[data-id="recent-grid"]');
-            if (sorted.length === 0) { grid.innerHTML = `<div style="color:#555;">Aucun anime ajouté.</div>`; return; }
-            grid.innerHTML = sorted.map(a => `<a href="video.html?name=${encodeURIComponent(a.anime)}" class="recent-card"><img src="${getRealImgPath(a.img)}" onerror="this.src='img/logo.jpg'"><div class="rc-title">${a.anime}</div>${a.addedAt?`<div style="font-size:0.62em;color:#555;margin-top:2px;">${formatAddedAt(a.addedAt)}</div>`:''}</a>`).join('');
-        }
+        const pseudo = userData.pseudo || userData.displayName || user.displayName || 'Utilisateur';
+        const avatarUrl = userData.photoURL || user.photoURL || IMG_LOGO;
+        const createdAt = userData.createdAt || user.metadata?.creationTime || null;
 
-        function renderScoreDist(animes, ctx) {
-            const counts = Array(10).fill(0);
-            animes.forEach(a => { if (a.rating >= 1 && a.rating <= 10) counts[a.rating - 1]++; });
-            const maxCount = Math.max(...counts, 1);
-            ctx.querySelector('[data-id="score-dist"]').innerHTML = counts.map((c, i) => `<div class="score-dist-bar" style="height:${Math.round((c / maxCount) * 100)}%" title="${c} anime${c > 1 ? 's' : ''} noté${c > 1 ? 's' : ''} ${i+1}/10">${c > 0 ? `<div class="bar-count">${c}</div>` : ''}<div class="bar-val">${i+1}</div></div>`).join('');
-        }
+        renderProfileShellInto('tab-profil', user, pseudo, avatarUrl, createdAt, userData.displayName || user.displayName, true, null);
+        document.getElementById('tabs-bar').style.display = 'flex';
+        document.getElementById('not-logged-block').style.display = 'none';
+
+        const snap = await getDocs(query(collection(db, "playlists"), where("uid", "==", user.uid)));
+        const sharedCustomSnap = await getDocs(query(collection(db, "playlists_custom"), where("uid", "==", user.uid), where("shared", "==", true)));
+        const sharedNames = new Set();
+        sharedCustomSnap.forEach(d => sharedNames.add(d.data().name));
+        const animes = [];
+        snap.forEach(d => {
+            const a = { id: d.id, ...d.data() };
+            if (!sharedNames.has(a.playlistTarget)) animes.push(a);
+        });
         
-        window.toggleM = () => {
-            const menu = document.getElementById('menu');
-            const overlay = document.getElementById('overlay');
-            const isOpen = menu.classList.toggle('active');
-            overlay.classList.toggle('active');
-            document.body.style.overflow = isOpen ? 'hidden' : '';
+        const ctx = document.getElementById('tab-profil');
+        renderStats(animes, ctx);
+        renderActivity(animes, ctx);
+        renderRecentAnimes(animes, ctx);
+        renderScoreDist(animes, ctx);
+        renderComments(user.uid, ctx);
+
+        document.getElementById('avatar-upload-btn').onclick = () => document.getElementById('avatar-file-input').click();
+        document.getElementById('avatar-file-input').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const spinner = document.getElementById('avatar-spinner');
+            spinner.classList.add('active');
+            try {
+                const storageRef = ref(storage, `avatars/${user.uid}`);
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+                await setDoc(userRef, { photoURL: url }, { merge: true });
+                document.getElementById('profile-avatar').src = url;
+                sessionStorage.setItem('userAvatar', url);
+                toast('Photo de profil mise à jour !');
+            } catch(err) { toast('Erreur lors de l\'upload.'); }
+            finally { spinner.classList.remove('active'); }
+        };
+        document.getElementById('btn-save-pseudo').onclick = async () => {
+            const val = document.getElementById('input-pseudo').value.trim();
+            if (!val) { toast('Le pseudo ne peut pas être vide.'); return; }
+            if (val.length > 30) { toast('30 caractères max.'); return; }
+            await setDoc(userRef, { pseudo: val }, { merge: true });
+            document.getElementById('display-pseudo').textContent = val;
+            sessionStorage.setItem('userPseudo', val);
+            toast('Pseudo mis à jour !');
         };
 
-        (function markActiveTab() {
-            const current = window.location.pathname.split('/').pop() || 'index.html';
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                if (tab.dataset.page === current) tab.classList.add('active');
-            });
-        })();
+        await loadCommunity(user);
+    }
 
-        window.addEventListener('scroll', () => {
-            const bg = document.getElementById('bg-overlay');
-            if (bg) bg.style.opacity = Math.min(window.scrollY / 600, 0.65);
+    async function loadCommunity(currentUser) {
+        const snap = await getDocs(collection(db, "users"));
+        const members = [];
+        snap.forEach(d => members.push({ uid: d.id, ...d.data() }));
+        members.sort((a, b) => {
+            const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return tb - ta;
         });
-    </script>
+        document.getElementById('community-grid').innerHTML = members.map(m => {
+            const pseudo = m.pseudo || m.displayName || 'Utilisateur';
+            const avatar = m.photoURL || IMG_LOGO;
+            const isMe = currentUser && m.uid === currentUser.uid;
+            return `<div class="member-card" onclick="openMemberProfile('${m.uid}')" style="cursor:pointer;">
+                <img src="${avatar}" class="member-avatar" onerror="this.src='${IMG_LOGO}'">
+                <div class="member-name">${pseudo}${isMe ? ' <span style="color:var(--primary);font-size:0.75em;">(moi)</span>' : ''}</div>
+                <div class="member-sub">Membre depuis ${formatDate(m.createdAt)}</div>
+            </div>`;
+        }).join('');
+    }
+
+    window.openMemberProfile = async function(uid) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        history.pushState({}, '', `profil.html?uid=${uid}`);
+        await buildPublicProfile(uid, null);
+    };
+
+    function renderProfileShellInto(containerId, user, pseudo, avatarUrl, createdAt, googleName, editable, viewUid) {
+        const avatarSection = editable ? `
+            <div class="avatar-wrapper">
+                <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='${IMG_LOGO}'">
+                <div id="avatar-upload-btn" class="avatar-upload-btn" title="Changer la photo"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+                <div id="avatar-spinner" class="upload-spinner">⏳</div>
+            </div>` : `
+            <div class="avatar-wrapper">
+                <img id="profile-avatar" class="avatar-img" src="${avatarUrl}" onerror="this.src='${IMG_LOGO}'">
+            </div>`;
+        const editSection = editable ? `
+            <div class="profile-google-name">Compte Google : ${googleName}</div>
+            <div class="edit-pseudo-row"><input id="input-pseudo" type="text" placeholder="Changer le pseudo…" maxlength="30"><button id="btn-save-pseudo">OK</button></div>` : '';
+        
+        const playlistButton = (viewUid && !editable) ? `<div><a href="playlist.html?uid=${viewUid}" class="btn-playlist-public">Voir sa playlist</a></div>` : '';
+        
+        document.getElementById(containerId).innerHTML = `
+            <div class="profile-layout">
+                <div class="sidebar">
+                    <div class="avatar-card">
+                        ${avatarSection}
+                        <div class="profile-username" id="display-pseudo">${pseudo}</div>
+                        ${editSection}
+                        ${playlistButton}
+                        <div class="profile-meta">Membre depuis<br><span>${formatDate(createdAt)}</span></div>
+                    </div>
+                    <div class="stats-card"><h3>Statistiques</h3><div data-id="stat-rows"><div class="stat-row"><span class="label">Chargement…</span></div></div><div class="status-bars" data-id="status-bars"></div></div>
+                    <div class="stats-card"><h3>Score moyen</h3><div class="score-avg-display"><div class="score-avg-number" data-id="avg-score">—</div><div class="score-stars" data-id="avg-stars"></div><div class="score-avg-label" data-id="avg-label">Aucune note pour l'instant</div></div></div>
+                </div>
+                <div class="main-content">
+                    <div class="section"><h2>Activité récente</h2><div data-id="activity-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
+                    <div class="section"><h2>Derniers animes ajoutés</h2><div data-id="recent-grid" class="recent-grid"></div></div>
+                    <div class="section"><h2>Commentaires</h2><div data-id="comments-feed"><div style="color:#555; font-size:0.85em;">Chargement…</div></div></div>
+                    <div class="section"><h2>Distribution des scores</h2><div class="score-dist" data-id="score-dist"></div><div style="display:flex; gap:4px; margin-top:24px;">${Array.from({length:10},(_,i)=>`<div style="flex:1; text-align:center; font-size:0.65em; color:#555;">${i+1}</div>`).join('')}</div></div>
+                </div>
+            </div>`;
+    }
+
+    async function renderComments(uid, ctx) {
+        const el = ctx.querySelector('[data-id="comments-feed"]');
+        if (!el) return;
+        try {
+            const snap = await getDocs(query(collection(db, "commentaires"), where("uid", "==", uid)));
+            if (snap.empty) { el.innerHTML = `<div style="color:#555; font-size:0.85em;">Aucun commentaire.</div>`; return; }
+            const docs = snap.docs.map(d => d.data()).sort((a,b) => (b.date?.seconds||0) - (a.date?.seconds||0));
+            el.innerHTML = docs.map(c => `<div class="comment-item">
+                    <a href="fiche.html?name=${encodeURIComponent(c.anime)}" class="comment-anime-link">${c.anime}</a>
+                    <div class="comment-text">${c.text}</div>
+                    <div class="comment-time">${timeAgo(c.date)}</div>
+                </div>`).join('');
+        } catch(e) { el.innerHTML = `<div style="color:#555; font-size:0.85em;">Aucun commentaire.</div>`; }
+    }
+
+    function renderStats(animes, ctx) {
+        const watching = animes.filter(a => a.status === 'watching').length;
+        const completed = animes.filter(a => a.status === 'completed').length;
+        const waiting = animes.filter(a => a.status === 'waiting').length;
+        const total = animes.length;
+        const totalEp = animes.reduce((s, a) => s + (parseInt(a.epSeen) || 0), 0);
+        const rated = animes.filter(a => a.rating && a.rating > 0);
+        const avgScore = rated.length > 0 ? (rated.reduce((s, a) => s + a.rating, 0) / rated.length).toFixed(1) : null;
+
+        ctx.querySelector('[data-id="stat-rows"]').innerHTML = `
+            <div class="stat-row"><span class="label">Total animes</span><span class="value">${total}</span></div>
+            <div class="stat-row"><span class="label" style="color:#2ecc71;">En cours</span><span class="value">${watching}</span></div>
+            <div class="stat-row"><span class="label" style="color:#2e86de;">Terminés</span><span class="value">${completed}</span></div>
+            <div class="stat-row"><span class="label" style="color:#f1c40f;">En attente</span><span class="value">${waiting}</span></div>
+            <div class="stat-row"><span class="label">Épisodes vus</span><span class="value">${totalEp.toLocaleString('fr-FR')}</span></div>
+            <div class="stat-row"><span class="label">Notés</span><span class="value">${rated.length}</span></div>`;
+
+        const pct = (n) => total > 0 ? Math.round((n / total) * 100) : 0;
+        ctx.querySelector('[data-id="status-bars"]').innerHTML = `
+            <div class="status-bar-item"><div class="bar-label"><span style="color:#2ecc71;">En cours</span><span>${watching}</span></div><div class="bar-track"><div class="bar-fill bar-watching" style="width:${pct(watching)}%"></div></div></div>
+            <div class="status-bar-item"><div class="bar-label"><span style="color:#2e86de;">Terminés</span><span>${completed}</span></div><div class="bar-track"><div class="bar-fill bar-completed" style="width:${pct(completed)}%"></div></div></div>
+            <div class="status-bar-item"><div class="bar-label"><span style="color:#f1c40f;">En attente</span><span>${waiting}</span></div><div class="bar-track"><div class="bar-fill bar-waiting" style="width:${pct(waiting)}%"></div></div></div>`;
+
+        if (avgScore) {
+            ctx.querySelector('[data-id="avg-score"]').textContent = avgScore + '/10';
+            ctx.querySelector('[data-id="avg-stars"]').textContent = starsHtml(parseFloat(avgScore));
+            ctx.querySelector('[data-id="avg-label"]').textContent = `Basé sur ${rated.length} note${rated.length > 1 ? 's' : ''}`;
+        }
+    }
+
+    function renderActivity(animes, ctx) {
+        const events = [];
+        animes.forEach(a => {
+            if (a.addedAt) events.push({ type: 'added', anime: a, ts: a.addedAt });
+            if (a.status === 'completed' && a.completedAt) events.push({ type: 'finished', anime: a, ts: a.completedAt });
+            if (a.ratedAt && a.rating) events.push({ type: 'rated', anime: a, ts: a.ratedAt });
+            if (a.epUpdatedAt && a.epSeen > 0) events.push({ type: 'ep', anime: a, ts: a.epUpdatedAt });
+        });
+        events.sort((a, b) => {
+            const ta = a.ts?.seconds ? a.ts.seconds : (a.ts ? new Date(a.ts).getTime() / 1000 : 0);
+            const tb = b.ts?.seconds ? b.ts.seconds : (b.ts ? new Date(b.ts).getTime() / 1000 : 0);
+            return tb - ta;
+        });
+        const recent = events.slice(0, 15);
+        const feed = ctx.querySelector('[data-id="activity-feed"]');
+        if (recent.length === 0) { feed.innerHTML = `<div style="color:#555; text-align:center; padding:20px;">Aucune activité récente.</div>`; return; }
+        const tagMap = { added: { cls: 'tag-added', label: 'Ajouté' }, finished: { cls: 'tag-finished', label: 'Terminé' }, rated: { cls: 'tag-rated', label: 'Noté' }, ep: { cls: 'tag-ep', label: 'Épisode vu' } };
+        feed.innerHTML = recent.map(ev => {
+            const a = ev.anime; const tag = tagMap[ev.type];
+            let detail = '';
+            if (ev.type === 'rated') detail = `Note : ${a.rating}/10`;
+            if (ev.type === 'ep') detail = `Épisode ${a.epSeen} / ${a.ep || '?'}`;
+            if (ev.type === 'added') detail = `Statut : ${a.status === 'watching' ? 'En cours' : a.status === 'completed' ? 'Terminé' : 'En attente'}`;
+            if (ev.type === 'finished') detail = `Terminé avec ${a.epSeen} épisode${a.epSeen > 1 ? 's' : ''}`;
+            const cover = csvDataMap[a.anime] ? getCoverPath(csvDataMap[a.anime].ordreAjout, 1) : IMG_LOGO;
+            return `<div class="activity-item"><img class="activity-img" src="${cover}" onerror="this.onerror=null;this.src='${IMG_LOGO}'"><div class="activity-body"><a href="fiche.html?name=${encodeURIComponent(a.anime)}" class="activity-title">${a.anime}</a><div class="activity-detail"><span class="tag ${tag.cls}">${tag.label}</span>${detail}</div></div><div class="activity-time">${timeAgo(ev.ts)}</div></div>`;
+        }).join('');
+    }
+
+    function renderRecentAnimes(animes, ctx) {
+        const sorted = [...animes].filter(a => a.addedAt).sort((a, b) => (b.addedAt?.seconds || 0) - (a.addedAt?.seconds || 0)).slice(0, 12);
+        const grid = ctx.querySelector('[data-id="recent-grid"]');
+        if (sorted.length === 0) { grid.innerHTML = `<div style="color:#555;">Aucun anime ajouté.</div>`; return; }
+        grid.innerHTML = sorted.map(a => {
+            const cover = csvDataMap[a.anime] ? getCoverPath(csvDataMap[a.anime].ordreAjout, 1) : IMG_LOGO;
+            return `<a href="fiche.html?name=${encodeURIComponent(a.anime)}" class="recent-card"><img src="${cover}" onerror="this.onerror=null;this.src='${IMG_LOGO}'"><div class="rc-title">${a.anime}</div>${a.addedAt?`<div style="font-size:0.62em;color:#555;margin-top:2px;">${formatAddedAt(a.addedAt)}</div>`:''}</a>`;
+        }).join('');
+    }
+
+    function renderScoreDist(animes, ctx) {
+        const counts = Array(10).fill(0);
+        animes.forEach(a => { if (a.rating >= 1 && a.rating <= 10) counts[a.rating - 1]++; });
+        const maxCount = Math.max(...counts, 1);
+        ctx.querySelector('[data-id="score-dist"]').innerHTML = counts.map((c, i) => `<div class="score-dist-bar" style="height:${Math.round((c / maxCount) * 100)}%" title="${c} anime${c > 1 ? 's' : ''} noté${c > 1 ? 's' : ''} ${i+1}/10">${c > 0 ? `<div class="bar-count">${c}</div>` : ''}<div class="bar-val">${i+1}</div></div>`).join('');
+    }
+</script>
 </body>
 </html>
