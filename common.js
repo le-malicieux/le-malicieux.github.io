@@ -2,7 +2,6 @@
    common.js — Logique partagée par toutes les pages du site
 ═══════════════════════════════════════════════════════════ */
 
-// ── Firebase ──
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
     getAuth, onAuthStateChanged, signInWithPopup,
@@ -28,7 +27,6 @@ export const db = getFirestore(_app);
 export const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 
-// Ré-export de TOUTES les fonctions Firebase nécessaires aux pages
 export {
     onAuthStateChanged, signInWithPopup, signOut,
     doc, setDoc, getDoc,
@@ -36,14 +34,9 @@ export {
     addDoc, deleteDoc, serverTimestamp
 };
 
-// ── Constantes ──
 export const IMG_LOGO = 'img/bannieres_icones/logo.jpg';
 export const IMG_DISCORD = 'img/bannieres_icones/logo-discord.jpg';
 export const DEFAULT_COVER_NUM = 1;
-
-// ═══════════════════════════════════════════════════════════
-//  CHEMINS D'IMAGES
-// ═══════════════════════════════════════════════════════════
 
 export function getTranche(ordreAjout) {
     const n = Math.max(1, parseInt(ordreAjout, 10) || 1);
@@ -69,10 +62,6 @@ export function getBackgroundUrl(kind, filename) {
         ? `img/fonds_mobiles/${filename}`
         : `img/fonds_desktop/${filename}`;
 }
-
-// ═══════════════════════════════════════════════════════════
-//  FALLBACK IMAGE (sans boucle)
-// ═══════════════════════════════════════════════════════════
 
 export function handleImgError(img, filename) {
     if (!img || img.dataset.fallbackDone === '1') return;
@@ -108,22 +97,14 @@ export function handleImgError(img, filename) {
 }
 window.handleImgError = handleImgError;
 
-// ═══════════════════════════════════════════════════════════
-//  ENCADRÉS CENSURE / STATUT
-// ═══════════════════════════════════════════════════════════
-// Style inline discret (pas de bordure colorée), cohérent avec
-// l'ancien design : juste du texte avec un préfixe rouge.
-
 export function renderMetaBadges(anime) {
     const cens = ((anime && anime.censure) || '—').trim();
     const etat = ((anime && anime.etat) || '—').trim();
-    return `<span class="meta-badge"><strong>Censure :</strong> ${cens}</span>
-        <span class="meta-badge"><strong>Statut :</strong> ${etat}</span>`;
+    return `<div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+        <span class="meta-badge"><strong>Censure :</strong> ${cens}</span>
+        <span class="meta-badge"><strong>Statut :</strong> ${etat}</span>
+    </div>`;
 }
-
-// ═══════════════════════════════════════════════════════════
-//  PARSING CSV
-// ═══════════════════════════════════════════════════════════
 
 export function parseCSVLine(line) {
     const cols = [];
@@ -152,25 +133,12 @@ export function parseAnimeRow(cols) {
     const editeurList = [producteur, label, studio].filter(Boolean);
 
     return {
-        nom: c(0),
-        pop: c(1),
-        score: c(2),
-        sortie: c(3),
-        ep: c(4),
-        censure: c(5),
-        etat: c(6),
-        description: c(7),
-        liensStreaming: c(8),
-        liensDownload: c(9),
-        infos: c(10),
-        tags: c(11),
-        malId: c(12),
-        producteur,
-        label,
-        studio,
+        nom: c(0), pop: c(1), score: c(2), sortie: c(3), ep: c(4),
+        censure: c(5), etat: c(6), description: c(7),
+        liensStreaming: c(8), liensDownload: c(9), infos: c(10),
+        tags: c(11), malId: c(12), producteur, label, studio,
         editeur: editeurList.join(', '),
-        prequels: c(16),
-        sequels: c(17),
+        prequels: c(16), sequels: c(17),
         ordreAjout: parseInt(c(18), 10) || 0,
         alternatif: c(19),
     };
@@ -193,18 +161,9 @@ export async function loadAnimes() {
     return animes;
 }
 
-// ═══════════════════════════════════════════════════════════
-//  RECHERCHE
-// ═══════════════════════════════════════════════════════════
-
 export function normalize(str) {
-    return (str || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[-_.:;,!?()'"&~#|\[\]\/]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+    return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[-_.:;,!?()'"&~#|\[\]\/]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 export function squash(str) { return normalize(str).replace(/ /g, ''); }
 
@@ -212,13 +171,9 @@ function editDistance(a, b, max) {
     if (Math.abs(a.length - b.length) > max) return max + 1;
     let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
     for (let i = 1; i <= a.length; i++) {
-        const cur = [i];
-        let best = i;
+        const cur = [i]; let best = i;
         for (let j = 1; j <= b.length; j++) {
-            cur[j] = Math.min(
-                prev[j] + 1, cur[j - 1] + 1,
-                prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
-            );
+            cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
             if (cur[j] < best) best = cur[j];
         }
         if (best > max) return max + 1;
@@ -283,14 +238,8 @@ export function highlightTitle(title, query) {
     }
     if (orig === -1) return title;
     const end = orig + query.length;
-    return title.substring(0, orig) +
-        '<span class="highlight">' + title.substring(orig, Math.min(end, title.length)) + '</span>' +
-        title.substring(Math.min(end, title.length));
+    return title.substring(0, orig) + '<span class="highlight">' + title.substring(orig, Math.min(end, title.length)) + '</span>' + title.substring(Math.min(end, title.length));
 }
-
-// ═══════════════════════════════════════════════════════════
-//  FOND VERROUILLÉ
-// ═══════════════════════════════════════════════════════════
 
 let _bgLastW = null;
 function _zoomFactor() {
@@ -305,11 +254,7 @@ export function lockBackground(force = false) {
     if (!force && _bgLastW !== null && Math.abs(w - _bgLastW) < 2) return;
     _bgLastW = w;
     const z = _zoomFactor();
-    const h = Math.max(
-        window.innerHeight || 0,
-        document.documentElement.clientHeight || 0,
-        (window.screen && window.screen.height) || 0
-    );
+    const h = Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0, (window.screen && window.screen.height) || 0);
     layers.forEach(el => {
         if (!el) return;
         el.style.width = (w / z) + 'px';
@@ -336,10 +281,6 @@ export async function setBackground() {
     } catch (e) {}
 }
 
-// ═══════════════════════════════════════════════════════════
-//  NAVBAR / MENU
-// ═══════════════════════════════════════════════════════════
-
 export function toggleM() {
     const menu = document.getElementById('menu');
     const overlay = document.getElementById('overlay');
@@ -357,10 +298,6 @@ export function markActiveTab() {
     });
 }
 
-// ═══════════════════════════════════════════════════════════
-//  AUTH FIREBASE
-// ═══════════════════════════════════════════════════════════
-
 let _currentUser = null;
 export function getCurrentUser() { return _currentUser; }
 
@@ -376,10 +313,8 @@ export function initAuth() {
             _currentUser = user;
             try {
                 await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid, email: user.email,
-                    displayName: user.displayName || '',
-                    photoURL: user.photoURL || '',
-                    lastSeen: new Date().toISOString()
+                    uid: user.uid, email: user.email, displayName: user.displayName || '',
+                    photoURL: user.photoURL || '', lastSeen: new Date().toISOString()
                 }, { merge: true });
             } catch (e) {}
 
@@ -407,10 +342,6 @@ export function initAuth() {
         }
     });
 }
-
-// ═══════════════════════════════════════════════════════════
-//  INIT GLOBALE
-// ═══════════════════════════════════════════════════════════
 
 export function initCommon() {
     setBackground();

@@ -15,23 +15,22 @@
         })();
     </script>
     <style>
-        /* ── Styles spécifiques à la fiche (le reste est dans common.css) ── */
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding-top: 62px; overflow-x: hidden; }
         .container { max-width: 1100px; margin: 0 auto; padding: 20px clamp(20px, 5vw, 100px); }
-
         .back-btn { display: inline-block; text-decoration: none; color: var(--primary); font-weight: bold; margin-bottom: 20px; border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; font-size: 0.85em; }
         .back-btn:hover { background: var(--primary); color: white; }
-
         .anime-header { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
         .top-info { display: flex; gap: 25px; margin-bottom: 25px; }
         .main-details { flex: 1; min-width: 0; }
         .anime-title { font-size: 2em; color: var(--primary); margin: 0 0 15px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        
+        /* Grille d'informations (comme video.html) */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
         .stat-item { background: #222; padding: 8px; border-radius: 8px; border: 1px solid #333; text-align: center; }
-        .stat-item small { color: var(--primary); font-size: 0.65em; display: block; margin-bottom: 4px; }
+        .stat-item small { color: var(--primary); font-size: 0.65em; display: block; margin-bottom: 4px; text-transform: uppercase; }
         .stat-item span { font-weight: bold; font-size: 0.85em; }
         .stat-item.mal-live { border-color: #2e86de; }
-        .mal-loading { display: inline-flex; align-items: center; gap: 6px; font-size: 0.7em; color: #888; margin-top: 6px; }
+        .mal-loading { display: inline-flex; align-items: center; gap: 6px; font-size: 0.7em; color: #888; margin-bottom: 10px; }
         .mal-loading .dot { width: 5px; height: 5px; background: #2e86de; border-radius: 50%; animation: pulse 1s infinite; }
         @keyframes pulse { 0%,100% { opacity:0.2; } 50% { opacity:1; } }
 
@@ -47,7 +46,6 @@
         .btn-link:hover { background: var(--primary); }
         .btn-delete { background: none; color: #ff4757; border: 1px solid #ff4757; padding: 6px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 0.75em; margin-top: 10px; }
         .mal-link { display: inline-flex; align-items: center; gap: 5px; font-size: 0.7em; color: #2e86de; text-decoration: none; margin-top: 4px; }
-
         .related-row { display: flex; gap: 16px; margin-bottom: 15px; flex-wrap: wrap; }
         .related-section { flex: 1; min-width: 0; }
         .related-label { font-size: 0.65em; color: var(--primary); font-weight: bold; margin-bottom: 6px; }
@@ -80,17 +78,19 @@
 
         /* ══════════ CARROUSEL MULTI-IMAGES ══════════ */
         .cover-carousel { position: relative; width: 260px; flex-shrink: 0; }
-        .cover-carousel .cover-track { width: 100%; border-radius: 10px; overflow: hidden; background: #111; aspect-ratio: 2/3; cursor: zoom-in; display: block; position: relative; }
-        .cover-carousel .cover-img { width: 100%; height: 100%; object-fit: cover; display: block; user-select: none; -webkit-user-drag: none; }
-        .cover-carousel .cover-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border: 1px solid #444; color: white; width: 32px; height: 60px; font-size: 1.4em; cursor: pointer; z-index: 5; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
-        .cover-carousel .cover-prev { left: 4px; }
-        .cover-carousel .cover-next { right: 4px; }
-        .cover-carousel .cover-nav:hover { background: var(--primary); }
-        .cover-carousel .cover-nav[disabled] { opacity: 0.25; cursor: default; }
-        .cover-carousel .cover-nav[disabled]:hover { background: rgba(0,0,0,0.6); }
-        .cover-carousel .cover-dots { position: absolute; bottom: 6px; left: 0; right: 0; display: flex; justify-content: center; gap: 5px; z-index: 5; flex-wrap: wrap; padding: 0 6px; }
+        .cover-track { width: 100%; border-radius: 10px; overflow: hidden; background: #111; aspect-ratio: 2/3; cursor: zoom-in; display: block; }
+        .cover-img { width: 100%; height: 100%; object-fit: cover; display: block; user-select: none; -webkit-user-drag: none; }
+        
+        /* Flèches et points sous l'image */
+        .cover-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+        .cover-nav { background: #222; border: 1px solid #444; color: white; width: 30px; height: 30px; font-size: 1.2em; cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+        .cover-nav:hover { background: var(--primary); }
+        .cover-nav[disabled] { opacity: 0.25; cursor: default; }
+        .cover-nav[disabled]:hover { background: #222; }
+        .cover-dots { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; flex: 1; margin: 0 10px; }
         .cover-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; border: 1px solid rgba(0,0,0,0.5); transition: background 0.15s; }
         .cover-dot.active { background: var(--primary); }
+        
         .cover-lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.94); z-index: 10000; align-items: center; justify-content: center; cursor: zoom-out; }
         .cover-lightbox.active { display: flex; }
         .cover-lightbox img { max-width: 92vw; max-height: 92vh; object-fit: contain; box-shadow: 0 0 40px rgba(0,0,0,0.95); }
@@ -98,8 +98,8 @@
         @media (max-width: 800px) {
             .top-info { flex-direction: row; gap: 12px; align-items: flex-start; margin-bottom: 16px; }
             .cover-carousel { width: 110px; max-width: 110px; }
-            .cover-carousel .cover-nav { width: 22px; height: 40px; font-size: 1em; }
-            .cover-carousel .cover-dots { gap: 3px; }
+            .cover-nav { width: 24px; height: 24px; font-size: 0.9em; }
+            .cover-dots { gap: 3px; }
             .cover-dot { width: 6px; height: 6px; }
             .anime-title { font-size: 1.15em; line-height: 1.25; }
             .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; }
@@ -211,7 +211,6 @@
 
     window.__allAnimesForRandom = allAnimes;
 
-    // ═══ CHARGEMENT DES DONNÉES ═══
     async function load() {
         const display = document.getElementById('anime-details');
         try {
@@ -254,19 +253,20 @@
                     ${anime.sequels ? `<div class="related-section"><div class="related-label">Suite(s)</div>${makeRelatedCards(anime.sequels)}</div>` : ''}
                 </div>` : '';
 
-            const metaBadges = renderMetaBadges(anime);
             const cover1 = getCoverPath(anime.ordreAjout, 1);
 
             display.innerHTML = `
                 <div class="anime-header">
                     <div class="top-info">
                         <div class="cover-carousel" id="cover-carousel">
-                            <button class="cover-nav cover-prev" aria-label="Image précédente">‹</button>
                             <div class="cover-track" id="cover-track">
                                 <img class="cover-img" id="cover-img" src="${cover1}" alt="${anime.nom}" onerror="handleImgError(this, '${anime.ordreAjout}-1.webp')">
                             </div>
-                            <button class="cover-nav cover-next" aria-label="Image suivante">›</button>
-                            <div class="cover-dots" id="cover-dots"></div>
+                            <div class="cover-controls">
+                                <button class="cover-nav cover-prev" aria-label="Image précédente">‹</button>
+                                <div class="cover-dots" id="cover-dots"></div>
+                                <button class="cover-nav cover-next" aria-label="Image suivante">›</button>
+                            </div>
                         </div>
                         <div class="main-details">
                             <h1 class="anime-title">${anime.nom}</h1>
@@ -275,10 +275,11 @@
                                 <div class="stat-item"><small>Score</small><span id="stat-score">${anime.score}</span></div>
                                 <div class="stat-item"><small>Sortie</small><span id="stat-sortie">${anime.sortie}</span></div>
                                 <div class="stat-item"><small>Épisodes</small><span>${anime.ep}</span></div>
+                                <div class="stat-item"><small>Censure</small><span>${anime.censure}</span></div>
+                                <div class="stat-item"><small>État</small><span id="stat-etat">${anime.etat}</span></div>
                             </div>
-                            ${metaBadges}
-                            <div id="mal-badge"><span class="mal-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span>Chargement MAL…</span></div>
-                            <p style="font-size:0.85em; color:#ccc; line-height:1.5;">${anime.description}</p>
+                            <div id="mal-badge" style="margin-top:10px;"><span class="mal-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span>Chargement MAL…</span></div>
+                            <p style="font-size:0.85em; color:#ccc; line-height:1.5; margin-top:10px;">${anime.description}</p>
                         </div>
                     </div>
                     <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:${relatedSection ? '10px' : '15px'};">${tagsHtml}</div>
@@ -308,7 +309,6 @@
                     </div>
                 </div>`;
 
-            // Liens DL / Streaming
             const getDomainLabel = (url, prefix) => {
                 try { return `${prefix} ${new URL(url).hostname.replace('www.', '')}`; }
                 catch (e) { return `${prefix} Lien`; }
@@ -341,15 +341,12 @@
                 infovArea.appendChild(t); infovArea.appendChild(b);
             }
 
-            // Init carrousel multi-images
             initCoverCarousel(anime.ordreAjout, imagesIndex);
 
-            // Back-link adapté
             const _ref = document.referrer, _bl = document.getElementById('back-link');
             if (_ref.includes('playlist.html')) _bl.innerText = 'Retour à la playlist';
             else if (_ref.includes('tags.html')) _bl.innerText = 'Retour aux tags';
 
-            // Fetch MAL
             fetchMALData(anime.nom, anime.malId).then(md => {
                 if (md) applyMALStats(md);
                 else {
@@ -376,16 +373,13 @@
                 }
             };
 
-            // Init seek
             loadSeekstreaming();
-
         } catch (err) {
             console.error(err);
             display.innerHTML = 'Erreur de chargement.';
         }
     }
 
-    // ═══ CARROUSEL MULTI-IMAGES ═══
     function initCoverCarousel(ordreAjout, imagesIndex) {
         const track = document.getElementById('cover-track');
         const img = document.getElementById('cover-img');
@@ -397,7 +391,6 @@
 
         const nums = (imagesIndex[String(ordreAjout)] || []).slice();
         if (!nums.length) {
-            // Fallback : logo, pas de boucle
             img.src = IMG_LOGO;
             img.onerror = null;
             prevBtn.style.display = 'none';
@@ -415,7 +408,6 @@
             img.src = getCoverPath(ordreAjout, nums[current]);
             img.dataset.tried = '';
             img.onerror = function() { handleImgError(this, `${ordreAjout}-${nums[current]}.webp`); };
-            // Préchargement des voisines (lazy)
             [current - 1, current + 1].forEach(j => {
                 if (j >= 0 && j < total) {
                     const pre = new Image();
@@ -439,7 +431,6 @@
             nextBtn.style.display = 'none';
         }
 
-        // Swipe tactile
         let startX = 0, startY = 0;
         track.addEventListener('touchstart', e => {
             startX = e.touches[0].clientX;
@@ -453,7 +444,6 @@
             }
         }, { passive: true });
 
-        // Lightbox au clic
         track.onclick = () => {
             lightboxImg.src = img.src;
             lightbox.classList.add('active');
@@ -463,7 +453,6 @@
         show(0);
     }
 
-    // ═══ MAL (Jikan) ═══
     const MAL_CACHE_TTL = 12 * 60 * 60 * 1000;
     function malCacheGet(key) {
         try {
@@ -536,8 +525,7 @@
         if (badge && malData.malUrl) badge.innerHTML = `<a href="${malData.malUrl}" target="_blank" class="mal-link">Voir sur MyAnimeList</a>`;
     }
 
-    // ═══ PLAYLIST + AUTH ═══
-    const firebaseReady = Promise.resolve(); // déjà initialisé dans common.js
+    const firebaseReady = Promise.resolve();
 
     function initPlaylistAndComments() {
         onAuthStateChanged(auth, async (u) => {
@@ -553,7 +541,6 @@
 
                 const docRef = doc(db, "playlists", u.uid + "_" + animeName);
                 let snap = await getDoc(docRef);
-                // Migration ancienne clé si besoin
                 if (!snap.exists()) {
                     try {
                         const allSnap = await getDocs(query(collection(db, "playlists"), where("uid", "==", u.uid)));
@@ -632,7 +619,6 @@
         else if (cel) cel.style.display = 'none';
     }
 
-    // ═══ SEEK (stream.csv) ═══
     async function loadSeekstreaming() {
         if (!animeName) return;
         try {
@@ -743,7 +729,6 @@
         } catch (e) { console.warn('SeekStreaming load error:', e); }
     }
 
-    // ═══ BACK / SEARCH ═══
     window.handleBack = (e) => {
         e.preventDefault();
         const from = document.referrer;
