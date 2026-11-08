@@ -34,9 +34,17 @@ export {
     addDoc, deleteDoc, serverTimestamp
 };
 
-export const IMG_LOGO = 'img/bannieres_icones/logo.jpg';
-export const IMG_DISCORD = 'img/bannieres_icones/logo-discord.jpg';
+// ── Constantes ──
+// On utilise jsDelivr pour éviter le Rate Limit de GitHub Pages.
+// Si tu changes de compte ou de nom de dépôt, modifie "le-malicieux/le-malicieux.github.io".
+const CDN_BASE = 'https://cdn.jsdelivr.net/gh/le-malicieux/le-malicieux.github.io@main';
+export const IMG_LOGO = `${CDN_BASE}/img/bannieres_icones/logo.jpg`;
+export const IMG_DISCORD = `${CDN_BASE}/img/bannieres_icones/logo-discord.jpg`;
 export const DEFAULT_COVER_NUM = 1;
+
+// ═══════════════════════════════════════════════════════════
+//  CHEMINS D'IMAGES
+// ═══════════════════════════════════════════════════════════
 
 export function getTranche(ordreAjout) {
     const n = Math.max(1, parseInt(ordreAjout, 10) || 1);
@@ -48,20 +56,24 @@ export function getTranche(ordreAjout) {
 export function getCoverPath(ordreAjout, num = DEFAULT_COVER_NUM) {
     const n = parseInt(ordreAjout, 10);
     if (!n || n < 1) return IMG_LOGO;
-    return `img/covers/${getTranche(n)}/${n}-${num}.webp`;
+    return `${CDN_BASE}/img/covers/${getTranche(n)}/${n}-${num}.webp`;
 }
 
 export function getPlsPath(slug) {
     if (!slug) return IMG_LOGO;
-    return `img/pls/${slug}.webp`;
+    return `${CDN_BASE}/img/pls/${slug}.webp`;
 }
 
 export function getBackgroundUrl(kind, filename) {
     if (!filename) return '';
     return kind === 'mobile'
-        ? `img/fonds_mobiles/${filename}`
-        : `img/fonds_desktop/${filename}`;
+        ? `${CDN_BASE}/img/fonds_mobiles/${filename}`
+        : `${CDN_BASE}/img/fonds_desktop/${filename}`;
 }
+
+// ═══════════════════════════════════════════════════════════
+//  FALLBACK IMAGE (sans boucle)
+// ═══════════════════════════════════════════════════════════
 
 export function handleImgError(img, filename) {
     if (!img || img.dataset.fallbackDone === '1') return;
@@ -88,7 +100,7 @@ export function handleImgError(img, filename) {
     };
     const next = (chain[ext] || []).find(e => !tried.includes(e));
     if (next) {
-        img.src = `img/covers/${getTranche(ordre)}/${ordre}-${num}.${next}`;
+        img.src = `${CDN_BASE}/img/covers/${getTranche(ordre)}/${ordre}-${num}.${next}`;
     } else {
         img.dataset.fallbackDone = '1';
         img.onerror = null;
@@ -96,6 +108,10 @@ export function handleImgError(img, filename) {
     }
 }
 window.handleImgError = handleImgError;
+
+// ═══════════════════════════════════════════════════════════
+//  ENCADRÉS CENSURE / STATUT
+// ═══════════════════════════════════════════════════════════
 
 export function renderMetaBadges(anime) {
     const cens = ((anime && anime.censure) || '—').trim();
@@ -105,6 +121,10 @@ export function renderMetaBadges(anime) {
         <span class="meta-badge"><strong>Statut :</strong> ${etat}</span>
     </div>`;
 }
+
+// ═══════════════════════════════════════════════════════════
+//  PARSING CSV
+// ═══════════════════════════════════════════════════════════
 
 export function parseCSVLine(line) {
     const cols = [];
@@ -160,6 +180,10 @@ export async function loadAnimes() {
     }
     return animes;
 }
+
+// ═══════════════════════════════════════════════════════════
+//  RECHERCHE
+// ═══════════════════════════════════════════════════════════
 
 export function normalize(str) {
     return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -241,6 +265,10 @@ export function highlightTitle(title, query) {
     return title.substring(0, orig) + '<span class="highlight">' + title.substring(orig, Math.min(end, title.length)) + '</span>' + title.substring(Math.min(end, title.length));
 }
 
+// ═══════════════════════════════════════════════════════════
+//  FOND VERROUILLÉ
+// ═══════════════════════════════════════════════════════════
+
 let _bgLastW = null;
 function _zoomFactor() {
     const z = parseFloat(getComputedStyle(document.documentElement).zoom);
@@ -281,6 +309,10 @@ export async function setBackground() {
     } catch (e) {}
 }
 
+// ═══════════════════════════════════════════════════════════
+//  NAVBAR / MENU
+// ═══════════════════════════════════════════════════════════
+
 export function toggleM() {
     const menu = document.getElementById('menu');
     const overlay = document.getElementById('overlay');
@@ -297,6 +329,10 @@ export function markActiveTab() {
         if (tab.dataset.page === current) tab.classList.add('active');
     });
 }
+
+// ═══════════════════════════════════════════════════════════
+//  AUTH FIREBASE
+// ═══════════════════════════════════════════════════════════
 
 let _currentUser = null;
 export function getCurrentUser() { return _currentUser; }
@@ -342,6 +378,10 @@ export function initAuth() {
         }
     });
 }
+
+// ═══════════════════════════════════════════════════════════
+//  INIT GLOBALE
+// ═══════════════════════════════════════════════════════════
 
 export function initCommon() {
     setBackground();
