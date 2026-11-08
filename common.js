@@ -1,25 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
    common.js — Logique partagée par toutes les pages du site
-   ─────────────────────────────────────────────────────────
-   À charger en type="module" dans chaque HTML :
-
-       <script type="module" src="common.js"></script>
-       <script type="module">
-           import { initCommon, loadAnimes, getCoverPath, ... } from './common.js';
-           initCommon();
-           // code spécifique à la page
-       </script>
-
-   Fournit :
-     - auth Firebase (signIn, signOut, observer)
-     - chemins d'images (getCoverPath, getPlsPath, getBackgroundUrl)
-     - fallback image sans boucle (handleImgError)
-     - encadrés censure / statut (renderMetaBadges)
-     - parsing CSV animes.csv (parseAnimeRow, loadAnimes)
-     - moteur de recherche (searchAnimes, highlightTitle)
-     - fond verrouillé (setBackground, lockBackground)
-     - navbar (toggleM, markActiveTab)
-     - init global (initCommon)
 ═══════════════════════════════════════════════════════════ */
 
 // ── Firebase ──
@@ -29,7 +9,9 @@ import {
     GoogleAuthProvider, signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-    getFirestore, doc, setDoc, getDoc
+    getFirestore, doc, setDoc, getDoc,
+    collection, query, where, getDocs, onSnapshot,
+    addDoc, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -46,8 +28,13 @@ export const db = getFirestore(_app);
 export const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 
-// Ré-export des fonctions Firebase utiles aux pages
-export { onAuthStateChanged, signInWithPopup, signOut, doc, setDoc, getDoc };
+// Ré-export de TOUTES les fonctions Firebase nécessaires aux pages
+export {
+    onAuthStateChanged, signInWithPopup, signOut,
+    doc, setDoc, getDoc,
+    collection, query, where, getDocs, onSnapshot,
+    addDoc, deleteDoc, serverTimestamp
+};
 
 // ── Constantes ──
 export const IMG_LOGO = 'img/bannieres_icones/logo.jpg';
@@ -58,7 +45,6 @@ export const DEFAULT_COVER_NUM = 1;
 //  CHEMINS D'IMAGES
 // ═══════════════════════════════════════════════════════════
 
-/** Calcule la tranche ("1-99", "100-199", …) pour un ordre_ajout donné. */
 export function getTranche(ordreAjout) {
     const n = Math.max(1, parseInt(ordreAjout, 10) || 1);
     if (n < 100) return '1-99';
@@ -66,20 +52,17 @@ export function getTranche(ordreAjout) {
     return `${start}-${start + 99}`;
 }
 
-/** Chemin complet d'une cover : img/covers/<tranche>/<ordre>-<num>.webp */
 export function getCoverPath(ordreAjout, num = DEFAULT_COVER_NUM) {
     const n = parseInt(ordreAjout, 10);
     if (!n || n < 1) return IMG_LOGO;
     return `img/covers/${getTranche(n)}/${n}-${num}.webp`;
 }
 
-/** Chemin d'un logo PLS : img/pls/<slug>.webp */
 export function getPlsPath(slug) {
     if (!slug) return IMG_LOGO;
     return `img/pls/${slug}.webp`;
 }
 
-/** Chemin d'un fond d'écran. */
 export function getBackgroundUrl(kind, filename) {
     if (!filename) return '';
     return kind === 'mobile'
@@ -91,14 +74,6 @@ export function getBackgroundUrl(kind, filename) {
 //  FALLBACK IMAGE (sans boucle)
 // ═══════════════════════════════════════════════════════════
 
-/**
- * Fallback progressif pour une cover manquante.
- * Accepte soit "556-1.webp" (nouveau format), soit n'importe quoi d'autre
- * (ancien format) : dans ce cas, on bascule directement sur le logo.
- *
- * Jamais de boucle : chaque extension n'est essayée qu'une seule fois,
- * puis on tombe sur le logo (onerror neutralisé).
- */
 export function handleImgError(img, filename) {
     if (!img || img.dataset.fallbackDone === '1') return;
     const m = String(filename || '').match(/^(\d+)-(\d+)\.(webp|jpg|jpeg|png)$/i);
@@ -131,35 +106,25 @@ export function handleImgError(img, filename) {
         img.src = IMG_LOGO;
     }
 }
-// Compatibilité : les anciens HTML appellent window.handleImgError(...)
 window.handleImgError = handleImgError;
 
 // ═══════════════════════════════════════════════════════════
 //  ENCADRÉS CENSURE / STATUT
 // ═══════════════════════════════════════════════════════════
+// Style inline discret (pas de bordure colorée), cohérent avec
+// l'ancien design : juste du texte avec un préfixe rouge.
 
-/**
- * Renvoie le HTML des encadrés "Censure : XXX" et "Statut : XXX".
- * Utilisable dans toute carte (index, tags, alphabetique, playlist, profil,
- * editeurs, fiche, pls, index_old).
- */
 export function renderMetaBadges(anime) {
     const cens = ((anime && anime.censure) || '—').trim();
     const etat = ((anime && anime.etat) || '—').trim();
-    return `<div class="meta-badge-row">
-        <span class="meta-badge meta-cens"><strong>Censure :</strong> ${cens}</span>
-        <span class="meta-badge meta-statut"><strong>Statut :</strong> ${etat}</span>
-    </div>`;
+    return `<span class="meta-badge"><strong>Censure :</strong> ${cens}</span>
+        <span class="meta-badge"><strong>Statut :</strong> ${etat}</span>`;
 }
 
 // ═══════════════════════════════════════════════════════════
 //  PARSING CSV
 // ═══════════════════════════════════════════════════════════
 
-/**
- * Découpe une ligne CSV en respectant les guillemets.
- * Séparateur : ; (comme dans animes.csv).
- */
 export function parseCSVLine(line) {
     const cols = [];
     let cur = '';
@@ -179,31 +144,6 @@ export function parseCSVLine(line) {
     return cols;
 }
 
-/**
- * Transforme une ligne de animes.csv en objet.
- *
- * Colonnes (0-based) — structure actuelle, SANS la colonne image supprimée :
- *   0  anime
- *   1  popularite
- *   2  score
- *   3  sortie
- *   4  episodes
- *   5  censure
- *   6  etat
- *   7  description
- *   8  Liens_Streaming
- *   9  Liens_Download
- *   10 infos
- *   11 tags
- *   12 mal_id
- *   13 Producteur
- *   14 Label
- *   15 Studio
- *   16 prequels
- *   17 sequels
- *   18 ordre_ajout
- *   19 alternatif
- */
 export function parseAnimeRow(cols) {
     const c = (i) => (cols[i] || '').trim().replace(/^"|"$/g, '');
     const producteur = c(13);
@@ -228,7 +168,6 @@ export function parseAnimeRow(cols) {
         producteur,
         label,
         studio,
-        // champ agrégé pour l'affichage "Éditeur" (rétrocompatible)
         editeur: editeurList.join(', '),
         prequels: c(16),
         sequels: c(17),
@@ -237,10 +176,6 @@ export function parseAnimeRow(cols) {
     };
 }
 
-/**
- * Charge animes.csv et renvoie la liste d'animes parsés.
- * Ignore silencieusement les lignes vides / incomplètes.
- */
 export async function loadAnimes() {
     const resp = await fetch('animes.csv');
     if (!resp.ok) throw new Error(`animes.csv introuvable (${resp.status})`);
@@ -281,8 +216,7 @@ function editDistance(a, b, max) {
         let best = i;
         for (let j = 1; j <= b.length; j++) {
             cur[j] = Math.min(
-                prev[j] + 1,
-                cur[j - 1] + 1,
+                prev[j] + 1, cur[j - 1] + 1,
                 prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
             );
             if (cur[j] < best) best = cur[j];
@@ -294,18 +228,14 @@ function editDistance(a, b, max) {
 }
 function isSubsequence(q, t) {
     let i = 0;
-    for (let j = 0; j < t.length && i < q.length; j++) {
-        if (t[j] === q[i]) i++;
-    }
+    for (let j = 0; j < t.length && i < q.length; j++) if (t[j] === q[i]) i++;
     return i === q.length;
 }
 
 export function matchScore(title, query) {
-    const t = normalize(title);
-    const q = normalize(query);
+    const t = normalize(title), q = normalize(query);
     if (!q) return null;
-    const ts = squash(t);
-    const qs = squash(q);
+    const ts = squash(t), qs = squash(q);
     if (t === q) return 1000;
     if (t.startsWith(q)) return 900 - t.length * 0.1;
     if (ts.startsWith(qs)) return 850 - ts.length * 0.1;
@@ -319,23 +249,13 @@ export function matchScore(title, query) {
     if (qs.length >= 2 && initials.startsWith(qs)) return 560;
     if (qs.length >= 4) {
         const tol = qs.length <= 6 ? 1 : 2;
-        for (const w of words) {
-            if (Math.abs(w.length - q.length) <= tol &&
-                editDistance(w, q, tol) <= tol) return 500;
-        }
-        if (Math.abs(ts.length - qs.length) <= tol &&
-            editDistance(ts, qs, tol) <= tol) return 480;
+        for (const w of words) if (Math.abs(w.length - q.length) <= tol && editDistance(w, q, tol) <= tol) return 500;
+        if (Math.abs(ts.length - qs.length) <= tol && editDistance(ts, qs, tol) <= tol) return 480;
     }
     if (qs.length >= 3 && isSubsequence(qs, ts)) return 300 - ts.length * 0.05;
     return null;
 }
 
-/**
- * Recherche dans une liste d'animes (déjà chargés).
- *   query   : chaîne de recherche
- *   animes  : tableau d'animes (résultat de loadAnimes())
- *   limit   : nombre max de résultats (optionnel)
- */
 export function searchAnimes(query, animes, limit) {
     const scored = [];
     for (const a of animes) {
@@ -353,12 +273,10 @@ export function searchAnimes(query, animes, limit) {
 
 export function highlightTitle(title, query) {
     if (!query) return title;
-    const normTitle = normalize(title);
-    const normQuery = normalize(query);
+    const normTitle = normalize(title), normQuery = normalize(query);
     const idx = normTitle.indexOf(normQuery);
     if (idx === -1) return title;
-    let count = 0;
-    let orig = -1;
+    let count = 0, orig = -1;
     for (let i = 0; i < title.length; i++) {
         if (normalize(title[i]).length > 0) count++;
         if (count > idx && orig === -1) orig = i;
@@ -380,16 +298,8 @@ function _zoomFactor() {
     return (!z || isNaN(z)) ? 1 : z;
 }
 
-/**
- * Fige les dimensions des couches #bg-layer et #bg-overlay en pixels.
- * Ne recalcule que si la LARGEUR change (rotation, redimensionnement réel) :
- * la barre d'URL mobile ne redimensionne plus l'image.
- */
 export function lockBackground(force = false) {
-    const layers = [
-        document.getElementById('bg-layer'),
-        document.getElementById('bg-overlay')
-    ];
+    const layers = [document.getElementById('bg-layer'), document.getElementById('bg-overlay')];
     if (!layers[0]) return;
     const w = document.documentElement.clientWidth;
     if (!force && _bgLastW !== null && Math.abs(w - _bgLastW) < 2) return;
@@ -407,7 +317,6 @@ export function lockBackground(force = false) {
     });
 }
 
-/** Choisit un fond aléatoire et le charge dans #bg-layer. */
 export async function setBackground() {
     try {
         const res = await fetch('backgrounds.json');
@@ -424,9 +333,7 @@ export async function setBackground() {
             if (layer) layer.style.backgroundImage = `url('${url}')`;
         };
         img.src = url;
-    } catch (e) {
-        /* silencieux */
-    }
+    } catch (e) {}
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -450,26 +357,13 @@ export function markActiveTab() {
     });
 }
 
-/** Ouvre une fiche au hasard parmi une liste d'animes. */
-export function randomAnime(animes) {
-    if (!animes || !animes.length) return;
-    const a = animes[Math.floor(Math.random() * animes.length)];
-    window.location.href = `fiche.html?name=${encodeURIComponent(a.nom)}`;
-}
-window.randomAnime = randomAnime;
-
 // ═══════════════════════════════════════════════════════════
 //  AUTH FIREBASE
 // ═══════════════════════════════════════════════════════════
 
 let _currentUser = null;
-/** Renvoie l'utilisateur actuellement connecté (ou null). */
 export function getCurrentUser() { return _currentUser; }
 
-/**
- * Initialise la délégation de clic sur les boutons de connexion/déconnexion
- * et observe l'état d'authentification pour peupler les .auth-ui-slot.
- */
 export function initAuth() {
     document.addEventListener('click', (e) => {
         if (e.target.closest('.js-login-btn')) signInWithPopup(auth, provider);
@@ -482,13 +376,12 @@ export function initAuth() {
             _currentUser = user;
             try {
                 await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid,
-                    email: user.email,
+                    uid: user.uid, email: user.email,
                     displayName: user.displayName || '',
                     photoURL: user.photoURL || '',
                     lastSeen: new Date().toISOString()
                 }, { merge: true });
-            } catch (e) { /* silencieux */ }
+            } catch (e) {}
 
             const cachedPseudo = sessionStorage.getItem('userPseudo');
             let displayName = cachedPseudo || user.displayName || 'Utilisateur';
@@ -502,7 +395,7 @@ export function initAuth() {
                     if (snap.exists() && snap.data().photoURL) {
                         sessionStorage.setItem('userAvatar', snap.data().photoURL);
                     }
-                } catch (e) { /* silencieux */ }
+                } catch (e) {}
             }
             const avatarUrl = sessionStorage.getItem('userAvatar') || user.photoURL || IMG_LOGO;
             const html = `<a href="profil.html" class="auth-account"><img src="${avatarUrl}" class="auth-avatar" onerror="this.src='${IMG_LOGO}'"><span class="auth-name">${displayName}</span></a><button class="js-logout-btn auth-logout-btn">Quitter</button>`;
@@ -519,16 +412,11 @@ export function initAuth() {
 //  INIT GLOBALE
 // ═══════════════════════════════════════════════════════════
 
-/**
- * À appeler une seule fois au démarrage de chaque page.
- * Pose : fond, verrou, observer de scroll, auth, onglet actif.
- */
 export function initCommon() {
     setBackground();
     lockBackground(true);
     window.addEventListener('resize', () => lockBackground(false));
-    window.addEventListener('orientationchange',
-        () => setTimeout(() => lockBackground(true), 250));
+    window.addEventListener('orientationchange', () => setTimeout(() => lockBackground(true), 250));
     window.addEventListener('scroll', () => {
         const bg = document.getElementById('bg-overlay');
         if (bg) bg.style.opacity = Math.min(window.scrollY / 600, 0.65);
