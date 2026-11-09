@@ -120,6 +120,11 @@
     let prodsData = {}; 
     let studiosData = {}; 
     let currentTab = 'hentai';
+    
+    // Caches pour les compteurs (optimisation)
+    let prodsCounts = {}; 
+    let labelsCounts = {}; 
+    let studiosCounts = {};
 
     async function init() {
         allAnimes = await loadAnimes();
@@ -142,8 +147,34 @@
             loadStudios('studios_ero.csv', true)
         ]);
 
+        precomputeCounts();
         window.addEventListener('hashchange', route);
         route();
+    }
+
+    function precomputeCounts() {
+        prodsCounts = {}; labelsCounts = {}; studiosCounts = {};
+        
+        allAnimes.forEach(a => {
+            let isAnimeEro = false;
+            [a.producteur, a.label, a.studio].forEach(str => {
+                if (str && str.split(',').some(s => eroticaSet.has(s.trim()))) isAnimeEro = true;
+            });
+            const tab = isAnimeEro ? 'erotica' : 'hentai';
+
+            (a.producteur || '').split(',').map(s=>s.trim()).filter(Boolean).forEach(p => {
+                if (!prodsCounts[p]) prodsCounts[p] = { hentai: 0, erotica: 0 };
+                prodsCounts[p][tab]++;
+            });
+            (a.label || '').split(',').map(s=>s.trim()).filter(Boolean).forEach(l => {
+                if (!labelsCounts[l]) labelsCounts[l] = { hentai: 0, erotica: 0 };
+                labelsCounts[l][tab]++;
+            });
+            (a.studio || '').split(',').map(s=>s.trim()).filter(Boolean).forEach(s => {
+                if (!studiosCounts[s]) studiosCounts[s] = { hentai: 0, erotica: 0 };
+                studiosCounts[s][tab]++;
+            });
+        });
     }
 
     async function loadProds(url, isEro) {
@@ -190,25 +221,6 @@
         } catch(e) {}
     }
 
-    function hasName(str, name) {
-        return (str || '').split(',').map(s=>s.trim()).includes(name);
-    }
-
-    function countAnimes(type, name, isEro) {
-        return allAnimes.filter(a => {
-            let isAnimeEro = false;
-            [a.producteur, a.label, a.studio].forEach(str => {
-                if (str && str.split(',').some(s => eroticaSet.has(s.trim()))) isAnimeEro = true;
-            });
-            if (isAnimeEro !== isEro) return false;
-
-            if (type === 'producer') return hasName(a.producteur, name);
-            if (type === 'label') return hasName(a.label, name);
-            if (type === 'studio') return hasName(a.studio, name);
-            return false;
-        }).length;
-    }
-
     function getLogoUrl(name) {
         return `img/pls/${name.replace(/\s+/g, '-')}.webp`;
     }
@@ -220,7 +232,11 @@
         else if (type === 'studio') link = `#${currentTab}/grid/studio/${encodeURIComponent(name)}`;
         else if (type === 'label') link = `#${currentTab}/grid/label/${encodeURIComponent(name)}`;
 
-        const count = countAnimes(type === 'label' ? 'label' : (type.includes('producer') ? 'producer' : 'studio'), name, currentTab === 'erotica');
+        let count = 0;
+        if (type === 'producer-labels' || type === 'producer') count = prodsCounts[name] ? prodsCounts[name][currentTab] : 0;
+        else if (type === 'label') count = labelsCounts[name] ? labelsCounts[name][currentTab] : 0;
+        else if (type === 'studio') count = studiosCounts[name] ? studiosCounts[name][currentTab] : 0;
+
         const initials = name.split(/[\s\-_]+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
         const logoUrl = getLogoUrl(name);
 
@@ -311,9 +327,9 @@
             });
             if (isAnimeEro !== isEro) return false;
 
-            if (type === 'producer') return hasName(a.producteur, name);
-            if (type === 'label') return hasName(a.label, name);
-            if (type === 'studio') return hasName(a.studio, name);
+            if (type === 'producer') return (a.producteur || '').split(',').map(s=>s.trim()).includes(name);
+            if (type === 'label') return (a.label || '').split(',').map(s=>s.trim()).includes(name);
+            if (type === 'studio') return (a.studio || '').split(',').map(s=>s.trim()).includes(name);
             return false;
         });
 
