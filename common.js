@@ -97,7 +97,7 @@ export function handleImgError(img, filename) {
     tried.push(ext);
     img.dataset.tried = tried.join(',');
 
-    // Si le .webp échoue, il tente le .jpg, etc. (C'est ce qui a créé les requêtes .jpg dans ta console)
+    // Si le .webp échoue, il tente le .jpg, etc.
     const chain = {
         webp: ['jpg', 'jpeg', 'png'],
         jpg: ['jpeg', 'png', 'webp'],

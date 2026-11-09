@@ -147,6 +147,14 @@
 /* Si un conteneur flex est utilisé */
 .meta-badge-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 
+/* ── LIAISON PLS SUR FICHE.HTML ── */
+.anime-pls-row { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; border: 1px solid #2a2a2a; }
+.pls-group { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.pls-label { font-size: 0.75em; color: #888; text-transform: uppercase; min-width: 70px; font-weight: bold; margin-top: 2px; }
+.pls-items { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+.pls-link-badge { font-size: 0.75em; background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.3); padding: 2px 8px; border-radius: 4px; color: var(--primary); text-decoration: none; transition: 0.2s; font-weight: 600; }
+.pls-link-badge:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
 /* ── IMAGES ── */
 img { image-rendering: auto; -ms-interpolation-mode: bicubic; }
 .card img, .img-container img, .ml-img, .sugg-img, .activity-img, .recent-card img, .member-avatar, .poster img, .related-card img { image-rendering: auto; -ms-interpolation-mode: bicubic; }

@@ -139,7 +139,7 @@
                 <a href="tags.html" class="nav-tab" data-page="tags.html">Tags</a>
                 <a href="alphabetique.html" class="nav-tab" data-page="alphabetique.html">A-Z</a>
                 <a href="playlist.html" class="nav-tab" data-page="playlist.html">Playlist</a>
-                <a href="editeurs.html" class="nav-tab" data-page="editeurs.html">Studios</a>
+                <a href="pls.html" class="nav-tab" data-page="pls.html">Industrie</a>
                 <a href="profil.html" class="nav-tab" data-page="profil.html">Profil</a>
                 <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
                 <button class="nav-action" onclick="randomAnime(window.__allAnimesForRandom)">Au hasard</button>
@@ -208,12 +208,27 @@
     let imagesIndex = {};
     let currentUser = null;
     let userRating = 0;
+    let eroticaSet = new Set();
 
     window.__allAnimesForRandom = allAnimes;
+
+    async function loadErotica() {
+        try {
+            const resp = await fetch('plsero_liste.csv');
+            if (resp.ok) {
+                const text = await resp.text();
+                text.split(/\r?\n/).forEach(l => { 
+                    const n = l.trim(); 
+                    if (n && n !== 'Studios Erotica') eroticaSet.add(n); 
+                });
+            }
+        } catch(e) {}
+    }
 
     async function load() {
         const display = document.getElementById('anime-details');
         try {
+            await loadErotica();
             [allAnimes, imagesIndex] = await Promise.all([
                 loadAnimes(),
                 fetch('images.json').then(r => r.ok ? r.json() : {}).catch(() => ({}))
@@ -253,6 +268,26 @@
                     ${anime.sequels ? `<div class="related-section"><div class="related-label">Suite(s)</div>${makeRelatedCards(anime.sequels)}</div>` : ''}
                 </div>` : '';
 
+            const generatePlsLinks = (str, type) => {
+                if (!str) return '';
+                return str.split(',').map(s => s.trim()).filter(Boolean).map(name => 
+                    `<a href="pls.html#${eroticaSet.has(name) ? 'erotica' : 'hentai'}/grid/${type}/${encodeURIComponent(name)}" class="pls-link-badge">${name}</a>`
+                ).join('');
+            };
+            const prodLinks = generatePlsLinks(anime.producteur, 'producer');
+            const labelLinks = generatePlsLinks(anime.label, 'label');
+            const studioLinks = generatePlsLinks(anime.studio, 'studio');
+
+            let plsHtml = '';
+            if (prodLinks || labelLinks || studioLinks) {
+                plsHtml = `
+                <div class="anime-pls-row">
+                    ${prodLinks ? `<div class="pls-group"><span class="pls-label">Producteur</span> <div class="pls-items">${prodLinks}</div></div>` : ''}
+                    ${labelLinks ? `<div class="pls-group"><span class="pls-label">Label</span> <div class="pls-items">${labelLinks}</div></div>` : ''}
+                    ${studioLinks ? `<div class="pls-group"><span class="pls-label">Studio</span> <div class="pls-items">${studioLinks}</div></div>` : ''}
+                </div>`;
+            }
+
             const cover1 = getCoverPath(anime.ordreAjout, 1);
 
             display.innerHTML = `
@@ -280,6 +315,7 @@
                             </div>
                             <div id="mal-badge" style="margin-top:10px;"><span class="mal-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span>Chargement MAL…</span></div>
                             <p style="font-size:0.85em; color:#ccc; line-height:1.5; margin-top:10px;">${anime.description}</p>
+                            ${plsHtml}
                         </div>
                     </div>
                     <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:${relatedSection ? '10px' : '15px'};">${tagsHtml}</div>
@@ -346,6 +382,7 @@
             const _ref = document.referrer, _bl = document.getElementById('back-link');
             if (_ref.includes('playlist.html')) _bl.innerText = 'Retour à la playlist';
             else if (_ref.includes('tags.html')) _bl.innerText = 'Retour aux tags';
+            else if (_ref.includes('pls.html')) _bl.innerText = 'Retour à l\'industrie';
 
             fetchMALData(anime.nom, anime.malId).then(md => {
                 if (md) applyMALStats(md);
