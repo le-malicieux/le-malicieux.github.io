@@ -11,22 +11,27 @@
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; padding-top: 62px; }
         .page-wrap { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 20px clamp(20px, 5vw, 100px) 60px; }
         
-        /* ── ONGLETS ── */
+        /* En-tête avec Tri */
+        .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .page-title { font-size: 1.6em; font-weight: 900; color: var(--primary); margin: 0; }
+        .sort-select { background: #1a1a1a; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85em; cursor: pointer; outline: none; }
+
+        /* Onglets Hentai / Erotica */
         .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .tab-btn { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 10px 24px; border-radius: 8px 8px 0 0; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; border-bottom: none; margin-bottom: -11px; }
         .tab-btn:hover { color: white; background: #222; }
         .tab-btn.active { background: var(--card-bg); color: var(--primary); border-color: var(--primary); border-bottom: 2px solid var(--card-bg); }
         
-        /* ── SÉPARATEURS ── */
+        /* Séparateurs de section */
         .section-sep { display: flex; align-items: center; gap: 12px; margin: 30px 0 15px 0; }
         .section-sep-line { flex: 1; height: 1px; background: rgba(255,71,87,0.25); }
-        .section-sep-label { font-size: 0.85em; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; display: flex; align-items: center; gap: 7px; }
+        .section-sep-label { font-size: 0.85em; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
         
-        /* ── GRILLES ET CARTES ── */
-        .pls-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 10px; }
+        /* Grille de cartes PLS */
+        .pls-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-bottom: 10px; }
         .pls-card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: row; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
         .pls-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255,71,87,0.1); }
-        .pls-logo-wrap { width: 62px; height: 62px; flex-shrink: 0; background: #111; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .pls-logo-wrap { width: 62px; height: 62px; flex-shrink: 0; background: #111; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 4px; }
         .pls-logo { width: 100%; height: 100%; object-fit: contain; object-position: center; }
         .pls-logo-fallback { width: 100%; height: 100%; background: linear-gradient(135deg, #1a0008, #2d0014); display: flex; align-items: center; justify-content: center; font-size: 1.3em; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; }
         .pls-card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
@@ -34,7 +39,15 @@
         .pls-count { font-size: 0.72em; color: #888; }
         .pls-count span { color: var(--primary); font-weight: bold; }
 
-        /* ── VUE ANIMES (Grille) ── */
+        /* En-tête de la vue Grille (Logo + Nom) */
+        .grid-header { display: flex; align-items: center; gap: 20px; background: var(--card-bg); border: 1px solid #2a2a2a; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; }
+        .grid-header-logo { width: 80px; height: 80px; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 5px; flex-shrink: 0; }
+        .grid-header-logo img { width: 100%; height: 100%; object-fit: contain; }
+        .grid-header-fallback { width: 100%; height: 100%; background: linear-gradient(135deg, #1a0008, #2d0014); display: flex; align-items: center; justify-content: center; font-size: 2em; font-weight: 900; color: var(--primary); }
+        .grid-header-info h1 { margin: 0; font-size: 1.8em; color: white; }
+        .grid-header-info p { margin: 4px 0 0; color: #888; font-size: 0.9em; }
+
+        /* Grille d'animés */
         .producer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
         .anime-card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; transition: 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
         .anime-card:hover { border-color: var(--primary); transform: translateY(-4px); }
@@ -43,16 +56,16 @@
         .ac-info { padding: 7px; flex: 1; }
         .ac-title { font-weight: 700; color: var(--primary); font-size: 0.88em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-bottom: 4px; }
         .score-badge { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.72); color: #f1c40f; font-size: 0.7em; padding: 2px 5px; border-radius: 4px; }
+        
         .empty-state { text-align: center; color: #555; padding: 40px 20px; grid-column: 1/-1; }
         .btn-back-list { display: inline-flex; align-items: center; gap: 6px; color: #aaa; font-size: 0.85em; cursor: pointer; border: 1px solid #333; background: #1a1a1a; padding: 6px 12px; border-radius: 6px; margin-bottom: 20px; text-decoration: none; }
         .btn-back-list:hover { color: var(--primary); border-color: var(--primary); }
-        .page-title { font-size: 1.6em; font-weight: 900; color: var(--primary); margin: 0 0 20px 0; }
 
         @media (max-width: 700px) {
             .pls-grid { grid-template-columns: 1fr !important; }
             .producer-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
-            .tabs-container { gap: 5px; }
-            .tab-btn { padding: 8px 16px; font-size: 0.9em; }
+            .grid-header { flex-direction: column; text-align: center; gap: 10px; }
+            .grid-header-logo { width: 60px; height: 60px; }
         }
     </style>
 </head>
@@ -87,10 +100,6 @@
                 </a>
             </nav>
             <div class="nav-right">
-                <div class="search-wrapper" id="search-wrapper">
-                    <input type="text" id="pls-search" placeholder="Rechercher un PLS..." autocomplete="off">
-                    <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-                </div>
                 <button class="nav-action" onclick="studioRandom()">Au hasard</button>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
                     <img src="img/bannieres_icones/logo-discord.jpg" alt="Discord">
@@ -100,7 +109,7 @@
     </header>
 
     <div class="page-wrap">
-        <div class="tabs-container">
+        <div class="tabs-container" id="tabs-container">
             <button class="tab-btn active" data-tab="hentai" onclick="location.hash='hentai/list'">Hentai</button>
             <button class="tab-btn" data-tab="erotica" onclick="location.hash='erotica/list'">Erotica</button>
         </div>
@@ -112,7 +121,6 @@
 
 <script type="module">
     import { initCommon, loadAnimes, getCoverPath, handleImgError, IMG_LOGO, parseCSVLine } from './common.js';
-
     initCommon();
 
     let allAnimes = [];
@@ -120,89 +128,70 @@
     let prodsData = {}; 
     let studiosData = {}; 
     let currentTab = 'hentai';
-    
-    // Caches pour les compteurs (optimisation)
-    let prodsCounts = {}; 
-    let labelsCounts = {}; 
-    let studiosCounts = {};
+    let currentSort = 'name-asc'; // Tri par défaut
+    let currentView = 'list'; // list, labels, grid
+
+    const cleanStr = s => (s || '').replace(/^\uFEFF/, '').trim();
 
     async function init() {
-        allAnimes = await loadAnimes();
-        
         try {
+            allAnimes = await loadAnimes();
             const resp = await fetch('plsero_liste.csv');
             if (resp.ok) {
                 const text = await resp.text();
                 text.split(/\r?\n/).forEach(l => { 
-                    const n = l.trim(); 
+                    const n = cleanStr(l); 
                     if (n && n !== 'Studios Erotica') eroticaSet.add(n); 
                 });
             }
-        } catch(e) {}
-
-        await Promise.all([
-            loadProds('prods.csv', false),
-            loadProds('prods_ero.csv', true),
-            loadStudios('studios.csv', false),
-            loadStudios('studios_ero.csv', true)
-        ]);
-
-        precomputeCounts();
-        window.addEventListener('hashchange', route);
-        route();
+            await Promise.all([
+                loadProds('prods.csv', false), loadProds('prods_ero.csv', true),
+                loadStudios('studios.csv', false), loadStudios('studios_ero.csv', true)
+            ]);
+            window.addEventListener('hashchange', route);
+            route();
+        } catch (e) {
+            console.error(e);
+            document.getElementById('view-container').innerHTML = `<div class="empty-state" style="color:red;">Erreur : ${e.message}</div>`;
+        }
     }
 
-    function precomputeCounts() {
-        prodsCounts = {}; labelsCounts = {}; studiosCounts = {};
-        
-        allAnimes.forEach(a => {
-            let isAnimeEro = false;
-            [a.producteur, a.label, a.studio].forEach(str => {
-                if (str && str.split(',').some(s => eroticaSet.has(s.trim()))) isAnimeEro = true;
-            });
-            const tab = isAnimeEro ? 'erotica' : 'hentai';
-
-            (a.producteur || '').split(',').map(s=>s.trim()).filter(Boolean).forEach(p => {
-                if (!prodsCounts[p]) prodsCounts[p] = { hentai: 0, erotica: 0 };
-                prodsCounts[p][tab]++;
-            });
-            (a.label || '').split(',').map(s=>s.trim()).filter(Boolean).forEach(l => {
-                if (!labelsCounts[l]) labelsCounts[l] = { hentai: 0, erotica: 0 };
-                labelsCounts[l][tab]++;
-            });
-            (a.studio || '').split(',').map(s=>s.trim()).filter(Boolean).forEach(s => {
-                if (!studiosCounts[s]) studiosCounts[s] = { hentai: 0, erotica: 0 };
-                studiosCounts[s][tab]++;
-            });
-        });
-    }
-
+    // ── GESTION DES FICHIERS CSV (Correction du tableau fusionné) ──
     async function loadProds(url, isEro) {
         try {
             const resp = await fetch(url);
             if (!resp.ok) return;
             const text = await resp.text();
             const lines = text.split(/\r?\n/);
-            const header = parseCSVLine(lines[0]);
+            const header = parseCSVLine(cleanStr(lines[0]));
+            
+            // Trouver les colonnes
             const idxLabels = header.findIndex(h => h.toLowerCase().includes('labels') && !h.toLowerCase().includes('travaille'));
             const idxStudios = header.findIndex(h => h.toLowerCase().includes('producteur travaille avec les studios'));
             
+            let currentProdName = ""; // Garde en mémoire le producteur du dessus
+            
             for (let i = 1; i < lines.length; i++) {
-                const cols = parseCSVLine(lines[i]);
+                const cols = parseCSVLine(cleanStr(lines[i]));
                 if (cols.length < 1) continue;
-                const name = cols[0].trim();
-                if (!name) continue;
                 
-                if (!prodsData[name]) prodsData[name] = { isEro, labels: new Set(), studios: new Set() };
+                // Si la colonne Producteur n'est pas vide, on change de producteur
+                const prodName = cleanStr(cols[0]);
+                if (prodName) currentProdName = prodName;
+                if (!currentProdName) continue;
+
+                if (!prodsData[currentProdName]) prodsData[currentProdName] = { isEro, labels: new Set(), studios: new Set() };
                 
+                // Ajouter les labels au producteur courant
                 if (idxLabels !== -1 && cols[idxLabels]) {
-                    cols[idxLabels].split(',').map(s=>s.trim()).filter(Boolean).forEach(l => prodsData[name].labels.add(l));
+                    cols[idxLabels].split(',').map(s=>cleanStr(s)).filter(Boolean).forEach(l => prodsData[currentProdName].labels.add(l));
                 }
+                // Ajouter les studios au producteur courant
                 if (idxStudios !== -1 && cols[idxStudios]) {
-                    cols[idxStudios].split(',').map(s=>s.trim()).filter(Boolean).forEach(s => prodsData[name].studios.add(s));
+                    cols[idxStudios].split(',').map(s=>cleanStr(s)).filter(Boolean).forEach(s => prodsData[currentProdName].studios.add(s));
                 }
             }
-        } catch(e) {}
+        } catch(e) { console.warn("Erreur loadProds", url, e); }
     }
 
     async function loadStudios(url, isEro) {
@@ -212,37 +201,54 @@
             const text = await resp.text();
             const lines = text.split(/\r?\n/);
             for (let i = 1; i < lines.length; i++) {
-                const cols = parseCSVLine(lines[i]);
+                const cols = parseCSVLine(cleanStr(lines[i]));
                 if (cols.length < 1) continue;
-                const name = cols[0].trim();
-                if (!name) continue;
-                studiosData[name] = { isEro };
+                const name = cleanStr(cols[0]);
+                if (name) studiosData[name] = { isEro };
             }
         } catch(e) {}
     }
 
-    function getLogoUrl(name) {
-        return `img/pls/${name.replace(/\s+/g, '-')}.webp`;
+    // ── LOGIQUE DE RENDU ──
+    
+    function getLogoUrl(name) { 
+        // Remplace les espaces par des tirets et encode le reste pour l'URL
+        return `img/pls/${encodeURIComponent(name.replace(/\s+/g, '-'))}.webp`; 
     }
 
-    function buildCard(name, type) {
-        let link = '';
-        if (type === 'producer-labels') link = `#${currentTab}/labels/${encodeURIComponent(name)}`;
-        else if (type === 'producer') link = `#${currentTab}/grid/producer/${encodeURIComponent(name)}`;
-        else if (type === 'studio') link = `#${currentTab}/grid/studio/${encodeURIComponent(name)}`;
-        else if (type === 'label') link = `#${currentTab}/grid/label/${encodeURIComponent(name)}`;
+    function getAnimesFor(type, name) {
+        const isEro = currentTab === 'erotica';
+        const normalize = s => (s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        
+        return allAnimes.filter(a => {
+            let isAnimeEro = false;
+            [a.producteur, a.label, a.studio].forEach(str => {
+                if (str && str.split(',').some(s => eroticaSet.has(s.trim()))) isAnimeEro = true;
+            });
+            if (isAnimeEro !== isEro) return false;
 
-        let count = 0;
-        if (type === 'producer-labels' || type === 'producer') count = prodsCounts[name] ? prodsCounts[name][currentTab] : 0;
-        else if (type === 'label') count = labelsCounts[name] ? labelsCounts[name][currentTab] : 0;
-        else if (type === 'studio') count = studiosCounts[name] ? studiosCounts[name][currentTab] : 0;
+            if (type === 'producer') return (a.producteur || '').split(',').map(normalize).includes(normalize(name));
+            if (type === 'label') return (a.label || '').split(',').map(normalize).includes(normalize(name));
+            if (type === 'studio') return (a.studio || '').split(',').map(normalize).includes(normalize(name));
+            return false;
+        });
+    }
+
+    function buildCard(name, type, count) {
+        // CORRECTION : On n'encode pas dans le href, le hash gère les espaces nativement
+        let link = '';
+        const safeName = name.replace(/\//g, '§'); // Remplace les slashs pour éviter de casser l'URL
+        
+        if (type === 'producer-labels') link = `#${currentTab}/labels/${safeName}`;
+        else if (type === 'producer') link = `#${currentTab}/grid/producer/${safeName}`;
+        else if (type === 'studio') link = `#${currentTab}/grid/studio/${safeName}`;
+        else if (type === 'label') link = `#${currentTab}/grid/label/${safeName}`;
 
         const initials = name.split(/[\s\-_]+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
-        const logoUrl = getLogoUrl(name);
-
+        
         return `<a href="${link}" class="pls-card">
             <div class="pls-logo-wrap">
-                <img src="${logoUrl}" class="pls-logo" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'pls-logo-fallback\\'>${initials}</div>'">
+                <img src="${getLogoUrl(name)}" class="pls-logo" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'pls-logo-fallback\\'>${initials}</div>'">
             </div>
             <div class="pls-card-body">
                 <div class="pls-name">${name}</div>
@@ -253,58 +259,70 @@
 
     function buildAnimeCard(a) {
         const cover = getCoverPath(a.ordreAjout, 1);
-        const coverFile = `${a.ordreAjout}-1.webp`;
         const scoreNum = parseFloat(a.score.replace(',','.'));
-        const scoreBadge = scoreNum ? `<div class="score-badge">${a.score}</div>` : '';
-        
         return `<a href="fiche.html?name=${encodeURIComponent(a.nom)}" class="anime-card">
-            <div class="img-wrap"><img src="${cover}" loading="lazy" onerror="handleImgError(this,'${coverFile}')">${scoreBadge}</div>
-            <div class="ac-info">
-                <div class="ac-title">${a.nom}</div>
-                <div class="card-meta-row" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
-                    <span class="meta-badge">${(a.sortie||'').match(/\d{4}/) || '—'}</span>
-                    <span class="meta-badge">${a.ep} ép.</span>
-                </div>
-            </div>
+            <div class="img-wrap"><img src="${cover}" loading="lazy" onerror="handleImgError(this,'${a.ordreAjout}-1.webp')">${scoreNum ? `<div class="score-badge">${a.score}</div>` : ''}</div>
+            <div class="ac-info"><div class="ac-title">${a.nom}</div></div>
         </a>`;
     }
 
     function renderList(tab) {
         const isEro = tab === 'erotica';
-        let prodsWithLabels = [];
-        let prodsWithoutLabels = [];
-        let studios = [];
+        let prodsWithLabels = [], prodsWithoutLabels = [], studios = [];
 
+        // Préparation des données
         for (const [name, data] of Object.entries(prodsData)) {
-            const isDataEro = data.isEro || eroticaSet.has(name);
-            if (isDataEro !== isEro) continue;
-            if (data.labels.size > 0) prodsWithLabels.push(name);
-            else prodsWithoutLabels.push(name);
+            if ((data.isEro || eroticaSet.has(name)) !== isEro) continue;
+            if (data.labels.size > 0) prodsWithLabels.push({ name, count: getAnimesFor('producer', name).length });
+            else prodsWithoutLabels.push({ name, count: getAnimesFor('producer', name).length });
         }
-
         for (const [name, data] of Object.entries(studiosData)) {
-            const isDataEro = data.isEro || eroticaSet.has(name);
-            if (isDataEro !== isEro) continue;
-            studios.push(name);
+            if ((data.isEro || eroticaSet.has(name)) !== isEro) continue;
+            studios.push({ name, count: getAnimesFor('studio', name).length });
         }
 
-        prodsWithLabels.sort(); prodsWithoutLabels.sort(); studios.sort();
+        // Application du Tri
+        const sortFn = (a, b) => {
+            if (currentSort === 'name-asc') return a.name.localeCompare(b.name, 'fr');
+            if (currentSort === 'name-desc') return b.name.localeCompare(a.name, 'fr');
+            if (currentSort === 'count-desc') return b.count - a.count;
+            if (currentSort === 'count-asc') return a.count - b.count;
+            return 0;
+        };
+        prodsWithLabels.sort(sortFn); prodsWithoutLabels.sort(sortFn); studios.sort(sortFn);
 
-        let html = '';
+        let html = `
+            <div class="page-header">
+                <h1 class="page-title">Industrie ${tab === 'hentai' ? 'Hentai' : 'Erotica'}</h1>
+                <select class="sort-select" id="pls-sort">
+                    <option value="name-asc" ${currentSort === 'name-asc' ? 'selected' : ''}>Trier : A à Z</option>
+                    <option value="name-desc" ${currentSort === 'name-desc' ? 'selected' : ''}>Trier : Z à A</option>
+                    <option value="count-desc" ${currentSort === 'count-desc' ? 'selected' : ''}>Trier : Nb titres (Desc)</option>
+                    <option value="count-asc" ${currentSort === 'count-asc' ? 'selected' : ''}>Trier : Nb titres (Asc)</option>
+                </select>
+            </div>
+        `;
+
         if (prodsWithLabels.length) {
             html += `<div class="section-sep"><div class="section-sep-label">Producteurs (avec labels)</div><div class="section-sep-line"></div></div>`;
-            html += `<div class="pls-grid">${prodsWithLabels.map(n => buildCard(n, 'producer-labels')).join('')}</div>`;
+            html += `<div class="pls-grid">${prodsWithLabels.map(p => buildCard(p.name, 'producer-labels', p.count)).join('')}</div>`;
         }
         if (prodsWithoutLabels.length) {
             html += `<div class="section-sep"><div class="section-sep-label">Producteurs (sans label)</div><div class="section-sep-line"></div></div>`;
-            html += `<div class="pls-grid">${prodsWithoutLabels.map(n => buildCard(n, 'producer')).join('')}</div>`;
+            html += `<div class="pls-grid">${prodsWithoutLabels.map(p => buildCard(p.name, 'producer', p.count)).join('')}</div>`;
         }
         if (studios.length) {
             html += `<div class="section-sep"><div class="section-sep-label">Studios</div><div class="section-sep-line"></div></div>`;
-            html += `<div class="pls-grid">${studios.map(n => buildCard(n, 'studio')).join('')}</div>`;
+            html += `<div class="pls-grid">${studios.map(s => buildCard(s.name, 'studio', s.count)).join('')}</div>`;
         }
 
-        document.getElementById('view-container').innerHTML = html || '<div class="empty-state">Aucun résultat.</div>';
+        document.getElementById('view-container').innerHTML = html;
+        
+        // Écouteur pour le tri
+        document.getElementById('pls-sort').addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            renderList(currentTab); // On relance le rendu
+        });
     }
 
     function renderLabels(tab, prodName) {
@@ -313,59 +331,74 @@
         const labels = Array.from(data.labels).sort();
         
         let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
-        html += `<h1 class="page-title">Labels de ${prodName}</h1>`;
-        html += `<div class="pls-grid">${labels.map(l => buildCard(l, 'label')).join('')}</div>`;
+        html += `<h1 class="page-title" style="margin-bottom:20px;">Labels de ${prodName}</h1>`;
+        html += `<div class="pls-grid">${labels.map(l => {
+            const count = getAnimesFor('label', l).length;
+            return buildCard(l, 'label', count);
+        }).join('')}</div>`;
         document.getElementById('view-container').innerHTML = html;
     }
 
     function renderGrid(tab, type, name) {
-        const isEro = tab === 'erotica';
-        let animes = allAnimes.filter(a => {
-            let isAnimeEro = false;
-            [a.producteur, a.label, a.studio].forEach(str => {
-                if (str && str.split(',').some(s => eroticaSet.has(s.trim()))) isAnimeEro = true;
-            });
-            if (isAnimeEro !== isEro) return false;
+        let animes = getAnimesFor(type, name);
+        animes.sort((a,b) => b.ordreAjout - a.ordreAjout); // Tri par ajout récent
 
-            if (type === 'producer') return (a.producteur || '').split(',').map(s=>s.trim()).includes(name);
-            if (type === 'label') return (a.label || '').split(',').map(s=>s.trim()).includes(name);
-            if (type === 'studio') return (a.studio || '').split(',').map(s=>s.trim()).includes(name);
-            return false;
-        });
-
-        animes.sort((a,b) => b.ordreAjout - a.ordreAjout);
-
-        let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
-        html += `<h1 class="page-title">${type.charAt(0).toUpperCase() + type.slice(1)} : ${name}</h1>`;
+        const initials = name.split(/[\s\-_]+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
         
-        if (animes.length === 0) html += `<div class="empty-state">Aucun anime trouvé.</div>`;
+        let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
+        
+        // En-tête avec le logo demandé
+        html += `
+        <div class="grid-header">
+            <div class="grid-header-logo">
+                <img src="${getLogoUrl(name)}" onerror="this.parentElement.innerHTML='<div class=\\'grid-header-fallback\\'>${initials}</div>'">
+            </div>
+            <div class="grid-header-info">
+                <h1>${name}</h1>
+                <p>${type.charAt(0).toUpperCase() + type.slice(1)} • ${animes.length} titre${animes.length > 1 ? 's' : ''}</p>
+            </div>
+        </div>`;
+        
+        if (animes.length === 0) html += `<div class="empty-state">Aucun anime trouvé pour ce ${type}.</div>`;
         else html += `<div class="producer-grid">${animes.map(a => buildAnimeCard(a)).join('')}</div>`;
         
         document.getElementById('view-container').innerHTML = html;
     }
 
+    // ── ROUTEUR (Correction du décodage URL) ──
     function route() {
         const hash = window.location.hash.slice(1) || 'hentai/list';
         const parts = hash.split('/');
         const tab = parts[0] || 'hentai';
         const view = parts[1] || 'list';
+        
+        // Décodage des noms (enlève les %20 et restaure les slashs)
+        const rawName = parts[2] ? decodeURIComponent(parts[2]).replace(/§/g, '/') : '';
+        const rawName2 = parts[3] ? decodeURIComponent(parts[3]).replace(/§/g, '/') : '';
+
         currentTab = tab;
-
+        currentView = view;
+        
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-
-        if (view === 'list') renderList(tab);
-        else if (view === 'labels') renderLabels(tab, parts[2]);
-        else if (view === 'grid') renderGrid(tab, parts[2], parts[3]);
+        
+        if (view === 'list') {
+            renderList(tab);
+            document.getElementById('tabs-container').style.display = 'flex';
+        } else {
+            document.getElementById('tabs-container').style.display = 'none'; // On cache les onglets quand on est dans une grille
+            if (view === 'labels') renderLabels(tab, rawName);
+            else if (view === 'grid') renderGrid(tab, rawName, rawName2);
+        }
     }
 
-    function studioRandom() {
-        const map = currentTab === 'erotica' ? studiosData : studiosData;
-        const keys = Object.keys(map);
-        if (keys.length) location.hash = `${currentTab}/grid/studio/${encodeURIComponent(keys[Math.floor(Math.random() * keys.length)])}`;
-    }
-
-    window.studioRandom = studioRandom;
-
+    window.studioRandom = () => {
+        const keys = Object.keys(studiosData);
+        if (keys.length) {
+            const rand = keys[Math.floor(Math.random() * keys.length)];
+            location.hash = `${currentTab}/grid/studio/${encodeURIComponent(rand).replace(/%2F/g, '§')}`;
+        }
+    };
+    
     init();
 </script>
 </body>
