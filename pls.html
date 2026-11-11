@@ -39,13 +39,24 @@
         .pls-count { font-size: 0.72em; color: #888; }
         .pls-count span { color: var(--primary); font-weight: bold; }
 
-        /* En-tête de la vue Grille (Logo + Nom) */
-        .grid-header { display: flex; align-items: center; gap: 20px; background: var(--card-bg); border: 1px solid #2a2a2a; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; }
-        .grid-header-logo { width: 80px; height: 80px; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 5px; flex-shrink: 0; }
+        /* En-tête de la vue Grille (Logo + Nom + Infos) */
+        .grid-header { display: flex; align-items: flex-start; gap: 20px; background: var(--card-bg); border: 1px solid #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+        .grid-header-logo { width: 100px; height: 100px; background: #111; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 5px; flex-shrink: 0; border: 1px solid #333; }
         .grid-header-logo img { width: 100%; height: 100%; object-fit: contain; }
-        .grid-header-fallback { width: 100%; height: 100%; background: linear-gradient(135deg, #1a0008, #2d0014); display: flex; align-items: center; justify-content: center; font-size: 2em; font-weight: 900; color: var(--primary); }
-        .grid-header-info h1 { margin: 0; font-size: 1.8em; color: white; }
-        .grid-header-info p { margin: 4px 0 0; color: #888; font-size: 0.9em; }
+        .grid-header-fallback { width: 100%; height: 100%; background: linear-gradient(135deg, #1a0008, #2d0014); display: flex; align-items: center; justify-content: center; font-size: 2.5em; font-weight: 900; color: var(--primary); }
+        .grid-header-info { flex: 1; min-width: 0; }
+        .grid-header-info h1 { margin: 0 0 5px 0; font-size: 1.8em; color: white; }
+        .grid-header-info .subtitle { margin: 0 0 15px 0; color: #888; font-size: 0.9em; }
+        
+        /* Badges de liens et relations dans l'en-tête */
+        .header-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+        .header-link { display: inline-flex; align-items: center; font-size: 0.75em; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: 0.2s; }
+        .header-link.mal { background: rgba(46,134,222,0.15); color: #2e86de; border: 1px solid rgba(46,134,222,0.3); }
+        .header-link.mal:hover { background: #2e86de; color: white; }
+        .header-link.web { background: rgba(255,255,255,0.05); color: #ccc; border: 1px solid #444; }
+        .header-link.web:hover { background: #444; color: white; }
+        .header-relations { display: flex; flex-direction: column; gap: 4px; font-size: 0.75em; color: #888; }
+        .header-relations strong { color: #aaa; }
 
         /* Grille d'animés */
         .producer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
@@ -64,8 +75,8 @@
         @media (max-width: 700px) {
             .pls-grid { grid-template-columns: 1fr !important; }
             .producer-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
-            .grid-header { flex-direction: column; text-align: center; gap: 10px; }
-            .grid-header-logo { width: 60px; height: 60px; }
+            .grid-header { flex-direction: column; align-items: center; text-align: center; }
+            .header-relations { align-items: center; }
         }
     </style>
 </head>
@@ -128,8 +139,7 @@
     let prodsData = {}; 
     let studiosData = {}; 
     let currentTab = 'hentai';
-    let currentSort = 'name-asc'; // Tri par défaut
-    let currentView = 'list'; // list, labels, grid
+    let currentSort = 'name-asc';
 
     const cleanStr = s => (s || '').replace(/^\uFEFF/, '').trim();
 
@@ -156,39 +166,41 @@
         }
     }
 
-    // ── GESTION DES FICHIERS CSV (Correction du tableau fusionné) ──
+    // ── CHARGEMENT DES CSV (Parsing de TOUTES les colonnes) ──
     async function loadProds(url, isEro) {
         try {
             const resp = await fetch(url);
             if (!resp.ok) return;
             const text = await resp.text();
             const lines = text.split(/\r?\n/);
-            const header = parseCSVLine(cleanStr(lines[0]));
-            
-            // Trouver les colonnes
-            const idxLabels = header.findIndex(h => h.toLowerCase().includes('labels') && !h.toLowerCase().includes('travaille'));
-            const idxStudios = header.findIndex(h => h.toLowerCase().includes('producteur travaille avec les studios'));
-            
-            let currentProdName = ""; // Garde en mémoire le producteur du dessus
+            let currentProdName = ""; 
             
             for (let i = 1; i < lines.length; i++) {
                 const cols = parseCSVLine(cleanStr(lines[i]));
                 if (cols.length < 1) continue;
                 
-                // Si la colonne Producteur n'est pas vide, on change de producteur
                 const prodName = cleanStr(cols[0]);
                 if (prodName) currentProdName = prodName;
                 if (!currentProdName) continue;
 
-                if (!prodsData[currentProdName]) prodsData[currentProdName] = { isEro, labels: new Set(), studios: new Set() };
-                
-                // Ajouter les labels au producteur courant
-                if (idxLabels !== -1 && cols[idxLabels]) {
-                    cols[idxLabels].split(',').map(s=>cleanStr(s)).filter(Boolean).forEach(l => prodsData[currentProdName].labels.add(l));
+                if (!prodsData[currentProdName]) {
+                    prodsData[currentProdName] = { isEro, links: {}, relations: {}, labels: {} };
                 }
-                // Ajouter les studios au producteur courant
-                if (idxStudios !== -1 && cols[idxStudios]) {
-                    cols[idxStudios].split(',').map(s=>cleanStr(s)).filter(Boolean).forEach(s => prodsData[currentProdName].studios.add(s));
+                
+                // Mise à jour des liens et relations du Producteur (colonnes 1 à 6)
+                if (cleanStr(cols[1]) || cleanStr(cols[2])) {
+                    prodsData[currentProdName].links = { mal: cleanStr(cols[1]), web: cleanStr(cols[2]), old: cleanStr(cols[3]) };
+                    prodsData[currentProdName].relations = { prods: cleanStr(cols[4]), labels: cleanStr(cols[5]), studios: cleanStr(cols[6]) };
+                }
+
+                // Gestion des Labels (colonnes 7 à 13)
+                const labelName = cleanStr(cols[7]);
+                if (labelName) {
+                    if (!prodsData[currentProdName].labels[labelName]) {
+                        prodsData[currentProdName].labels[labelName] = { isEro, links: {}, relations: {} };
+                    }
+                    prodsData[currentProdName].labels[labelName].links = { mal: cleanStr(cols[8]), web: cleanStr(cols[9]), old: cleanStr(cols[10]) };
+                    prodsData[currentProdName].labels[labelName].relations = { prods: cleanStr(cols[11]), labels: cleanStr(cols[12]), studios: cleanStr(cols[13]) };
                 }
             }
         } catch(e) { console.warn("Erreur loadProds", url, e); }
@@ -204,18 +216,18 @@
                 const cols = parseCSVLine(cleanStr(lines[i]));
                 if (cols.length < 1) continue;
                 const name = cleanStr(cols[0]);
-                if (name) studiosData[name] = { isEro };
+                if (!name) continue;
+                
+                if (!studiosData[name]) studiosData[name] = { isEro };
+                // Studio CSV : 0=Nom, 1=Studio et Prod, 2=MAL, 3=Web, 4=Avec Prod, 5=Avec Labels, 6=Avec Studios
+                studiosData[name].links = { mal: cleanStr(cols[2]), web: cleanStr(cols[3]), old: "" };
+                studiosData[name].relations = { prods: cleanStr(cols[4]), labels: cleanStr(cols[5]), studios: cleanStr(cols[6]) };
             }
         } catch(e) {}
     }
 
-    // ── LOGIQUE DE RENDU ──
+    // ── LOGIQUE DE RECHERCHE ──
     
-    function getLogoUrl(name) { 
-        // Remplace les espaces par des tirets et encode le reste pour l'URL
-        return `img/pls/${encodeURIComponent(name.replace(/\s+/g, '-'))}.webp`; 
-    }
-
     function getAnimesFor(type, name) {
         const isEro = currentTab === 'erotica';
         const normalize = s => (s || '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -230,19 +242,29 @@
             if (type === 'producer') return (a.producteur || '').split(',').map(normalize).includes(normalize(name));
             if (type === 'label') return (a.label || '').split(',').map(normalize).includes(normalize(name));
             if (type === 'studio') return (a.studio || '').split(',').map(normalize).includes(normalize(name));
+            
+            if (type === 'direct-producer') {
+                const isProd = (a.producteur || '').split(',').map(normalize).includes(normalize(name));
+                const hasLabel = (a.label || '').trim().length > 0;
+                return isProd && !hasLabel; // Animes du producteur SANS label
+            }
             return false;
         });
     }
 
+    function getLogoUrl(name) { 
+        return `img/pls/${encodeURI(name.replace(/\s+/g, '-'))}.webp`; 
+    }
+
     function buildCard(name, type, count) {
-        // CORRECTION : On n'encode pas dans le href, le hash gère les espaces nativement
         let link = '';
-        const safeName = name.replace(/\//g, '§'); // Remplace les slashs pour éviter de casser l'URL
+        const safeName = name.replace(/\//g, '§'); 
         
         if (type === 'producer-labels') link = `#${currentTab}/labels/${safeName}`;
         else if (type === 'producer') link = `#${currentTab}/grid/producer/${safeName}`;
         else if (type === 'studio') link = `#${currentTab}/grid/studio/${safeName}`;
         else if (type === 'label') link = `#${currentTab}/grid/label/${safeName}`;
+        else if (type === 'direct-producer') link = `#${currentTab}/grid/direct-producer/${safeName}`;
 
         const initials = name.split(/[\s\-_]+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
         
@@ -266,22 +288,26 @@
         </a>`;
     }
 
+    // ── RENDU DES VUES ──
+
     function renderList(tab) {
         const isEro = tab === 'erotica';
         let prodsWithLabels = [], prodsWithoutLabels = [], studios = [];
 
-        // Préparation des données
         for (const [name, data] of Object.entries(prodsData)) {
             if ((data.isEro || eroticaSet.has(name)) !== isEro) continue;
-            if (data.labels.size > 0) prodsWithLabels.push({ name, count: getAnimesFor('producer', name).length });
-            else prodsWithoutLabels.push({ name, count: getAnimesFor('producer', name).length });
+            const count = getAnimesFor('producer', name).length;
+            if (count === 0) continue;
+            
+            if (Object.keys(data.labels).length > 0) prodsWithLabels.push({ name, count });
+            else prodsWithoutLabels.push({ name, count });
         }
         for (const [name, data] of Object.entries(studiosData)) {
             if ((data.isEro || eroticaSet.has(name)) !== isEro) continue;
-            studios.push({ name, count: getAnimesFor('studio', name).length });
+            const count = getAnimesFor('studio', name).length;
+            if (count > 0) studios.push({ name, count });
         }
 
-        // Application du Tri
         const sortFn = (a, b) => {
             if (currentSort === 'name-asc') return a.name.localeCompare(b.name, 'fr');
             if (currentSort === 'name-desc') return b.name.localeCompare(a.name, 'fr');
@@ -318,46 +344,90 @@
 
         document.getElementById('view-container').innerHTML = html;
         
-        // Écouteur pour le tri
         document.getElementById('pls-sort').addEventListener('change', (e) => {
             currentSort = e.target.value;
-            renderList(currentTab); // On relance le rendu
+            renderList(currentTab);
         });
     }
 
     function renderLabels(tab, prodName) {
         const data = prodsData[prodName];
         if (!data) return;
-        const labels = Array.from(data.labels).sort();
         
+        // Le producteur a-t-il des animes directs (sans label) ?
+        const directCount = getAnimesFor('direct-producer', prodName).length;
+
         let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
-        html += `<h1 class="page-title" style="margin-bottom:20px;">Labels de ${prodName}</h1>`;
-        html += `<div class="pls-grid">${labels.map(l => {
-            const count = getAnimesFor('label', l).length;
-            return buildCard(l, 'label', count);
-        }).join('')}</div>`;
+        
+        // En-tête avec Logo et infos du producteur
+        html += buildHeader(prodName, 'producer', data);
+
+        // Si le producteur a des animes directs, on affiche une carte pour y accéder
+        if (directCount > 0) {
+            html += `<div class="section-sep"><div class="section-sep-label">Œuvres directes du producteur</div><div class="section-sep-line"></div></div>`;
+            html += `<div class="pls-grid">${buildCard(prodName, 'direct-producer', directCount)}</div>`;
+        }
+
+        // On affiche les labels
+        const labels = Object.keys(data.labels).sort();
+        if (labels.length > 0) {
+            html += `<div class="section-sep"><div class="section-sep-label">Labels du producteur</div><div class="section-sep-line"></div></div>`;
+            html += `<div class="pls-grid">${labels.map(l => {
+                const count = getAnimesFor('label', l).length;
+                return buildCard(l, 'label', count);
+            }).join('')}</div>`;
+        }
+        
         document.getElementById('view-container').innerHTML = html;
     }
 
-    function renderGrid(tab, type, name) {
-        let animes = getAnimesFor(type, name);
-        animes.sort((a,b) => b.ordreAjout - a.ordreAjout); // Tri par ajout récent
+    function buildHeader(name, type, data) {
+        let linksHtml = '';
+        if (data.links) {
+            if (data.links.mal) linksHtml += `<a href="${data.links.mal}" target="_blank" class="header-link mal">MyAnimeList</a>`;
+            if (data.links.web) linksHtml += `<a href="${data.links.web}" target="_blank" class="header-link web">Site Web</a>`;
+            if (data.links.old) linksHtml += `<a href="${data.links.old}" target="_blank" class="header-link web">Ancien Site</a>`;
+        }
+
+        let relationsHtml = '';
+        if (data.relations) {
+            if (data.relations.prods) relationsHtml += `<div><strong>Avec Producteurs :</strong> ${data.relations.prods}</div>`;
+            if (data.relations.labels) relationsHtml += `<div><strong>Avec Labels :</strong> ${data.relations.labels}</div>`;
+            if (data.relations.studios) relationsHtml += `<div><strong>Avec Studios :</strong> ${data.relations.studios}</div>`;
+        }
 
         const initials = name.split(/[\s\-_]+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
-        
-        let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
-        
-        // En-tête avec le logo demandé
-        html += `
+
+        return `
         <div class="grid-header">
             <div class="grid-header-logo">
                 <img src="${getLogoUrl(name)}" onerror="this.parentElement.innerHTML='<div class=\\'grid-header-fallback\\'>${initials}</div>'">
             </div>
             <div class="grid-header-info">
                 <h1>${name}</h1>
-                <p>${type.charAt(0).toUpperCase() + type.slice(1)} • ${animes.length} titre${animes.length > 1 ? 's' : ''}</p>
+                <p class="subtitle">${type === 'producer' ? 'Producteur' : type === 'studio' ? 'Studio' : 'Label'}</p>
+                <div class="header-links">${linksHtml || '<span style="font-size:0.8em;color:#666;">Aucun lien renseigné</span>'}</div>
+                <div class="header-relations">${relationsHtml || ''}</div>
             </div>
         </div>`;
+    }
+
+    function renderGrid(tab, type, name) {
+        let animes = getAnimesFor(type, name);
+        animes.sort((a,b) => b.ordreAjout - a.ordreAjout);
+
+        let data = {};
+        if (type === 'producer' || type === 'direct-producer') data = prodsData[name] || {};
+        else if (type === 'label') {
+            // Trouver le label
+            for (const p of Object.values(prodsData)) {
+                if (p.labels && p.labels[name]) { data = p.labels[name]; break; }
+            }
+        }
+        else if (type === 'studio') data = studiosData[name] || {};
+
+        let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
+        html += buildHeader(name, type === 'direct-producer' ? 'producer' : type, data);
         
         if (animes.length === 0) html += `<div class="empty-state">Aucun anime trouvé pour ce ${type}.</div>`;
         else html += `<div class="producer-grid">${animes.map(a => buildAnimeCard(a)).join('')}</div>`;
@@ -365,19 +435,17 @@
         document.getElementById('view-container').innerHTML = html;
     }
 
-    // ── ROUTEUR (Correction du décodage URL) ──
+    // ── ROUTEUR ──
     function route() {
         const hash = window.location.hash.slice(1) || 'hentai/list';
         const parts = hash.split('/');
         const tab = parts[0] || 'hentai';
         const view = parts[1] || 'list';
         
-        // Décodage des noms (enlève les %20 et restaure les slashs)
         const rawName = parts[2] ? decodeURIComponent(parts[2]).replace(/§/g, '/') : '';
         const rawName2 = parts[3] ? decodeURIComponent(parts[3]).replace(/§/g, '/') : '';
 
         currentTab = tab;
-        currentView = view;
         
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
         
@@ -385,7 +453,7 @@
             renderList(tab);
             document.getElementById('tabs-container').style.display = 'flex';
         } else {
-            document.getElementById('tabs-container').style.display = 'none'; // On cache les onglets quand on est dans une grille
+            document.getElementById('tabs-container').style.display = 'none';
             if (view === 'labels') renderLabels(tab, rawName);
             else if (view === 'grid') renderGrid(tab, rawName, rawName2);
         }
