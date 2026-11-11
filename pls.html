@@ -46,7 +46,7 @@
         .grid-header-fallback { width: 100%; height: 100%; background: linear-gradient(135deg, #1a0008, #2d0014); display: flex; align-items: center; justify-content: center; font-size: 2.5em; font-weight: 900; color: var(--primary); }
         .grid-header-info { flex: 1; min-width: 0; }
         .grid-header-info h1 { margin: 0 0 5px 0; font-size: 1.8em; color: white; }
-        .grid-header-info .subtitle { margin: 0 0 15px 0; color: #888; font-size: 0.9em; }
+        .grid-header-info .subtitle { margin: 0 0 15px 0; color: #888; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.05em; }
         
         /* Badges de liens et relations dans l'en-tête */
         .header-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
@@ -187,13 +187,13 @@
                     prodsData[currentProdName] = { isEro, links: {}, relations: {}, labels: {} };
                 }
                 
-                // Mise à jour des liens et relations du Producteur (colonnes 1 à 6)
+                // Mise à jour des liens et relations du Producteur
                 if (cleanStr(cols[1]) || cleanStr(cols[2])) {
                     prodsData[currentProdName].links = { mal: cleanStr(cols[1]), web: cleanStr(cols[2]), old: cleanStr(cols[3]) };
                     prodsData[currentProdName].relations = { prods: cleanStr(cols[4]), labels: cleanStr(cols[5]), studios: cleanStr(cols[6]) };
                 }
 
-                // Gestion des Labels (colonnes 7 à 13)
+                // Gestion des Labels
                 const labelName = cleanStr(cols[7]);
                 if (labelName) {
                     if (!prodsData[currentProdName].labels[labelName]) {
@@ -219,7 +219,6 @@
                 if (!name) continue;
                 
                 if (!studiosData[name]) studiosData[name] = { isEro };
-                // Studio CSV : 0=Nom, 1=Studio et Prod, 2=MAL, 3=Web, 4=Avec Prod, 5=Avec Labels, 6=Avec Studios
                 studiosData[name].links = { mal: cleanStr(cols[2]), web: cleanStr(cols[3]), old: "" };
                 studiosData[name].relations = { prods: cleanStr(cols[4]), labels: cleanStr(cols[5]), studios: cleanStr(cols[6]) };
             }
@@ -227,7 +226,6 @@
     }
 
     // ── LOGIQUE DE RECHERCHE ──
-    
     function getAnimesFor(type, name) {
         const isEro = currentTab === 'erotica';
         const normalize = s => (s || '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -242,12 +240,6 @@
             if (type === 'producer') return (a.producteur || '').split(',').map(normalize).includes(normalize(name));
             if (type === 'label') return (a.label || '').split(',').map(normalize).includes(normalize(name));
             if (type === 'studio') return (a.studio || '').split(',').map(normalize).includes(normalize(name));
-            
-            if (type === 'direct-producer') {
-                const isProd = (a.producteur || '').split(',').map(normalize).includes(normalize(name));
-                const hasLabel = (a.label || '').trim().length > 0;
-                return isProd && !hasLabel; // Animes du producteur SANS label
-            }
             return false;
         });
     }
@@ -257,15 +249,7 @@
     }
 
     function buildCard(name, type, count) {
-        let link = '';
-        const safeName = name.replace(/\//g, '§'); 
-        
-        if (type === 'producer-labels') link = `#${currentTab}/labels/${safeName}`;
-        else if (type === 'producer') link = `#${currentTab}/grid/producer/${safeName}`;
-        else if (type === 'studio') link = `#${currentTab}/grid/studio/${safeName}`;
-        else if (type === 'label') link = `#${currentTab}/grid/label/${safeName}`;
-        else if (type === 'direct-producer') link = `#${currentTab}/grid/direct-producer/${safeName}`;
-
+        let link = `#${currentTab}/grid/${type}/${encodeURIComponent(name).replace(/%2F/g, '§')}`;
         const initials = name.split(/[\s\-_]+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
         
         return `<a href="${link}" class="pls-card">
@@ -289,18 +273,14 @@
     }
 
     // ── RENDU DES VUES ──
-
     function renderList(tab) {
         const isEro = tab === 'erotica';
-        let prodsWithLabels = [], prodsWithoutLabels = [], studios = [];
+        let prods = [], studios = [];
 
         for (const [name, data] of Object.entries(prodsData)) {
             if ((data.isEro || eroticaSet.has(name)) !== isEro) continue;
             const count = getAnimesFor('producer', name).length;
-            if (count === 0) continue;
-            
-            if (Object.keys(data.labels).length > 0) prodsWithLabels.push({ name, count });
-            else prodsWithoutLabels.push({ name, count });
+            if (count > 0) prods.push({ name, count });
         }
         for (const [name, data] of Object.entries(studiosData)) {
             if ((data.isEro || eroticaSet.has(name)) !== isEro) continue;
@@ -315,7 +295,7 @@
             if (currentSort === 'count-asc') return a.count - b.count;
             return 0;
         };
-        prodsWithLabels.sort(sortFn); prodsWithoutLabels.sort(sortFn); studios.sort(sortFn);
+        prods.sort(sortFn); studios.sort(sortFn);
 
         let html = `
             <div class="page-header">
@@ -329,13 +309,9 @@
             </div>
         `;
 
-        if (prodsWithLabels.length) {
-            html += `<div class="section-sep"><div class="section-sep-label">Producteurs (avec labels)</div><div class="section-sep-line"></div></div>`;
-            html += `<div class="pls-grid">${prodsWithLabels.map(p => buildCard(p.name, 'producer-labels', p.count)).join('')}</div>`;
-        }
-        if (prodsWithoutLabels.length) {
-            html += `<div class="section-sep"><div class="section-sep-label">Producteurs (sans label)</div><div class="section-sep-line"></div></div>`;
-            html += `<div class="pls-grid">${prodsWithoutLabels.map(p => buildCard(p.name, 'producer', p.count)).join('')}</div>`;
+        if (prods.length) {
+            html += `<div class="section-sep"><div class="section-sep-label">Producteurs</div><div class="section-sep-line"></div></div>`;
+            html += `<div class="pls-grid">${prods.map(p => buildCard(p.name, 'producer', p.count)).join('')}</div>`;
         }
         if (studios.length) {
             html += `<div class="section-sep"><div class="section-sep-label">Studios</div><div class="section-sep-line"></div></div>`;
@@ -348,37 +324,6 @@
             currentSort = e.target.value;
             renderList(currentTab);
         });
-    }
-
-    function renderLabels(tab, prodName) {
-        const data = prodsData[prodName];
-        if (!data) return;
-        
-        // Le producteur a-t-il des animes directs (sans label) ?
-        const directCount = getAnimesFor('direct-producer', prodName).length;
-
-        let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
-        
-        // En-tête avec Logo et infos du producteur
-        html += buildHeader(prodName, 'producer', data);
-
-        // Si le producteur a des animes directs, on affiche une carte pour y accéder
-        if (directCount > 0) {
-            html += `<div class="section-sep"><div class="section-sep-label">Œuvres directes du producteur</div><div class="section-sep-line"></div></div>`;
-            html += `<div class="pls-grid">${buildCard(prodName, 'direct-producer', directCount)}</div>`;
-        }
-
-        // On affiche les labels
-        const labels = Object.keys(data.labels).sort();
-        if (labels.length > 0) {
-            html += `<div class="section-sep"><div class="section-sep-label">Labels du producteur</div><div class="section-sep-line"></div></div>`;
-            html += `<div class="pls-grid">${labels.map(l => {
-                const count = getAnimesFor('label', l).length;
-                return buildCard(l, 'label', count);
-            }).join('')}</div>`;
-        }
-        
-        document.getElementById('view-container').innerHTML = html;
     }
 
     function buildHeader(name, type, data) {
@@ -417,9 +362,8 @@
         animes.sort((a,b) => b.ordreAjout - a.ordreAjout);
 
         let data = {};
-        if (type === 'producer' || type === 'direct-producer') data = prodsData[name] || {};
+        if (type === 'producer') data = prodsData[name] || {};
         else if (type === 'label') {
-            // Trouver le label
             for (const p of Object.values(prodsData)) {
                 if (p.labels && p.labels[name]) { data = p.labels[name]; break; }
             }
@@ -427,9 +371,20 @@
         else if (type === 'studio') data = studiosData[name] || {};
 
         let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
-        html += buildHeader(name, type === 'direct-producer' ? 'producer' : type, data);
+        html += buildHeader(name, type, data);
+
+        // Si c'est un producteur avec des labels, on affiche ses labels avant la grille
+        if (type === 'producer' && data.labels && Object.keys(data.labels).length > 0) {
+            html += `<div class="section-sep"><div class="section-sep-label">Labels de ce producteur</div><div class="section-sep-line"></div></div>`;
+            html += `<div class="pls-grid">${Object.keys(data.labels).sort().map(l => {
+                const count = getAnimesFor('label', l).length;
+                return buildCard(l, 'label', count);
+            }).join('')}</div>`;
+        }
+
+        html += `<div class="section-sep"><div class="section-sep-label">Tous les animes</div><div class="section-sep-line"></div></div>`;
         
-        if (animes.length === 0) html += `<div class="empty-state">Aucun anime trouvé pour ce ${type}.</div>`;
+        if (animes.length === 0) html += `<div class="empty-state">Aucun anime trouvé.</div>`;
         else html += `<div class="producer-grid">${animes.map(a => buildAnimeCard(a)).join('')}</div>`;
         
         document.getElementById('view-container').innerHTML = html;
@@ -454,8 +409,7 @@
             document.getElementById('tabs-container').style.display = 'flex';
         } else {
             document.getElementById('tabs-container').style.display = 'none';
-            if (view === 'labels') renderLabels(tab, rawName);
-            else if (view === 'grid') renderGrid(tab, rawName, rawName2);
+            if (view === 'grid') renderGrid(tab, rawName, rawName2);
         }
     }
 
