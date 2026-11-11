@@ -60,9 +60,14 @@
         
         try {
             const res = await fetch(WORKER_URL);
-            if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
+            const data = await res.json(); // On lit le JSON
+
+            // Si le Worker nous renvoie une erreur, on l'affiche clairement
+            if (!Array.isArray(data)) {
+                throw new Error(`Erreur Worker : ${data.message || data.details || 'Erreur inconnue'}`);
+            }
             
-            const messages = await res.json();
+            const messages = data;
             
             // On filtre pour ne garder que les messages qui ont du contenu (texte, image ou embed)
             const validMessages = messages.filter(m => 
@@ -87,7 +92,6 @@
                 // Gestion des images jointes
                 let attachmentsHtml = '';
                 if (m.attachments && m.attachments.length > 0) {
-                    // On vérifie si c'est bien une image pour l'afficher
                     attachmentsHtml = m.attachments
                         .filter(a => a.content_type && a.content_type.startsWith('image/'))
                         .map(a => `<img src="${a.url}" class="post-image" loading="lazy">`)
@@ -123,10 +127,11 @@
             
         } catch (e) {
             console.error("Erreur de chargement des annonces :", e);
+            // Affiche le message d'erreur exact pour t'aider à débugger
             feed.innerHTML = `
                 <div class="error-state" style="color: var(--primary);">
                     Impossible de charger les annonces Discord.<br>
-                    <span style="font-size: 0.8em; color: #888;">(Vérifie que l'URL du Worker est correcte et que le bot est bien configuré)</span>
+                    <span style="font-size: 0.8em; color: #888;">(${e.message})</span>
                 </div>`;
         }
     }
