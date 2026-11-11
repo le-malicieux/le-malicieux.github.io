@@ -40,23 +40,40 @@
         .pls-count span { color: var(--primary); font-weight: bold; }
 
         /* En-tête de la vue Grille (Logo + Nom + Infos) */
-        .grid-header { display: flex; align-items: flex-start; gap: 20px; background: var(--card-bg); border: 1px solid #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+        .grid-header { display: flex; align-items: flex-start; gap: 20px; background: var(--card-bg); border: 1px solid #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
         .grid-header-logo { width: 100px; height: 100px; background: #111; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 5px; flex-shrink: 0; border: 1px solid #333; }
         .grid-header-logo img { width: 100%; height: 100%; object-fit: contain; }
         .grid-header-fallback { width: 100%; height: 100%; background: linear-gradient(135deg, #1a0008, #2d0014); display: flex; align-items: center; justify-content: center; font-size: 2.5em; font-weight: 900; color: var(--primary); }
         .grid-header-info { flex: 1; min-width: 0; }
         .grid-header-info h1 { margin: 0 0 5px 0; font-size: 1.8em; color: white; }
-        .grid-header-info .subtitle { margin: 0 0 15px 0; color: #888; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.05em; }
+        .grid-header-info .subtitle { margin: 0 0 12px 0; color: #888; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em; }
         
-        /* Badges de liens et relations dans l'en-tête */
-        .header-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-        .header-link { display: inline-flex; align-items: center; font-size: 0.75em; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: 0.2s; }
+        /* Badges de liens dans l'en-tête */
+        .header-links-box { background: rgba(0,0,0,0.3); border: 1px solid #333; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+        .header-links-title { font-size: 0.7em; color: #aaa; text-transform: uppercase; font-weight: bold; margin-bottom: 6px; letter-spacing: 0.05em; }
+        .header-links { display: flex; flex-wrap: wrap; gap: 8px; }
+        .header-link { display: inline-flex; align-items: center; font-size: 0.75em; padding: 5px 12px; border-radius: 4px; text-decoration: none; font-weight: 600; transition: 0.2s; }
         .header-link.mal { background: rgba(46,134,222,0.15); color: #2e86de; border: 1px solid rgba(46,134,222,0.3); }
         .header-link.mal:hover { background: #2e86de; color: white; }
         .header-link.web { background: rgba(255,255,255,0.05); color: #ccc; border: 1px solid #444; }
         .header-link.web:hover { background: #444; color: white; }
-        .header-relations { display: flex; flex-direction: column; gap: 4px; font-size: 0.75em; color: #888; }
-        .header-relations strong { color: #aaa; }
+        
+        /* Relations */
+        .header-relations { display: flex; flex-direction: column; gap: 4px; font-size: 0.75em; color: #888; line-height: 1.4; }
+        .header-relations strong { color: var(--text); margin-right: 4px; }
+        .relation-link { color: #ff6b7a; text-decoration: none; transition: 0.15s; }
+        .relation-link:hover { color: white; text-decoration: underline; }
+
+        /* Statistiques (Titres, Score, Meilleur) */
+        .pls-stats-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .pls-stat-box { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 90px; }
+        .pls-stat-val { font-size: 1.3em; font-weight: 900; color: var(--primary); display: block; line-height: 1.1; }
+        .pls-stat-lbl { font-size: 0.65em; color: #666; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; display: block; }
+
+        /* Barre de contrôles (Filtres) */
+        .pls-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; background: var(--card-bg); padding: 12px 16px; border-radius: 10px; border: 1px solid #2a2a2a; }
+        .ctrl-select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; outline: none; }
+        .result-count { font-size: 0.8em; color: #888; margin-left: auto; }
 
         /* Grille d'animés */
         .producer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
@@ -76,7 +93,10 @@
             .pls-grid { grid-template-columns: 1fr !important; }
             .producer-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
             .grid-header { flex-direction: column; align-items: center; text-align: center; }
-            .header-relations { align-items: center; }
+            .header-relations { align-items: center; text-align: center; }
+            .header-links { justify-content: center; }
+            .pls-controls { flex-direction: column; align-items: stretch; }
+            .result-count { margin-left: 0; text-align: center; }
         }
     </style>
 </head>
@@ -140,6 +160,9 @@
     let studiosData = {}; 
     let currentTab = 'hentai';
     let currentSort = 'name-asc';
+    
+    // État des filtres pour la vue Grille
+    let currentGridFilters = { sort: 'score-desc', filter: '', costudio: '' };
 
     const cleanStr = s => (s || '').replace(/^\uFEFF/, '').trim();
 
@@ -187,13 +210,11 @@
                     prodsData[currentProdName] = { isEro, links: {}, relations: {}, labels: {} };
                 }
                 
-                // Mise à jour des liens et relations du Producteur
                 if (cleanStr(cols[1]) || cleanStr(cols[2])) {
                     prodsData[currentProdName].links = { mal: cleanStr(cols[1]), web: cleanStr(cols[2]), old: cleanStr(cols[3]) };
                     prodsData[currentProdName].relations = { prods: cleanStr(cols[4]), labels: cleanStr(cols[5]), studios: cleanStr(cols[6]) };
                 }
 
-                // Gestion des Labels
                 const labelName = cleanStr(cols[7]);
                 if (labelName) {
                     if (!prodsData[currentProdName].labels[labelName]) {
@@ -246,6 +267,26 @@
 
     function getLogoUrl(name) { 
         return `img/pls/${encodeURI(name.replace(/\s+/g, '-'))}.webp`; 
+    }
+
+    // Fonction pour générer les liens cliquables pour les relations
+    function generateRelationLinks(str, type) {
+        if (!str) return '';
+        return str.split(',').map(s => s.trim()).filter(Boolean).map(name => {
+            // On devine le type pour le lien
+            let targetType = type;
+            if (type === 'prods' && studiosData[name]) targetType = 'studio';
+            else if (type === 'prods' && !prodsData[name]) targetType = 'studio'; // Heuristique
+            if (type === 'labels' && !prodsData[name]) targetType = 'label';
+            
+            // Normalisation du type pour l'URL
+            if (targetType === 'prods') targetType = 'producer';
+            if (targetType === 'labels') targetType = 'label';
+            if (targetType === 'studios') targetType = 'studio';
+
+            const safeName = encodeURIComponent(name).replace(/%2F/g, '§');
+            return `<a href="#${currentTab}/grid/${targetType}/${safeName}" class="relation-link">${name}</a>`;
+        }).join(', ');
     }
 
     function buildCard(name, type, count) {
@@ -336,9 +377,9 @@
 
         let relationsHtml = '';
         if (data.relations) {
-            if (data.relations.prods) relationsHtml += `<div><strong>Avec Producteurs :</strong> ${data.relations.prods}</div>`;
-            if (data.relations.labels) relationsHtml += `<div><strong>Avec Labels :</strong> ${data.relations.labels}</div>`;
-            if (data.relations.studios) relationsHtml += `<div><strong>Avec Studios :</strong> ${data.relations.studios}</div>`;
+            if (data.relations.prods) relationsHtml += `<div><strong>Travaille avec (Producteurs) :</strong> ${generateRelationLinks(data.relations.prods, 'prods')}</div>`;
+            if (data.relations.labels) relationsHtml += `<div><strong>Travaille avec (Labels) :</strong> ${generateRelationLinks(data.relations.labels, 'labels')}</div>`;
+            if (data.relations.studios) relationsHtml += `<div><strong>Travaille avec (Studios) :</strong> ${generateRelationLinks(data.relations.studios, 'studios')}</div>`;
         }
 
         const initials = name.split(/[\s\-_]+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
@@ -351,16 +392,16 @@
             <div class="grid-header-info">
                 <h1>${name}</h1>
                 <p class="subtitle">${type === 'producer' ? 'Producteur' : type === 'studio' ? 'Studio' : 'Label'}</p>
-                <div class="header-links">${linksHtml || '<span style="font-size:0.8em;color:#666;">Aucun lien renseigné</span>'}</div>
-                <div class="header-relations">${relationsHtml || ''}</div>
+                
+                ${linksHtml ? `<div class="header-links-box"><div class="header-links-title">Liens de redirection</div><div class="header-links">${linksHtml}</div></div>` : ''}
+                ${relationsHtml ? `<div class="header-relations">${relationsHtml}</div>` : ''}
             </div>
         </div>`;
     }
 
     function renderGrid(tab, type, name) {
         let animes = getAnimesFor(type, name);
-        animes.sort((a,b) => b.ordreAjout - a.ordreAjout);
-
+        
         let data = {};
         if (type === 'producer') data = prodsData[name] || {};
         else if (type === 'label') {
@@ -373,7 +414,7 @@
         let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
         html += buildHeader(name, type, data);
 
-        // Si c'est un producteur avec des labels, on affiche ses labels avant la grille
+        // Si c'est un producteur avec des labels, on affiche ses labels
         if (type === 'producer' && data.labels && Object.keys(data.labels).length > 0) {
             html += `<div class="section-sep"><div class="section-sep-label">Labels de ce producteur</div><div class="section-sep-line"></div></div>`;
             html += `<div class="pls-grid">${Object.keys(data.labels).sort().map(l => {
@@ -382,12 +423,103 @@
             }).join('')}</div>`;
         }
 
+        // Calcul des stats
+        const validScores = animes.map(a => parseFloat(a.score.replace(',', '.'))).filter(n => !isNaN(n) && n > 0);
+        const total = animes.length;
+        const avg = validScores.length ? (validScores.reduce((a,b)=>a+b,0) / validScores.length).toFixed(2) : '—';
+        const best = validScores.length ? Math.max(...validScores).toFixed(2) : '—';
+
+        // Récupération des co-studios pour le filtre
+        const coStudios = new Set();
+        animes.forEach(a => {
+            (a.studio || '').split(',').map(s => s.trim()).filter(Boolean).forEach(s => {
+                if (s !== name) coStudios.add(s);
+            });
+        });
+
         html += `<div class="section-sep"><div class="section-sep-label">Tous les animes</div><div class="section-sep-line"></div></div>`;
         
-        if (animes.length === 0) html += `<div class="empty-state">Aucun anime trouvé.</div>`;
-        else html += `<div class="producer-grid">${animes.map(a => buildAnimeCard(a)).join('')}</div>`;
+        html += `
+        <div class="pls-stats-bar">
+            <div class="pls-stat-box"><span class="pls-stat-val">${total}</span><span class="pls-stat-lbl">Titres</span></div>
+            <div class="pls-stat-box"><span class="pls-stat-val">${avg}</span><span class="pls-stat-lbl">Score moy.</span></div>
+            <div class="pls-stat-box"><span class="pls-stat-val">${best}</span><span class="pls-stat-lbl">Meilleur</span></div>
+        </div>
         
+        <div class="pls-controls">
+            <select class="ctrl-select" id="grid-sort">
+                <option value="score-desc" ${currentGridFilters.sort === 'score-desc' ? 'selected' : ''}>Tri : Score (Desc)</option>
+                <option value="score-asc" ${currentGridFilters.sort === 'score-asc' ? 'selected' : ''}>Tri : Score (Asc)</option>
+                <option value="pop" ${currentGridFilters.sort === 'pop' ? 'selected' : ''}>Tri : Popularité</option>
+                <option value="annee" ${currentGridFilters.sort === 'annee' ? 'selected' : ''}>Tri : Année</option>
+                <option value="nom" ${currentGridFilters.sort === 'nom' ? 'selected' : ''}>Tri : Nom (A-Z)</option>
+                <option value="episodes" ${currentGridFilters.sort === 'episodes' ? 'selected' : ''}>Tri : Épisodes</option>
+            </select>
+            <select class="ctrl-select" id="grid-filter">
+                <option value="" ${currentGridFilters.filter === '' ? 'selected' : ''}>Tout afficher</option>
+                <option value="en cours" ${currentGridFilters.filter === 'en cours' ? 'selected' : ''}>En cours</option>
+                <option value="terminé" ${currentGridFilters.filter === 'terminé' ? 'selected' : ''}>Terminés</option>
+                <option value="oui" ${currentGridFilters.filter === 'oui' ? 'selected' : ''}>Censuré</option>
+                <option value="non" ${currentGridFilters.filter === 'non' ? 'selected' : ''}>Non censuré</option>
+            </select>
+            ${coStudios.size > 0 ? `
+            <select class="ctrl-select" id="grid-costudio">
+                <option value="">Tous les studios</option>
+                ${Array.from(coStudios).sort().map(s => `<option value="${s}" ${currentGridFilters.costudio === s ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>` : ''}
+            <span class="result-count" id="grid-count"></span>
+        </div>
+        
+        <div id="grid-container"></div>`;
+
         document.getElementById('view-container').innerHTML = html;
+
+        // Fonction pour appliquer les filtres dynamiquement
+        const applyFilters = () => {
+            const sVal = document.getElementById('grid-sort').value;
+            const fVal = document.getElementById('grid-filter').value;
+            const cVal = document.getElementById('grid-costudio') ? document.getElementById('grid-costudio').value : '';
+            
+            currentGridFilters = { sort: sVal, filter: fVal, costudio: cVal };
+
+            let filtered = [...animes];
+            
+            // Filtre statut
+            if (fVal === 'oui' || fVal === 'non') filtered = filtered.filter(a => a.censure.toLowerCase() === fVal);
+            else if (fVal === 'terminé') filtered = filtered.filter(a => a.etat.toLowerCase().includes('termin') || a.etat.toLowerCase().includes('fini'));
+            else if (fVal === 'en cours') filtered = filtered.filter(a => a.etat.toLowerCase().includes('cours') || a.etat.toLowerCase().includes('airing'));
+            
+            // Filtre co-studio
+            if (cVal) filtered = filtered.filter(a => (a.studio || '').split(',').map(s => s.trim()).includes(cVal));
+
+            // Tri
+            filtered.sort((a, b) => {
+                if (sVal === 'score-desc') return (parseFloat(b.score.replace(',','.'))||0) - (parseFloat(a.score.replace(',','.'))||0);
+                if (sVal === 'score-asc') return (parseFloat(a.score.replace(',','.'))||0) - (parseFloat(b.score.replace(',','.'))||0);
+                if (sVal === 'pop') return (parseInt(a.pop.replace('#',''))||99999) - (parseInt(b.pop.replace('#',''))||99999);
+                if (sVal === 'annee') { 
+                    const getY = s => { const m = (s||'').match(/\d{4}/g); return m ? parseInt(m[m.length-1]) : 0; };
+                    return getY(b.sortie) - getY(a.sortie); 
+                }
+                if (sVal === 'nom') return a.nom.localeCompare(b.nom);
+                if (sVal === 'episodes') { const na=parseInt((a.ep||'').match(/\d+/g)?.pop()||0), nb=parseInt((b.ep||'').match(/\d+/g)?.pop()||0);return nb-na; }
+                return 0;
+            });
+
+            document.getElementById('grid-count').textContent = `${filtered.length} titre${filtered.length > 1 ? 's' : ''} affiché${filtered.length > 1 ? 's' : ''}`;
+            
+            const container = document.getElementById('grid-container');
+            if (filtered.length === 0) container.innerHTML = `<div class="empty-state">Aucun anime ne correspond à ces filtres.</div>`;
+            else container.innerHTML = `<div class="producer-grid">${filtered.map(a => buildAnimeCard(a)).join('')}</div>`;
+        };
+
+        // Écouteurs sur les selects
+        document.getElementById('grid-sort').addEventListener('change', applyFilters);
+        document.getElementById('grid-filter').addEventListener('change', applyFilters);
+        if (document.getElementById('grid-costudio')) document.getElementById('grid-costudio').addEventListener('change', applyFilters);
+
+        // Premier rendu de la grille
+        applyFilters();
     }
 
     // ── ROUTEUR ──
