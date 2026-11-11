@@ -39,14 +39,16 @@
         .pls-count { font-size: 0.72em; color: #888; }
         .pls-count span { color: var(--primary); font-weight: bold; }
 
-        /* En-tête de la vue Grille (Logo + Nom + Infos) */
-        .grid-header { display: flex; align-items: flex-start; gap: 20px; background: var(--card-bg); border: 1px solid #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        /* En-tête de la vue Grille (Logo + Nom + Infos + Stats) */
+        .grid-header { display: flex; align-items: flex-start; gap: 20px; background: var(--card-bg); border: 1px solid #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 25px; flex-wrap: wrap; }
         .grid-header-logo { width: 100px; height: 100px; background: #111; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 5px; flex-shrink: 0; border: 1px solid #333; }
         .grid-header-logo img { width: 100%; height: 100%; object-fit: contain; }
         .grid-header-fallback { width: 100%; height: 100%; background: linear-gradient(135deg, #1a0008, #2d0014); display: flex; align-items: center; justify-content: center; font-size: 2.5em; font-weight: 900; color: var(--primary); }
-        .grid-header-info { flex: 1; min-width: 0; }
+        .grid-header-info { flex: 1; min-width: 300px; }
         .grid-header-info h1 { margin: 0 0 5px 0; font-size: 1.8em; color: white; }
         .grid-header-info .subtitle { margin: 0 0 12px 0; color: #888; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em; }
+        .grid-header-info .subtitle a { color: var(--primary); text-decoration: none; font-weight: bold; }
+        .grid-header-info .subtitle a:hover { text-decoration: underline; }
         
         /* Badges de liens dans l'en-tête */
         .header-links-box { background: rgba(0,0,0,0.3); border: 1px solid #333; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
@@ -59,16 +61,16 @@
         .header-link.web:hover { background: #444; color: white; }
         
         /* Relations */
-        .header-relations { display: flex; flex-direction: column; gap: 4px; font-size: 0.75em; color: #888; line-height: 1.4; }
+        .header-relations { display: flex; flex-direction: column; gap: 4px; font-size: 0.75em; color: #888; line-height: 1.4; margin-bottom: 15px; }
         .header-relations strong { color: var(--text); margin-right: 4px; }
         .relation-link { color: #ff6b7a; text-decoration: none; transition: 0.15s; }
         .relation-link:hover { color: white; text-decoration: underline; }
 
-        /* Statistiques (Titres, Score, Meilleur) */
-        .pls-stats-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-        .pls-stat-box { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 90px; }
-        .pls-stat-val { font-size: 1.3em; font-weight: 900; color: var(--primary); display: block; line-height: 1.1; }
-        .pls-stat-lbl { font-size: 0.65em; color: #666; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; display: block; }
+        /* Statistiques (intégrées dans l'en-tête) */
+        .pls-stats-bar { display: flex; gap: 10px; flex-wrap: wrap; }
+        .pls-stat-box { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 8px 14px; text-align: center; min-width: 80px; }
+        .pls-stat-val { font-size: 1.2em; font-weight: 900; color: var(--primary); display: block; line-height: 1.1; }
+        .pls-stat-lbl { font-size: 0.6em; color: #666; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; display: block; }
 
         /* Barre de contrôles (Filtres) */
         .pls-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; background: var(--card-bg); padding: 12px 16px; border-radius: 10px; border: 1px solid #2a2a2a; }
@@ -97,6 +99,7 @@
             .header-links { justify-content: center; }
             .pls-controls { flex-direction: column; align-items: stretch; }
             .result-count { margin-left: 0; text-align: center; }
+            .pls-stats-bar { justify-content: center; }
         }
     </style>
 </head>
@@ -159,9 +162,8 @@
     let prodsData = {}; 
     let studiosData = {}; 
     let currentTab = 'hentai';
-    let currentSort = 'name-asc';
+    let currentSort = 'count-desc'; // Tri par défaut par nombre de titres (Desc)
     
-    // État des filtres pour la vue Grille
     let currentGridFilters = { sort: 'score-desc', filter: '', costudio: '' };
 
     const cleanStr = s => (s || '').replace(/^\uFEFF/, '').trim();
@@ -189,7 +191,7 @@
         }
     }
 
-    // ── CHARGEMENT DES CSV (Parsing de TOUTES les colonnes) ──
+    // ── CHARGEMENT DES CSV ──
     async function loadProds(url, isEro) {
         try {
             const resp = await fetch(url);
@@ -210,11 +212,13 @@
                     prodsData[currentProdName] = { isEro, links: {}, relations: {}, labels: {} };
                 }
                 
-                if (cleanStr(cols[1]) || cleanStr(cols[2])) {
+                // Colonnes Producteur : 1=MAL, 2=Web, 3=Old, 4=Avec Prod, 5=Avec Labels, 6=Avec Studios
+                if (cleanStr(cols[1]) || cleanStr(cols[2]) || cleanStr(cols[3])) {
                     prodsData[currentProdName].links = { mal: cleanStr(cols[1]), web: cleanStr(cols[2]), old: cleanStr(cols[3]) };
                     prodsData[currentProdName].relations = { prods: cleanStr(cols[4]), labels: cleanStr(cols[5]), studios: cleanStr(cols[6]) };
                 }
 
+                // Colonnes Labels : 7=Nom, 8=MAL, 9=Web, 10=Old, 11=Avec Prod, 12=Avec Labels, 13=Avec Studios
                 const labelName = cleanStr(cols[7]);
                 if (labelName) {
                     if (!prodsData[currentProdName].labels[labelName]) {
@@ -240,6 +244,7 @@
                 if (!name) continue;
                 
                 if (!studiosData[name]) studiosData[name] = { isEro };
+                // Colonnes Studio : 0=Nom, 1=Info, 2=MAL, 3=Web, 4=Avec Prod, 5=Avec Labels, 6=Avec Studios
                 studiosData[name].links = { mal: cleanStr(cols[2]), web: cleanStr(cols[3]), old: "" };
                 studiosData[name].relations = { prods: cleanStr(cols[4]), labels: cleanStr(cols[5]), studios: cleanStr(cols[6]) };
             }
@@ -269,17 +274,14 @@
         return `img/pls/${encodeURI(name.replace(/\s+/g, '-'))}.webp`; 
     }
 
-    // Fonction pour générer les liens cliquables pour les relations
     function generateRelationLinks(str, type) {
         if (!str) return '';
         return str.split(',').map(s => s.trim()).filter(Boolean).map(name => {
-            // On devine le type pour le lien
             let targetType = type;
             if (type === 'prods' && studiosData[name]) targetType = 'studio';
-            else if (type === 'prods' && !prodsData[name]) targetType = 'studio'; // Heuristique
+            else if (type === 'prods' && !prodsData[name]) targetType = 'studio'; 
             if (type === 'labels' && !prodsData[name]) targetType = 'label';
             
-            // Normalisation du type pour l'URL
             if (targetType === 'prods') targetType = 'producer';
             if (targetType === 'labels') targetType = 'label';
             if (targetType === 'studios') targetType = 'studio';
@@ -342,10 +344,10 @@
             <div class="page-header">
                 <h1 class="page-title">Industrie ${tab === 'hentai' ? 'Hentai' : 'Erotica'}</h1>
                 <select class="sort-select" id="pls-sort">
-                    <option value="name-asc" ${currentSort === 'name-asc' ? 'selected' : ''}>Trier : A à Z</option>
-                    <option value="name-desc" ${currentSort === 'name-desc' ? 'selected' : ''}>Trier : Z à A</option>
                     <option value="count-desc" ${currentSort === 'count-desc' ? 'selected' : ''}>Trier : Nb titres (Desc)</option>
                     <option value="count-asc" ${currentSort === 'count-asc' ? 'selected' : ''}>Trier : Nb titres (Asc)</option>
+                    <option value="name-asc" ${currentSort === 'name-asc' ? 'selected' : ''}>Trier : A à Z</option>
+                    <option value="name-desc" ${currentSort === 'name-desc' ? 'selected' : ''}>Trier : Z à A</option>
                 </select>
             </div>
         `;
@@ -367,12 +369,16 @@
         });
     }
 
-    function buildHeader(name, type, data) {
+    function buildHeader(name, type, data, parentProd, stats) {
         let linksHtml = '';
         if (data.links) {
             if (data.links.mal) linksHtml += `<a href="${data.links.mal}" target="_blank" class="header-link mal">MyAnimeList</a>`;
             if (data.links.web) linksHtml += `<a href="${data.links.web}" target="_blank" class="header-link web">Site Web</a>`;
-            if (data.links.old) linksHtml += `<a href="${data.links.old}" target="_blank" class="header-link web">Ancien Site</a>`;
+            if (data.links.old) {
+                const isAniDB = data.links.old.toLowerCase().includes('anidb');
+                const label = isAniDB ? 'AniDB' : 'Ancien Site';
+                linksHtml += `<a href="${data.links.old}" target="_blank" class="header-link web">${label}</a>`;
+            }
         }
 
         let relationsHtml = '';
@@ -382,7 +388,25 @@
             if (data.relations.studios) relationsHtml += `<div><strong>Travaille avec (Studios) :</strong> ${generateRelationLinks(data.relations.studios, 'studios')}</div>`;
         }
 
+        // Gestion du sous-titre pour les labels
+        let subtitleHtml = type === 'producer' ? 'PRODUCTEUR' : type === 'studio' ? 'STUDIO' : 'LABEL';
+        if (type === 'label' && parentProd) {
+            const safeParent = encodeURIComponent(parentProd).replace(/%2F/g, '§');
+            subtitleHtml = `LABEL DE <a href="#${currentTab}/grid/producer/${safeParent}">${parentProd}</a>`;
+        }
+
         const initials = name.split(/[\s\-_]+/).map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
+
+        let statsHtml = '';
+        if (stats) {
+            statsHtml = `
+            <div class="pls-stats-bar">
+                <div class="pls-stat-box"><span class="pls-stat-val">${stats.total}</span><span class="pls-stat-lbl">Titres</span></div>
+                <div class="pls-stat-box"><span class="pls-stat-val">${stats.avg}</span><span class="pls-stat-lbl">Score moy.</span></div>
+                <div class="pls-stat-box"><span class="pls-stat-val">${stats.best}</span><span class="pls-stat-lbl">Meilleur</span></div>
+                <div class="pls-stat-box"><span class="pls-stat-val">${stats.worst}</span><span class="pls-stat-lbl">Pire score</span></div>
+            </div>`;
+        }
 
         return `
         <div class="grid-header">
@@ -391,10 +415,11 @@
             </div>
             <div class="grid-header-info">
                 <h1>${name}</h1>
-                <p class="subtitle">${type === 'producer' ? 'Producteur' : type === 'studio' ? 'Studio' : 'Label'}</p>
+                <p class="subtitle">${subtitleHtml}</p>
                 
                 ${linksHtml ? `<div class="header-links-box"><div class="header-links-title">Liens de redirection</div><div class="header-links">${linksHtml}</div></div>` : ''}
                 ${relationsHtml ? `<div class="header-relations">${relationsHtml}</div>` : ''}
+                ${statsHtml}
             </div>
         </div>`;
     }
@@ -403,18 +428,32 @@
         let animes = getAnimesFor(type, name);
         
         let data = {};
+        let parentProd = null;
+
         if (type === 'producer') data = prodsData[name] || {};
         else if (type === 'label') {
-            for (const p of Object.values(prodsData)) {
-                if (p.labels && p.labels[name]) { data = p.labels[name]; break; }
+            for (const [pName, pData] of Object.entries(prodsData)) {
+                if (pData.labels && pData.labels[name]) { 
+                    data = pData.labels[name]; 
+                    parentProd = pName;
+                    break; 
+                }
             }
         }
         else if (type === 'studio') data = studiosData[name] || {};
 
-        let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
-        html += buildHeader(name, type, data);
+        // Calcul des stats
+        const validScores = animes.map(a => parseFloat(a.score.replace(',', '.'))).filter(n => !isNaN(n) && n > 0);
+        const total = animes.length;
+        const avg = validScores.length ? (validScores.reduce((a,b)=>a+b,0) / validScores.length).toFixed(2) : '—';
+        const best = validScores.length ? Math.max(...validScores).toFixed(2) : '—';
+        const worst = validScores.length ? Math.min(...validScores).toFixed(2) : '—';
+        
+        const stats = { total, avg, best, worst };
 
-        // Si c'est un producteur avec des labels, on affiche ses labels
+        let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
+        html += buildHeader(name, type, data, parentProd, stats);
+
         if (type === 'producer' && data.labels && Object.keys(data.labels).length > 0) {
             html += `<div class="section-sep"><div class="section-sep-label">Labels de ce producteur</div><div class="section-sep-line"></div></div>`;
             html += `<div class="pls-grid">${Object.keys(data.labels).sort().map(l => {
@@ -423,13 +462,6 @@
             }).join('')}</div>`;
         }
 
-        // Calcul des stats
-        const validScores = animes.map(a => parseFloat(a.score.replace(',', '.'))).filter(n => !isNaN(n) && n > 0);
-        const total = animes.length;
-        const avg = validScores.length ? (validScores.reduce((a,b)=>a+b,0) / validScores.length).toFixed(2) : '—';
-        const best = validScores.length ? Math.max(...validScores).toFixed(2) : '—';
-
-        // Récupération des co-studios pour le filtre
         const coStudios = new Set();
         animes.forEach(a => {
             (a.studio || '').split(',').map(s => s.trim()).filter(Boolean).forEach(s => {
@@ -440,12 +472,6 @@
         html += `<div class="section-sep"><div class="section-sep-label">Tous les animes</div><div class="section-sep-line"></div></div>`;
         
         html += `
-        <div class="pls-stats-bar">
-            <div class="pls-stat-box"><span class="pls-stat-val">${total}</span><span class="pls-stat-lbl">Titres</span></div>
-            <div class="pls-stat-box"><span class="pls-stat-val">${avg}</span><span class="pls-stat-lbl">Score moy.</span></div>
-            <div class="pls-stat-box"><span class="pls-stat-val">${best}</span><span class="pls-stat-lbl">Meilleur</span></div>
-        </div>
-        
         <div class="pls-controls">
             <select class="ctrl-select" id="grid-sort">
                 <option value="score-desc" ${currentGridFilters.sort === 'score-desc' ? 'selected' : ''}>Tri : Score (Desc)</option>
@@ -474,7 +500,6 @@
 
         document.getElementById('view-container').innerHTML = html;
 
-        // Fonction pour appliquer les filtres dynamiquement
         const applyFilters = () => {
             const sVal = document.getElementById('grid-sort').value;
             const fVal = document.getElementById('grid-filter').value;
@@ -484,15 +509,12 @@
 
             let filtered = [...animes];
             
-            // Filtre statut
             if (fVal === 'oui' || fVal === 'non') filtered = filtered.filter(a => a.censure.toLowerCase() === fVal);
             else if (fVal === 'terminé') filtered = filtered.filter(a => a.etat.toLowerCase().includes('termin') || a.etat.toLowerCase().includes('fini'));
             else if (fVal === 'en cours') filtered = filtered.filter(a => a.etat.toLowerCase().includes('cours') || a.etat.toLowerCase().includes('airing'));
             
-            // Filtre co-studio
             if (cVal) filtered = filtered.filter(a => (a.studio || '').split(',').map(s => s.trim()).includes(cVal));
 
-            // Tri
             filtered.sort((a, b) => {
                 if (sVal === 'score-desc') return (parseFloat(b.score.replace(',','.'))||0) - (parseFloat(a.score.replace(',','.'))||0);
                 if (sVal === 'score-asc') return (parseFloat(a.score.replace(',','.'))||0) - (parseFloat(b.score.replace(',','.'))||0);
@@ -513,16 +535,13 @@
             else container.innerHTML = `<div class="producer-grid">${filtered.map(a => buildAnimeCard(a)).join('')}</div>`;
         };
 
-        // Écouteurs sur les selects
         document.getElementById('grid-sort').addEventListener('change', applyFilters);
         document.getElementById('grid-filter').addEventListener('change', applyFilters);
         if (document.getElementById('grid-costudio')) document.getElementById('grid-costudio').addEventListener('change', applyFilters);
 
-        // Premier rendu de la grille
         applyFilters();
     }
 
-    // ── ROUTEUR ──
     function route() {
         const hash = window.location.hash.slice(1) || 'hentai/list';
         const parts = hash.split('/');
