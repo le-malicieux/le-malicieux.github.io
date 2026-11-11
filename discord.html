@@ -25,12 +25,22 @@
         /* Images jointes */
         .post-image { max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px; margin-top: 10px; border: 1px solid #444; display: block; }
         
-        /* Embeds (les cartes spéciales de Discord) */
+        /* Embeds */
         .embed-box { border-left: 4px solid var(--primary); background: rgba(0,0,0,0.3); padding: 12px 16px; margin-top: 12px; border-radius: 0 6px 6px 0; }
         .embed-title { font-weight: bold; color: #fff; margin-bottom: 6px; font-size: 1em; }
         .embed-desc { font-size: 0.9em; color: #ccc; line-height: 1.4; white-space: pre-wrap; }
         
         .loading-state, .error-state, .empty-state { text-align: center; color: #888; padding: 40px 20px; font-style: italic; }
+        
+        /* Bouton "Charger plus" */
+        .load-more-container { text-align: center; margin-top: 30px; }
+        .load-more-btn { 
+            background: rgba(255,71,87,0.1); border: 1px solid var(--primary); color: var(--primary); 
+            padding: 10px 24px; border-radius: 8px; font-size: 1em; font-weight: bold; 
+            cursor: pointer; transition: 0.2s; outline: none; 
+        }
+        .load-more-btn:hover { background: var(--primary); color: white; }
+        .load-more-btn:disabled { opacity: 0.5; cursor: wait; border-color: #555; color: #888; background: transparent; }
     </style>
 </head>
 <body>
@@ -41,93 +51,118 @@
 
     <div class="page-wrap">
         <h1 class="page-title">📢 Annonces Officielles</h1>
-        <div id="discord-feed">
-            <div class="loading-state">Chargement des annonces depuis Discord...</div>
+        <div id="discord-feed"></div>
+        <div class="load-more-container" id="load-more-container" style="display:none;">
+            <button class="load-more-btn" id="load-more-btn" onclick="loadMore()">Charger plus de messages</button>
         </div>
     </div>
 
 <script type="module">
     import { initCommon } from './common.js';
     
-    // Initialise le fond, la navbar, l'auth, etc.
     initCommon();
 
     // ⚠️ REMPLACE CETTE URL PAR CELLE DE TON CLOUDFLARE WORKER ⚠️
     const WORKER_URL = 'https://discord-annonces.zach-bisanti.workers.dev';
 
-    async function loadAnnouncements() {
-        const feed = document.getElementById('discord-feed');
+    const feed = document.getElementById('discord-feed');
+    const loadMoreContainer = document.getElementById('load-more-container');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+
+    let lastMessageId = null; // Permet de savoir où on s'est arrêté
+    let isLoading = false;
+
+    async function fetchMessages(beforeId = null) {
+        let url = WORKER_URL;
+        if (beforeId) url += `?before=${beforeId}`;
         
-        try {
-            const res = await fetch(WORKER_URL);
-            const data = await res.json(); // On lit le JSON
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        if (!Array.isArray(data)) {
+            throw new Error(`Erreur Worker : ${data.message || data.details || 'Erreur inconnue'}`);
+        }
+        return data;
+    }
 
-            // Si le Worker nous renvoie une erreur, on l'affiche clairement
-            if (!Array.isArray(data)) {
-                throw new Error(`Erreur Worker : ${data.message || data.details || 'Erreur inconnue'}`);
+    function renderMessages(messages, append = false) {
+        const validMessages = messages.filter(m => 
+            (m.content && m.content.trim() !== '') || 
+            (m.attachments && m.attachments.length > 0) || 
+            (m.embeds && m.embeds.length > 0)
+        );
+
+        if (validMessages.length === 0 && !append) {
+            feed.innerHTML = '<div class="empty-state">Aucune annonce pour le moment. Revenez plus tard !</div>';
+            return;
+        }
+
+        // On enregistre l'ID du dernier message (le plus ancien de ce lot) pour la prochaine pagination
+        if (messages.length > 0) {
+            lastMessageId = messages[messages.length - 1].id;
+        }
+
+        const html = validMessages.map(m => {
+            const dateObj = new Date(m.date);
+            const dateStr = dateObj.toLocaleString('fr-FR', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', 
+                hour: '2-digit', minute: '2-digit' 
+            });
+
+            let attachmentsHtml = '';
+            if (m.attachments && m.attachments.length > 0) {
+                attachmentsHtml = m.attachments
+                    .filter(a => a.content_type && a.content_type.startsWith('image/'))
+                    .map(a => `<img src="${a.url}" class="post-image" loading="lazy">`)
+                    .join('');
             }
             
-            const messages = data;
-            
-            // On filtre pour ne garder que les messages qui ont du contenu (texte, image ou embed)
-            const validMessages = messages.filter(m => 
-                (m.content && m.content.trim() !== '') || 
-                (m.attachments && m.attachments.length > 0) || 
-                (m.embeds && m.embeds.length > 0)
-            );
-
-            if (validMessages.length === 0) {
-                feed.innerHTML = '<div class="empty-state">Aucune annonce pour le moment. Revenez plus tard !</div>';
-                return;
-            }
-
-            feed.innerHTML = validMessages.map(m => {
-                // Formatage de la date
-                const dateObj = new Date(m.date);
-                const dateStr = dateObj.toLocaleString('fr-FR', { 
-                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', 
-                    hour: '2-digit', minute: '2-digit' 
-                });
-
-                // Gestion des images jointes
-                let attachmentsHtml = '';
-                if (m.attachments && m.attachments.length > 0) {
-                    attachmentsHtml = m.attachments
-                        .filter(a => a.content_type && a.content_type.startsWith('image/'))
-                        .map(a => `<img src="${a.url}" class="post-image" loading="lazy">`)
-                        .join('');
-                }
-                
-                // Gestion des embeds (quand un bot poste une carte avec un titre, etc.)
-                let embedsHtml = '';
-                if (m.embeds && m.embeds.length > 0) {
-                    embedsHtml = m.embeds.map(e => `
-                        <div class="embed-box" style="${e.color ? `border-left-color: #${e.color.toString(16).padStart(6, '0')};` : ''}">
-                            ${e.title ? `<div class="embed-title">${e.title}</div>` : ''}
-                            ${e.description ? `<div class="embed-desc">${e.description}</div>` : ''}
-                        </div>
-                    `).join('');
-                }
-
-                // Rendu final du message
-                return `
-                <div class="discord-post">
-                    <div class="post-header">
-                        <img src="${m.avatar}" class="post-avatar" onerror="this.src='img/bannieres_icones/logo.jpg'">
-                        <div>
-                            <div class="post-author">${m.author}</div>
-                            <div class="post-date">${dateStr}</div>
-                        </div>
+            let embedsHtml = '';
+            if (m.embeds && m.embeds.length > 0) {
+                embedsHtml = m.embeds.map(e => `
+                    <div class="embed-box" style="${e.color ? `border-left-color: #${e.color.toString(16).padStart(6, '0')};` : ''}">
+                        ${e.title ? `<div class="embed-title">${e.title}</div>` : ''}
+                        ${e.description ? `<div class="embed-desc">${e.description}</div>` : ''}
                     </div>
-                    <div class="post-content">${m.content || ''}</div>
-                    ${embedsHtml}
-                    ${attachmentsHtml}
-                </div>`;
-            }).join('');
+                `).join('');
+            }
+
+            return `
+            <div class="discord-post">
+                <div class="post-header">
+                    <img src="${m.avatar}" class="post-avatar" onerror="this.src='img/bannieres_icones/logo.jpg'">
+                    <div>
+                        <div class="post-author">${m.author}</div>
+                        <div class="post-date">${dateStr}</div>
+                    </div>
+                </div>
+                <div class="post-content">${m.content || ''}</div>
+                ${embedsHtml}
+                ${attachmentsHtml}
+            </div>`;
+        }).join('');
+
+        if (append) {
+            feed.insertAdjacentHTML('beforeend', html);
+        } else {
+            feed.innerHTML = html;
+        }
+    }
+
+    async function init() {
+        try {
+            feed.innerHTML = '<div class="loading-state">Chargement des annonces...</div>';
+            const messages = await fetchMessages();
             
+            feed.innerHTML = ''; // On vide le message de chargement
+            renderMessages(messages);
+            
+            // Si on a reçu exactement 100 messages, c'est qu'il y en a probablement d'autres
+            if (messages.length === 100) {
+                loadMoreContainer.style.display = 'block';
+            }
         } catch (e) {
-            console.error("Erreur de chargement des annonces :", e);
-            // Affiche le message d'erreur exact pour t'aider à débugger
+            console.error(e);
             feed.innerHTML = `
                 <div class="error-state" style="color: var(--primary);">
                     Impossible de charger les annonces Discord.<br>
@@ -135,9 +170,37 @@
                 </div>`;
         }
     }
-    
-    // Lancer le chargement
-    loadAnnouncements();
+
+    window.loadMore = async function() {
+        if (isLoading || !lastMessageId) return;
+        
+        isLoading = true;
+        loadMoreBtn.textContent = 'Chargement...';
+        loadMoreBtn.disabled = true;
+
+        try {
+            const messages = await fetchMessages(lastMessageId);
+            renderMessages(messages, true);
+            
+            // S'il n'y a plus de messages (moins de 100), on cache le bouton
+            if (messages.length < 100) {
+                loadMoreContainer.style.display = 'none';
+            } else {
+                loadMoreBtn.textContent = 'Charger plus de messages';
+                loadMoreBtn.disabled = false;
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Erreur lors du chargement des messages plus anciens.');
+            loadMoreBtn.textContent = 'Réessayer';
+            loadMoreBtn.disabled = false;
+        } finally {
+            isLoading = false;
+        }
+    };
+
+    // Lancer le premier chargement
+    init();
 </script>
 </body>
 </html>
