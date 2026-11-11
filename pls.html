@@ -85,6 +85,12 @@
         .anime-card img { width: 100%; height: 100%; object-fit: cover; }
         .ac-info { padding: 7px; flex: 1; }
         .ac-title { font-weight: 700; color: var(--primary); font-size: 0.88em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-bottom: 4px; }
+        
+        /* Nouveaux badges de métadonnées et surlignage */
+        .ac-meta { font-size: 0.68em; color: #888; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+        .ac-meta span { padding: 1px 4px; border-radius: 3px; transition: 0.2s; }
+        .ac-meta .highlight { color: var(--primary); font-weight: bold; background: rgba(255,71,87,0.15); }
+        
         .score-badge { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.72); color: #f1c40f; font-size: 0.7em; padding: 2px 5px; border-radius: 4px; }
         
         .empty-state { text-align: center; color: #555; padding: 40px 20px; grid-column: 1/-1; }
@@ -212,13 +218,11 @@
                     prodsData[currentProdName] = { isEro, links: {}, relations: {}, labels: {} };
                 }
                 
-                // Colonnes Producteur : 1=MAL, 2=Web, 3=Old, 4=Avec Prod, 5=Avec Labels, 6=Avec Studios
                 if (cleanStr(cols[1]) || cleanStr(cols[2]) || cleanStr(cols[3])) {
                     prodsData[currentProdName].links = { mal: cleanStr(cols[1]), web: cleanStr(cols[2]), old: cleanStr(cols[3]) };
                     prodsData[currentProdName].relations = { prods: cleanStr(cols[4]), labels: cleanStr(cols[5]), studios: cleanStr(cols[6]) };
                 }
 
-                // Colonnes Labels : 7=Nom, 8=MAL, 9=Web, 10=Old, 11=Avec Prod, 12=Avec Labels, 13=Avec Studios
                 const labelName = cleanStr(cols[7]);
                 if (labelName) {
                     if (!prodsData[currentProdName].labels[labelName]) {
@@ -244,7 +248,6 @@
                 if (!name) continue;
                 
                 if (!studiosData[name]) studiosData[name] = { isEro };
-                // Colonnes Studio : 0=Nom, 1=Info, 2=MAL, 3=Web, 4=Avec Prod, 5=Avec Labels, 6=Avec Studios
                 studiosData[name].links = { mal: cleanStr(cols[2]), web: cleanStr(cols[3]), old: "" };
                 studiosData[name].relations = { prods: cleanStr(cols[4]), labels: cleanStr(cols[5]), studios: cleanStr(cols[6]) };
             }
@@ -306,12 +309,26 @@
         </a>`;
     }
 
-    function buildAnimeCard(a) {
+    // Modification pour intégrer le surlignage en fonction du tri
+    function buildAnimeCard(a, sortVal) {
         const cover = getCoverPath(a.ordreAjout, 1);
         const scoreNum = parseFloat(a.score.replace(',','.'));
+        const yearMatch = (a.sortie || '').match(/\d{4}/g);
+        const year = yearMatch ? yearMatch[yearMatch.length - 1] : '—';
+        
+        const hl = (f) => sortVal === f ? 'highlight' : '';
+
         return `<a href="fiche.html?name=${encodeURIComponent(a.nom)}" class="anime-card">
             <div class="img-wrap"><img src="${cover}" loading="lazy" onerror="handleImgError(this,'${a.ordreAjout}-1.webp')">${scoreNum ? `<div class="score-badge">${a.score}</div>` : ''}</div>
-            <div class="ac-info"><div class="ac-title">${a.nom}</div></div>
+            <div class="ac-info">
+                <div class="ac-title">${a.nom}</div>
+                <div class="ac-meta">
+                    <span class="${hl('score')}">★ ${a.score || '—'}</span>
+                    <span class="${hl('annee')}">${year}</span>
+                    <span class="${hl('episodes')}">${a.ep} ép.</span>
+                    <span class="${hl('pop')}">${a.pop}</span>
+                </div>
+            </div>
         </a>`;
     }
 
@@ -388,7 +405,6 @@
             if (data.relations.studios) relationsHtml += `<div><strong>Travaille avec (Studios) :</strong> ${generateRelationLinks(data.relations.studios, 'studios')}</div>`;
         }
 
-        // Gestion du sous-titre pour les labels
         let subtitleHtml = type === 'producer' ? 'PRODUCTEUR' : type === 'studio' ? 'STUDIO' : 'LABEL';
         if (type === 'label' && parentProd) {
             const safeParent = encodeURIComponent(parentProd).replace(/%2F/g, '§');
@@ -442,7 +458,6 @@
         }
         else if (type === 'studio') data = studiosData[name] || {};
 
-        // Calcul des stats
         const validScores = animes.map(a => parseFloat(a.score.replace(',', '.'))).filter(n => !isNaN(n) && n > 0);
         const total = animes.length;
         const avg = validScores.length ? (validScores.reduce((a,b)=>a+b,0) / validScores.length).toFixed(2) : '—';
@@ -451,7 +466,8 @@
         
         const stats = { total, avg, best, worst };
 
-        let html = `<a href="#${tab}/list" class="btn-back-list">← Retour à la liste</a>`;
+        // Remplacement du lien classique par un retour intelligent
+        let html = `<a href="javascript:void(0)" onclick="if(history.length>1) history.back(); else location.hash='${tab}/list';" class="btn-back-list">← Retour à la liste</a>`;
         html += buildHeader(name, type, data, parentProd, stats);
 
         if (type === 'producer' && data.labels && Object.keys(data.labels).length > 0) {
@@ -532,7 +548,8 @@
             
             const container = document.getElementById('grid-container');
             if (filtered.length === 0) container.innerHTML = `<div class="empty-state">Aucun anime ne correspond à ces filtres.</div>`;
-            else container.innerHTML = `<div class="producer-grid">${filtered.map(a => buildAnimeCard(a)).join('')}</div>`;
+            // On passe sVal à buildAnimeCard pour le surlignage
+            else container.innerHTML = `<div class="producer-grid">${filtered.map(a => buildAnimeCard(a, sVal)).join('')}</div>`;
         };
 
         document.getElementById('grid-sort').addEventListener('change', applyFilters);
