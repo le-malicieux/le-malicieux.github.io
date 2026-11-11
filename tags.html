@@ -13,8 +13,7 @@
         
         .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
         .page-title { font-size: 1.6em; font-weight: 900; color: var(--primary); margin: 0; }
-        .sort-select { background: #1a1a1a; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85em; cursor: pointer; outline: none; }
-
+        
         /* Recherche de tags */
         .search-tag-wrap { position: relative; width: 100%; max-width: 400px; margin-bottom: 20px; }
         .search-tag-wrap input { width: 100%; background: #1c1c1f; border: 1px solid #38383d; color: white; padding: 10px 34px 10px 14px; border-radius: 8px; font-size: 0.95em; box-sizing: border-box; outline: none; transition: border-color 0.15s; }
@@ -83,6 +82,7 @@
                 <a href="tags.html" class="nav-tab active" data-page="tags.html">Tags</a>
                 <a href="alphabetique.html" class="nav-tab" data-page="alphabetique.html">A-Z</a>
                 <a href="playlist.html" class="nav-tab" data-page="playlist.html">Playlist</a>
+                <!-- MODIFICATION ICI : Lien vers pls.html -->
                 <a href="pls.html" class="nav-tab" data-page="pls.html">Industrie</a>
                 <a href="profil.html" class="nav-tab" data-page="profil.html">Profil</a>
                 <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
@@ -132,13 +132,13 @@
 <script type="module">
     import {
         initCommon, loadAnimes, getCoverPath, handleImgError, IMG_LOGO,
-        searchAnimes, highlightTitle, getCurrentUser
+        searchAnimes, highlightTitle
     } from './common.js';
 
     initCommon();
 
     let allAnimes = [];
-    let allTags = []; // { name: string, count: number }
+    let allTags = []; 
     let activeTags = new Set();
     let tagSearchQuery = '';
 
@@ -151,7 +151,6 @@
             
             buildTagsList();
             
-            // Gestion de l'URL (ex: tags.html?tags=Harem,Action)
             const urlParams = new URLSearchParams(window.location.search);
             const tagsParam = urlParams.get('tags');
             if (tagsParam) {
@@ -190,7 +189,7 @@
         });
 
         allTags = Array.from(tagMap.entries()).map(([name, count]) => ({ name, count }));
-        allTags.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)); // Tri par popularité
+        allTags.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
     }
 
     function renderTags() {
@@ -214,14 +213,12 @@
             </div>`;
         }).join('');
 
-        // Événements sur les tags
         grid.querySelectorAll('.tag-pill').forEach(pill => {
             pill.addEventListener('click', () => {
                 const tag = pill.dataset.tag;
                 if (activeTags.has(tag)) activeTags.delete(tag);
                 else activeTags.add(tag);
                 
-                // Mise à jour URL
                 const newUrl = activeTags.size > 0 
                     ? `tags.html?tags=${Array.from(activeTags).map(encodeURIComponent).join(',')}`
                     : 'tags.html';
@@ -232,7 +229,6 @@
             });
         });
 
-        // Afficher ou cacher le bouton Clear
         document.getElementById('btn-clear').classList.toggle('visible', activeTags.size > 0);
     }
 
@@ -249,14 +245,12 @@
         section.style.display = 'block';
         title.textContent = `Résultats pour : ${Array.from(activeTags).join(', ')}`;
 
-        // Filtrer les animés qui possèdent TOUS les tags actifs
         const filteredAnimes = allAnimes.filter(a => {
             if (!a.tags) return false;
             const aTags = a.tags.split(',').map(t => t.trim());
             return Array.from(activeTags).every(t => aTags.includes(t));
         });
 
-        // Trier par ordre d'ajout (récent)
         filteredAnimes.sort((a, b) => b.ordreAjout - a.ordreAjout);
 
         if (filteredAnimes.length === 0) {
@@ -274,7 +268,6 @@
         }).join('');
     }
 
-    // ── RECHERCHE GLOBALE (Barre de navigation) ──
     function setupSearch() {
         const searchInput = document.getElementById('search');
         const searchSuggestions = document.getElementById('search-suggestions');
