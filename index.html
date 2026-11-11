@@ -97,7 +97,7 @@
                 <a href="tags.html" class="nav-tab" data-page="tags.html">Tags</a>
                 <a href="alphabetique.html" class="nav-tab" data-page="alphabetique.html">A-Z</a>
                 <a href="playlist.html" class="nav-tab" data-page="playlist.html">Playlist</a>
-                <a href="editeurs.html" class="nav-tab" data-page="editeurs.html">Studios</a>
+                <a href="pls.html" class="nav-tab" data-page="pls.html">Industrie</a>
                 <a href="profil.html" class="nav-tab" data-page="profil.html">Profil</a>
                 <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
                 <button class="nav-action" onclick="doRandom()">Au hasard</button>
@@ -246,12 +246,11 @@
         </a>`;
     }
 
-    // Taille modérée : un peu plus grand que l'original (170), sans être énorme
-    const CARD_TARGET = 190; // Largeur idéale
-    const CARD_MIN = 135;    // Largeur minimale
-    const CARD_MAX = 240;    // Largeur maximale
-    const CARD_GAP = 12;     // Espace entre les cartes
-    const MOBILE_MIN_COLS = 2; // 2 cartes par ligne sur mobile
+    const CARD_TARGET = 190;
+    const CARD_MIN = 135;
+    const CARD_MAX = 240;
+    const CARD_GAP = 12;
+    const MOBILE_MIN_COLS = 2;
 
     function cardWidthFor(avail, n) { return (avail - (n - 1) * CARD_GAP) / n; }
     
