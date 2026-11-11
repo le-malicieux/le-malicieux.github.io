@@ -35,14 +35,114 @@ export {
 };
 
 // ── Constantes ──
-// On utilise jsDelivr pour éviter le Rate Limit de GitHub Pages.
-// Vérifie bien que le nom d'utilisateur est "le-malicieux" (sans "e" au début).
 const CDN_BASE = 'https://cdn.jsdelivr.net/gh/le-malicieux/le-malicieux.github.io@main';
 
-// Si tu as converti tes logos en .webp, change l'extension ici.
 export const IMG_LOGO = `${CDN_BASE}/img/bannieres_icones/logo.jpg`;
 export const IMG_DISCORD = `${CDN_BASE}/img/bannieres_icones/logo-discord.jpg`;
 export const DEFAULT_COVER_NUM = 1;
+
+// ═══════════════════════════════════════════════════════════
+//  NAVBAR GLOBALE (Générée automatiquement)
+// ═══════════════════════════════════════════════════════════
+
+const HEADER_HTML = `
+    <header class="site-header">
+        <div class="navbar">
+            <div class="nav-left">
+                <button class="burger" onclick="toggleM()" aria-label="Ouvrir le menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <a class="nav-brand" href="index.html">
+                    <img src="${CDN_BASE}/img/bannieres_icones/logo.jpg" class="nav-logo-small" alt="Logo Le Malicieux">
+                    <span class="nav-title">LE MALICIEUX</span>
+                </a>
+            </div>
+            <div class="mobile-overlay" id="overlay" onclick="toggleM()"></div>
+            <nav class="nav-links" id="menu">
+                <div class="close-menu" onclick="toggleM()">Fermer</div>
+                <div class="menu-account js-hidden" id="menu-account-wrap">
+                    <a href="profil.html" id="nav-profil-link-mobile" class="auth-account" style="text-decoration:none;">
+                        <img id="nav-avatar-mobile" src="${CDN_BASE}/img/bannieres_icones/logo.jpg" class="auth-avatar" style="display:none;">
+                        <span id="nav-pseudo-mobile" class="auth-name" style="display:none;"></span>
+                    </a>
+                </div>
+                <a href="index.html" class="nav-tab" data-page="index.html">Accueil</a>
+                <a href="tags.html" class="nav-tab" data-page="tags.html">Tags</a>
+                <a href="alphabetique.html" class="nav-tab" data-page="alphabetique.html">A-Z</a>
+                <a href="playlist.html" class="nav-tab" data-page="playlist.html">Playlist</a>
+                <a href="pls.html" class="nav-tab" data-page="pls.html">Industrie</a>
+                <a href="profil.html" class="nav-tab" data-page="profil.html">Profil</a>
+                <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
+                <button class="nav-action" onclick="randomAnime()">Au hasard</button>
+                <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
+                    <img src="${CDN_BASE}/img/bannieres_icones/logo-discord.jpg" alt="Discord">
+                </a>
+            </nav>
+            <div class="nav-right">
+                <div class="search-wrapper" id="search-wrapper">
+                    <input type="text" id="search" placeholder="Rechercher un anime..." autocomplete="off">
+                    <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                    <div class="search-suggestions" id="search-suggestions"></div>
+                </div>
+                <button class="nav-action" onclick="randomAnime()">Au hasard</button>
+                <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
+                    <img src="${CDN_BASE}/img/bannieres_icones/logo-discord.jpg" alt="Discord">
+                </a>
+                <a href="profil.html" id="nav-profil-link" class="auth-account" style="text-decoration:none;">
+                    <img id="nav-avatar" src="${CDN_BASE}/img/bannieres_icones/logo.jpg" class="auth-avatar" style="display:none;">
+                    <span id="nav-pseudo" class="auth-name" style="display:none;"></span>
+                </a>
+                <div id="auth-ui" class="auth-ui-slot"><button class="js-login-btn auth-login-btn">Connexion</button></div>
+            </div>
+        </div>
+    </header>
+`;
+
+export function renderHeader() {
+    if (document.querySelector('.site-header')) return; 
+    document.body.insertAdjacentHTML('afterbegin', HEADER_HTML);
+    setupHeaderSearch();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CACHE GLOBAL POUR LES ANIMES
+// ═══════════════════════════════════════════════════════════
+
+let _animesCache = null;
+let _animesPromise = null;
+
+export async function loadAnimes() {
+    // Si le cache est déjà rempli, on le renvoie instantanément
+    if (_animesCache) return _animesCache;
+    
+    // Si une requête est déjà en cours, on attend qu'elle finisse au lieu d'en lancer une autre
+    if (_animesPromise) return _animesPromise;
+
+    _animesPromise = (async () => {
+        try {
+            const resp = await fetch('animes.csv');
+            if (!resp.ok) throw new Error(`animes.csv introuvable (${resp.status})`);
+            const raw = await resp.text();
+            const lines = raw.split(/\r?\n/);
+            const animes = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+                const cols = parseCSVLine(line);
+                if (cols.length < 19) continue;
+                const a = parseAnimeRow(cols);
+                if (a.nom && a.ordreAjout > 0) animes.push(a);
+            }
+            _animesCache = animes; // On stocke en cache
+            return animes;
+        } catch (e) {
+            _animesPromise = null; // En cas d'erreur, on permet de réessayer
+            throw e;
+        }
+    })();
+
+    return _animesPromise;
+}
 
 // ═══════════════════════════════════════════════════════════
 //  CHEMINS D'IMAGES
@@ -58,19 +158,16 @@ export function getTranche(ordreAjout) {
 export function getCoverPath(ordreAjout, num = DEFAULT_COVER_NUM) {
     const n = parseInt(ordreAjout, 10);
     if (!n || n < 1) return IMG_LOGO;
-    // Utilisation de .webp
     return `${CDN_BASE}/img/covers/${getTranche(n)}/${n}-${num}.webp`;
 }
 
 export function getPlsPath(slug) {
     if (!slug) return IMG_LOGO;
-    // Utilisation de .webp
     return `${CDN_BASE}/img/pls/${slug}.webp`;
 }
 
 export function getBackgroundUrl(kind, filename) {
     if (!filename) return '';
-    // Assure-toi que les noms de fichiers dans ton backgrounds.json ont bien l'extension .webp
     return kind === 'mobile'
         ? `${CDN_BASE}/img/fonds_mobiles/${filename}`
         : `${CDN_BASE}/img/fonds_desktop/${filename}`;
@@ -97,13 +194,7 @@ export function handleImgError(img, filename) {
     tried.push(ext);
     img.dataset.tried = tried.join(',');
 
-    // Si le .webp échoue, il tente le .jpg, etc.
-    const chain = {
-        webp: ['jpg', 'jpeg', 'png'],
-        jpg: ['jpeg', 'png', 'webp'],
-        jpeg: ['jpg', 'png', 'webp'],
-        png: ['jpg', 'jpeg', 'webp']
-    };
+    const chain = { webp: ['jpg', 'jpeg', 'png'], jpg: ['jpeg', 'png', 'webp'], jpeg: ['jpg', 'png', 'webp'], png: ['jpg', 'jpeg', 'webp'] };
     const next = (chain[ext] || []).find(e => !tried.includes(e));
     if (next) {
         img.src = `${CDN_BASE}/img/covers/${getTranche(ordre)}/${ordre}-${num}.${next}`;
@@ -168,23 +259,6 @@ export function parseAnimeRow(cols) {
         ordreAjout: parseInt(c(18), 10) || 0,
         alternatif: c(19),
     };
-}
-
-export async function loadAnimes() {
-    const resp = await fetch('animes.csv');
-    if (!resp.ok) throw new Error(`animes.csv introuvable (${resp.status})`);
-    const raw = await resp.text();
-    const lines = raw.split(/\r?\n/);
-    const animes = [];
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i];
-        if (!line.trim()) continue;
-        const cols = parseCSVLine(line);
-        if (cols.length < 19) continue;
-        const a = parseAnimeRow(cols);
-        if (a.nom && a.ordreAjout > 0) animes.push(a);
-    }
-    return animes;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -316,7 +390,7 @@ export async function setBackground() {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  NAVBAR / MENU
+//  NAVBAR / MENU & RECHERCHE
 // ═══════════════════════════════════════════════════════════
 
 export function toggleM() {
@@ -333,6 +407,76 @@ export function markActiveTab() {
     const current = window.location.pathname.split('/').pop() || 'index.html';
     document.querySelectorAll('.nav-tab').forEach(tab => {
         if (tab.dataset.page === current) tab.classList.add('active');
+    });
+}
+
+// Bouton "Au hasard" global
+window.randomAnime = async () => {
+    try {
+        const animes = await loadAnimes(); // Utilise le cache global
+        if (animes.length > 0) {
+            const random = animes[Math.floor(Math.random() * animes.length)];
+            window.location.href = `fiche.html?name=${encodeURIComponent(random.nom)}`;
+        }
+    } catch (e) { console.error("Erreur random anime", e); }
+};
+
+// Configuration de la barre de recherche
+let _headerSearchSetup = false;
+async function setupHeaderSearch() {
+    if (_headerSearchSetup) return;
+    const searchInput = document.getElementById('search');
+    const searchSuggestions = document.getElementById('search-suggestions');
+    if (!searchInput || !searchSuggestions) return;
+
+    _headerSearchSetup = true;
+
+    searchInput.addEventListener('input', async function() {
+        const val = this.value.trim();
+        if (val.length < 2) { searchSuggestions.classList.remove('active'); return; }
+        
+        // Affiche "Chargement..." si le fichier CSV n'est pas encore en cache
+        if (!_animesCache) {
+            searchSuggestions.innerHTML = '<div class="sugg-empty">Chargement...</div>';
+            searchSuggestions.classList.add('active');
+        }
+
+        // Attend que les animés soient chargés (utilise la promesse globale si déjà en cours)
+        const animes = await loadAnimes(); 
+
+        const results = searchAnimes(val, animes, 8);
+        if (results.length === 0) {
+            searchSuggestions.innerHTML = '<div class="sugg-empty">Aucun résultat</div>';
+        } else {
+            searchSuggestions.innerHTML = results.map(a => 
+                `<div class="suggestion-item" data-name="${a.nom.replace(/"/g, '&quot;')}">
+                    <img src="${getCoverPath(a.ordreAjout, 1)}" class="sugg-img" onerror="this.onerror=null;this.src='${IMG_LOGO}'">
+                    <span>${highlightTitle(a.nom, val)}</span>
+                </div>`
+            ).join('');
+        }
+        searchSuggestions.classList.add('active');
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const val = this.value.trim();
+            if (val) window.location.href = 'index.html?search=' + encodeURIComponent(val);
+            searchSuggestions.classList.remove('active');
+            this.blur();
+        }
+    });
+
+    searchSuggestions.addEventListener('click', function(e) {
+        const item = e.target.closest('.suggestion-item');
+        if (item && item.dataset.name) {
+            window.location.href = 'fiche.html?name=' + encodeURIComponent(item.dataset.name);
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-wrapper')) searchSuggestions.classList.remove('active');
     });
 }
 
@@ -377,6 +521,17 @@ export function initAuth() {
             const avatarUrl = sessionStorage.getItem('userAvatar') || user.photoURL || IMG_LOGO;
             const html = `<a href="profil.html" class="auth-account"><img src="${avatarUrl}" class="auth-avatar" onerror="this.src='${IMG_LOGO}'"><span class="auth-name">${displayName}</span></a><button class="js-logout-btn auth-logout-btn">Quitter</button>`;
             slots.forEach(el => { el.innerHTML = html; });
+            
+            const mobAvatar = document.getElementById('nav-avatar-mobile');
+            const mobPseudo = document.getElementById('nav-pseudo-mobile');
+            const mobWrap = document.getElementById('menu-account-wrap');
+            if(mobAvatar && mobPseudo) {
+                mobAvatar.src = avatarUrl;
+                mobAvatar.style.display = 'inline-block';
+                mobPseudo.textContent = displayName;
+                mobPseudo.style.display = 'inline';
+                if(mobWrap) mobWrap.classList.remove('js-hidden');
+            }
         } else {
             _currentUser = null;
             const html = `<button class="js-login-btn auth-login-btn">Connexion</button>`;
@@ -390,6 +545,7 @@ export function initAuth() {
 // ═══════════════════════════════════════════════════════════
 
 export function initCommon() {
+    renderHeader(); // Injecte la navbar
     setBackground();
     lockBackground(true);
     window.addEventListener('resize', () => lockBackground(false));
@@ -399,5 +555,5 @@ export function initCommon() {
         if (bg) bg.style.opacity = Math.min(window.scrollY / 600, 0.65);
     });
     initAuth();
-    markActiveTab();
+    setTimeout(markActiveTab, 50); 
 }
