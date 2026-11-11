@@ -11,8 +11,33 @@
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; padding-top: 62px; }
         .page-wrap { max-width: 800px; margin: 0 auto; padding: 20px clamp(20px, 5vw, 100px) 60px; }
         
-        .page-title { font-size: 1.6em; font-weight: 900; color: var(--primary); margin: 0 0 20px 0; text-align: center; }
+        /* ── BARRE D'OUTILS (Titre + Tri) ── */
+        .toolbar {
+            background: rgba(15, 15, 15, 0.85); /* Fond sombre semi-transparent */
+            backdrop-filter: blur(8px); /* Effet de flou derrière */
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        }
         
+        .page-title { font-size: 1.5em; font-weight: 900; color: var(--primary); margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 10px; }
+        
+        .sort-wrapper { display: flex; align-items: center; gap: 8px; }
+        .sort-wrapper label { font-size: 0.85em; color: #aaa; font-weight: bold; text-transform: uppercase; }
+        .sort-select { 
+            background: #1c1c1f; border: 1px solid #444; color: white; 
+            padding: 8px 12px; border-radius: 6px; font-size: 0.85em; 
+            cursor: pointer; outline: none; transition: 0.2s;
+        }
+        .sort-select:hover { border-color: var(--primary); }
+
         /* Style des messages Discord */
         .discord-post { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; margin-bottom: 16px; transition: border-color 0.2s; }
         .discord-post:hover { border-color: #444; }
@@ -41,6 +66,11 @@
         }
         .load-more-btn:hover { background: var(--primary); color: white; }
         .load-more-btn:disabled { opacity: 0.5; cursor: wait; border-color: #555; color: #888; background: transparent; }
+
+        @media (max-width: 600px) {
+            .toolbar { flex-direction: column; align-items: stretch; text-align: center; }
+            .sort-wrapper { justify-content: center; }
+        }
     </style>
 </head>
 <body>
@@ -50,8 +80,19 @@
     <!-- La navbar est injectée ici automatiquement par common.js -->
 
     <div class="page-wrap">
-        <h1 class="page-title">📢 Annonces Officielles</h1>
+        <div class="toolbar">
+            <h1 class="page-title">📢 Annonces Officielles</h1>
+            <div class="sort-wrapper">
+                <label for="sort-order">Trier :</label>
+                <select id="sort-order" class="sort-select">
+                    <option value="desc">Plus récents d'abord</option>
+                    <option value="asc">Plus anciens d'abord</option>
+                </select>
+            </div>
+        </div>
+
         <div id="discord-feed"></div>
+        
         <div class="load-more-container" id="load-more-container" style="display:none;">
             <button class="load-more-btn" id="load-more-btn" onclick="loadMore()">Charger plus de messages</button>
         </div>
@@ -68,10 +109,13 @@
     const feed = document.getElementById('discord-feed');
     const loadMoreContainer = document.getElementById('load-more-container');
     const loadMoreBtn = document.getElementById('load-more-btn');
+    const sortSelect = document.getElementById('sort-order');
 
-    let lastMessageId = null; // Permet de savoir où on s'est arrêté
+    let allMessages = []; // Stocke TOUS les messages chargés (pour pouvoir les trier)
+    let lastMessageId = null; // ID du message le plus ancien chargé
     let isLoading = false;
 
+    // ── 1. Récupération des données ──
     async function fetchMessages(beforeId = null) {
         let url = WORKER_URL;
         if (beforeId) url += `?before=${beforeId}`;
@@ -85,24 +129,30 @@
         return data;
     }
 
-    function renderMessages(messages, append = false) {
-        const validMessages = messages.filter(m => 
+    // ── 2. Affichage et Tri ──
+    function renderMessages() {
+        // Filtre les messages vides
+        let validMessages = allMessages.filter(m => 
             (m.content && m.content.trim() !== '') || 
             (m.attachments && m.attachments.length > 0) || 
             (m.embeds && m.embeds.length > 0)
         );
 
-        if (validMessages.length === 0 && !append) {
+        if (validMessages.length === 0) {
             feed.innerHTML = '<div class="empty-state">Aucune annonce pour le moment. Revenez plus tard !</div>';
             return;
         }
 
-        // On enregistre l'ID du dernier message (le plus ancien de ce lot) pour la prochaine pagination
-        if (messages.length > 0) {
-            lastMessageId = messages[messages.length - 1].id;
-        }
+        // Application du tri choisi
+        const sortOrder = sortSelect.value;
+        validMessages.sort((a, b) => {
+            const dateA = new Date(a.date).getTime();
+            const dateB = new Date(b.date).getTime();
+            return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+        });
 
-        const html = validMessages.map(m => {
+        // Génération du HTML
+        feed.innerHTML = validMessages.map(m => {
             const dateObj = new Date(m.date);
             const dateStr = dateObj.toLocaleString('fr-FR', { 
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', 
@@ -141,23 +191,22 @@
                 ${attachmentsHtml}
             </div>`;
         }).join('');
-
-        if (append) {
-            feed.insertAdjacentHTML('beforeend', html);
-        } else {
-            feed.innerHTML = html;
-        }
     }
 
+    // ── 3. Initialisation et Pagination ──
     async function init() {
         try {
             feed.innerHTML = '<div class="loading-state">Chargement des annonces...</div>';
             const messages = await fetchMessages();
             
-            feed.innerHTML = ''; // On vide le message de chargement
-            renderMessages(messages);
+            allMessages = messages;
+            if (messages.length > 0) {
+                lastMessageId = messages[messages.length - 1].id; // ID du plus ancien
+            }
             
-            // Si on a reçu exactement 100 messages, c'est qu'il y en a probablement d'autres
+            renderMessages();
+            
+            // Affiche le bouton s'il y a probablement d'autres pages (100 = max API)
             if (messages.length === 100) {
                 loadMoreContainer.style.display = 'block';
             }
@@ -179,12 +228,21 @@
         loadMoreBtn.disabled = true;
 
         try {
-            const messages = await fetchMessages(lastMessageId);
-            renderMessages(messages, true);
+            // On charge les messages qui viennent AVANT le plus ancien qu'on a déjà
+            const olderMessages = await fetchMessages(lastMessageId);
             
-            // S'il n'y a plus de messages (moins de 100), on cache le bouton
-            if (messages.length < 100) {
-                loadMoreContainer.style.display = 'none';
+            // On ajoute les nouveaux messages à notre liste globale
+            allMessages = allMessages.concat(olderMessages);
+            
+            if (olderMessages.length > 0) {
+                lastMessageId = olderMessages[olderMessages.length - 1].id;
+            }
+
+            // On réaffiche tout en appliquant le tri actuel
+            renderMessages();
+            
+            if (olderMessages.length < 100) {
+                loadMoreContainer.style.display = 'none'; // Plus rien à charger
             } else {
                 loadMoreBtn.textContent = 'Charger plus de messages';
                 loadMoreBtn.disabled = false;
@@ -198,6 +256,9 @@
             isLoading = false;
         }
     };
+
+    // Re-trier instantanément quand on change le menu déroulant
+    sortSelect.addEventListener('change', renderMessages);
 
     // Lancer le premier chargement
     init();

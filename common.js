@@ -71,6 +71,7 @@ const HEADER_HTML = `
                 <a href="alphabetique.html" class="nav-tab" data-page="alphabetique.html">A-Z</a>
                 <a href="playlist.html" class="nav-tab" data-page="playlist.html">Playlist</a>
                 <a href="pls.html" class="nav-tab" data-page="pls.html">Industrie</a>
+                <a href="discord.html" class="nav-tab" data-page="discord.html">Updates</a>
                 <a href="profil.html" class="nav-tab" data-page="profil.html">Profil</a>
                 <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
                 <button class="nav-action" onclick="randomAnime()">Au hasard</button>
