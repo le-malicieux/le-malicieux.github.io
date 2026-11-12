@@ -42,6 +42,25 @@ export const IMG_DISCORD = `${CDN_BASE}/img/bannieres_icones/logo-discord.jpg`;
 export const DEFAULT_COVER_NUM = 1;
 
 // ═══════════════════════════════════════════════════════════
+//  LOGIQUE DE STATISTIQUES
+// ═══════════════════════════════════════════════════════════
+
+async function logVisit() {
+    try {
+        // On ne compte pas les visites en local (quand tu développes)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
+
+        await addDoc(collection(db, "visits"), {
+            page: window.location.pathname,
+            referrer: document.referrer || 'Direct',
+            timestamp: serverTimestamp()
+        });
+    } catch (e) {
+        console.error("Erreur d'enregistrement de la visite", e);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
 //  NAVBAR GLOBALE (Générée automatiquement)
 // ═══════════════════════════════════════════════════════════
 
@@ -557,4 +576,7 @@ export function initCommon() {
     });
     initAuth();
     setTimeout(markActiveTab, 50); 
+    
+    // 👇 AJOUT DE L'APPEL POUR ENREGISTRER LA VISITE
+    logVisit();
 }

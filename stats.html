@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="img/bannieres_icones/logo.jpg" type="image/jpeg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="common.css">
+    <title>Statistiques - Le Malicieux</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding-top: 62px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .page-title { font-size: 1.8em; color: var(--primary); margin-bottom: 20px; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card-bg); border: 1px solid #333; border-radius: 12px; padding: 20px; text-align: center; }
+        .stat-value { font-size: 2.5em; font-weight: 900; color: white; line-height: 1.1; }
+        .stat-label { font-size: 0.8em; color: #888; text-transform: uppercase; margin-top: 5px; }
+
+        .section-box { background: var(--card-bg); border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .section-box h2 { font-size: 1.1em; color: var(--primary); margin: 0 0 15px 0; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        
+        .list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 0.9em; }
+        .list-item:last-child { border-bottom: none; }
+        .list-name { color: #ccc; word-break: break-all; }
+        .list-count { color: var(--primary); font-weight: bold; }
+        .loading { text-align: center; color: #888; padding: 40px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div id="bg-layer"></div>
+    <div id="bg-overlay"></div>
+
+    <div class="container">
+        <h1 class="page-title">📊 Statistiques du site</h1>
+        
+        <div id="loading" class="loading">Chargement des données...</div>
+        
+        <div id="stats-content" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-visits">0</div>
+                    <div class="stat-label">Vues totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="unique-pages">0</div>
+                    <div class="stat-label">Pages vues</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div class="section-box">
+                    <h2>🔥 Top 10 des pages</h2>
+                    <div id="top-pages-list"></div>
+                </div>
+                
+                <div class="section-box">
+                    <h2>🔗 Top 10 des sources (Referrers)</h2>
+                    <div id="top-referrers-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    import { initCommon } from './common.js';
+    import { db } from './common.js';
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    initCommon();
+
+    async function loadStats() {
+        try {
+            const querySnapshot = await getDocs(collection(db, "visits"));
+            
+            let total = 0;
+            const pages = {};
+            const referrers = {};
+
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                total++;
+                
+                // Comptage des pages
+                const page = data.page || 'Inconnue';
+                pages[page] = (pages[page] || 0) + 1;
+
+                // Comptage des référents
+                let ref = data.referrer || 'Direct';
+                if (ref !== 'Direct') {
+                    try { ref = new URL(ref).hostname.replace('www.', ''); } catch(e) {}
+                }
+                referrers[ref] = (referrers[ref] || 0) + 1;
+            });
+
+            // Affichage des totaux
+            document.getElementById('total-visits').textContent = total.toLocaleString('fr-FR');
+            document.getElementById('unique-pages').textContent = Object.keys(pages).length;
+
+            // Tri et affichage des top pages
+            const sortedPages = Object.entries(pages).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            document.getElementById('top-pages-list').innerHTML = sortedPages.map(([name, count]) => 
+                `<div class="list-item"><span class="list-name">${name}</span><span class="list-count">${count}</span></div>`
+            ).join('') || '<div style="color:#555;">Aucune donnée</div>';
+
+            // Tri et affichage des top referrers
+            const sortedRefs = Object.entries(referrers).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            document.getElementById('top-referrers-list').innerHTML = sortedRefs.map(([name, count]) => 
+                `<div class="list-item"><span class="list-name">${name}</span><span class="list-count">${count}</span></div>`
+            ).join('') || '<div style="color:#555;">Aucune donnée</div>';
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('stats-content').style.display = 'block';
+
+        } catch (e) {
+            console.error("Erreur stats:", e);
+            document.getElementById('loading').innerHTML = `<span style="color:var(--primary);">Erreur lors du chargement des données. (Vérifie tes règles Firestore)</span>`;
+        }
+    }
+
+    loadStats();
+</script>
+</body>
+</html>
