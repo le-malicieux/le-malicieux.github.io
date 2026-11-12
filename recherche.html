@@ -15,7 +15,7 @@
         /* ── BARRE LATÉRALE (Filtres) ── */
         .sidebar { width: 300px; flex-shrink: 0; background: var(--card-bg); border-right: 1px solid #2a2a2a; padding: 20px; overflow-y: auto; position: sticky; top: 62px; height: calc(100vh - 62px); box-sizing: border-box; }
         .sidebar h2 { font-size: 1.2em; color: var(--primary); margin-top: 0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-reset { background: none; border: 1px solid #555; color: #aaa; font-size: 0.7em; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+        .btn-reset { background: none; border: 1px solid #555; color: #aaa; font-size: 0.7em; padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
         .btn-reset:hover { background: #333; color: white; }
         
         details { border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px; }
@@ -26,10 +26,15 @@
         
         .filter-group { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
         .filter-group label { font-size: 0.85em; color: #ccc; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .filter-group input[type="radio"], .filter-group input[type="checkbox"] { accent-color: var(--primary); width: 16px; height: 16px; }
+        .filter-group input[type="radio"], .filter-group input[type="checkbox"] { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
         
         .search-input { width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white; border-radius: 6px; font-size: 0.85em; margin-bottom: 10px; }
         
+        /* Style Leboncoin Min/Max */
+        .range-inputs { display: flex; align-items: center; gap: 8px; }
+        .range-inputs input { flex: 1; text-align: center; margin-bottom: 0; padding: 8px 4px; }
+        .range-inputs span { color: #666; font-weight: bold; }
+
         .checkbox-list { max-height: 200px; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 6px; }
         .checkbox-list::-webkit-scrollbar { width: 6px; }
         .checkbox-list::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
@@ -81,33 +86,43 @@
             </details>
 
             <details open>
-                <summary>Type de contenu</summary>
+                <summary>Catégorie / Censure</summary>
                 <div class="filter-group">
-                    <label><input type="radio" name="type" value="all" checked> Tout</label>
-                    <label><input type="radio" name="type" value="hentai"> Hentai uniquement</label>
-                    <label><input type="radio" name="type" value="erotica"> Erotica uniquement</label>
+                    <label><input type="radio" name="categorie" value="all" checked> Tout</label>
+                    <label><input type="radio" name="categorie" value="non-censured"> Non-Censuré</label>
+                    <label><input type="radio" name="categorie" value="censured"> Censuré</label>
+                    <label><input type="radio" name="categorie" value="erotica"> Erotica</label>
                 </div>
             </details>
 
             <details open>
-                <summary>Censure</summary>
+                <summary>Statut</summary>
                 <div class="filter-group">
-                    <label><input type="radio" name="censure" value="all" checked> Peu importe</label>
-                    <label><input type="radio" name="censure" value="non"> Non censuré</label>
-                    <label><input type="radio" name="censure" value="oui"> Censuré</label>
+                    <label><input type="radio" name="statut" value="all" checked> Peu importe</label>
+                    <label><input type="radio" name="statut" value="fini"> Fini</label>
+                    <label><input type="radio" name="statut" value="encours"> En cours</label>
+                </div>
+            </details>
+
+            <details open>
+                <summary>Année de sortie</summary>
+                <div class="filter-group">
+                    <div class="range-inputs">
+                        <input type="number" id="f-year-min" class="search-input" placeholder="Min" min="1970" max="2030">
+                        <span>-</span>
+                        <input type="number" id="f-year-max" class="search-input" placeholder="Max" min="1970" max="2030">
+                    </div>
                 </div>
             </details>
 
             <details>
-                <summary>Année de sortie</summary>
+                <summary>Score (sur 10)</summary>
                 <div class="filter-group">
-                    <select id="f-year" class="search-input" style="cursor:pointer;">
-                        <option value="all">Toutes les années</option>
-                        <option value="recent">Moins de 5 ans</option>
-                        <option value="mid">5 à 10 ans</option>
-                        <option value="old">Plus de 10 ans</option>
-                        <option value="veryold">Plus de 20 ans</option>
-                    </select>
+                    <div class="range-inputs">
+                        <input type="number" id="f-score-min" class="search-input" placeholder="Min" step="0.1" min="0" max="10">
+                        <span>-</span>
+                        <input type="number" id="f-score-max" class="search-input" placeholder="Max" step="0.1" min="0" max="10">
+                    </div>
                 </div>
             </details>
 
@@ -152,7 +167,7 @@
     </div>
 
 <script type="module">
-    import { initCommon, loadAnimes, getCoverPath, handleImgError, IMG_LOGO, searchAnimes } from './common.js';
+    import { initCommon, loadAnimes, getCoverPath, handleImgError, searchAnimes } from './common.js';
 
     initCommon();
 
@@ -162,15 +177,18 @@
     // État des filtres
     let filters = {
         search: '',
-        type: 'all',
-        censure: 'all',
-        year: 'all',
+        categorie: 'all', // all, non-censured, censured, erotica
+        statut: 'all',
+        yearMin: '',
+        yearMax: '',
+        scoreMin: '',
+        scoreMax: '',
         tags: new Set(),
         pls: new Set(),
         sort: 'recent'
     };
 
-    // Extraire l'année d'une chaîne (ex: "25 déc. 2005" -> 2005)
+    // Extraire l'année d'une chaîne
     function getYear(str) {
         const m = (str || '').match(/\d{4}/g);
         return m ? parseInt(m[m.length - 1]) : 0;
@@ -180,7 +198,6 @@
         try {
             allAnimes = await loadAnimes();
             
-            // Charger la liste Erotica
             const resp = await fetch('plsero_liste.csv');
             if (resp.ok) {
                 const text = await resp.text();
@@ -204,16 +221,12 @@
         const uniquePls = new Set();
 
         allAnimes.forEach(a => {
-            // Tags
             if (a.tags) a.tags.split(',').map(t => t.trim()).filter(Boolean).forEach(t => uniqueTags.add(t));
-            
-            // PLS (Producteur, Label, Studio)
             if (a.producteur) a.producteur.split(',').map(s=>s.trim()).filter(Boolean).forEach(p => uniquePls.add(p));
             if (a.label) a.label.split(',').map(s=>s.trim()).filter(Boolean).forEach(l => uniquePls.add(l));
             if (a.studio) a.studio.split(',').map(s=>s.trim()).filter(Boolean).forEach(s => uniquePls.add(s));
         });
 
-        // Trier alphabétiquement
         const sortedTags = Array.from(uniqueTags).sort((a,b) => a.localeCompare(b));
         const sortedPls = Array.from(uniquePls).sort((a,b) => a.localeCompare(b));
 
@@ -226,9 +239,8 @@
         ).join('');
     }
 
-    // Écouter les changements sur les filtres
     function setupEvents() {
-        // Recherche texte
+        // Recherche texte (debounce)
         let searchTimer;
         document.getElementById('f-search').addEventListener('input', (e) => {
             clearTimeout(searchTimer);
@@ -238,20 +250,28 @@
             }, 300);
         });
 
-        // Type (Hentai / Erotica)
-        document.querySelectorAll('input[name="type"]').forEach(el => {
-            el.addEventListener('change', (e) => { filters.type = e.target.value; applyFilters(); });
+        // Radios (Catégorie / Statut)
+        document.querySelectorAll('input[name="categorie"]').forEach(el => {
+            el.addEventListener('change', (e) => { filters.categorie = e.target.value; applyFilters(); });
+        });
+        document.querySelectorAll('input[name="statut"]').forEach(el => {
+            el.addEventListener('change', (e) => { filters.statut = e.target.value; applyFilters(); });
         });
 
-        // Censure
-        document.querySelectorAll('input[name="censure"]').forEach(el => {
-            el.addEventListener('change', (e) => { filters.censure = e.target.value; applyFilters(); });
-        });
-
-        // Année
-        document.getElementById('f-year').addEventListener('change', (e) => {
-            filters.year = e.target.value;
-            applyFilters();
+        // Inputs Min/Max (Année et Score)
+        const rangeInputs = ['f-year-min', 'f-year-max', 'f-score-min', 'f-score-max'];
+        rangeInputs.forEach(id => {
+            let timer;
+            document.getElementById(id).addEventListener('input', (e) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    if (id === 'f-year-min') filters.yearMin = e.target.value;
+                    if (id === 'f-year-max') filters.yearMax = e.target.value;
+                    if (id === 'f-score-min') filters.scoreMin = e.target.value;
+                    if (id === 'f-score-max') filters.scoreMax = e.target.value;
+                    applyFilters();
+                }, 400);
+            });
         });
 
         // Tri
@@ -260,7 +280,7 @@
             applyFilters();
         });
 
-        // Recherche locale dans les tags
+        // Recherches locales (Tags / PLS)
         document.getElementById('f-tag-search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             document.querySelectorAll('#tags-list label').forEach(lbl => {
@@ -268,7 +288,6 @@
             });
         });
 
-        // Recherche locale dans les PLS
         document.getElementById('f-pls-search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             document.querySelectorAll('#pls-list label').forEach(lbl => {
@@ -276,7 +295,7 @@
             });
         });
 
-        // Checkboxes Tags
+        // Checkboxes Tags / PLS
         document.querySelectorAll('.tag-cb').forEach(cb => {
             cb.addEventListener('change', (e) => {
                 if (e.target.checked) filters.tags.add(e.target.value);
@@ -285,7 +304,6 @@
             });
         });
 
-        // Checkboxes PLS
         document.querySelectorAll('.pls-cb').forEach(cb => {
             cb.addEventListener('change', (e) => {
                 if (e.target.checked) filters.pls.add(e.target.value);
@@ -295,61 +313,73 @@
         });
     }
 
-    // Réinitialiser les filtres
     window.resetFilters = function() {
-        document.querySelector('input[name="type"][value="all"]').checked = true;
-        document.querySelector('input[name="censure"][value="all"]').checked = true;
-        document.getElementById('f-year').value = 'all';
-        document.getElementById('f-search').value = '';
-        document.getElementById('f-tag-search').value = '';
-        document.getElementById('f-pls-search').value = '';
+        document.querySelector('input[name="categorie"][value="all"]').checked = true;
+        document.querySelector('input[name="statut"][value="all"]').checked = true;
+        
+        ['f-year-min', 'f-year-max', 'f-score-min', 'f-score-max', 'f-search', 'f-tag-search', 'f-pls-search'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
         
         document.querySelectorAll('.tag-cb, .pls-cb').forEach(cb => cb.checked = false);
         document.querySelectorAll('#tags-list label, #pls-list label').forEach(lbl => lbl.style.display = 'flex');
 
-        filters = { search: '', type: 'all', censure: 'all', year: 'all', tags: new Set(), pls: new Set(), sort: 'recent' };
+        filters = { 
+            search: '', categorie: 'all', statut: 'all', 
+            yearMin: '', yearMax: '', scoreMin: '', scoreMax: '', 
+            tags: new Set(), pls: new Set(), sort: 'recent' 
+        };
         applyFilters();
     };
 
-    // Filtrer et Afficher
     function applyFilters() {
-        const currentYear = new Date().getFullYear();
-
-        // 1. Filtrer
         let filtered = allAnimes.filter(a => {
-            // Type (Erotica vs Hentai)
+            // 1. Catégorie (Erotica / Censuré / Non-censuré)
             let isAnimeEro = false;
             [a.producteur, a.label, a.studio].forEach(str => {
                 if (str && str.split(',').some(s => eroticaSet.has(s.trim()))) isAnimeEro = true;
             });
-            if (filters.type === 'hentai' && isAnimeEro) return false;
-            if (filters.type === 'erotica' && !isAnimeEro) return false;
 
-            // Censure
-            if (filters.censure !== 'all') {
-                const isCens = (a.censure || '').toLowerCase().includes('oui') || (a.censure || '').toLowerCase().includes('censuré');
-                if (filters.censure === 'oui' && !isCens) return false;
-                if (filters.censure === 'non' && isCens) return false;
+            if (filters.categorie === 'erotica' && !isAnimeEro) return false;
+            if (filters.categorie === 'non-censured') {
+                if (isAnimeEro) return false; // On exclut Erotica
+                if ((a.censure || '').toLowerCase().includes('oui')) return false;
+            }
+            if (filters.categorie === 'censured') {
+                if (isAnimeEro) return false; // On exclut Erotica
+                if (!(a.censure || '').toLowerCase().includes('oui')) return false;
             }
 
-            // Année
+            // 2. Statut (Fini / En cours)
+            if (filters.statut !== 'all') {
+                const isFini = (a.etat || '').toLowerCase().includes('fini') || (a.etat || '').toLowerCase().includes('termin');
+                const isEnCours = (a.etat || '').toLowerCase().includes('cours') || (a.etat || '').toLowerCase().includes('airing');
+                if (filters.statut === 'fini' && !isFini) return false;
+                if (filters.statut === 'encours' && !isEnCours) return false;
+            }
+
+            // 3. Année Min / Max
             const aYear = getYear(a.sortie);
-            if (filters.year !== 'all' && aYear > 0) {
-                const age = currentYear - aYear;
-                if (filters.year === 'recent' && age > 5) return false;
-                if (filters.year === 'mid' && (age < 5 || age > 10)) return false;
-                if (filters.year === 'old' && age < 10) return false;
-                if (filters.year === 'veryold' && age < 20) return false;
+            if (aYear > 0) {
+                if (filters.yearMin && aYear < parseInt(filters.yearMin)) return false;
+                if (filters.yearMax && aYear > parseInt(filters.yearMax)) return false;
+            } else if (filters.yearMin || filters.yearMax) {
+                return false; // Si on filtre par année et que l'anime n'a pas d'année, on l'exclut
             }
 
-            // Tags (doit posséder TOUS les tags sélectionnés)
+            // 4. Score Min / Max
+            const aScore = parseFloat((a.score || '0').replace(',', '.'));
+            if (filters.scoreMin && aScore < parseFloat(filters.scoreMin)) return false;
+            if (filters.scoreMax && aScore > parseFloat(filters.scoreMax)) return false;
+
+            // 5. Tags (ET)
             if (filters.tags.size > 0) {
                 if (!a.tags) return false;
                 const aTags = a.tags.split(',').map(t => t.trim());
                 for (const t of filters.tags) if (!aTags.includes(t)) return false;
             }
 
-            // PLS (doit posséder AU MOINS UN des PLS sélectionnés)
+            // 6. PLS (OU)
             if (filters.pls.size > 0) {
                 const aPls = [];
                 if (a.producteur) aPls.push(...a.producteur.split(',').map(s=>s.trim()));
@@ -364,12 +394,12 @@
             return true;
         });
 
-        // 2. Recherche texte (si présente)
+        // Recherche texte globale
         if (filters.search) {
             filtered = searchAnimes(filters.search, filtered);
         }
 
-        // 3. Trier
+        // Tri
         filtered.sort((a, b) => {
             if (filters.sort === 'recent') return b.ordreAjout - a.ordreAjout;
             if (filters.sort === 'score') return (parseFloat(b.score.replace(',','.'))||0) - (parseFloat(a.score.replace(',','.'))||0);
@@ -379,7 +409,7 @@
             return 0;
         });
 
-        // 4. Afficher
+        // Affichage
         document.getElementById('results-count').textContent = `${filtered.length} résultat${filtered.length > 1 ? 's' : ''}`;
         
         const grid = document.getElementById('results-grid');
