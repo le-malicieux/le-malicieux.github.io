@@ -47,7 +47,6 @@ export const DEFAULT_COVER_NUM = 1;
 
 async function logVisit() {
     try {
-        // On ne compte pas les visites en local (quand tu développes)
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
 
         await addDoc(collection(db, "visits"), {
@@ -87,13 +86,15 @@ const HEADER_HTML = `
                 </div>
                 <a href="index.html" class="nav-tab" data-page="index.html">Accueil</a>
                 <a href="tags.html" class="nav-tab" data-page="tags.html">Tags</a>
-                <a href="recherche.html" class="nav-tab" data-page="recherche.html">Recherche appr.</a>
                 <a href="alphabetique.html" class="nav-tab" data-page="alphabetique.html">A-Z</a>
                 <a href="playlist.html" class="nav-tab" data-page="playlist.html">Playlist</a>
                 <a href="pls.html" class="nav-tab" data-page="pls.html">Industrie</a>
                 <a href="discord.html" class="nav-tab" data-page="discord.html">Updates</a>
                 <a href="profil.html" class="nav-tab" data-page="profil.html">Profil</a>
                 <a href="index_old.html" class="nav-tab" data-page="index_old.html">Ancien Index</a>
+                
+                <!-- Boutons pour le menu mobile -->
+                <a href="recherche.html" class="nav-action">Recherche appr.</a>
                 <button class="nav-action" onclick="randomAnime()">Au hasard</button>
                 <a href="https://discord.gg/4DY3Zq4vW4" target="_blank" class="discord-btn" title="Rejoindre le Discord">
                     <img src="${CDN_BASE}/img/bannieres_icones/logo-discord.jpg" alt="Discord">
@@ -134,10 +135,7 @@ let _animesCache = null;
 let _animesPromise = null;
 
 export async function loadAnimes() {
-    // Si le cache est déjà rempli, on le renvoie instantanément
     if (_animesCache) return _animesCache;
-    
-    // Si une requête est déjà en cours, on attend qu'elle finisse au lieu d'en lancer une autre
     if (_animesPromise) return _animesPromise;
 
     _animesPromise = (async () => {
@@ -155,10 +153,10 @@ export async function loadAnimes() {
                 const a = parseAnimeRow(cols);
                 if (a.nom && a.ordreAjout > 0) animes.push(a);
             }
-            _animesCache = animes; // On stocke en cache
+            _animesCache = animes;
             return animes;
         } catch (e) {
-            _animesPromise = null; // En cas d'erreur, on permet de réessayer
+            _animesPromise = null;
             throw e;
         }
     })();
@@ -457,13 +455,11 @@ async function setupHeaderSearch() {
         const val = this.value.trim();
         if (val.length < 2) { searchSuggestions.classList.remove('active'); return; }
         
-        // Affiche "Chargement..." si le fichier CSV n'est pas encore en cache
         if (!_animesCache) {
             searchSuggestions.innerHTML = '<div class="sugg-empty">Chargement...</div>';
             searchSuggestions.classList.add('active');
         }
 
-        // Attend que les animés soient chargés (utilise la promesse globale si déjà en cours)
         const animes = await loadAnimes(); 
 
         const results = searchAnimes(val, animes, 8);
