@@ -99,10 +99,10 @@
     background: none; color: #b9b9bd; border: 1px solid #3a3a3f; cursor: pointer;
     font-size: 0.76em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
     padding: 8px 13px; border-radius: 2px; white-space: nowrap; transition: 0.15s;
-    text-decoration: none; /* Ajouté pour les liens <a> */
-    display: inline-flex; /* Ajouté pour les liens <a> */
-    align-items: center; /* Ajouté pour les liens <a> */
-    justify-content: center; /* Ajouté pour les liens <a> */
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 .nav-action:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
 
@@ -144,8 +144,7 @@
 }
 .voir-tout-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
-/* ── ENCADRÉS CENSURE / STATUT ──
-   Style propre : petites cases avec fond sombre et bordure fine. */
+/* ── ENCADRÉS CENSURE / STATUT ── */
 .meta-badge {
     display: inline-flex; align-items: center;
     background: rgba(255,255,255,0.06);
@@ -156,8 +155,6 @@
     white-space: nowrap;
 }
 .meta-badge strong { color: var(--primary); font-weight: 600; margin-right: 3px; }
-
-/* Si un conteneur flex est utilisé */
 .meta-badge-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 
 /* ── LIAISON PLS SUR FICHE.HTML ── */
