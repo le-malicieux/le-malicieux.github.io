@@ -159,6 +159,9 @@
                 hour: '2-digit', minute: '2-digit' 
             });
 
+            // Modification du pseudo ici
+            const displayAuthor = (m.author === 'zacharisk_11') ? 'Créateur' : m.author;
+
             let attachmentsHtml = '';
             if (m.attachments && m.attachments.length > 0) {
                 attachmentsHtml = m.attachments
@@ -182,7 +185,7 @@
                 <div class="post-header">
                     <img src="${m.avatar}" class="post-avatar" onerror="this.src='img/bannieres_icones/logo.jpg'">
                     <div>
-                        <div class="post-author">${m.author}</div>
+                        <div class="post-author">${displayAuthor}</div>
                         <div class="post-date">${dateStr}</div>
                     </div>
                 </div>
