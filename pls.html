@@ -97,6 +97,13 @@
         .btn-back-list { display: inline-flex; align-items: center; gap: 6px; color: #aaa; font-size: 0.85em; cursor: pointer; border: 1px solid #333; background: #1a1a1a; padding: 6px 12px; border-radius: 6px; margin-bottom: 20px; text-decoration: none; }
         .btn-back-list:hover { color: var(--primary); border-color: var(--primary); }
 
+        /* ── NOUVEAU : Section PLS Manquants ── */
+        .missing-pls-section { margin-top: 50px; padding: 20px; background: rgba(255, 170, 0, 0.05); border: 1px dashed #ffaa00; border-radius: 12px; }
+        .missing-pls-title { color: #ffaa00; font-size: 1.1em; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .missing-pls-group { margin-bottom: 10px; font-size: 0.9em; }
+        .missing-pls-group strong { color: #ccc; display: block; margin-bottom: 5px; }
+        .missing-pls-badge { display: inline-block; background: #333; border: 1px solid #555; padding: 4px 8px; border-radius: 4px; margin: 2px; color: #eee; }
+
         @media (max-width: 700px) {
             .pls-grid { grid-template-columns: 1fr !important; }
             .producer-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
@@ -345,6 +352,27 @@
             html += `<div class="pls-grid">${studios.map(s => buildCard(s.name, 'studio', s.count)).join('')}</div>`;
         }
 
+        // 👇 AJOUT : Section pour les PLS manquants (orphelins)
+        const missing = findMissingPls()[tab === 'erotica' ? 'erotica' : 'hentai'];
+        const hasMissing = missing.producers.size > 0 || missing.labels.size > 0 || missing.studios.size > 0;
+
+        if (hasMissing) {
+            html += `<div class="missing-pls-section">`;
+            html += `<div class="missing-pls-title">⚠️ PLS Non Répertoriés (À corriger dans les CSV)</div>`;
+            
+            const makeList = (set, typeLabel) => {
+                if (set.size === 0) return '';
+                const items = Array.from(set).sort().map(name => `<span class="missing-pls-badge">${name}</span>`).join('');
+                return `<div class="missing-pls-group"><strong>${typeLabel} :</strong> ${items}</div>`;
+            };
+
+            html += makeList(missing.producers, 'Producteurs');
+            html += makeList(missing.labels, 'Labels');
+            html += makeList(missing.studios, 'Studios');
+            html += `</div>`;
+        }
+        // 👆 FIN AJOUT
+
         document.getElementById('view-container').innerHTML = html;
         
         document.getElementById('pls-sort').addEventListener('change', (e) => {
@@ -352,6 +380,48 @@
             renderList(currentTab);
         });
     }
+
+    // 👇 NOUVELLE FONCTION : Recherche des PLS absents des 4 CSV
+    function findMissingPls() {
+        const knownProducers = new Set(Object.keys(prodsData));
+        const knownLabels = new Set();
+        for (const p of Object.values(prodsData)) {
+            if (p.labels) Object.keys(p.labels).forEach(l => knownLabels.add(l));
+        }
+        const knownStudios = new Set(Object.keys(studiosData));
+
+        const missing = {
+            hentai: { producers: new Set(), labels: new Set(), studios: new Set() },
+            erotica: { producers: new Set(), labels: new Set(), studios: new Set() }
+        };
+
+        allAnimes.forEach(a => {
+            let isAnimeEro = false;
+            [a.producteur, a.label, a.studio].forEach(str => {
+                if (str && str.split(',').some(s => eroticaSet.has(s.trim()))) isAnimeEro = true;
+            });
+            const tabType = isAnimeEro ? 'erotica' : 'hentai';
+
+            if (a.producteur) {
+                a.producteur.split(',').map(s=>s.trim()).filter(Boolean).forEach(p => {
+                    if (!knownProducers.has(p)) missing[tabType].producers.add(p);
+                });
+            }
+            if (a.label) {
+                a.label.split(',').map(s=>s.trim()).filter(Boolean).forEach(l => {
+                    if (!knownLabels.has(l)) missing[tabType].labels.add(l);
+                });
+            }
+            if (a.studio) {
+                a.studio.split(',').map(s=>s.trim()).filter(Boolean).forEach(s => {
+                    if (!knownStudios.has(s)) missing[tabType].studios.add(s);
+                });
+            }
+        });
+
+        return missing;
+    }
+    // 👆 FIN NOUVELLE FONCTION
 
     function buildHeader(name, type, data, parentProd, stats) {
         let linksHtml = '';
