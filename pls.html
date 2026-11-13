@@ -141,9 +141,9 @@
     let eroticaSet = new Set();
     let prodsData = {}; 
     let studiosData = {}; 
-    let dualEntities = new Set(); // Stocke les entités qui sont à la fois Producteur et Studio
+    let dualEntities = new Set(); // Entités à la fois Producteur et Studio
     let currentTab = 'hentai';
-    let currentSort = 'count-desc'; // Tri par défaut par nombre de titres (Desc)
+    let currentSort = 'count-desc';
     
     let currentGridFilters = { sort: 'score-desc', filter: '', costudio: '' };
 
@@ -165,7 +165,7 @@
                 loadStudios('studios.csv', false), loadStudios('studios_ero.csv', true)
             ]);
             
-            // 👇 DÉTECTION DYNAMIQUE DES ENTITÉS MIXTES DEPUIS ANIMES.CSV
+            // 1. Détection via animes.csv (si le nom est identique dans Producteur et Studio)
             allAnimes.forEach(a => {
                 const pList = (a.producteur || '').split(',').map(s => cleanStr(s)).filter(Boolean);
                 const sList = (a.studio || '').split(',').map(s => cleanStr(s)).filter(Boolean);
@@ -173,25 +173,38 @@
                     if (sList.includes(p)) dualEntities.add(p);
                 });
             });
-            // 👆 FIN DÉTECTION
 
-            // Fusion des studios qui sont aussi producteurs
+            // 2. Détection via les fichiers Studios (si la colonne B "Studio et Producteur" est remplie)
             for (const [name, data] of Object.entries(studiosData)) {
-                if (data.isAlsoProd || dualEntities.has(name)) {
-                    dualEntities.add(name); // On s'assure qu'il est dans le set
-                    if (!prodsData[name]) {
-                        prodsData[name] = { 
-                            isEro: data.isEro, 
-                            links: data.links, 
-                            relations: data.relations, 
-                            labels: {}, 
-                            isAlsoProd: true 
-                        };
-                    } else {
-                        prodsData[name].isAlsoProd = true;
-                    }
+                if (data.isAlsoProd) {
+                    dualEntities.add(name);
                 }
             }
+
+            // 3. Fusion : On s'assure que toutes les entités mixtes sont dans les deux dictionnaires
+            dualEntities.forEach(name => {
+                // Si c'est dans prodsData, on l'ajoute à studiosData
+                if (prodsData[name] && !studiosData[name]) {
+                    studiosData[name] = { 
+                        isEro: prodsData[name].isEro, 
+                        links: prodsData[name].links, 
+                        relations: prodsData[name].relations, 
+                        isAlsoProd: true 
+                    };
+                }
+                // Si c'est dans studiosData, on l'ajoute à prodsData
+                if (studiosData[name] && !prodsData[name]) {
+                    prodsData[name] = { 
+                        isEro: studiosData[name].isEro, 
+                        links: studiosData[name].links, 
+                        relations: studiosData[name].relations, 
+                        labels: {}, 
+                        isAlsoProd: true 
+                    };
+                }
+                if (prodsData[name]) prodsData[name].isAlsoProd = true;
+                if (studiosData[name]) studiosData[name].isAlsoProd = true;
+            });
 
             window.addEventListener('hashchange', route);
             route();
@@ -248,14 +261,20 @@
             for (let i = 1; i < lines.length; i++) {
                 const cols = parseCSVLine(cleanStr(lines[i]));
                 if (cols.length < 1) continue;
-                const name = cleanStr(cols[0]);
+                
+                // Colonne A = Studio, Colonne B = "Studio et Producteur"
+                const nameColA = cleanStr(cols[0]);
+                const nameColB = cleanStr(cols[1]);
+                
+                // Le nom du studio est soit dans A, soit dans B (si A est vide)
+                const name = nameColA || nameColB;
                 if (!name) continue;
                 
-                // Vérifier si la colonne B (index 1) contient quelque chose (ex: "Producteur et Studio")
-                const isAlsoProd = cleanStr(cols[1]).length > 0;
+                // Si B est rempli, c'est une entité mixte
+                const isAlsoProd = nameColB.length > 0;
 
                 if (!studiosData[name]) studiosData[name] = { isEro };
-                studiosData[name].isAlsoProd = isAlsoProd; // On enregistre le flag
+                studiosData[name].isAlsoProd = isAlsoProd;
                 studiosData[name].links = { mal: cleanStr(cols[2]), web: cleanStr(cols[3]), old: "" };
                 studiosData[name].relations = { prods: cleanStr(cols[4]), labels: cleanStr(cols[5]), studios: cleanStr(cols[6]) };
             }
@@ -267,8 +286,9 @@
         const isEro = currentTab === 'erotica';
         const normalize = s => (s || '').trim().toLowerCase().replace(/\s+/g, ' ');
         const targetName = normalize(name);
-
-        const isDual = dualEntities.has(name);
+        
+        // On vérifie si c'est une entité mixte
+        const isDual = dualEntities.has(name) || (studiosData[name] && studiosData[name].isAlsoProd) || (prodsData[name] && prodsData[name].isAlsoProd);
 
         return allAnimes.filter(a => {
             let isAnimeEro = false;
@@ -283,12 +303,12 @@
 
             if (type === 'producer') {
                 if (inProd) return true;
-                if (isDual && inStud) return true;
+                if (isDual && inStud) return true; // Si mixte, on cherche aussi dans studio
                 return false;
             }
             if (type === 'studio') {
                 if (inStud) return true;
-                if (isDual && inProd) return true;
+                if (isDual && inProd) return true; // Si mixte, on cherche aussi dans producteur
                 return false;
             }
             if (type === 'label') return inLab;
