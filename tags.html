@@ -21,16 +21,24 @@
         .tag-pill:hover, .tag-pill.active { background: var(--primary); border-color: var(--primary); color: white; }
         .clear-tags-btn { background: #333; border: 1px solid #ff4757; color: #ff4757; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8em; margin-left: 10px; }
         .clear-tags-btn:hover { background: #ff4757; color: white; }
+        
         .selected-descriptions { background: rgba(15,15,15,0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255,71,87,0.4); border-left: 4px solid var(--primary); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: none; }
         .selected-descriptions.visible { display: block; }
         .selected-descriptions h4 { margin: 0 0 8px 0; color: var(--primary); font-size: 1em; }
         .selected-descriptions .desc-item { margin-bottom: 8px; color: #ddd; font-size: 0.9em; line-height: 1.5; }
         .selected-descriptions .desc-item strong { color: var(--primary); }
+
+        /* ── NOUVEAU : Statistiques par Tag ── */
+        .tag-stats { display: flex; gap: 12px; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; }
+        .stat-box { background: #111; border: 1px solid #2a2a2a; border-radius: 6px; padding: 8px 16px; text-align: center; min-width: 90px; }
+        .stat-val { display: block; font-size: 1.2em; font-weight: 900; color: var(--primary); line-height: 1.1; }
+        .stat-lbl { font-size: 0.6em; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; display: block; }
         
         /* Taille de fiche augmentée pour faire tenir 4 badges sur une ligne */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
         @media (max-width: 700px) {
             .grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .tag-stats { justify-content: center; }
         }
         .card { background: var(--card-bg); border-radius: 3px; overflow: hidden; transition: 0.2s; border: 1px solid #333; text-decoration: none; color: inherit; font-size: 0.85em; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-6px); border-color: var(--primary); }
@@ -55,10 +63,19 @@
     <div class="container">
         <h2 style="color: var(--primary); margin-bottom: 20px;">Explorer par catégories</h2>
         <div id="tags-categories"></div>
+        
         <div id="selected-descriptions" class="selected-descriptions">
             <h4>📖 Tags sélectionnés :</h4>
             <div id="descriptions-list"></div>
+            
+            <!-- Bloc statistiques -->
+            <div class="tag-stats" id="tag-stats">
+                <div class="stat-box"><span class="stat-val" id="stat-avg">—</span><span class="stat-lbl">Score Moy.</span></div>
+                <div class="stat-box"><span class="stat-val" id="stat-best">—</span><span class="stat-lbl">Meilleur</span></div>
+                <div class="stat-box"><span class="stat-val" id="stat-worst">—</span><span class="stat-lbl">Pire score</span></div>
+            </div>
         </div>
+
         <div class="results-header">
             <div id="results-title" class="results-title">Sélectionnez des tags</div>
             <div class="sort-controls">
@@ -136,22 +153,72 @@
     function updateDescriptions() {
         const container = document.getElementById('selected-descriptions');
         const list = document.getElementById('descriptions-list');
-        if (selectedTags.size === 0) { container.classList.remove('visible'); return; }
+        
+        if (selectedTags.size === 0 && !currentSearch) { 
+            container.classList.remove('visible'); 
+            return; 
+        }
+        
         container.classList.add('visible');
-        list.innerHTML = Array.from(selectedTags).map(t => `<div class="desc-item"><strong>${t}</strong> : ${tagDescriptions[t] || 'Pas de description.'}</div>`).join('');
+        
+        // Affichage des descriptions de tags
+        if (selectedTags.size > 0) {
+            list.innerHTML = Array.from(selectedTags).map(t => `<div class="desc-item"><strong>${t}</strong> : ${tagDescriptions[t] || 'Pas de description.'}</div>`).join('');
+        } else {
+            list.innerHTML = '';
+        }
+
+        // Affichage ou non des stats (on les cache si c'est juste une recherche sans tags)
+        const statsEl = document.getElementById('tag-stats');
+        if (selectedTags.size > 0 || currentSearch) {
+            statsEl.style.display = 'flex';
+        } else {
+            statsEl.style.display = 'none';
+        }
     }
 
     function applyFiltersAndSort() {
         let filtered = allAnimes;
-        if (selectedTags.size) filtered = filtered.filter(a => {
-            if (!a.tags) return false;
-            const list = a.tags.split(',').map(t => t.trim());
-            for (const tag of selectedTags) if (!list.includes(tag)) return false;
-            return true;
-        });
+        
+        // Filtrage par tags
+        if (selectedTags.size) {
+            filtered = filtered.filter(a => {
+                if (!a.tags) return false;
+                const list = a.tags.split(',').map(t => t.trim());
+                for (const tag of selectedTags) if (!list.includes(tag)) return false;
+                return true;
+            });
+        }
+        
+        // Filtrage par recherche
         if (currentSearch) filtered = searchAnimes(currentSearch, filtered);
+        
+        // Calcul des statistiques
+        const validScores = filtered
+            .map(a => parseFloat((a.score || '').replace(',', '.')))
+            .filter(s => !isNaN(s) && s > 0);
+
+        if (validScores.length > 0) {
+            const avg = (validScores.reduce((sum, val) => sum + val, 0) / validScores.length).toFixed(2);
+            const best = Math.max(...validScores).toFixed(2);
+            const worst = Math.min(...validScores).toFixed(2);
+
+            document.getElementById('stat-avg').textContent = avg;
+            document.getElementById('stat-best').textContent = best;
+            document.getElementById('stat-worst').textContent = worst;
+        } else {
+            document.getElementById('stat-avg').textContent = '—';
+            document.getElementById('stat-best').textContent = '—';
+            document.getElementById('stat-worst').textContent = '—';
+        }
+        
+        // Tri
         if (currentSort) filtered = sortList(filtered, currentSort);
+        
+        // Affichage
         renderCards(filtered);
+        
+        // Mise à jour du titre
         const title = document.getElementById('results-title');
         if (!selectedTags.size && !currentSearch) title.innerText = "Sélectionnez des tags ou recherchez un anime";
         else {
@@ -221,10 +288,18 @@
     function toggleTag(tag) {
         if (selectedTags.has(tag)) selectedTags.delete(tag);
         else selectedTags.add(tag);
-        updateTagsUI(); updateDescriptions(); updateURLAndStorage(); applyFiltersAndSort();
+        updateTagsUI(); 
+        updateDescriptions(); 
+        updateURLAndStorage(); 
+        applyFiltersAndSort();
     }
+    
     function clearAllTags() {
-        selectedTags.clear(); updateTagsUI(); updateDescriptions(); updateURLAndStorage(); applyFiltersAndSort();
+        selectedTags.clear(); 
+        updateTagsUI(); 
+        updateDescriptions(); 
+        updateURLAndStorage(); 
+        applyFiltersAndSort();
     }
 
     function generateCategoriesUI(allTagsSet) {
@@ -255,7 +330,8 @@
     window.clearAllTags = clearAllTags;
     window.applySort = function () {
         currentSort = document.getElementById('tag-sort').value;
-        updateURLAndStorage(); applyFiltersAndSort();
+        updateURLAndStorage(); 
+        applyFiltersAndSort();
     };
 
     // ─── Recherche ───
@@ -265,6 +341,7 @@
     searchInput.addEventListener('input', function () {
         currentSearch = this.value.trim();
         updateURLAndStorage();
+        updateDescriptions();
         applyFiltersAndSort();
         clearTimeout(suggTimer);
         suggTimer = setTimeout(() => {
