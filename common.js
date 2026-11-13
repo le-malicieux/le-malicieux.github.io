@@ -35,7 +35,10 @@ export {
 };
 
 // ── Constantes ──
-const CDN_BASE = 'https://cdn.jsdelivr.net/gh/le-malicieux/le-malicieux.github.io@main';
+// Utilisation de fastly.jsdelivr.net pour une meilleure stabilité en cas de blocage
+const CDN_BASE = 'https://fastly.jsdelivr.net/gh/le-malicieux/le-malicieux.github.io@main';
+// Version pour forcer le rechargement du cache si nécessaire (change la valeur si tu as des soucis)
+const VERSION = '?v=1.0.1';
 
 export const IMG_LOGO = `${CDN_BASE}/img/bannieres_icones/logo.jpg`;
 export const IMG_DISCORD = `${CDN_BASE}/img/bannieres_icones/logo-discord.jpg`;
@@ -47,6 +50,7 @@ export const DEFAULT_COVER_NUM = 1;
 
 async function logVisit() {
     try {
+        // On ne compte pas les visites en local (quand tu développes)
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
 
         await addDoc(collection(db, "visits"), {
@@ -178,27 +182,45 @@ export function getTranche(ordreAjout) {
 export function getCoverPath(ordreAjout, num = DEFAULT_COVER_NUM) {
     const n = parseInt(ordreAjout, 10);
     if (!n || n < 1) return IMG_LOGO;
-    return `${CDN_BASE}/img/covers/${getTranche(n)}/${n}-${num}.webp`;
+    // Ajout de la version pour le cache
+    return `${CDN_BASE}/img/covers/${getTranche(n)}/${n}-${num}.webp${VERSION}`;
 }
 
 export function getPlsPath(slug) {
     if (!slug) return IMG_LOGO;
-    return `${CDN_BASE}/img/pls/${slug}.webp`;
+    return `${CDN_BASE}/img/pls/${slug}.webp${VERSION}`;
 }
 
 export function getBackgroundUrl(kind, filename) {
     if (!filename) return '';
+    // Ajout de la version pour le cache
     return kind === 'mobile'
-        ? `${CDN_BASE}/img/fonds_mobiles/${filename}`
-        : `${CDN_BASE}/img/fonds_desktop/${filename}`;
+        ? `${CDN_BASE}/img/fonds_mobiles/${filename}${VERSION}`
+        : `${CDN_BASE}/img/fonds_desktop/${filename}${VERSION}`;
 }
 
 // ═══════════════════════════════════════════════════════════
-//  FALLBACK IMAGE (sans boucle)
+//  FALLBACK IMAGE (avec changement de CDN)
 // ═══════════════════════════════════════════════════════════
 
 export function handleImgError(img, filename) {
     if (!img || img.dataset.fallbackDone === '1') return;
+
+    // 1. Si l'image vient de "fastly.jsdelivr.net", on tente gcore.jsdelivr.net
+    if (img.src.includes('fastly.jsdelivr.net') && !img.dataset.fallbackTried) {
+        img.dataset.fallbackTried = '1';
+        img.src = img.src.replace('fastly.jsdelivr.net', 'gcore.jsdelivr.net');
+        return;
+    }
+
+    // 2. Si l'image vient de "gcore.jsdelivr.net", on tente cdn.jsdelivr.net (le principal)
+    if (img.src.includes('gcore.jsdelivr.net') && img.dataset.fallbackTried === '1') {
+        img.dataset.fallbackTried = '2';
+        img.src = img.src.replace('gcore.jsdelivr.net', 'cdn.jsdelivr.net');
+        return;
+    }
+
+    // 3. Si l'image échoue sur les 3 CDN, on tente les extensions de secours (jpg, png, etc.)
     const m = String(filename || '').match(/^(\d+)-(\d+)\.(webp|jpg|jpeg|png)$/i);
     if (!m) {
         img.dataset.fallbackDone = '1';
@@ -217,7 +239,9 @@ export function handleImgError(img, filename) {
     const chain = { webp: ['jpg', 'jpeg', 'png'], jpg: ['jpeg', 'png', 'webp'], jpeg: ['jpg', 'png', 'webp'], png: ['jpg', 'jpeg', 'webp'] };
     const next = (chain[ext] || []).find(e => !tried.includes(e));
     if (next) {
-        img.src = `${CDN_BASE}/img/covers/${getTranche(ordre)}/${ordre}-${num}.${next}`;
+        // On repart sur fastly pour le nouveau format
+        img.dataset.fallbackTried = ''; 
+        img.src = `https://fastly.jsdelivr.net/gh/le-malicieux/le-malicieux.github.io@main/img/covers/${getTranche(ordre)}/${ordre}-${num}.${next}${VERSION}`;
     } else {
         img.dataset.fallbackDone = '1';
         img.onerror = null;
@@ -399,11 +423,24 @@ export async function setBackground() {
         const list = data[kind] || [];
         if (!list.length) return;
         const file = list[Math.floor(Math.random() * list.length)];
+        
+        // On utilise le fallback manuel ici aussi pour les fonds d'écran
         const url = getBackgroundUrl(kind, file);
+        
         const img = new Image();
         img.onload = () => {
             const layer = document.getElementById('bg-layer');
             if (layer) layer.style.backgroundImage = `url('${url}')`;
+        };
+        img.onerror = () => {
+            // Si Fastly échoue, on tente sur gcore pour le fond
+            const fallbackUrl = url.replace('fastly.jsdelivr.net', 'gcore.jsdelivr.net');
+            const imgFallback = new Image();
+            imgFallback.onload = () => {
+                const layer = document.getElementById('bg-layer');
+                if (layer) layer.style.backgroundImage = `url('${fallbackUrl}')`;
+            };
+            imgFallback.src = fallbackUrl;
         };
         img.src = url;
     } catch (e) {}
@@ -455,11 +492,13 @@ async function setupHeaderSearch() {
         const val = this.value.trim();
         if (val.length < 2) { searchSuggestions.classList.remove('active'); return; }
         
+        // Affiche "Chargement..." si le fichier CSV n'est pas encore en cache
         if (!_animesCache) {
             searchSuggestions.innerHTML = '<div class="sugg-empty">Chargement...</div>';
             searchSuggestions.classList.add('active');
         }
 
+        // Attend que les animés soient chargés (utilise la promesse globale si déjà en cours)
         const animes = await loadAnimes(); 
 
         const results = searchAnimes(val, animes, 8);
