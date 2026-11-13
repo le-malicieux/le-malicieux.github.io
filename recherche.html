@@ -40,11 +40,12 @@
         .pills-sub-group { margin-bottom: 15px; }
         .pills-sub-title { font-size: 0.75em; color: #888; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
         
-        .pills-container { display: flex; flex-wrap: wrap; gap: 8px; max-height: 120px; overflow-y: auto; padding: 5px; }
+        /* Hauteur augmentée pour éviter de scroller */
+        .pills-container { display: flex; flex-wrap: wrap; gap: 8px; max-height: 350px; overflow-y: auto; padding: 5px; }
         .pills-container::-webkit-scrollbar { width: 6px; }
         .pills-container::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
         
-        .pill { background: #222; border: 1px solid #444; color: #ccc; padding: 5px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; user-select: none; transition: 0.2s; }
+        .pill { background: #222; border: 1px solid #444; color: #ccc; padding: 6px 14px; border-radius: 20px; font-size: 0.85em; cursor: pointer; user-select: none; transition: 0.2s; }
         .pill:hover { border-color: #666; background: #333; }
         .pill.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 2px 8px rgba(255,71,87,0.3); }
 
@@ -232,7 +233,6 @@
         }
     }
 
-    // 1. Préparer les données (Tags et PLS séparés par type et catégorie)
     function buildDataLists() {
         const uniqueTags = new Set();
         const prodH = new Set(), labH = new Set(), studH = new Set();
@@ -269,7 +269,6 @@
         plsData.erotica = Array.from(eroAll).sort((a,b) => a.localeCompare(b));
     }
 
-    // 2. Afficher les Tags
     function renderTags() {
         const container = document.getElementById('tags-container');
         container.innerHTML = allUniqueTags.map(t => {
@@ -278,9 +277,7 @@
         }).join('');
     }
 
-    // 3. Afficher les PLS
     function renderPls() {
-        // Hentai
         const createPills = (arr) => arr.map(p => {
             const isActive = filters.pls.has(p) ? 'active' : '';
             return `<div class="pill ${isActive}" data-val="${p.replace(/"/g, '&quot;')}" onclick="togglePls('${p.replace(/'/g, "\\'")}')">${p}</div>`;
@@ -289,11 +286,8 @@
         document.getElementById('container-producers-hentai').innerHTML = createPills(plsData.hentai.producers);
         document.getElementById('container-labels-hentai').innerHTML = createPills(plsData.hentai.labels);
         document.getElementById('container-studios-hentai').innerHTML = createPills(plsData.hentai.studios);
-        
-        // Erotica
         document.getElementById('container-erotica-all').innerHTML = createPills(plsData.erotica);
 
-        // Gestion de la visibilité selon la catégorie
         const cat = filters.categorie;
         const showHentai = (cat === 'all' || cat.startsWith('hentai'));
         const showErotica = (cat === 'all' || cat === 'erotica');
@@ -301,11 +295,9 @@
         document.getElementById('pls-hentai-producers').style.display = showHentai ? 'block' : 'none';
         document.getElementById('pls-hentai-labels').style.display = showHentai ? 'block' : 'none';
         document.getElementById('pls-hentai-studios').style.display = showHentai ? 'block' : 'none';
-        
         document.getElementById('pls-erotica-group').style.display = showErotica ? 'block' : 'none';
     }
 
-    // Fonctions globales
     window.toggleTag = function(tag) {
         if (filters.tags.has(tag)) filters.tags.delete(tag);
         else filters.tags.add(tag);
@@ -316,7 +308,7 @@
     window.togglePls = function(pls) {
         if (filters.pls.has(pls)) filters.pls.delete(pls);
         else filters.pls.add(pls);
-        renderPls(); // Mise à jour visuelle des pills
+        renderPls();
         applyFilters();
     };
 
@@ -330,11 +322,8 @@
             }, 300);
         });
 
-        // Changement de catégorie
         document.getElementById('f-categorie').addEventListener('change', (e) => {
             filters.categorie = e.target.value;
-            
-            // Nettoyage des PLS non valides
             const validPls = new Set();
             if (filters.categorie === 'erotica') plsData.erotica.forEach(p => validPls.add(p));
             else if (filters.categorie.startsWith('hentai')) {
@@ -347,9 +336,7 @@
                 plsData.hentai.labels.forEach(p => validPls.add(p));
                 plsData.hentai.studios.forEach(p => validPls.add(p));
             }
-            
             filters.pls = new Set(Array.from(filters.pls).filter(p => validPls.has(p)));
-
             renderPls();
             applyFilters();
         });
@@ -357,7 +344,6 @@
         document.getElementById('f-statut').addEventListener('change', (e) => { filters.statut = e.target.value; applyFilters(); });
         document.getElementById('sort-order').addEventListener('change', (e) => { filters.sort = e.target.value; applyFilters(); });
 
-        // Inputs Min/Max
         const rangeInputs = ['f-year-min', 'f-year-max', 'f-score-min', 'f-score-max'];
         rangeInputs.forEach(id => {
             let timer;
@@ -378,18 +364,11 @@
         document.getElementById('f-categorie').value = 'all';
         document.getElementById('f-statut').value = 'all';
         document.getElementById('f-search').value = '';
-        
-        ['f-year-min', 'f-year-max', 'f-score-min', 'f-score-max'].forEach(id => {
-            document.getElementById(id).value = '';
-        });
+        ['f-year-min', 'f-year-max', 'f-score-min', 'f-score-max'].forEach(id => { document.getElementById(id).value = ''; });
 
-        filters = { 
-            search: '', categorie: 'all', statut: 'all', 
-            yearMin: '', yearMax: '', scoreMin: '', scoreMax: '', 
-            tags: new Set(), pls: new Set(), sort: 'recent' 
-        };
-        
+        filters = { search: '', categorie: 'all', statut: 'all', yearMin: '', yearMax: '', scoreMin: '', scoreMax: '', tags: new Set(), pls: new Set(), sort: 'recent' };
         document.getElementById('sort-order').value = 'recent';
+        
         renderTags();
         renderPls();
         applyFilters();
@@ -402,7 +381,6 @@
                 if (str && str.split(',').some(s => eroticaSet.has(s.trim()))) isAnimeEro = true;
             });
 
-            // Catégorie
             if (filters.categorie === 'erotica' && !isAnimeEro) return false;
             if (filters.categorie === 'hentai' && isAnimeEro) return false;
             if (filters.categorie === 'hentai-non-censured') {
@@ -414,7 +392,6 @@
                 if (!(a.censure || '').toLowerCase().includes('oui')) return false;
             }
 
-            // Statut
             if (filters.statut !== 'all') {
                 const isFini = (a.etat || '').toLowerCase().includes('fini') || (a.etat || '').toLowerCase().includes('termin');
                 const isEnCours = (a.etat || '').toLowerCase().includes('cours') || (a.etat || '').toLowerCase().includes('airing');
@@ -422,7 +399,6 @@
                 if (filters.statut === 'encours' && !isEnCours) return false;
             }
 
-            // Année
             const aYear = getYear(a.sortie);
             if (aYear > 0) {
                 if (filters.yearMin && aYear < parseInt(filters.yearMin)) return false;
@@ -431,25 +407,21 @@
                 return false; 
             }
 
-            // Score
             const aScore = parseFloat((a.score || '0').replace(',', '.'));
             if (filters.scoreMin && aScore < parseFloat(filters.scoreMin)) return false;
             if (filters.scoreMax && aScore > parseFloat(filters.scoreMax)) return false;
 
-            // Tags
             if (filters.tags.size > 0) {
                 if (!a.tags) return false;
                 const aTags = a.tags.split(',').map(t => t.trim());
                 for (const t of filters.tags) if (!aTags.includes(t)) return false;
             }
 
-            // PLS
             if (filters.pls.size > 0) {
                 const aPls = [];
                 if (a.producteur) aPls.push(...a.producteur.split(',').map(s=>s.trim()));
                 if (a.label) aPls.push(...a.label.split(',').map(s=>s.trim()));
                 if (a.studio) aPls.push(...a.studio.split(',').map(s=>s.trim()));
-                
                 let hasOne = false;
                 for (const p of filters.pls) if (aPls.includes(p)) { hasOne = true; break; }
                 if (!hasOne) return false;
