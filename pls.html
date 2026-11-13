@@ -97,7 +97,7 @@
         .btn-back-list { display: inline-flex; align-items: center; gap: 6px; color: #aaa; font-size: 0.85em; cursor: pointer; border: 1px solid #333; background: #1a1a1a; padding: 6px 12px; border-radius: 6px; margin-bottom: 20px; text-decoration: none; }
         .btn-back-list:hover { color: var(--primary); border-color: var(--primary); }
 
-        /* ── NOUVEAU : Section PLS Manquants ── */
+        /* ── Section PLS Manquants ── */
         .missing-pls-section { margin-top: 50px; padding: 20px; background: rgba(255, 170, 0, 0.05); border: 1px dashed #ffaa00; border-radius: 12px; }
         .missing-pls-title { color: #ffaa00; font-size: 1.1em; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
         .missing-pls-group { margin-bottom: 10px; font-size: 0.9em; }
@@ -163,6 +163,24 @@
                 loadProds('prods.csv', false), loadProds('prods_ero.csv', true),
                 loadStudios('studios.csv', false), loadStudios('studios_ero.csv', true)
             ]);
+            
+            // Fusion des studios qui sont aussi producteurs
+            for (const [name, data] of Object.entries(studiosData)) {
+                if (data.isAlsoProd) {
+                    if (!prodsData[name]) {
+                        prodsData[name] = { 
+                            isEro: data.isEro, 
+                            links: data.links, 
+                            relations: data.relations, 
+                            labels: {}, 
+                            isAlsoProd: true 
+                        };
+                    } else {
+                        prodsData[name].isAlsoProd = true;
+                    }
+                }
+            }
+
             window.addEventListener('hashchange', route);
             route();
         } catch (e) {
@@ -221,7 +239,11 @@
                 const name = cleanStr(cols[0]);
                 if (!name) continue;
                 
+                // Vérifier si la colonne "Studio et Producteur" (index 1) est remplie
+                const isAlsoProd = cleanStr(cols[1]) !== "";
+
                 if (!studiosData[name]) studiosData[name] = { isEro };
+                studiosData[name].isAlsoProd = isAlsoProd; // On enregistre le flag
                 studiosData[name].links = { mal: cleanStr(cols[2]), web: cleanStr(cols[3]), old: "" };
                 studiosData[name].relations = { prods: cleanStr(cols[4]), labels: cleanStr(cols[5]), studios: cleanStr(cols[6]) };
             }
@@ -233,6 +255,9 @@
         const isEro = currentTab === 'erotica';
         const normalize = s => (s || '').trim().toLowerCase().replace(/\s+/g, ' ');
         
+        // Si c'est un studio qui est aussi producteur, on cherche dans les deux colonnes
+        const isAlsoProd = studiosData[name] && studiosData[name].isAlsoProd;
+
         return allAnimes.filter(a => {
             let isAnimeEro = false;
             [a.producteur, a.label, a.studio].forEach(str => {
@@ -240,7 +265,12 @@
             });
             if (isAnimeEro !== isEro) return false;
 
-            if (type === 'producer') return (a.producteur || '').split(',').map(normalize).includes(normalize(name));
+            if (type === 'producer') {
+                const isProd = (a.producteur || '').split(',').map(normalize).includes(normalize(name));
+                const isStud = (a.studio || '').split(',').map(normalize).includes(normalize(name));
+                if (isAlsoProd) return isProd || isStud;
+                return isProd;
+            }
             if (type === 'label') return (a.label || '').split(',').map(normalize).includes(normalize(name));
             if (type === 'studio') return (a.studio || '').split(',').map(normalize).includes(normalize(name));
             return false;
@@ -352,7 +382,7 @@
             html += `<div class="pls-grid">${studios.map(s => buildCard(s.name, 'studio', s.count)).join('')}</div>`;
         }
 
-        // 👇 AJOUT : Section pour les PLS manquants (orphelins)
+        // Section pour les PLS manquants (orphelins)
         const missing = findMissingPls()[tab === 'erotica' ? 'erotica' : 'hentai'];
         const hasMissing = missing.producers.size > 0 || missing.labels.size > 0 || missing.studios.size > 0;
 
@@ -371,7 +401,6 @@
             html += makeList(missing.studios, 'Studios');
             html += `</div>`;
         }
-        // 👆 FIN AJOUT
 
         document.getElementById('view-container').innerHTML = html;
         
@@ -381,7 +410,7 @@
         });
     }
 
-    // 👇 NOUVELLE FONCTION : Recherche des PLS absents des 4 CSV
+    // Recherche des PLS absents des 4 CSV
     function findMissingPls() {
         const knownProducers = new Set(Object.keys(prodsData));
         const knownLabels = new Set();
@@ -421,7 +450,6 @@
 
         return missing;
     }
-    // 👆 FIN NOUVELLE FONCTION
 
     function buildHeader(name, type, data, parentProd, stats) {
         let linksHtml = '';
@@ -443,7 +471,11 @@
         }
 
         let subtitleHtml = type === 'producer' ? 'PRODUCTEUR' : type === 'studio' ? 'STUDIO' : 'LABEL';
-        if (type === 'label' && parentProd) {
+        
+        // Gestion du label "Producteur et Studio"
+        if ((type === 'producer' || type === 'studio') && studiosData[name] && studiosData[name].isAlsoProd) {
+            subtitleHtml = 'PRODUCTEUR ET STUDIO';
+        } else if (type === 'label' && parentProd) {
             const safeParent = encodeURIComponent(parentProd).replace(/%2F/g, '§');
             subtitleHtml = `LABEL DE <a href="#${currentTab}/grid/producer/${safeParent}">${parentProd}</a>`;
         }
