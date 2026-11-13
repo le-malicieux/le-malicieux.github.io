@@ -22,7 +22,7 @@
         
         .filter-control { background: #1a1a1a; border: 1px solid #444; color: white; padding: 8px 10px; border-radius: 6px; font-size: 0.85em; outline: none; width: 100%; box-sizing: border-box; cursor: pointer; }
         .filter-control:focus { border-color: var(--primary); }
-        input[type="number"].filter-control { cursor: text; }
+        input[type="number"].filter-control, input[type="text"].filter-control { cursor: text; }
         
         /* Bloc Min/Max */
         .range-inputs { display: flex; align-items: center; gap: 5px; }
@@ -33,21 +33,20 @@
         .btn-reset-top { background: rgba(255,71,87,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: 0.2s; white-space: nowrap; height: 36px; margin-top: 20px; }
         .btn-reset-top:hover { background: var(--primary); color: white; }
 
-        /* ── SECTIONS REPLIABLES (Tags / PLS) ── */
-        details { background: #1a1a1a; border: 1px solid #444; border-radius: 6px; position: relative; }
-        summary { padding: 8px 10px; font-size: 0.85em; color: white; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-        summary::-webkit-details-marker { display: none; }
-        summary::after { content: '▼'; font-size: 0.7em; color: #aaa; }
-        details[open] summary { border-bottom: 1px solid #444; border-radius: 6px 6px 0 0; }
-        details[open] summary::after { content: '▲'; }
+        /* ── SECTION TAGS ET PLS (Pills) ── */
+        .pills-section { margin-top: 15px; border-top: 1px solid #333; padding-top: 15px; }
+        .pills-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .pills-section-header span { font-size: 0.8em; color: var(--primary); font-weight: bold; text-transform: uppercase; }
         
-        .dropdown-content { position: absolute; top: 100%; left: 0; right: 0; background: #1a1a1a; border: 1px solid #444; border-top: none; border-radius: 0 0 6px 6px; z-index: 100; padding: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); min-width: 250px; max-width: 350px; }
-        .dropdown-search { width: 100%; padding: 6px 8px; background: #111; border: 1px solid #333; color: white; border-radius: 4px; margin-bottom: 8px; font-size: 0.8em; }
-        .checkbox-list { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 5px; }
-        .checkbox-list::-webkit-scrollbar { width: 6px; }
-        .checkbox-list::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-        .checkbox-list label { font-size: 0.85em; color: #ccc; display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none; letter-spacing: 0; }
-        .checkbox-list input { accent-color: var(--primary); width: 15px; height: 15px; }
+        .pills-search { background: #111; border: 1px solid #333; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.8em; width: 200px; outline: none; }
+        
+        .pills-container { display: flex; flex-wrap: wrap; gap: 8px; max-height: 150px; overflow-y: auto; padding: 5px; }
+        .pills-container::-webkit-scrollbar { width: 6px; }
+        .pills-container::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        
+        .pill { background: #222; border: 1px solid #444; color: #ccc; padding: 5px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; user-select: none; transition: 0.2s; }
+        .pill:hover { border-color: #666; background: #333; }
+        .pill.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 2px 8px rgba(255,71,87,0.3); }
 
         /* ── ZONE DE RÉSULTATS ── */
         .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
@@ -66,7 +65,8 @@
             .filters-grid { grid-template-columns: 1fr 1fr; }
             .btn-reset-top { grid-column: 1 / -1; margin-top: 0; }
             .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .dropdown-content { position: fixed; top: auto; bottom: 0; left: 0; right: 0; max-width: 100%; border-radius: 12px 12px 0 0; border: 1px solid #444; padding: 20px; }
+            .pills-search { width: 100%; margin-top: 5px; }
+            .pills-section-header { flex-direction: column; align-items: flex-start; gap: 5px; }
         }
     </style>
 </head>
@@ -85,13 +85,14 @@
                     <input type="text" id="f-search" class="filter-control" placeholder="Ex: Overflow, Bible Black...">
                 </div>
 
-                <!-- Catégorie / Censure -->
+                <!-- Catégorie -->
                 <div class="filter-block">
                     <label>Catégorie</label>
                     <select id="f-categorie" class="filter-control">
                         <option value="all">Tout</option>
-                        <option value="non-censured">Non-Censuré</option>
-                        <option value="censured">Censuré</option>
+                        <option value="hentai">Hentai (Tout)</option>
+                        <option value="hentai-non-censured">Hentai Non-Censuré</option>
+                        <option value="hentai-censured">Hentai Censuré</option>
                         <option value="erotica">Erotica</option>
                     </select>
                 </div>
@@ -126,32 +127,26 @@
                     </div>
                 </div>
 
-                <!-- Tags -->
-                <div class="filter-block">
-                    <label>Tags</label>
-                    <details>
-                        <summary>Sélectionner des tags</summary>
-                        <div class="dropdown-content">
-                            <input type="text" id="f-tag-search" class="dropdown-search" placeholder="Chercher un tag...">
-                            <div class="checkbox-list" id="tags-list"></div>
-                        </div>
-                    </details>
-                </div>
-
-                <!-- PLS -->
-                <div class="filter-block">
-                    <label>Producteurs / Labels / Studios</label>
-                    <details>
-                        <summary>Sélectionner des PLS</summary>
-                        <div class="dropdown-content">
-                            <input type="text" id="f-pls-search" class="dropdown-search" placeholder="Chercher un PLS...">
-                            <div class="checkbox-list" id="pls-list"></div>
-                        </div>
-                    </details>
-                </div>
-
                 <!-- Bouton Reset -->
                 <button class="btn-reset-top" onclick="resetFilters()">Effacer les filtres</button>
+            </div>
+
+            <!-- Section Tags -->
+            <div class="pills-section">
+                <div class="pills-section-header">
+                    <span>Tags</span>
+                    <input type="text" id="search-tag" class="pills-search" placeholder="Filtrer les tags...">
+                </div>
+                <div class="pills-container" id="tags-container"></div>
+            </div>
+
+            <!-- Section PLS -->
+            <div class="pills-section">
+                <div class="pills-section-header">
+                    <span>Producteurs / Labels / Studios</span>
+                    <input type="text" id="search-pls" class="pills-search" placeholder="Filtrer les PLS...">
+                </div>
+                <div class="pills-container" id="pls-container"></div>
             </div>
         </div>
 
@@ -178,6 +173,10 @@
     let allAnimes = [];
     let eroticaSet = new Set();
     
+    // Stockage global des tags et PLS avec leur type (pour le filtrage dynamique)
+    let allUniqueTags = [];
+    let allUniquePls = { hentai: [], erotica: [] };
+
     let filters = {
         search: '',
         categorie: 'all',
@@ -209,43 +208,101 @@
                 });
             }
 
-            buildFilterLists();
+            buildDataLists();
+            renderTags();
+            renderPls('all'); // Initialise avec tous les PLS
             setupEvents();
             applyFilters();
             
-            // Fermer les dropdowns si on clique ailleurs
-            document.addEventListener('click', (e) => {
-                document.querySelectorAll('details').forEach(d => {
-                    if (!d.contains(e.target)) d.removeAttribute('open');
-                });
-            });
         } catch (e) {
             console.error(e);
         }
     }
 
-    function buildFilterLists() {
+    // 1. Préparer les données (Tags et PLS séparés Hentai/Erotica)
+    function buildDataLists() {
         const uniqueTags = new Set();
-        const uniquePls = new Set();
+        const plsHentai = new Set();
+        const plsErotica = new Set();
 
         allAnimes.forEach(a => {
+            // Tags
             if (a.tags) a.tags.split(',').map(t => t.trim()).filter(Boolean).forEach(t => uniqueTags.add(t));
-            if (a.producteur) a.producteur.split(',').map(s=>s.trim()).filter(Boolean).forEach(p => uniquePls.add(p));
-            if (a.label) a.label.split(',').map(s=>s.trim()).filter(Boolean).forEach(l => uniquePls.add(l));
-            if (a.studio) a.studio.split(',').map(s=>s.trim()).filter(Boolean).forEach(s => uniquePls.add(s));
+            
+            // Déterminer si c'est Erotica
+            let isEro = false;
+            [a.producteur, a.label, a.studio].forEach(str => {
+                if (str && str.split(',').some(s => eroticaSet.has(s.trim()))) isEro = true;
+            });
+
+            // PLS
+            const aPls = [];
+            if (a.producteur) aPls.push(...a.producteur.split(',').map(s=>s.trim()));
+            if (a.label) aPls.push(...a.label.split(',').map(s=>s.trim()));
+            if (a.studio) aPls.push(...a.studio.split(',').map(s=>s.trim()));
+
+            aPls.filter(Boolean).forEach(p => {
+                if (isEro) plsErotica.add(p);
+                else plsHentai.add(p);
+            });
         });
 
-        const sortedTags = Array.from(uniqueTags).sort((a,b) => a.localeCompare(b));
-        const sortedPls = Array.from(uniquePls).sort((a,b) => a.localeCompare(b));
-
-        document.getElementById('tags-list').innerHTML = sortedTags.map(t => 
-            `<label><input type="checkbox" value="${t.replace(/"/g, '&quot;')}" class="tag-cb"> ${t}</label>`
-        ).join('');
-
-        document.getElementById('pls-list').innerHTML = sortedPls.map(p => 
-            `<label><input type="checkbox" value="${p.replace(/"/g, '&quot;')}" class="pls-cb"> ${p}</label>`
-        ).join('');
+        allUniqueTags = Array.from(uniqueTags).sort((a,b) => a.localeCompare(b));
+        allUniquePls.hentai = Array.from(plsHentai).sort((a,b) => a.localeCompare(b));
+        allUniquePls.erotica = Array.from(plsErotica).sort((a,b) => a.localeCompare(b));
     }
+
+    // 2. Afficher les Tags
+    function renderTags() {
+        const container = document.getElementById('tags-container');
+        const searchVal = document.getElementById('search-tag').value.toLowerCase();
+        
+        let visibleTags = allUniqueTags;
+        if (searchVal) visibleTags = allUniqueTags.filter(t => t.toLowerCase().includes(searchVal));
+
+        container.innerHTML = visibleTags.map(t => {
+            const isActive = filters.tags.has(t) ? 'active' : '';
+            return `<div class="pill ${isActive}" data-val="${t.replace(/"/g, '&quot;')}" onclick="toggleTag('${t.replace(/'/g, "\\'")}')">${t}</div>`;
+        }).join('') || '<div style="color:#555; font-size:0.8em;">Aucun tag trouvé.</div>';
+    }
+
+    // 3. Afficher les PLS (en fonction de la catégorie)
+    function renderPls(categorie) {
+        const container = document.getElementById('pls-container');
+        const searchVal = document.getElementById('search-pls').value.toLowerCase();
+        
+        let sourcePls = [];
+        if (categorie === 'erotica') {
+            sourcePls = allUniquePls.erotica;
+        } else if (categorie === 'hentai' || categorie === 'hentai-non-censured' || categorie === 'hentai-censured') {
+            sourcePls = allUniquePls.hentai;
+        } else {
+            // Si "Tout", on combine les deux en évitant les doublons
+            sourcePls = Array.from(new Set([...allUniquePls.hentai, ...allUniquePls.erotica])).sort((a,b) => a.localeCompare(b));
+        }
+
+        if (searchVal) sourcePls = sourcePls.filter(p => p.toLowerCase().includes(searchVal));
+
+        container.innerHTML = sourcePls.map(p => {
+            const isActive = filters.pls.has(p) ? 'active' : '';
+            return `<div class="pill ${isActive}" data-val="${p.replace(/"/g, '&quot;')}" onclick="togglePls('${p.replace(/'/g, "\\'")}')">${p}</div>`;
+        }).join('') || '<div style="color:#555; font-size:0.8em;">Aucun PLS trouvé.</div>';
+    }
+
+    // Fonctions globales pour les clics sur les pills
+    window.toggleTag = function(tag) {
+        if (filters.tags.has(tag)) filters.tags.delete(tag);
+        else filters.tags.add(tag);
+        renderTags();
+        applyFilters();
+    };
+
+    window.togglePls = function(pls) {
+        if (filters.pls.has(pls)) filters.pls.delete(pls);
+        else filters.pls.add(pls);
+        renderPls(filters.categorie);
+        applyFilters();
+    };
 
     function setupEvents() {
         let searchTimer;
@@ -257,8 +314,23 @@
             }, 300);
         });
 
-        // Selects
-        document.getElementById('f-categorie').addEventListener('change', (e) => { filters.categorie = e.target.value; applyFilters(); });
+        // Changement de catégorie
+        document.getElementById('f-categorie').addEventListener('change', (e) => {
+            filters.categorie = e.target.value;
+            
+            // Nettoyage : si on passe en Hentai, on retire les PLS Erotica sélectionnés, etc.
+            const currentValidPls = new Set();
+            if (filters.categorie === 'erotica') allUniquePls.erotica.forEach(p => currentValidPls.add(p));
+            else if (filters.categorie.startsWith('hentai')) allUniquePls.hentai.forEach(p => currentValidPls.add(p));
+            else Array.from(new Set([...allUniquePls.hentai, ...allUniquePls.erotica])).forEach(p => currentValidPls.add(p));
+            
+            // Filtrer les sélections actuelles pour ne garder que celles valides
+            filters.pls = new Set(Array.from(filters.pls).filter(p => currentValidPls.has(p)));
+
+            renderPls(filters.categorie);
+            applyFilters();
+        });
+
         document.getElementById('f-statut').addEventListener('change', (e) => { filters.statut = e.target.value; applyFilters(); });
         document.getElementById('sort-order').addEventListener('change', (e) => { filters.sort = e.target.value; applyFilters(); });
 
@@ -278,57 +350,31 @@
             });
         });
 
-        // Recherches locales
-        document.getElementById('f-tag-search').addEventListener('input', (e) => {
-            e.stopPropagation(); // Empêche la fermeture du details
-            const val = e.target.value.toLowerCase();
-            document.querySelectorAll('#tags-list label').forEach(lbl => {
-                lbl.style.display = lbl.textContent.toLowerCase().includes(val) ? 'flex' : 'none';
-            });
-        });
-
-        document.getElementById('f-pls-search').addEventListener('input', (e) => {
-            e.stopPropagation();
-            const val = e.target.value.toLowerCase();
-            document.querySelectorAll('#pls-list label').forEach(lbl => {
-                lbl.style.display = lbl.textContent.toLowerCase().includes(val) ? 'flex' : 'none';
-            });
-        });
-
-        // Checkboxes
-        document.querySelectorAll('.tag-cb').forEach(cb => {
-            cb.addEventListener('change', (e) => {
-                if (e.target.checked) filters.tags.add(e.target.value);
-                else filters.tags.delete(e.target.value);
-                applyFilters();
-            });
-        });
-
-        document.querySelectorAll('.pls-cb').forEach(cb => {
-            cb.addEventListener('change', (e) => {
-                if (e.target.checked) filters.pls.add(e.target.value);
-                else filters.pls.delete(e.target.value);
-                applyFilters();
-            });
-        });
+        // Recherches locales dans les pills
+        document.getElementById('search-tag').addEventListener('input', renderTags);
+        document.getElementById('search-pls').addEventListener('input', () => renderPls(filters.categorie));
     }
 
     window.resetFilters = function() {
         document.getElementById('f-categorie').value = 'all';
         document.getElementById('f-statut').value = 'all';
+        document.getElementById('f-search').value = '';
+        document.getElementById('search-tag').value = '';
+        document.getElementById('search-pls').value = '';
         
-        ['f-year-min', 'f-year-max', 'f-score-min', 'f-score-max', 'f-search', 'f-tag-search', 'f-pls-search'].forEach(id => {
+        ['f-year-min', 'f-year-max', 'f-score-min', 'f-score-max'].forEach(id => {
             document.getElementById(id).value = '';
         });
-        
-        document.querySelectorAll('.tag-cb, .pls-cb').forEach(cb => cb.checked = false);
-        document.querySelectorAll('#tags-list label, #pls-list label').forEach(lbl => lbl.style.display = 'flex');
 
         filters = { 
             search: '', categorie: 'all', statut: 'all', 
             yearMin: '', yearMax: '', scoreMin: '', scoreMax: '', 
             tags: new Set(), pls: new Set(), sort: 'recent' 
         };
+        
+        document.getElementById('sort-order').value = 'recent';
+        renderTags();
+        renderPls('all');
         applyFilters();
     };
 
@@ -341,11 +387,12 @@
 
             // Catégorie
             if (filters.categorie === 'erotica' && !isAnimeEro) return false;
-            if (filters.categorie === 'non-censured') {
+            if (filters.categorie === 'hentai' && isAnimeEro) return false;
+            if (filters.categorie === 'hentai-non-censured') {
                 if (isAnimeEro) return false;
                 if ((a.censure || '').toLowerCase().includes('oui')) return false;
             }
-            if (filters.categorie === 'censured') {
+            if (filters.categorie === 'hentai-censured') {
                 if (isAnimeEro) return false;
                 if (!(a.censure || '').toLowerCase().includes('oui')) return false;
             }
@@ -372,14 +419,14 @@
             if (filters.scoreMin && aScore < parseFloat(filters.scoreMin)) return false;
             if (filters.scoreMax && aScore > parseFloat(filters.scoreMax)) return false;
 
-            // Tags
+            // Tags (ET)
             if (filters.tags.size > 0) {
                 if (!a.tags) return false;
                 const aTags = a.tags.split(',').map(t => t.trim());
                 for (const t of filters.tags) if (!aTags.includes(t)) return false;
             }
 
-            // PLS
+            // PLS (OU)
             if (filters.pls.size > 0) {
                 const aPls = [];
                 if (a.producteur) aPls.push(...a.producteur.split(',').map(s=>s.trim()));
