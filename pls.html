@@ -141,6 +141,7 @@
     let eroticaSet = new Set();
     let prodsData = {}; 
     let studiosData = {}; 
+    let dualEntities = new Set(); // Stocke les entités qui sont à la fois Producteur et Studio
     let currentTab = 'hentai';
     let currentSort = 'count-desc'; // Tri par défaut par nombre de titres (Desc)
     
@@ -164,9 +165,20 @@
                 loadStudios('studios.csv', false), loadStudios('studios_ero.csv', true)
             ]);
             
+            // 👇 DÉTECTION DYNAMIQUE DES ENTITÉS MIXTES DEPUIS ANIMES.CSV
+            allAnimes.forEach(a => {
+                const pList = (a.producteur || '').split(',').map(s => cleanStr(s)).filter(Boolean);
+                const sList = (a.studio || '').split(',').map(s => cleanStr(s)).filter(Boolean);
+                pList.forEach(p => {
+                    if (sList.includes(p)) dualEntities.add(p);
+                });
+            });
+            // 👆 FIN DÉTECTION
+
             // Fusion des studios qui sont aussi producteurs
             for (const [name, data] of Object.entries(studiosData)) {
-                if (data.isAlsoProd) {
+                if (data.isAlsoProd || dualEntities.has(name)) {
+                    dualEntities.add(name); // On s'assure qu'il est dans le set
                     if (!prodsData[name]) {
                         prodsData[name] = { 
                             isEro: data.isEro, 
@@ -239,8 +251,8 @@
                 const name = cleanStr(cols[0]);
                 if (!name) continue;
                 
-                // Vérifier si la colonne "Studio et Producteur" (index 1) est remplie
-                const isAlsoProd = cleanStr(cols[1]) !== "";
+                // Vérifier si la colonne B (index 1) contient quelque chose (ex: "Producteur et Studio")
+                const isAlsoProd = cleanStr(cols[1]).length > 0;
 
                 if (!studiosData[name]) studiosData[name] = { isEro };
                 studiosData[name].isAlsoProd = isAlsoProd; // On enregistre le flag
@@ -254,9 +266,9 @@
     function getAnimesFor(type, name) {
         const isEro = currentTab === 'erotica';
         const normalize = s => (s || '').trim().toLowerCase().replace(/\s+/g, ' ');
-        
-        // Si c'est un studio qui est aussi producteur, on cherche dans les deux colonnes
-        const isAlsoProd = studiosData[name] && studiosData[name].isAlsoProd;
+        const targetName = normalize(name);
+
+        const isDual = dualEntities.has(name);
 
         return allAnimes.filter(a => {
             let isAnimeEro = false;
@@ -265,14 +277,21 @@
             });
             if (isAnimeEro !== isEro) return false;
 
+            const inProd = (a.producteur || '').split(',').map(normalize).includes(targetName);
+            const inStud = (a.studio || '').split(',').map(normalize).includes(targetName);
+            const inLab = (a.label || '').split(',').map(normalize).includes(targetName);
+
             if (type === 'producer') {
-                const isProd = (a.producteur || '').split(',').map(normalize).includes(normalize(name));
-                const isStud = (a.studio || '').split(',').map(normalize).includes(normalize(name));
-                if (isAlsoProd) return isProd || isStud;
-                return isProd;
+                if (inProd) return true;
+                if (isDual && inStud) return true;
+                return false;
             }
-            if (type === 'label') return (a.label || '').split(',').map(normalize).includes(normalize(name));
-            if (type === 'studio') return (a.studio || '').split(',').map(normalize).includes(normalize(name));
+            if (type === 'studio') {
+                if (inStud) return true;
+                if (isDual && inProd) return true;
+                return false;
+            }
+            if (type === 'label') return inLab;
             return false;
         });
     }
@@ -472,8 +491,8 @@
 
         let subtitleHtml = type === 'producer' ? 'PRODUCTEUR' : type === 'studio' ? 'STUDIO' : 'LABEL';
         
-        // Gestion du label "Producteur et Studio"
-        if ((type === 'producer' || type === 'studio') && studiosData[name] && studiosData[name].isAlsoProd) {
+        // Gestion du label "Producteur et Studio" basée sur notre Set global
+        if ((type === 'producer' || type === 'studio') && dualEntities.has(name)) {
             subtitleHtml = 'PRODUCTEUR ET STUDIO';
         } else if (type === 'label' && parentProd) {
             const safeParent = encodeURIComponent(parentProd).replace(/%2F/g, '§');
