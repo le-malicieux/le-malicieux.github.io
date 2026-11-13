@@ -10,40 +10,48 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding-top: 62px; }
         
-        .layout { display: flex; max-width: 1400px; margin: 0 auto; min-height: calc(100vh - 62px); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         
-        /* ── BARRE LATÉRALE (Filtres) ── */
-        .sidebar { width: 300px; flex-shrink: 0; background: var(--card-bg); border-right: 1px solid #2a2a2a; padding: 20px; overflow-y: auto; position: sticky; top: 62px; height: calc(100vh - 62px); box-sizing: border-box; }
-        .sidebar h2 { font-size: 1.2em; color: var(--primary); margin-top: 0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-reset { background: none; border: 1px solid #555; color: #aaa; font-size: 0.7em; padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
-        .btn-reset:hover { background: #333; color: white; }
+        /* ── BARRE DE FILTRES EN HAUT ── */
+        .filters-top { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         
-        details { border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px; }
-        summary { font-weight: bold; cursor: pointer; color: #eee; font-size: 0.95em; outline: none; list-style: none; display: flex; justify-content: space-between; }
-        summary::-webkit-details-marker { display: none; }
-        summary::after { content: '+'; color: var(--primary); font-weight: bold; }
-        details[open] summary::after { content: '-'; }
+        .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: start; }
         
-        .filter-group { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .filter-group label { font-size: 0.85em; color: #ccc; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .filter-group input[type="radio"], .filter-group input[type="checkbox"] { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
+        .filter-block { display: flex; flex-direction: column; gap: 6px; }
+        .filter-block label { font-size: 0.75em; color: #aaa; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
         
-        .search-input { width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white; border-radius: 6px; font-size: 0.85em; margin-bottom: 10px; }
+        .filter-control { background: #1a1a1a; border: 1px solid #444; color: white; padding: 8px 10px; border-radius: 6px; font-size: 0.85em; outline: none; width: 100%; box-sizing: border-box; cursor: pointer; }
+        .filter-control:focus { border-color: var(--primary); }
+        input[type="number"].filter-control { cursor: text; }
         
-        /* Style Leboncoin Min/Max */
-        .range-inputs { display: flex; align-items: center; gap: 8px; }
-        .range-inputs input { flex: 1; text-align: center; margin-bottom: 0; padding: 8px 4px; }
+        /* Bloc Min/Max */
+        .range-inputs { display: flex; align-items: center; gap: 5px; }
+        .range-inputs input { text-align: center; }
         .range-inputs span { color: #666; font-weight: bold; }
 
-        .checkbox-list { max-height: 200px; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 6px; }
+        /* Bouton Reset */
+        .btn-reset-top { background: rgba(255,71,87,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: 0.2s; white-space: nowrap; height: 36px; margin-top: 20px; }
+        .btn-reset-top:hover { background: var(--primary); color: white; }
+
+        /* ── SECTIONS REPLIABLES (Tags / PLS) ── */
+        details { background: #1a1a1a; border: 1px solid #444; border-radius: 6px; position: relative; }
+        summary { padding: 8px 10px; font-size: 0.85em; color: white; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '▼'; font-size: 0.7em; color: #aaa; }
+        details[open] summary { border-bottom: 1px solid #444; border-radius: 6px 6px 0 0; }
+        details[open] summary::after { content: '▲'; }
+        
+        .dropdown-content { position: absolute; top: 100%; left: 0; right: 0; background: #1a1a1a; border: 1px solid #444; border-top: none; border-radius: 0 0 6px 6px; z-index: 100; padding: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); min-width: 250px; max-width: 350px; }
+        .dropdown-search { width: 100%; padding: 6px 8px; background: #111; border: 1px solid #333; color: white; border-radius: 4px; margin-bottom: 8px; font-size: 0.8em; }
+        .checkbox-list { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 5px; }
         .checkbox-list::-webkit-scrollbar { width: 6px; }
         .checkbox-list::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        .checkbox-list label { font-size: 0.85em; color: #ccc; display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none; letter-spacing: 0; }
+        .checkbox-list input { accent-color: var(--primary); width: 15px; height: 15px; }
 
         /* ── ZONE DE RÉSULTATS ── */
-        .main-content { flex: 1; padding: 20px; min-width: 0; }
-        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--card-bg); padding: 10px 15px; border-radius: 8px; border: 1px solid #2a2a2a; }
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .results-count { font-weight: bold; color: white; font-size: 1.1em; }
-        .sort-select { background: #1a1a1a; border: 1px solid #444; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.85em; cursor: pointer; outline: none; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; }
         .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.2s; border: 1px solid #333; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
@@ -54,14 +62,11 @@
         .card-title { font-weight: bold; color: var(--primary); font-size: 0.9em; height: 2.4em; overflow: hidden; line-height: 1.2; margin-bottom: 5px; }
         .score-badge { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color: #f1c40f; font-size: 0.7em; padding: 2px 5px; border-radius: 4px; }
         
-        /* Mobile */
-        .mobile-filter-btn { display: none; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; width: 100%; font-weight: bold; margin-bottom: 15px; cursor: pointer; }
         @media (max-width: 800px) {
-            .layout { flex-direction: column; }
-            .sidebar { width: 100%; position: static; height: auto; display: none; border-right: none; border-bottom: 1px solid #333; }
-            .sidebar.active { display: block; }
-            .mobile-filter-btn { display: block; }
+            .filters-grid { grid-template-columns: 1fr 1fr; }
+            .btn-reset-top { grid-column: 1 / -1; margin-top: 0; }
             .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .dropdown-content { position: fixed; top: auto; bottom: 0; left: 0; right: 0; max-width: 100%; border-radius: 12px 12px 0 0; border: 1px solid #444; padding: 20px; }
         }
     </style>
 </head>
@@ -70,100 +75,99 @@
     <div id="bg-overlay"></div>
     <!-- La navbar s'injecte via common.js -->
 
-    <div class="layout">
-        <!-- BARRE LATÉRALE DES FILTRES -->
-        <aside class="sidebar" id="sidebar">
-            <h2>
-                Filtres
-                <button class="btn-reset" onclick="resetFilters()">Réinitialiser</button>
-            </h2>
-
-            <details open>
-                <summary>Mots-clés</summary>
-                <div class="filter-group">
-                    <input type="text" id="f-search" class="search-input" placeholder="Rechercher un titre...">
+    <div class="container">
+        <!-- BARRE DE FILTRES EN HAUT -->
+        <div class="filters-top">
+            <div class="filters-grid">
+                <!-- Recherche -->
+                <div class="filter-block" style="grid-column: span 2;">
+                    <label>Recherche par titre</label>
+                    <input type="text" id="f-search" class="filter-control" placeholder="Ex: Overflow, Bible Black...">
                 </div>
-            </details>
 
-            <details open>
-                <summary>Catégorie / Censure</summary>
-                <div class="filter-group">
-                    <label><input type="radio" name="categorie" value="all" checked> Tout</label>
-                    <label><input type="radio" name="categorie" value="non-censured"> Non-Censuré</label>
-                    <label><input type="radio" name="categorie" value="censured"> Censuré</label>
-                    <label><input type="radio" name="categorie" value="erotica"> Erotica</label>
+                <!-- Catégorie / Censure -->
+                <div class="filter-block">
+                    <label>Catégorie</label>
+                    <select id="f-categorie" class="filter-control">
+                        <option value="all">Tout</option>
+                        <option value="non-censured">Non-Censuré</option>
+                        <option value="censured">Censuré</option>
+                        <option value="erotica">Erotica</option>
+                    </select>
                 </div>
-            </details>
 
-            <details open>
-                <summary>Statut</summary>
-                <div class="filter-group">
-                    <label><input type="radio" name="statut" value="all" checked> Peu importe</label>
-                    <label><input type="radio" name="statut" value="fini"> Fini</label>
-                    <label><input type="radio" name="statut" value="encours"> En cours</label>
+                <!-- Statut -->
+                <div class="filter-block">
+                    <label>Statut</label>
+                    <select id="f-statut" class="filter-control">
+                        <option value="all">Peu importe</option>
+                        <option value="fini">Fini</option>
+                        <option value="encours">En cours</option>
+                    </select>
                 </div>
-            </details>
 
-            <details open>
-                <summary>Année de sortie</summary>
-                <div class="filter-group">
+                <!-- Année -->
+                <div class="filter-block">
+                    <label>Année de sortie</label>
                     <div class="range-inputs">
-                        <input type="number" id="f-year-min" class="search-input" placeholder="Min" min="1970" max="2030">
+                        <input type="number" id="f-year-min" class="filter-control" placeholder="Min" min="1970" max="2030">
                         <span>-</span>
-                        <input type="number" id="f-year-max" class="search-input" placeholder="Max" min="1970" max="2030">
+                        <input type="number" id="f-year-max" class="filter-control" placeholder="Max" min="1970" max="2030">
                     </div>
                 </div>
-            </details>
 
-            <details>
-                <summary>Score (sur 10)</summary>
-                <div class="filter-group">
+                <!-- Score -->
+                <div class="filter-block">
+                    <label>Score (sur 10)</label>
                     <div class="range-inputs">
-                        <input type="number" id="f-score-min" class="search-input" placeholder="Min" step="0.1" min="0" max="10">
+                        <input type="number" id="f-score-min" class="filter-control" placeholder="Min" step="0.1" min="0" max="10">
                         <span>-</span>
-                        <input type="number" id="f-score-max" class="search-input" placeholder="Max" step="0.1" min="0" max="10">
+                        <input type="number" id="f-score-max" class="filter-control" placeholder="Max" step="0.1" min="0" max="10">
                     </div>
                 </div>
-            </details>
 
-            <details>
-                <summary>Tags</summary>
-                <div class="filter-group">
-                    <input type="text" id="f-tag-search" class="search-input" placeholder="Chercher un tag...">
-                    <div class="checkbox-list" id="tags-list">
-                        <!-- Rempli par JS -->
-                    </div>
+                <!-- Tags -->
+                <div class="filter-block">
+                    <label>Tags</label>
+                    <details>
+                        <summary>Sélectionner des tags</summary>
+                        <div class="dropdown-content">
+                            <input type="text" id="f-tag-search" class="dropdown-search" placeholder="Chercher un tag...">
+                            <div class="checkbox-list" id="tags-list"></div>
+                        </div>
+                    </details>
                 </div>
-            </details>
 
-            <details>
-                <summary>Producteurs / Labels / Studios</summary>
-                <div class="filter-group">
-                    <input type="text" id="f-pls-search" class="search-input" placeholder="Chercher un PLS...">
-                    <div class="checkbox-list" id="pls-list">
-                        <!-- Rempli par JS -->
-                    </div>
+                <!-- PLS -->
+                <div class="filter-block">
+                    <label>Producteurs / Labels / Studios</label>
+                    <details>
+                        <summary>Sélectionner des PLS</summary>
+                        <div class="dropdown-content">
+                            <input type="text" id="f-pls-search" class="dropdown-search" placeholder="Chercher un PLS...">
+                            <div class="checkbox-list" id="pls-list"></div>
+                        </div>
+                    </details>
                 </div>
-            </details>
-        </aside>
+
+                <!-- Bouton Reset -->
+                <button class="btn-reset-top" onclick="resetFilters()">Effacer les filtres</button>
+            </div>
+        </div>
 
         <!-- RÉSULTATS -->
-        <main class="main-content">
-            <button class="mobile-filter-btn" onclick="document.getElementById('sidebar').classList.toggle('active')">Afficher / Masquer les filtres</button>
-            
-            <div class="results-header">
-                <span class="results-count" id="results-count">Chargement...</span>
-                <select id="sort-order" class="sort-select">
-                    <option value="recent">Tri : Ajout récent</option>
-                    <option value="score">Tri : Meilleur score</option>
-                    <option value="year-desc">Tri : Année (Desc)</option>
-                    <option value="year-asc">Tri : Année (Asc)</option>
-                    <option value="name">Tri : A à Z</option>
-                </select>
-            </div>
+        <div class="results-header">
+            <span class="results-count" id="results-count">Chargement...</span>
+            <select id="sort-order" class="filter-control" style="width:auto;">
+                <option value="recent">Tri : Ajout récent</option>
+                <option value="score">Tri : Meilleur score</option>
+                <option value="year-desc">Tri : Année (Desc)</option>
+                <option value="year-asc">Tri : Année (Asc)</option>
+                <option value="name">Tri : A à Z</option>
+            </select>
+        </div>
 
-            <div class="grid" id="results-grid"></div>
-        </main>
+        <div class="grid" id="results-grid"></div>
     </div>
 
 <script type="module">
@@ -174,10 +178,9 @@
     let allAnimes = [];
     let eroticaSet = new Set();
     
-    // État des filtres
     let filters = {
         search: '',
-        categorie: 'all', // all, non-censured, censured, erotica
+        categorie: 'all',
         statut: 'all',
         yearMin: '',
         yearMax: '',
@@ -188,7 +191,6 @@
         sort: 'recent'
     };
 
-    // Extraire l'année d'une chaîne
     function getYear(str) {
         const m = (str || '').match(/\d{4}/g);
         return m ? parseInt(m[m.length - 1]) : 0;
@@ -210,12 +212,18 @@
             buildFilterLists();
             setupEvents();
             applyFilters();
+            
+            // Fermer les dropdowns si on clique ailleurs
+            document.addEventListener('click', (e) => {
+                document.querySelectorAll('details').forEach(d => {
+                    if (!d.contains(e.target)) d.removeAttribute('open');
+                });
+            });
         } catch (e) {
             console.error(e);
         }
     }
 
-    // Créer les listes de checkboxes pour les Tags et les PLS
     function buildFilterLists() {
         const uniqueTags = new Set();
         const uniquePls = new Set();
@@ -240,7 +248,6 @@
     }
 
     function setupEvents() {
-        // Recherche texte (debounce)
         let searchTimer;
         document.getElementById('f-search').addEventListener('input', (e) => {
             clearTimeout(searchTimer);
@@ -250,15 +257,12 @@
             }, 300);
         });
 
-        // Radios (Catégorie / Statut)
-        document.querySelectorAll('input[name="categorie"]').forEach(el => {
-            el.addEventListener('change', (e) => { filters.categorie = e.target.value; applyFilters(); });
-        });
-        document.querySelectorAll('input[name="statut"]').forEach(el => {
-            el.addEventListener('change', (e) => { filters.statut = e.target.value; applyFilters(); });
-        });
+        // Selects
+        document.getElementById('f-categorie').addEventListener('change', (e) => { filters.categorie = e.target.value; applyFilters(); });
+        document.getElementById('f-statut').addEventListener('change', (e) => { filters.statut = e.target.value; applyFilters(); });
+        document.getElementById('sort-order').addEventListener('change', (e) => { filters.sort = e.target.value; applyFilters(); });
 
-        // Inputs Min/Max (Année et Score)
+        // Inputs Min/Max
         const rangeInputs = ['f-year-min', 'f-year-max', 'f-score-min', 'f-score-max'];
         rangeInputs.forEach(id => {
             let timer;
@@ -274,14 +278,9 @@
             });
         });
 
-        // Tri
-        document.getElementById('sort-order').addEventListener('change', (e) => {
-            filters.sort = e.target.value;
-            applyFilters();
-        });
-
-        // Recherches locales (Tags / PLS)
+        // Recherches locales
         document.getElementById('f-tag-search').addEventListener('input', (e) => {
+            e.stopPropagation(); // Empêche la fermeture du details
             const val = e.target.value.toLowerCase();
             document.querySelectorAll('#tags-list label').forEach(lbl => {
                 lbl.style.display = lbl.textContent.toLowerCase().includes(val) ? 'flex' : 'none';
@@ -289,13 +288,14 @@
         });
 
         document.getElementById('f-pls-search').addEventListener('input', (e) => {
+            e.stopPropagation();
             const val = e.target.value.toLowerCase();
             document.querySelectorAll('#pls-list label').forEach(lbl => {
                 lbl.style.display = lbl.textContent.toLowerCase().includes(val) ? 'flex' : 'none';
             });
         });
 
-        // Checkboxes Tags / PLS
+        // Checkboxes
         document.querySelectorAll('.tag-cb').forEach(cb => {
             cb.addEventListener('change', (e) => {
                 if (e.target.checked) filters.tags.add(e.target.value);
@@ -314,8 +314,8 @@
     }
 
     window.resetFilters = function() {
-        document.querySelector('input[name="categorie"][value="all"]').checked = true;
-        document.querySelector('input[name="statut"][value="all"]').checked = true;
+        document.getElementById('f-categorie').value = 'all';
+        document.getElementById('f-statut').value = 'all';
         
         ['f-year-min', 'f-year-max', 'f-score-min', 'f-score-max', 'f-search', 'f-tag-search', 'f-pls-search'].forEach(id => {
             document.getElementById(id).value = '';
@@ -334,23 +334,23 @@
 
     function applyFilters() {
         let filtered = allAnimes.filter(a => {
-            // 1. Catégorie (Erotica / Censuré / Non-censuré)
             let isAnimeEro = false;
             [a.producteur, a.label, a.studio].forEach(str => {
                 if (str && str.split(',').some(s => eroticaSet.has(s.trim()))) isAnimeEro = true;
             });
 
+            // Catégorie
             if (filters.categorie === 'erotica' && !isAnimeEro) return false;
             if (filters.categorie === 'non-censured') {
-                if (isAnimeEro) return false; // On exclut Erotica
+                if (isAnimeEro) return false;
                 if ((a.censure || '').toLowerCase().includes('oui')) return false;
             }
             if (filters.categorie === 'censured') {
-                if (isAnimeEro) return false; // On exclut Erotica
+                if (isAnimeEro) return false;
                 if (!(a.censure || '').toLowerCase().includes('oui')) return false;
             }
 
-            // 2. Statut (Fini / En cours)
+            // Statut
             if (filters.statut !== 'all') {
                 const isFini = (a.etat || '').toLowerCase().includes('fini') || (a.etat || '').toLowerCase().includes('termin');
                 const isEnCours = (a.etat || '').toLowerCase().includes('cours') || (a.etat || '').toLowerCase().includes('airing');
@@ -358,28 +358,28 @@
                 if (filters.statut === 'encours' && !isEnCours) return false;
             }
 
-            // 3. Année Min / Max
+            // Année
             const aYear = getYear(a.sortie);
             if (aYear > 0) {
                 if (filters.yearMin && aYear < parseInt(filters.yearMin)) return false;
                 if (filters.yearMax && aYear > parseInt(filters.yearMax)) return false;
             } else if (filters.yearMin || filters.yearMax) {
-                return false; // Si on filtre par année et que l'anime n'a pas d'année, on l'exclut
+                return false; 
             }
 
-            // 4. Score Min / Max
+            // Score
             const aScore = parseFloat((a.score || '0').replace(',', '.'));
             if (filters.scoreMin && aScore < parseFloat(filters.scoreMin)) return false;
             if (filters.scoreMax && aScore > parseFloat(filters.scoreMax)) return false;
 
-            // 5. Tags (ET)
+            // Tags
             if (filters.tags.size > 0) {
                 if (!a.tags) return false;
                 const aTags = a.tags.split(',').map(t => t.trim());
                 for (const t of filters.tags) if (!aTags.includes(t)) return false;
             }
 
-            // 6. PLS (OU)
+            // PLS
             if (filters.pls.size > 0) {
                 const aPls = [];
                 if (a.producteur) aPls.push(...a.producteur.split(',').map(s=>s.trim()));
@@ -394,12 +394,8 @@
             return true;
         });
 
-        // Recherche texte globale
-        if (filters.search) {
-            filtered = searchAnimes(filters.search, filtered);
-        }
+        if (filters.search) filtered = searchAnimes(filters.search, filtered);
 
-        // Tri
         filtered.sort((a, b) => {
             if (filters.sort === 'recent') return b.ordreAjout - a.ordreAjout;
             if (filters.sort === 'score') return (parseFloat(b.score.replace(',','.'))||0) - (parseFloat(a.score.replace(',','.'))||0);
@@ -409,7 +405,6 @@
             return 0;
         });
 
-        // Affichage
         document.getElementById('results-count').textContent = `${filtered.length} résultat${filtered.length > 1 ? 's' : ''}`;
         
         const grid = document.getElementById('results-grid');
