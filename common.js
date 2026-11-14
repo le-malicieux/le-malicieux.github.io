@@ -193,10 +193,10 @@ export function getPlsPath(slug) {
 
 export function getBackgroundUrl(kind, filename) {
     if (!filename) return '';
-    // Ajout de la version pour le cache
+    // MODIFICATION : On utilise le chemin relatif direct vers GitHub Pages (ou localhost)
     return kind === 'mobile'
-        ? `${CDN_BASE}/img/fonds_mobiles/${filename}${VERSION}`
-        : `${CDN_BASE}/img/fonds_desktop/${filename}${VERSION}`;
+        ? `img/fonds_mobiles/${filename}`
+        : `img/fonds_desktop/${filename}`;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -424,23 +424,13 @@ export async function setBackground() {
         if (!list.length) return;
         const file = list[Math.floor(Math.random() * list.length)];
         
-        // On utilise le fallback manuel ici aussi pour les fonds d'écran
+        // MODIFICATION : On utilise directement le chemin relatif de GitHub Pages
         const url = getBackgroundUrl(kind, file);
         
         const img = new Image();
         img.onload = () => {
             const layer = document.getElementById('bg-layer');
             if (layer) layer.style.backgroundImage = `url('${url}')`;
-        };
-        img.onerror = () => {
-            // Si Fastly échoue, on tente sur gcore pour le fond
-            const fallbackUrl = url.replace('fastly.jsdelivr.net', 'gcore.jsdelivr.net');
-            const imgFallback = new Image();
-            imgFallback.onload = () => {
-                const layer = document.getElementById('bg-layer');
-                if (layer) layer.style.backgroundImage = `url('${fallbackUrl}')`;
-            };
-            imgFallback.src = fallbackUrl;
         };
         img.src = url;
     } catch (e) {}
