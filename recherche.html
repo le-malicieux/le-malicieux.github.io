@@ -33,21 +33,52 @@
         .btn-reset-top { background: rgba(255,71,87,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: 0.2s; white-space: nowrap; height: 36px; margin-top: 20px; }
         .btn-reset-top:hover { background: var(--primary); color: white; }
 
-        /* ── SECTION TAGS ET PLS (Pills) ── */
+        /* ── SECTION TAGS ── */
         .pills-section { margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; }
-        
         .pills-group-title { font-size: 0.85em; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; border-left: 3px solid var(--primary); padding-left: 8px; }
-        .pills-sub-group { margin-bottom: 15px; }
-        .pills-sub-title { font-size: 0.75em; color: #888; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        
-        /* Hauteur augmentée pour éviter de scroller */
-        .pills-container { display: flex; flex-wrap: wrap; gap: 8px; max-height: 350px; overflow-y: auto; padding: 5px; }
+        .pills-container { display: flex; flex-wrap: wrap; gap: 8px; max-height: 150px; overflow-y: auto; padding: 5px; }
         .pills-container::-webkit-scrollbar { width: 6px; }
         .pills-container::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
         
         .pill { background: #222; border: 1px solid #444; color: #ccc; padding: 6px 14px; border-radius: 20px; font-size: 0.85em; cursor: pointer; user-select: none; transition: 0.2s; }
         .pill:hover { border-color: #666; background: #333; }
         .pill.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 2px 8px rgba(255,71,87,0.3); }
+
+        /* ── NOUVEAU : MENUS DÉROULANTS PLS ── */
+        .dropdowns-row { display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
+        
+        details.custom-dropdown { 
+            flex: 1; min-width: 300px; 
+            background: #1a1a1a; border: 1px solid #444; border-radius: 8px; 
+            position: relative;
+        }
+        details.custom-dropdown[open] { border-color: var(--primary); }
+        
+        details.custom-dropdown summary {
+            padding: 12px 16px; font-size: 0.9em; font-weight: bold; color: white;
+            cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.02); border-radius: 8px;
+        }
+        details.custom-dropdown summary::-webkit-details-marker { display: none; }
+        details.custom-dropdown summary::after { content: '▼'; font-size: 0.7em; color: #aaa; }
+        details.custom-dropdown[open] summary::after { content: '▲'; }
+        
+        .dropdown-panel {
+            position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+            background: #111; border: 1px solid var(--primary); border-radius: 8px;
+            padding: 15px; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            max-height: 400px; overflow-y: auto;
+        }
+        .dropdown-panel::-webkit-scrollbar { width: 6px; }
+        .dropdown-panel::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+        .dd-sub-group { margin-bottom: 15px; }
+        .dd-sub-group:last-child { margin-bottom: 0; }
+        .dd-sub-title { font-size: 0.75em; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; border-bottom: 1px dashed #333; padding-bottom: 4px; }
+        
+        .dd-checkbox-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .dd-checkbox-list label { display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: #ccc; cursor: pointer; }
+        .dd-checkbox-list input[type="checkbox"] { accent-color: var(--primary); width: 15px; height: 15px; }
 
         /* ── ZONE DE RÉSULTATS ── */
         .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
@@ -66,6 +97,8 @@
             .filters-grid { grid-template-columns: 1fr 1fr; }
             .btn-reset-top { grid-column: 1 / -1; margin-top: 0; }
             .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .dd-checkbox-list { grid-template-columns: 1fr; }
+            details.custom-dropdown { min-width: 100%; }
         }
     </style>
 </head>
@@ -131,33 +164,44 @@
             </div>
 
             <!-- Section Tags -->
-            <div class="pills-section">
+            <div class="pills-section" id="tags-section">
                 <span class="pills-group-title">Tags</span>
                 <div class="pills-container" id="tags-container"></div>
             </div>
 
-            <!-- Section PLS -->
-            <div class="pills-section">
+            <!-- Section PLS (Menus déroulants) -->
+            <div class="pills-section" id="pls-section">
                 <span class="pills-group-title">Producteurs / Labels / Studios</span>
-                
-                <div id="pls-hentai-producers" class="pills-sub-group">
-                    <span class="pills-sub-title">Producteurs (Hentai)</span>
-                    <div class="pills-container" id="container-producers-hentai"></div>
-                </div>
-                
-                <div id="pls-hentai-labels" class="pills-sub-group">
-                    <span class="pills-sub-title">Labels (Hentai)</span>
-                    <div class="pills-container" id="container-labels-hentai"></div>
-                </div>
-                
-                <div id="pls-hentai-studios" class="pills-sub-group">
-                    <span class="pills-sub-title">Studios (Hentai)</span>
-                    <div class="pills-container" id="container-studios-hentai"></div>
-                </div>
+                <div class="dropdowns-row">
+                    <!-- Dropdown Hentai -->
+                    <details class="custom-dropdown" id="dd-hentai">
+                        <summary>Filtrer par PLS (Hentai)</summary>
+                        <div class="dropdown-panel">
+                            <div class="dd-sub-group">
+                                <span class="dd-sub-title">Producteurs</span>
+                                <div class="dd-checkbox-list" id="dd-list-producers-hentai"></div>
+                            </div>
+                            <div class="dd-sub-group">
+                                <span class="dd-sub-title">Labels</span>
+                                <div class="dd-checkbox-list" id="dd-list-labels-hentai"></div>
+                            </div>
+                            <div class="dd-sub-group">
+                                <span class="dd-sub-title">Studios</span>
+                                <div class="dd-checkbox-list" id="dd-list-studios-hentai"></div>
+                            </div>
+                        </div>
+                    </details>
 
-                <div id="pls-erotica-group" class="pills-sub-group" style="border-top: 1px dashed #444; padding-top: 15px; margin-top: 15px;">
-                    <span class="pills-sub-title" style="color: #ff6b7a;">PLS Erotica</span>
-                    <div class="pills-container" id="container-erotica-all"></div>
+                    <!-- Dropdown Erotica -->
+                    <details class="custom-dropdown" id="dd-erotica">
+                        <summary>Filtrer par PLS (Erotica)</summary>
+                        <div class="dropdown-panel">
+                            <div class="dd-sub-group">
+                                <span class="dd-sub-title">Tous les PLS Erotica</span>
+                                <div class="dd-checkbox-list" id="dd-list-erotica-all"></div>
+                            </div>
+                        </div>
+                    </details>
                 </div>
             </div>
         </div>
@@ -224,7 +268,7 @@
 
             buildDataLists();
             renderTags();
-            renderPls();
+            renderPlsCheckboxes();
             setupEvents();
             applyFilters();
             
@@ -277,27 +321,19 @@
         }).join('');
     }
 
-    function renderPls() {
-        const createPills = (arr) => arr.map(p => {
-            const isActive = filters.pls.has(p) ? 'active' : '';
-            return `<div class="pill ${isActive}" data-val="${p.replace(/"/g, '&quot;')}" onclick="togglePls('${p.replace(/'/g, "\\'")}')">${p}</div>`;
+    function renderPlsCheckboxes() {
+        const createCheckboxes = (arr) => arr.map(p => {
+            const isChecked = filters.pls.has(p) ? 'checked' : '';
+            return `<label><input type="checkbox" value="${p.replace(/"/g, '&quot;')}" ${isChecked} onchange="togglePls(this)"> ${p}</label>`;
         }).join('');
 
-        document.getElementById('container-producers-hentai').innerHTML = createPills(plsData.hentai.producers);
-        document.getElementById('container-labels-hentai').innerHTML = createPills(plsData.hentai.labels);
-        document.getElementById('container-studios-hentai').innerHTML = createPills(plsData.hentai.studios);
-        document.getElementById('container-erotica-all').innerHTML = createPills(plsData.erotica);
-
-        const cat = filters.categorie;
-        const showHentai = (cat === 'all' || cat.startsWith('hentai'));
-        const showErotica = (cat === 'all' || cat === 'erotica');
-
-        document.getElementById('pls-hentai-producers').style.display = showHentai ? 'block' : 'none';
-        document.getElementById('pls-hentai-labels').style.display = showHentai ? 'block' : 'none';
-        document.getElementById('pls-hentai-studios').style.display = showHentai ? 'block' : 'none';
-        document.getElementById('pls-erotica-group').style.display = showErotica ? 'block' : 'none';
+        document.getElementById('dd-list-producers-hentai').innerHTML = createCheckboxes(plsData.hentai.producers);
+        document.getElementById('dd-list-labels-hentai').innerHTML = createCheckboxes(plsData.hentai.labels);
+        document.getElementById('dd-list-studios-hentai').innerHTML = createCheckboxes(plsData.hentai.studios);
+        document.getElementById('dd-list-erotica-all').innerHTML = createCheckboxes(plsData.erotica);
     }
 
+    // Fonctions globales
     window.toggleTag = function(tag) {
         if (filters.tags.has(tag)) filters.tags.delete(tag);
         else filters.tags.add(tag);
@@ -305,10 +341,10 @@
         applyFilters();
     };
 
-    window.togglePls = function(pls) {
-        if (filters.pls.has(pls)) filters.pls.delete(pls);
-        else filters.pls.add(pls);
-        renderPls();
+    window.togglePls = function(checkbox) {
+        const pls = checkbox.value;
+        if (checkbox.checked) filters.pls.add(pls);
+        else filters.pls.delete(pls);
         applyFilters();
     };
 
@@ -324,6 +360,20 @@
 
         document.getElementById('f-categorie').addEventListener('change', (e) => {
             filters.categorie = e.target.value;
+            
+            // Mise à jour de la visibilité des menus déroulants selon la catégorie
+            if (filters.categorie === 'erotica') {
+                document.getElementById('dd-hentai').style.display = 'none';
+                document.getElementById('dd-erotica').style.display = 'block';
+            } else if (filters.categorie.startsWith('hentai')) {
+                document.getElementById('dd-hentai').style.display = 'block';
+                document.getElementById('dd-erotica').style.display = 'none';
+            } else {
+                document.getElementById('dd-hentai').style.display = 'block';
+                document.getElementById('dd-erotica').style.display = 'block';
+            }
+
+            // On nettoie les PLS non valides
             const validPls = new Set();
             if (filters.categorie === 'erotica') plsData.erotica.forEach(p => validPls.add(p));
             else if (filters.categorie.startsWith('hentai')) {
@@ -337,7 +387,7 @@
                 plsData.hentai.studios.forEach(p => validPls.add(p));
             }
             filters.pls = new Set(Array.from(filters.pls).filter(p => validPls.has(p)));
-            renderPls();
+            renderPlsCheckboxes();
             applyFilters();
         });
 
@@ -358,6 +408,13 @@
                 }, 400);
             });
         });
+
+        // Fermer les dropdowns si on clique ailleurs
+        document.addEventListener('click', (e) => {
+            document.querySelectorAll('details.custom-dropdown').forEach(d => {
+                if (!d.contains(e.target)) d.removeAttribute('open');
+            });
+        });
     }
 
     window.resetFilters = function() {
@@ -370,7 +427,11 @@
         document.getElementById('sort-order').value = 'recent';
         
         renderTags();
-        renderPls();
+        renderPlsCheckboxes();
+        
+        document.getElementById('dd-hentai').style.display = 'block';
+        document.getElementById('dd-erotica').style.display = 'block';
+
         applyFilters();
     };
 
