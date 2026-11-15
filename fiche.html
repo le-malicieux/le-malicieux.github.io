@@ -109,6 +109,25 @@
             .cover-carousel { width: 88px; max-width: 88px; }
             .anime-title { font-size: 1.02em; }
         }
+
+        /* ══════════ SUGGESTIONS SIMILAIRES ══════════ */
+        .suggestions-section { margin-top: 20px; background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; }
+        .suggestions-section h3 { font-size: 1.1em; margin: 0 0 15px; color: var(--text); display: flex; align-items: center; justify-content: space-between; }
+        .suggestions-section h3 .sugg-info-icon { font-size: 0.7em; color: #666; font-weight: normal; font-style: italic; }
+        .suggestions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+        .sugg-card { display: flex; gap: 10px; background: #222; border: 1px solid #333; border-radius: 10px; padding: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s, transform 0.15s; }
+        .sugg-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .sugg-card img { width: 60px; height: 84px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+        .sugg-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+        .sugg-title { font-size: 0.85em; font-weight: bold; color: var(--text); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; }
+        .sugg-meta { font-size: 0.7em; color: #999; }
+        .sugg-badge { display: inline-block; background: rgba(255,204,102,0.15); color: #ffcc66; font-size: 0.9em; padding: 1px 6px; border-radius: 4px; margin-right: 5px; border: 1px solid rgba(255,204,102,0.3); }
+        .sugg-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+        .sugg-tags span { background: rgba(255,255,255,0.05); color: #aaa; font-size: 0.65em; padding: 2px 5px; border-radius: 3px; border: 1px solid #333; }
+        .sugg-empty { color: #666; font-style: italic; font-size: 0.85em; padding: 8px 0; }
+        @media (max-width: 800px) {
+            .suggestions-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -121,6 +140,11 @@
         <a href="index.html" id="back-link" class="back-btn" onclick="handleBack(event)">Retour au catalogue</a>
         <div id="seek-banner" class="seek-available-banner"><strong>Épisodes disponibles</strong> sous-titrés en VOSTFR / VOSTE / VOSTA en 1080p (ou parfois 720p) — directement sur ce site, voir plus bas.</div>
         <div id="anime-details">Chargement des données...</div>
+
+        <div id="suggestions-section" class="suggestions-section" style="display:none;">
+            <h3>Suggestions similaires <span class="sugg-info-icon">basées sur les tags</span></h3>
+            <div id="suggestions-grid" class="suggestions-grid"></div>
+        </div>
 
         <div id="seekstreaming-section" class="seekstreaming-section" style="display:none;">
             <h3>Regarder en streaming</h3>
@@ -176,6 +200,115 @@
                 });
             }
         } catch(e) {}
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // SUGGESTIONS SIMILAIRES PAR TAGS (TF-IDF pondéré)
+    // - tags vus 1 seule fois globalement → ignorés
+    // - anime avec 1..4 tags valides → mode "rare" (IDF brut)
+    // - anime avec ≥5 tags valides → mode "normal" (cosinus IDF)
+    // ═══════════════════════════════════════════════════════════
+    let _tagIndex = null;
+
+    function _normaliserTags(str) {
+        if (!str) return [];
+        return str.split(',')
+            .map(t => t.trim().toLowerCase())
+            .filter(t => t && t.length > 1 && t !== 'x' && t !== 'non');
+    }
+
+    function _buildTagIndex(animes) {
+        const df = Object.create(null);
+        const N = animes.length;
+        animes.forEach(a => {
+            const set = new Set(_normaliserTags(a.tags));
+            set.forEach(t => { df[t] = (df[t] || 0) + 1; });
+        });
+        const idf = Object.create(null);
+        for (const t in df) {
+            if (df[t] < 2) continue; // tag vu une seule fois → ignoré
+            idf[t] = Math.log(N / df[t]);
+        }
+        return { df, idf, N };
+    }
+
+    function _similariteTags(a, b, idf) {
+        const setA = new Set(_normaliserTags(a.tags));
+        const setB = new Set(_normaliserTags(b.tags));
+        let dot = 0, nA = 0, nB = 0, communs = 0;
+        setA.forEach(t => {
+            const w = idf[t] || 0;
+            nA += w * w;
+            if (setB.has(t)) { dot += w * w; communs++; }
+        });
+        setB.forEach(t => { const w = idf[t] || 0; nB += w * w; });
+        if (!nA || !nB) return { score: 0, communs: 0 };
+        return { score: dot / (Math.sqrt(nA) * Math.sqrt(nB)), communs };
+    }
+
+    function getSuggestions(animeCourant, animes, index) {
+        const tagsValides = _normaliserTags(animeCourant.tags).filter(t => index.idf[t]);
+        const modeRare = tagsValides.length >= 1 && tagsValides.length <= 4;
+        const tagsTries = modeRare
+            ? [...tagsValides].sort((x, y) => index.idf[y] - index.idf[x])
+            : tagsValides;
+
+        const results = [];
+        for (const a of animes) {
+            if (a.nom === animeCourant.nom) continue;
+
+            if (modeRare) {
+                const setB = new Set(_normaliserTags(a.tags));
+                let score = 0, communs = 0;
+                for (const t of tagsTries) {
+                    if (setB.has(t)) { score += index.idf[t]; communs++; }
+                }
+                if (tagsTries.length && setB.has(tagsTries[0])) score *= 1.4;
+                if (communs >= 1 && score > 0) {
+                    results.push({ anime: a, score, communs, mode: 'rare' });
+                }
+            } else {
+                const { score, communs } = _similariteTags(animeCourant, a, index.idf);
+                if (score >= 0.12 && communs >= 2) {
+                    results.push({ anime: a, score, communs, mode: 'normal' });
+                }
+            }
+        }
+        results.sort((x, y) => y.score - x.score);
+        return results.slice(0, 6);
+    }
+
+    function renderSuggestions() {
+        const container = document.getElementById('suggestions-grid');
+        const section = document.getElementById('suggestions-section');
+        if (!container || !section) return;
+
+        if (!_tagIndex) _tagIndex = _buildTagIndex(allAnimes);
+        const suggestions = getSuggestions(anime, allAnimes, _tagIndex);
+
+        if (!suggestions.length) {
+            section.style.display = '';
+            container.innerHTML = '<p class="sugg-empty">Aucune suggestion pertinente trouvée pour cet anime (tags trop rares ou absents).</p>';
+            return;
+        }
+
+        section.style.display = '';
+        container.innerHTML = suggestions.map(s => {
+            const tags = _normaliserTags(s.anime.tags).slice(0, 6);
+            const imgSrc = getCoverPath(s.anime.ordreAjout, 1);
+            const badge = s.mode === 'rare' ? '<span class="sugg-badge">tag rare</span>' : '';
+            const scoreTxt = s.mode === 'rare'
+                ? `${s.communs} tag(s) rare(s) en commun`
+                : `similarité ${(s.score * 100).toFixed(0)}% · ${s.communs} tag(s) commun(s)`;
+            return `<a class="sugg-card" href="fiche.html?name=${encodeURIComponent(s.anime.nom)}">
+                <img src="${imgSrc}" onerror="this.onerror=null;this.src='${IMG_LOGO}'" alt="">
+                <div class="sugg-info">
+                    <div class="sugg-title">${s.anime.nom}</div>
+                    <div class="sugg-meta">${badge}${scoreTxt}</div>
+                    <div class="sugg-tags">${tags.map(t => `<span>${t}</span>`).join('')}</div>
+                </div>
+            </a>`;
+        }).join('');
     }
 
     async function load() {
@@ -331,6 +464,10 @@
             }
 
             initCoverCarousel(anime.ordreAjout, imagesIndex);
+
+            // Suggestions similaires (calculées une seule fois pour tous les animes)
+            if (!_tagIndex) _tagIndex = _buildTagIndex(allAnimes);
+            renderSuggestions();
 
             const _ref = document.referrer, _bl = document.getElementById('back-link');
             if (_ref.includes('playlist.html')) _bl.innerText = 'Retour à la playlist';
