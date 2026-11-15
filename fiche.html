@@ -121,9 +121,13 @@
         .sugg-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
         .sugg-title { font-size: 0.85em; font-weight: bold; color: var(--text); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; }
         .sugg-meta { font-size: 0.7em; color: #999; }
-        .sugg-badge { display: inline-block; background: rgba(255,204,102,0.15); color: #ffcc66; font-size: 0.9em; padding: 1px 6px; border-radius: 4px; margin-right: 5px; border: 1px solid rgba(255,204,102,0.3); }
+        .sugg-badge { display: inline-block; font-size: 0.9em; padding: 1px 6px; border-radius: 4px; margin-right: 5px; border: 1px solid; font-weight: bold; }
+        .sugg-badge-high { background: rgba(46,213,115,0.15); color: #2ed573; border-color: rgba(46,213,115,0.35); }
+        .sugg-badge-mid { background: rgba(255,165,0,0.15); color: #ffa500; border-color: rgba(255,165,0,0.35); }
+        .sugg-badge-low { background: rgba(150,150,150,0.15); color: #aaa; border-color: rgba(150,150,150,0.3); }
         .sugg-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
         .sugg-tags span { background: rgba(255,255,255,0.05); color: #aaa; font-size: 0.65em; padding: 2px 5px; border-radius: 3px; border: 1px solid #333; }
+        .sugg-tags span.sugg-tag-common { background: rgba(46,213,115,0.12); color: #2ed573; border-color: rgba(46,213,115,0.3); }
         .sugg-empty { color: #666; font-style: italic; font-size: 0.85em; padding: 8px 0; }
         @media (max-width: 800px) {
             .suggestions-grid { grid-template-columns: 1fr; }
@@ -142,7 +146,7 @@
         <div id="anime-details">Chargement des données...</div>
 
         <div id="suggestions-section" class="suggestions-section" style="display:none;">
-            <h3>Suggestions similaires <span class="sugg-info-icon">basées sur les tags</span></h3>
+            <h3>Suggestions similaires <span class="sugg-info-icon">par tags en commun</span></h3>
             <div id="suggestions-grid" class="suggestions-grid"></div>
         </div>
 
@@ -203,11 +207,21 @@
     }
 
     // ═══════════════════════════════════════════════════════════
-    // SUGGESTIONS SIMILAIRES PAR TAGS (TF-IDF pondéré)
-    // - tags vus 1 seule fois globalement → ignorés
-    // - anime avec 1..4 tags valides → mode "rare" (IDF brut)
-    // - anime avec ≥5 tags valides → mode "normal" (cosinus IDF)
+    // SUGGESTIONS SIMILAIRES — priorité aux tags EN COMMUN puis aux RARES
+    // ─────────────────────────────────────────────────────────────
+    // 1) Tri principal : nombre de tags communs DÉCROISSANT
+    //    (un anime avec + de tags partagés passe toujours devant)
+    // 2) Tri secondaire : somme des IDF DÉCROISSANTE (tags rares d'abord)
+    // 3) Structure de sortie :
+    //    - Les (N-2) premières = meilleurs matches (≥4 tags communs si possible)
+    //    - Les 2 dernières = "diversité" avec 1-3 tags communs
+    //      (pour continuer à proposer des animes peu taggés)
+    // 4) Les tags vus une seule fois globalement (df < 2) sont IGNORÉS.
     // ═══════════════════════════════════════════════════════════
+    const SUGG_TOP_N = 6;
+    const SUGG_STRONG_MIN = 4;   // seuil "match fort" (≥4 tags communs)
+    const SUGG_DIVERSITY = 2;    // nombre de slots réservés aux 1-3 tags communs
+
     let _tagIndex = null;
 
     function _normaliserTags(str) {
@@ -226,56 +240,94 @@
         });
         const idf = Object.create(null);
         for (const t in df) {
-            if (df[t] < 2) continue; // tag vu une seule fois → ignoré
+            if (df[t] < 2) continue; // tag vu une seule fois globalement → ignoré
             idf[t] = Math.log(N / df[t]);
         }
         return { df, idf, N };
     }
 
-    function _similariteTags(a, b, idf) {
-        const setA = new Set(_normaliserTags(a.tags));
-        const setB = new Set(_normaliserTags(b.tags));
-        let dot = 0, nA = 0, nB = 0, communs = 0;
-        setA.forEach(t => {
-            const w = idf[t] || 0;
-            nA += w * w;
-            if (setB.has(t)) { dot += w * w; communs++; }
+    function _computeCandidates(animeCourant, animes, index) {
+        const tagsCourant = _normaliserTags(animeCourant.tags).filter(t => index.idf[t]);
+        if (tagsCourant.length === 0) return [];
+
+        const setCourant = new Set(tagsCourant);
+        const results = [];
+
+        for (const a of animes) {
+            if (a.nom === animeCourant.nom) continue;
+            const setB = new Set(_normaliserTags(a.tags).filter(t => index.idf[t]));
+
+            const commons = [];
+            setCourant.forEach(t => { if (setB.has(t)) commons.push(t); });
+            if (commons.length === 0) continue;
+
+            const idfSum = commons.reduce((s, t) => s + index.idf[t], 0);
+            results.push({
+                anime: a,
+                communs: commons.length,
+                idfSum,
+                commonsList: commons
+            });
+        }
+
+        // Tri : nb de tags communs DESC, puis rareté (Σ IDF) DESC
+        results.sort((a, b) => {
+            if (b.communs !== a.communs) return b.communs - a.communs;
+            return b.idfSum - a.idfSum;
         });
-        setB.forEach(t => { const w = idf[t] || 0; nB += w * w; });
-        if (!nA || !nB) return { score: 0, communs: 0 };
-        return { score: dot / (Math.sqrt(nA) * Math.sqrt(nB)), communs };
+        return results;
     }
 
     function getSuggestions(animeCourant, animes, index) {
-        const tagsValides = _normaliserTags(animeCourant.tags).filter(t => index.idf[t]);
-        const modeRare = tagsValides.length >= 1 && tagsValides.length <= 4;
-        const tagsTries = modeRare
-            ? [...tagsValides].sort((x, y) => index.idf[y] - index.idf[x])
-            : tagsValides;
+        const candidates = _computeCandidates(animeCourant, animes, index);
+        if (candidates.length === 0) return [];
 
-        const results = [];
-        for (const a of animes) {
-            if (a.nom === animeCourant.nom) continue;
+        const strongPool = candidates.filter(c => c.communs >= SUGG_STRONG_MIN);
+        const diversePool = candidates.filter(c => c.communs >= 1 && c.communs <= 3);
 
-            if (modeRare) {
-                const setB = new Set(_normaliserTags(a.tags));
-                let score = 0, communs = 0;
-                for (const t of tagsTries) {
-                    if (setB.has(t)) { score += index.idf[t]; communs++; }
-                }
-                if (tagsTries.length && setB.has(tagsTries[0])) score *= 1.4;
-                if (communs >= 1 && score > 0) {
-                    results.push({ anime: a, score, communs, mode: 'rare' });
-                }
-            } else {
-                const { score, communs } = _similariteTags(animeCourant, a, index.idf);
-                if (score >= 0.12 && communs >= 2) {
-                    results.push({ anime: a, score, communs, mode: 'normal' });
-                }
+        const selected = [];
+        const used = new Set();
+        const take = (list, max) => {
+            let count = 0;
+            for (const c of list) {
+                if (count >= max || selected.length >= SUGG_TOP_N) break;
+                if (used.has(c.anime.nom)) continue;
+                selected.push(c);
+                used.add(c.anime.nom);
+                count++;
+            }
+            return count;
+        };
+
+        // 1) On remplit d'abord les (N-2) slots avec les meilleurs matches
+        const mainSlots = Math.max(0, SUGG_TOP_N - SUGG_DIVERSITY);
+        take(strongPool, mainSlots);
+
+        // 2) Si pas assez de "forts", on complète avec le reste trié (naturellement
+        //    les 3 tags puis les 2 tags puis les 1 tag)
+        if (selected.length < mainSlots) {
+            for (const c of candidates) {
+                if (selected.length >= mainSlots) break;
+                if (used.has(c.anime.nom)) continue;
+                selected.push(c);
+                used.add(c.anime.nom);
             }
         }
-        results.sort((x, y) => y.score - x.score);
-        return results.slice(0, 6);
+
+        // 3) On réserve les 2 dernières places à la DIVERSITÉ (1-3 tags communs)
+        take(diversePool, SUGG_DIVERSITY);
+
+        // 4) Fallback : compléter depuis le reste si on n'a pas atteint N
+        if (selected.length < SUGG_TOP_N) {
+            for (const c of candidates) {
+                if (selected.length >= SUGG_TOP_N) break;
+                if (used.has(c.anime.nom)) continue;
+                selected.push(c);
+                used.add(c.anime.nom);
+            }
+        }
+
+        return selected;
     }
 
     function renderSuggestions() {
@@ -296,16 +348,26 @@
         container.innerHTML = suggestions.map(s => {
             const tags = _normaliserTags(s.anime.tags).slice(0, 6);
             const imgSrc = getCoverPath(s.anime.ordreAjout, 1);
-            const badge = s.mode === 'rare' ? '<span class="sugg-badge">tag rare</span>' : '';
-            const scoreTxt = s.mode === 'rare'
-                ? `${s.communs} tag(s) rare(s) en commun`
-                : `similarité ${(s.score * 100).toFixed(0)}% · ${s.communs} tag(s) commun(s)`;
+
+            let badgeClass = 'sugg-badge-low';
+            if (s.communs >= 4) badgeClass = 'sugg-badge-high';
+            else if (s.communs >= 2) badgeClass = 'sugg-badge-mid';
+
+            const label = s.communs === 1
+                ? '1 tag en commun'
+                : `${s.communs} tags en commun`;
+
+            const tagsHtml = tags.map(t => {
+                const isCommon = s.commonsList.includes(t);
+                return `<span class="${isCommon ? 'sugg-tag-common' : ''}">${t}</span>`;
+            }).join('');
+
             return `<a class="sugg-card" href="fiche.html?name=${encodeURIComponent(s.anime.nom)}">
                 <img src="${imgSrc}" onerror="this.onerror=null;this.src='${IMG_LOGO}'" alt="">
                 <div class="sugg-info">
                     <div class="sugg-title">${s.anime.nom}</div>
-                    <div class="sugg-meta">${badge}${scoreTxt}</div>
-                    <div class="sugg-tags">${tags.map(t => `<span>${t}</span>`).join('')}</div>
+                    <div class="sugg-meta"><span class="sugg-badge ${badgeClass}">${label}</span></div>
+                    <div class="sugg-tags">${tagsHtml}</div>
                 </div>
             </a>`;
         }).join('');
